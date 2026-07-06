@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════
+   FOOTER CIAE — Compact Institutional
+   ═══════════════════════════════════ */
+.cf-root {
+  width: 100%;
+  background: #ffffff;
+  flex-shrink: 0;
+  border-top: 1px solid #eef0f3;
+  position: relative;
+}
+
+/* Barra tricolor superior */
+.cf-accent {
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg,
+    #0b5445 0%,
+    #0b5445 40%,
+    #9a7026 60%,
+    #7e0808 100%
+  );
+}
+
+.cf-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 9px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Lado izquierdo */
+.cf-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cf-pulse {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
+  animation: cf-pulse 2.5s ease infinite;
+}
+@keyframes cf-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.6); }
+  70%  { box-shadow: 0 0 0 7px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
+}
+
+.cf-brand {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0b5445;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.cf-pipe {
+  width: 1px;
+  height: 12px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.cf-tagline {
+  font-size: 0.67rem;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Lado derecho */
+.cf-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cf-dev {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cf-dot {
+  font-size: 0.6rem;
+  color: #cbd5e1;
+}
+
+.cf-copy {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cf-inner {
+    padding: 8px 18px;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+  .cf-tagline { display: none; }
+  .cf-dev     { display: none; }
+  .cf-right   { justify-content: center; }
+}

@@ -1,0 +1,13 @@
+"""
+Módulo  : clustering_service.py
+Carpeta : epidemeologia/services/
+Qué hace: Ejecuta el análisis de clustering geoespacial sobre los casos de dengue.
+Usado en: pipeline_service.py
+"""
+from configs.settings import RUTA_GTO_JSON, RUTA_CATALOGO_EPI
+
+
+def procesar_clustering(df) -> dict:
+    from epidemeologia.modulos.clustering import ejecutar_clustering
+
+    return ejecutar_clustering(df, str(RUTA_GTO_JSON), str(RUTA_CATALOGO_EPI))

@@ -1,0 +1,234 @@
+{
+    "CUPN 01": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
+        "descripcionNumerador": "Número de derechohabientes a los que se les otorgó acciones preventivas en los últimos 12 meses ",
+        "descripcionDenominador": "Total de población derechohabiente adscrita a médico familiar",
+        "nombreArchivoFinal": "CUPN 01",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "CIP01": {
+                "hoja": "CIP Unidad Médica",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "T   O   T   A   L",
+                "columna_dato": [
+                    "C",
+                    "MESES_CIP01"
+                ]
+            }
+        },
+        "MESES_CIP01": {
+            "1": "D",
+            "2": "F",
+            "3": "H",
+            "4": "J",
+            "5": "L",
+            "6": "N",
+            "7": "S",
+            "8": "U",
+            "9": "W",
+            "10": "Y",
+            "11": "AA",
+            "12": "AC"
+        },
+        "operacion": {
+            "numerador": "(CIP01[1])",
+            "denominador": "(CIP01[0])",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": 4.8,
+                "Esperado": 5.3
+            },
+            "Febrero": {
+                "Bajo": 9.7,
+                "Esperado": 10.5
+            },
+            "Marzo": {
+                "Bajo": 14.5,
+                "Esperado": 15.8
+            },
+            "Abril": {
+                "Bajo": 19.3,
+                "Esperado": 21.0
+            },
+            "Mayo": {
+                "Bajo": 24.2,
+                "Esperado": 26.3
+            },
+            "Junio": {
+                "Bajo": 29.0,
+                "Esperado": 31.5
+            },
+            "Julio": {
+                "Bajo": 33.8,
+                "Esperado": 36.8
+            },
+            "Agosto": {
+                "Bajo": 38.7,
+                "Esperado": 42.0
+            },
+            "Septiembre": {
+                "Bajo": 43.5,
+                "Esperado": 47.3
+            },
+            "Octubre": {
+                "Bajo": 48.3,
+                "Esperado": 52.5
+            },
+            "Noviembre": {
+                "Bajo": 53.2,
+                "Esperado": 57.8
+            },
+            "Diciembre": {
+                "Bajo": 58.0,
+                "Esperado": 63.0
+            }
+        },
+        "mostrar": true
+    },
+    "CUPN 03": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
+        "descripcionNumerador": "Aceptantes de primera vez de métodos anticonceptivos en consulta externa",
+        "descripcionDenominador": "Meta de aceptantes de primera vez de métodos anticonceptivos en consulta externa",
+        "nombreArchivoFinal": "CUPN 03",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "IN08": {
+                "hoja": "Indicadores",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "T O T A L E S",
+                "columna_dato": [
+                    "D"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(IN08[0])",
+            "denominador": "None",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Alto": 8.1,
+            "Esperado": 7.0
+        },
+        "mostrar": false
+    },
+    "CUPN 04": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
+        "descripcionNumerador": "Número de derechohabientes referidos al segundo nivel de atención con ocasión de servicio de primera vez, por las Unidades de Medicina Familiar",
+        "descripcionDenominador": "Número de consultas otorgadas en Medicina Familiar",
+        "nombreArchivoFinal": "CUPN 04",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "IN08": {
+                "hoja": "Indicadores",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "T O T A L E S",
+                "columna_dato": [
+                    "D"
+                ]
+            },
+            "PU01": {
+                "hoja": "Parte I",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "MEDICINA FAMILIAR",
+                "columna_dato": [
+                    "E"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(IN08[0])",
+            "denominador": "(PU01[0])",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Alto": 8.1,
+            "Esperado": 7.0
+        },
+        "mostrar": true
+    },
+    "CUPN 05": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
+        "descripcionNumerador": "Número de consultas otorgadas en Medicina Familiar (servicio 04)",
+        "descripcionDenominador": "Número de horas trabajadas por los médicos familiares (servicio 04)",
+        "nombreArchivoFinal": "CUPN 05",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "PU01": {
+                "hoja": "Parte I",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "MEDICINA FAMILIAR",
+                "columna_dato": [
+                    "C",
+                    "E"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(PU01[1])",
+            "denominador": "(PU01[0])",
+            "resultado": "round((numerador / denominador), 2)"
+        },
+        "semaforo": {
+            "Bajo": 3.1,
+            "Esperado": 4.0
+        },
+        "mostrar": true
+    },
+    "CUPN 07": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",
+        "descripcionNumerador": "Número total de consultas otorgadas en el servicio de Estomatología",
+        "descripcionDenominador": "Total de horas trabajadas por el estomatólogo",
+        "nombreArchivoFinal": "CUPN 07",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "PU01": {
+                "hoja": "Parte I",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "ESTOMATOLOGIA",
+                "columna_dato": [
+                    "E",
+                    "C"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(PU01[0])",
+            "denominador": "(PU01[1])",
+            "resultado": "round((numerador / denominador), 2)"
+        },
+        "semaforo": {
+            "Bajo": 2.0,
+            "Esperado": 2.8
+        },
+        "mostrar": true
+    }
+}

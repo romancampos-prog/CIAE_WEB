@@ -1,0 +1,36 @@
+{
+    "MT 02": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "Materna 02 - Oportunidad de inicio de la vigilancia prenatal.",
+        "descripcionNumerador": "Consultas prenatales con ocasión de servicio de primera vez, en el primer trimestre de la gestación",
+        "descripcionDenominador": "Total de consultas prenatales con ocasión de servicio de primera vez",
+        "nombreArchivoFinal": "MT 02",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "MT03": {
+                "hoja": "Vigilancia Materna",
+                "modo": "INTERSECCION_FILA",
+                "columna_etiqueta": [
+                    "J"
+                ],
+                "fila": [
+                    65,
+                    69
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(MT03[0])",
+            "denominador": "(MT03[1])",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Bajo": 50.0,
+            "Esperado": 53.0
+        },
+        "mostrar": true
+    }
+}

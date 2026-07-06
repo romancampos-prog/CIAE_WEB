@@ -1,0 +1,1425 @@
+{
+    "ANIO": 2026,
+    "MESES": {
+        "ENERO": {
+            "UMF 46 GUANAJUATO": {
+                "numerador": 663,
+                "denominador": 1904,
+                "%": 34.82,
+                "color": "Gris"
+            },
+            "UMF 50 GUANAJUATO": {
+                "numerador": 10636,
+                "denominador": 78696,
+                "%": 13.52,
+                "color": "Gris"
+            },
+            "UMFH 11 S.MIGUEL ALLEND": {
+                "numerador": 4946,
+                "denominador": 41326,
+                "%": 11.97,
+                "color": "Gris"
+            },
+            "UMFH 12 DOLORES HIDALGO": {
+                "numerador": 5289,
+                "denominador": 34930,
+                "%": 15.14,
+                "color": "Gris"
+            },
+            "UMF 14 SILAO": {
+                "numerador": 9653,
+                "denominador": 102511,
+                "%": 9.42,
+                "color": "Gris"
+            },
+            "HGSMF 2 IRAPUATO": {
+                "numerador": 30496,
+                "denominador": 197218,
+                "%": 15.46,
+                "color": "Gris"
+            },
+            "UMF 45 IRAPUATO": {
+                "numerador": 1205,
+                "denominador": 3880,
+                "%": 31.06,
+                "color": "Gris"
+            },
+            "UMF 44 IRAPUATO": {
+                "numerador": 2706,
+                "denominador": 25008,
+                "%": 10.82,
+                "color": "Gris"
+            },
+            "UMF 57 IRAPUATO": {
+                "numerador": 17143,
+                "denominador": 100429,
+                "%": 17.07,
+                "color": "Gris"
+            },
+            "UMF 16 S.CRUZ JUVENTINO": {
+                "numerador": 3466,
+                "denominador": 25717,
+                "%": 13.48,
+                "color": "Gris"
+            },
+            "UMF 05 COMONFORT": {
+                "numerador": 955,
+                "denominador": 10897,
+                "%": 8.76,
+                "color": "Gris"
+            },
+            "UMF 49 CELAYA": {
+                "numerador": 28286,
+                "denominador": 172876,
+                "%": 16.36,
+                "color": "Gris"
+            },
+            "UMF 59 CELAYA": {
+                "numerador": 12551,
+                "denominador": 97899,
+                "%": 12.82,
+                "color": "Gris"
+            },
+            "UMFH 6 CORTAZAR": {
+                "numerador": 5134,
+                "denominador": 49074,
+                "%": 10.46,
+                "color": "Gris"
+            },
+            "HGSMF 13 ACAMBARO": {
+                "numerador": 4842,
+                "denominador": 34135,
+                "%": 14.18,
+                "color": "Gris"
+            },
+            "HGSMF 15 MOROLEON": {
+                "numerador": 2890,
+                "denominador": 23409,
+                "%": 12.35,
+                "color": "Gris"
+            },
+            "UMFH 08 SALVATIERRA": {
+                "numerador": 3854,
+                "denominador": 22437,
+                "%": 17.18,
+                "color": "Gris"
+            },
+            "HGZMF 03 SALAMANCA": {
+                "numerador": 16216,
+                "denominador": 138709,
+                "%": 11.69,
+                "color": "Gris"
+            },
+            "UMF 40 VILLAGRAN": {
+                "numerador": 4570,
+                "denominador": 39282,
+                "%": 11.63,
+                "color": "Gris"
+            },
+            "UMFH 09 PENJAMO": {
+                "numerador": 2993,
+                "denominador": 24156,
+                "%": 12.39,
+                "color": "Gris"
+            },
+            "HGZMF 21 LEON": {
+                "numerador": 29843,
+                "denominador": 217416,
+                "%": 13.73,
+                "color": "Gris"
+            },
+            "UMF 47": {
+                "numerador": 40447,
+                "denominador": 318544,
+                "%": 12.7,
+                "color": "Gris"
+            },
+            "UMF 53": {
+                "numerador": 28172,
+                "denominador": 237035,
+                "%": 11.89,
+                "color": "Gris"
+            },
+            "UMF 56 LAS MANDARINAS": {
+                "numerador": 10755,
+                "denominador": 69672,
+                "%": 15.44,
+                "color": "Gris"
+            },
+            "UMF 60 LEON": {
+                "numerador": 10330,
+                "denominador": 56983,
+                "%": 18.13,
+                "color": "Gris"
+            },
+            "HGSMF 07 SN FCO DEL RINCO": {
+                "numerador": 8065,
+                "denominador": 44831,
+                "%": 17.99,
+                "color": "Gris"
+            },
+            "UMF 27 PURISIMA": {
+                "numerador": 3460,
+                "denominador": 20623,
+                "%": 16.78,
+                "color": "Gris"
+            },
+            "UMF 17 SORIA": {
+                "numerador": 990,
+                "denominador": 7594,
+                "%": 13.04,
+                "color": "Gris"
+            },
+            "UMF 26 OCAMPO": {
+                "numerador": 255,
+                "denominador": 2609,
+                "%": 9.77,
+                "color": "Gris"
+            },
+            "UMF 19 V.SANTIAGO": {
+                "numerador": 3672,
+                "denominador": 35072,
+                "%": 10.47,
+                "color": "Gris"
+            },
+            "HGSMF 20 S.LUIS PAZ": {
+                "numerador": 2869,
+                "denominador": 41058,
+                "%": 6.99,
+                "color": "Gris"
+            },
+            "UMF 30 S.FELIPE": {
+                "numerador": 1074,
+                "denominador": 12969,
+                "%": 8.28,
+                "color": "Gris"
+            },
+            "UMF 41 TARIMORO": {
+                "numerador": 888,
+                "denominador": 6863,
+                "%": 12.94,
+                "color": "Gris"
+            },
+            "UMF 28 ROMITA": {
+                "numerador": 1000,
+                "denominador": 16415,
+                "%": 6.09,
+                "color": "Gris"
+            },
+            "UMF 38 S.JOSE ITURBIDE": {
+                "numerador": 5222,
+                "denominador": 50945,
+                "%": 10.25,
+                "color": "Gris"
+            },
+            "UMF 25 JARAL BERRIO": {
+                "numerador": 519,
+                "denominador": 8679,
+                "%": 5.98,
+                "color": "Gris"
+            },
+            "UMF 29": {
+                "numerador": 390,
+                "denominador": 2072,
+                "%": 18.82,
+                "color": "Gris"
+            },
+            "UMF 18 APASEO EL ALTO": {
+                "numerador": 849,
+                "denominador": 8464,
+                "%": 10.03,
+                "color": "Gris"
+            },
+            "UMF 24 MANUEL DOBLADO": {
+                "numerador": 943,
+                "denominador": 5595,
+                "%": 16.85,
+                "color": "Gris"
+            },
+            "UMF 36 YURIRIA": {
+                "numerador": 846,
+                "denominador": 5910,
+                "%": 14.31,
+                "color": "Gris"
+            },
+            "UMF 35 PUEBLO NUEVO": {
+                "numerador": 583,
+                "denominador": 2624,
+                "%": 22.22,
+                "color": "Gris"
+            },
+            "UMF 32 CUERAMARO": {
+                "numerador": 682,
+                "denominador": 4853,
+                "%": 14.05,
+                "color": "Gris"
+            },
+            "UMF 22 ABASOLO": {
+                "numerador": 1695,
+                "denominador": 17781,
+                "%": 9.53,
+                "color": "Gris"
+            },
+            "UMF 23 APASEO GRANDE": {
+                "numerador": 4890,
+                "denominador": 36669,
+                "%": 13.34,
+                "color": "Gris"
+            },
+            "UMF 34 JARAL PROGRESO": {
+                "numerador": 1547,
+                "denominador": 11357,
+                "%": 13.62,
+                "color": "Gris"
+            },
+            "UMF 51 LEON": {
+                "numerador": 28199,
+                "denominador": 167564,
+                "%": 16.83,
+                "color": "Gris"
+            },
+            "TOTAL": {
+                "numerador": 356679,
+                "denominador": 2634690,
+                "%": 13.54,
+                "color": "Gris"
+            }
+        },
+        "FEBRERO": {
+            "UMF 46 GUANAJUATO": {
+                "numerador": 993,
+                "denominador": 1904,
+                "%": 52.15,
+                "color": "Gris"
+            },
+            "UMF 50 GUANAJUATO": {
+                "numerador": 17302,
+                "denominador": 78696,
+                "%": 21.99,
+                "color": "Gris"
+            },
+            "UMFH 11 S.MIGUEL ALLEND": {
+                "numerador": 7957,
+                "denominador": 41326,
+                "%": 19.25,
+                "color": "Gris"
+            },
+            "UMFH 12 DOLORES HIDALGO": {
+                "numerador": 8006,
+                "denominador": 34930,
+                "%": 22.92,
+                "color": "Gris"
+            },
+            "UMF 14 SILAO": {
+                "numerador": 16103,
+                "denominador": 102511,
+                "%": 15.71,
+                "color": "Gris"
+            },
+            "HGSMF 2 IRAPUATO": {
+                "numerador": 45268,
+                "denominador": 197218,
+                "%": 22.95,
+                "color": "Gris"
+            },
+            "UMF 45 IRAPUATO": {
+                "numerador": 1776,
+                "denominador": 3880,
+                "%": 45.77,
+                "color": "Gris"
+            },
+            "UMF 44 IRAPUATO": {
+                "numerador": 4227,
+                "denominador": 25008,
+                "%": 16.9,
+                "color": "Gris"
+            },
+            "UMF 57 IRAPUATO": {
+                "numerador": 25280,
+                "denominador": 100429,
+                "%": 25.17,
+                "color": "Gris"
+            },
+            "UMF 16 S.CRUZ JUVENTINO": {
+                "numerador": 5676,
+                "denominador": 25717,
+                "%": 22.07,
+                "color": "Gris"
+            },
+            "UMF 05 COMONFORT": {
+                "numerador": 1596,
+                "denominador": 10897,
+                "%": 14.65,
+                "color": "Gris"
+            },
+            "UMF 49 CELAYA": {
+                "numerador": 42165,
+                "denominador": 172876,
+                "%": 24.39,
+                "color": "Gris"
+            },
+            "UMF 59 CELAYA": {
+                "numerador": 21068,
+                "denominador": 97899,
+                "%": 21.52,
+                "color": "Gris"
+            },
+            "UMFH 6 CORTAZAR": {
+                "numerador": 8712,
+                "denominador": 49074,
+                "%": 17.75,
+                "color": "Gris"
+            },
+            "HGSMF 13 ACAMBARO": {
+                "numerador": 8360,
+                "denominador": 34135,
+                "%": 24.49,
+                "color": "Gris"
+            },
+            "HGSMF 15 MOROLEON": {
+                "numerador": 5351,
+                "denominador": 23409,
+                "%": 22.86,
+                "color": "Gris"
+            },
+            "UMFH 08 SALVATIERRA": {
+                "numerador": 6033,
+                "denominador": 22437,
+                "%": 26.89,
+                "color": "Gris"
+            },
+            "HGZMF 03 SALAMANCA": {
+                "numerador": 27910,
+                "denominador": 138709,
+                "%": 20.12,
+                "color": "Gris"
+            },
+            "UMF 40 VILLAGRAN": {
+                "numerador": 7802,
+                "denominador": 39282,
+                "%": 19.86,
+                "color": "Gris"
+            },
+            "UMFH 09 PENJAMO": {
+                "numerador": 5077,
+                "denominador": 24156,
+                "%": 21.02,
+                "color": "Gris"
+            },
+            "HGZMF 21 LEON": {
+                "numerador": 47441,
+                "denominador": 217416,
+                "%": 21.82,
+                "color": "Gris"
+            },
+            "UMF 47": {
+                "numerador": 65320,
+                "denominador": 318544,
+                "%": 20.51,
+                "color": "Gris"
+            },
+            "UMF 53": {
+                "numerador": 45714,
+                "denominador": 237035,
+                "%": 19.29,
+                "color": "Gris"
+            },
+            "UMF 56 LAS MANDARINAS": {
+                "numerador": 16532,
+                "denominador": 69672,
+                "%": 23.73,
+                "color": "Gris"
+            },
+            "UMF 60 LEON": {
+                "numerador": 15644,
+                "denominador": 56983,
+                "%": 27.45,
+                "color": "Gris"
+            },
+            "HGSMF 07 SN FCO DEL RINCO": {
+                "numerador": 11547,
+                "denominador": 44831,
+                "%": 25.76,
+                "color": "Gris"
+            },
+            "UMF 27 PURISIMA": {
+                "numerador": 5175,
+                "denominador": 20623,
+                "%": 25.09,
+                "color": "Gris"
+            },
+            "UMF 17 SORIA": {
+                "numerador": 1554,
+                "denominador": 7594,
+                "%": 20.46,
+                "color": "Gris"
+            },
+            "UMF 26 OCAMPO": {
+                "numerador": 413,
+                "denominador": 2609,
+                "%": 15.83,
+                "color": "Gris"
+            },
+            "UMF 19 V.SANTIAGO": {
+                "numerador": 6133,
+                "denominador": 35072,
+                "%": 17.49,
+                "color": "Gris"
+            },
+            "HGSMF 20 S.LUIS PAZ": {
+                "numerador": 5831,
+                "denominador": 41058,
+                "%": 14.2,
+                "color": "Gris"
+            },
+            "UMF 30 S.FELIPE": {
+                "numerador": 1934,
+                "denominador": 12969,
+                "%": 14.91,
+                "color": "Gris"
+            },
+            "UMF 41 TARIMORO": {
+                "numerador": 1474,
+                "denominador": 6863,
+                "%": 21.48,
+                "color": "Gris"
+            },
+            "UMF 28 ROMITA": {
+                "numerador": 1823,
+                "denominador": 16415,
+                "%": 11.11,
+                "color": "Gris"
+            },
+            "UMF 38 S.JOSE ITURBIDE": {
+                "numerador": 8835,
+                "denominador": 50945,
+                "%": 17.34,
+                "color": "Gris"
+            },
+            "UMF 25 JARAL BERRIO": {
+                "numerador": 861,
+                "denominador": 8679,
+                "%": 9.92,
+                "color": "Gris"
+            },
+            "UMF 29": {
+                "numerador": 713,
+                "denominador": 2072,
+                "%": 34.41,
+                "color": "Gris"
+            },
+            "UMF 18 APASEO EL ALTO": {
+                "numerador": 1359,
+                "denominador": 8464,
+                "%": 16.06,
+                "color": "Gris"
+            },
+            "UMF 24 MANUEL DOBLADO": {
+                "numerador": 1476,
+                "denominador": 5595,
+                "%": 26.38,
+                "color": "Gris"
+            },
+            "UMF 36 YURIRIA": {
+                "numerador": 1316,
+                "denominador": 5910,
+                "%": 22.27,
+                "color": "Gris"
+            },
+            "UMF 35 PUEBLO NUEVO": {
+                "numerador": 972,
+                "denominador": 2624,
+                "%": 37.04,
+                "color": "Gris"
+            },
+            "UMF 32 CUERAMARO": {
+                "numerador": 1362,
+                "denominador": 4853,
+                "%": 28.07,
+                "color": "Gris"
+            },
+            "UMF 22 ABASOLO": {
+                "numerador": 3206,
+                "denominador": 17781,
+                "%": 18.03,
+                "color": "Gris"
+            },
+            "UMF 23 APASEO GRANDE": {
+                "numerador": 7680,
+                "denominador": 36669,
+                "%": 20.94,
+                "color": "Gris"
+            },
+            "UMF 34 JARAL PROGRESO": {
+                "numerador": 2978,
+                "denominador": 11357,
+                "%": 26.22,
+                "color": "Gris"
+            },
+            "UMF 51 LEON": {
+                "numerador": 44571,
+                "denominador": 167564,
+                "%": 26.6,
+                "color": "Gris"
+            },
+            "TOTAL": {
+                "numerador": 568526,
+                "denominador": 2634690,
+                "%": 21.58,
+                "color": "Gris"
+            }
+        },
+        "MARZO": {
+            "UMF 46 GUANAJUATO": {
+                "numerador": 1107,
+                "denominador": 1904,
+                "%": 58.14,
+                "color": "Gris"
+            },
+            "UMF 50 GUANAJUATO": {
+                "numerador": 22076,
+                "denominador": 78696,
+                "%": 28.05,
+                "color": "Gris"
+            },
+            "UMFH 11 S.MIGUEL ALLEND": {
+                "numerador": 9727,
+                "denominador": 41326,
+                "%": 23.54,
+                "color": "Gris"
+            },
+            "UMFH 12 DOLORES HIDALGO": {
+                "numerador": 9615,
+                "denominador": 34930,
+                "%": 27.53,
+                "color": "Gris"
+            },
+            "UMF 14 SILAO": {
+                "numerador": 19905,
+                "denominador": 102511,
+                "%": 19.42,
+                "color": "Gris"
+            },
+            "HGSMF 2 IRAPUATO": {
+                "numerador": 52809,
+                "denominador": 197218,
+                "%": 26.78,
+                "color": "Gris"
+            },
+            "UMF 45 IRAPUATO": {
+                "numerador": 2212,
+                "denominador": 3880,
+                "%": 57.01,
+                "color": "Gris"
+            },
+            "UMF 44 IRAPUATO": {
+                "numerador": 5229,
+                "denominador": 25008,
+                "%": 20.91,
+                "color": "Gris"
+            },
+            "UMF 57 IRAPUATO": {
+                "numerador": 30241,
+                "denominador": 100429,
+                "%": 30.11,
+                "color": "Gris"
+            },
+            "UMF 16 S.CRUZ JUVENTINO": {
+                "numerador": 7004,
+                "denominador": 25717,
+                "%": 27.23,
+                "color": "Gris"
+            },
+            "UMF 05 COMONFORT": {
+                "numerador": 1992,
+                "denominador": 10897,
+                "%": 18.28,
+                "color": "Gris"
+            },
+            "UMF 49 CELAYA": {
+                "numerador": 50812,
+                "denominador": 172876,
+                "%": 29.39,
+                "color": "Gris"
+            },
+            "UMF 59 CELAYA": {
+                "numerador": 25935,
+                "denominador": 97899,
+                "%": 26.49,
+                "color": "Gris"
+            },
+            "UMFH 6 CORTAZAR": {
+                "numerador": 10895,
+                "denominador": 49074,
+                "%": 22.2,
+                "color": "Gris"
+            },
+            "HGSMF 13 ACAMBARO": {
+                "numerador": 10167,
+                "denominador": 34135,
+                "%": 29.78,
+                "color": "Gris"
+            },
+            "HGSMF 15 MOROLEON": {
+                "numerador": 6659,
+                "denominador": 23409,
+                "%": 28.45,
+                "color": "Gris"
+            },
+            "UMFH 08 SALVATIERRA": {
+                "numerador": 7286,
+                "denominador": 22437,
+                "%": 32.47,
+                "color": "Gris"
+            },
+            "HGZMF 03 SALAMANCA": {
+                "numerador": 34017,
+                "denominador": 138709,
+                "%": 24.52,
+                "color": "Gris"
+            },
+            "UMF 40 VILLAGRAN": {
+                "numerador": 9860,
+                "denominador": 39282,
+                "%": 25.1,
+                "color": "Gris"
+            },
+            "UMFH 09 PENJAMO": {
+                "numerador": 7213,
+                "denominador": 24156,
+                "%": 29.86,
+                "color": "Gris"
+            },
+            "HGZMF 21 LEON": {
+                "numerador": 57096,
+                "denominador": 217416,
+                "%": 26.26,
+                "color": "Gris"
+            },
+            "UMF 47": {
+                "numerador": 77044,
+                "denominador": 318544,
+                "%": 24.19,
+                "color": "Gris"
+            },
+            "UMF 53": {
+                "numerador": 55392,
+                "denominador": 237035,
+                "%": 23.37,
+                "color": "Gris"
+            },
+            "UMF 56 LAS MANDARINAS": {
+                "numerador": 20005,
+                "denominador": 69672,
+                "%": 28.71,
+                "color": "Gris"
+            },
+            "UMF 60 LEON": {
+                "numerador": 18715,
+                "denominador": 56983,
+                "%": 32.84,
+                "color": "Gris"
+            },
+            "HGSMF 07 SN FCO DEL RINCO": {
+                "numerador": 13243,
+                "denominador": 44831,
+                "%": 29.54,
+                "color": "Gris"
+            },
+            "UMF 27 PURISIMA": {
+                "numerador": 6294,
+                "denominador": 20623,
+                "%": 30.52,
+                "color": "Gris"
+            },
+            "UMF 17 SORIA": {
+                "numerador": 1911,
+                "denominador": 7594,
+                "%": 25.16,
+                "color": "Gris"
+            },
+            "UMF 26 OCAMPO": {
+                "numerador": 504,
+                "denominador": 2609,
+                "%": 19.32,
+                "color": "Gris"
+            },
+            "UMF 19 V.SANTIAGO": {
+                "numerador": 7946,
+                "denominador": 35072,
+                "%": 22.66,
+                "color": "Gris"
+            },
+            "HGSMF 20 S.LUIS PAZ": {
+                "numerador": 8232,
+                "denominador": 41058,
+                "%": 20.05,
+                "color": "Gris"
+            },
+            "UMF 30 S.FELIPE": {
+                "numerador": 2504,
+                "denominador": 12969,
+                "%": 19.31,
+                "color": "Gris"
+            },
+            "UMF 41 TARIMORO": {
+                "numerador": 1848,
+                "denominador": 6863,
+                "%": 26.93,
+                "color": "Gris"
+            },
+            "UMF 28 ROMITA": {
+                "numerador": 2492,
+                "denominador": 16415,
+                "%": 15.18,
+                "color": "Gris"
+            },
+            "UMF 38 S.JOSE ITURBIDE": {
+                "numerador": 11320,
+                "denominador": 50945,
+                "%": 22.22,
+                "color": "Gris"
+            },
+            "UMF 25 JARAL BERRIO": {
+                "numerador": 1160,
+                "denominador": 8679,
+                "%": 13.37,
+                "color": "Gris"
+            },
+            "UMF 29": {
+                "numerador": 883,
+                "denominador": 2072,
+                "%": 42.62,
+                "color": "Gris"
+            },
+            "UMF 18 APASEO EL ALTO": {
+                "numerador": 1593,
+                "denominador": 8464,
+                "%": 18.82,
+                "color": "Gris"
+            },
+            "UMF 24 MANUEL DOBLADO": {
+                "numerador": 1753,
+                "denominador": 5595,
+                "%": 31.33,
+                "color": "Gris"
+            },
+            "UMF 36 YURIRIA": {
+                "numerador": 1568,
+                "denominador": 5910,
+                "%": 26.53,
+                "color": "Gris"
+            },
+            "UMF 35 PUEBLO NUEVO": {
+                "numerador": 1282,
+                "denominador": 2624,
+                "%": 48.86,
+                "color": "Gris"
+            },
+            "UMF 32 CUERAMARO": {
+                "numerador": 1754,
+                "denominador": 4853,
+                "%": 36.14,
+                "color": "Gris"
+            },
+            "UMF 22 ABASOLO": {
+                "numerador": 4063,
+                "denominador": 17781,
+                "%": 22.85,
+                "color": "Gris"
+            },
+            "UMF 23 APASEO GRANDE": {
+                "numerador": 9514,
+                "denominador": 36669,
+                "%": 25.95,
+                "color": "Gris"
+            },
+            "UMF 34 JARAL PROGRESO": {
+                "numerador": 3767,
+                "denominador": 11357,
+                "%": 33.17,
+                "color": "Gris"
+            },
+            "UMF 51 LEON": {
+                "numerador": 54679,
+                "denominador": 167564,
+                "%": 32.63,
+                "color": "Gris"
+            },
+            "TOTAL": {
+                "numerador": 691323,
+                "denominador": 2634690,
+                "%": 26.24,
+                "color": "Gris"
+            }
+        },
+        "ABRIL": {
+            "UMF 46 GUANAJUATO": {
+                "numerador": 1226,
+                "denominador": 1904,
+                "%": 64.39,
+                "color": "Gris"
+            },
+            "UMF 50 GUANAJUATO": {
+                "numerador": 25855,
+                "denominador": 78696,
+                "%": 32.85,
+                "color": "Gris"
+            },
+            "UMFH 11 S.MIGUEL ALLEND": {
+                "numerador": 11320,
+                "denominador": 41326,
+                "%": 27.39,
+                "color": "Gris"
+            },
+            "UMFH 12 DOLORES HIDALGO": {
+                "numerador": 11077,
+                "denominador": 34930,
+                "%": 31.71,
+                "color": "Gris"
+            },
+            "UMF 14 SILAO": {
+                "numerador": 22744,
+                "denominador": 102511,
+                "%": 22.19,
+                "color": "Gris"
+            },
+            "HGSMF 2 IRAPUATO": {
+                "numerador": 59492,
+                "denominador": 197218,
+                "%": 30.17,
+                "color": "Gris"
+            },
+            "UMF 45 IRAPUATO": {
+                "numerador": 2548,
+                "denominador": 3880,
+                "%": 65.67,
+                "color": "Gris"
+            },
+            "UMF 44 IRAPUATO": {
+                "numerador": 6161,
+                "denominador": 25008,
+                "%": 24.64,
+                "color": "Gris"
+            },
+            "UMF 57 IRAPUATO": {
+                "numerador": 34412,
+                "denominador": 100429,
+                "%": 34.27,
+                "color": "Gris"
+            },
+            "UMF 16 S.CRUZ JUVENTINO": {
+                "numerador": 8051,
+                "denominador": 25717,
+                "%": 31.31,
+                "color": "Gris"
+            },
+            "UMF 05 COMONFORT": {
+                "numerador": 2372,
+                "denominador": 10897,
+                "%": 21.77,
+                "color": "Gris"
+            },
+            "UMF 49 CELAYA": {
+                "numerador": 58700,
+                "denominador": 172876,
+                "%": 33.95,
+                "color": "Gris"
+            },
+            "UMF 59 CELAYA": {
+                "numerador": 30466,
+                "denominador": 97899,
+                "%": 31.12,
+                "color": "Gris"
+            },
+            "UMFH 6 CORTAZAR": {
+                "numerador": 12282,
+                "denominador": 49074,
+                "%": 25.03,
+                "color": "Gris"
+            },
+            "HGSMF 13 ACAMBARO": {
+                "numerador": 11550,
+                "denominador": 34135,
+                "%": 33.84,
+                "color": "Gris"
+            },
+            "HGSMF 15 MOROLEON": {
+                "numerador": 7326,
+                "denominador": 23409,
+                "%": 31.3,
+                "color": "Gris"
+            },
+            "UMFH 08 SALVATIERRA": {
+                "numerador": 8170,
+                "denominador": 22437,
+                "%": 36.41,
+                "color": "Gris"
+            },
+            "HGZMF 03 SALAMANCA": {
+                "numerador": 38606,
+                "denominador": 138709,
+                "%": 27.83,
+                "color": "Gris"
+            },
+            "UMF 40 VILLAGRAN": {
+                "numerador": 11522,
+                "denominador": 39282,
+                "%": 29.33,
+                "color": "Gris"
+            },
+            "UMFH 09 PENJAMO": {
+                "numerador": 8037,
+                "denominador": 24156,
+                "%": 33.27,
+                "color": "Gris"
+            },
+            "HGZMF 21 LEON": {
+                "numerador": 65211,
+                "denominador": 217416,
+                "%": 29.99,
+                "color": "Gris"
+            },
+            "UMF 47": {
+                "numerador": 86586,
+                "denominador": 318544,
+                "%": 27.18,
+                "color": "Gris"
+            },
+            "UMF 53": {
+                "numerador": 64789,
+                "denominador": 237035,
+                "%": 27.33,
+                "color": "Gris"
+            },
+            "UMF 56 LAS MANDARINAS": {
+                "numerador": 22729,
+                "denominador": 69672,
+                "%": 32.62,
+                "color": "Gris"
+            },
+            "UMF 60 LEON": {
+                "numerador": 21235,
+                "denominador": 56983,
+                "%": 37.27,
+                "color": "Gris"
+            },
+            "HGSMF 07 SN FCO DEL RINCO": {
+                "numerador": 15003,
+                "denominador": 44831,
+                "%": 33.47,
+                "color": "Gris"
+            },
+            "UMF 27 PURISIMA": {
+                "numerador": 7227,
+                "denominador": 20623,
+                "%": 35.04,
+                "color": "Gris"
+            },
+            "UMF 17 SORIA": {
+                "numerador": 2293,
+                "denominador": 7594,
+                "%": 30.19,
+                "color": "Gris"
+            },
+            "UMF 26 OCAMPO": {
+                "numerador": 576,
+                "denominador": 2609,
+                "%": 22.08,
+                "color": "Gris"
+            },
+            "UMF 19 V.SANTIAGO": {
+                "numerador": 9233,
+                "denominador": 35072,
+                "%": 26.33,
+                "color": "Gris"
+            },
+            "HGSMF 20 S.LUIS PAZ": {
+                "numerador": 10541,
+                "denominador": 41058,
+                "%": 25.67,
+                "color": "Gris"
+            },
+            "UMF 30 S.FELIPE": {
+                "numerador": 2927,
+                "denominador": 12969,
+                "%": 22.57,
+                "color": "Gris"
+            },
+            "UMF 41 TARIMORO": {
+                "numerador": 2144,
+                "denominador": 6863,
+                "%": 31.24,
+                "color": "Gris"
+            },
+            "UMF 28 ROMITA": {
+                "numerador": 3025,
+                "denominador": 16415,
+                "%": 18.43,
+                "color": "Gris"
+            },
+            "UMF 38 S.JOSE ITURBIDE": {
+                "numerador": 13318,
+                "denominador": 50945,
+                "%": 26.14,
+                "color": "Gris"
+            },
+            "UMF 25 JARAL BERRIO": {
+                "numerador": 1367,
+                "denominador": 8679,
+                "%": 15.75,
+                "color": "Gris"
+            },
+            "UMF 29": {
+                "numerador": 1029,
+                "denominador": 2072,
+                "%": 49.66,
+                "color": "Gris"
+            },
+            "UMF 18 APASEO EL ALTO": {
+                "numerador": 1867,
+                "denominador": 8464,
+                "%": 22.06,
+                "color": "Gris"
+            },
+            "UMF 24 MANUEL DOBLADO": {
+                "numerador": 2008,
+                "denominador": 5595,
+                "%": 35.89,
+                "color": "Gris"
+            },
+            "UMF 36 YURIRIA": {
+                "numerador": 1753,
+                "denominador": 5910,
+                "%": 29.66,
+                "color": "Gris"
+            },
+            "UMF 35 PUEBLO NUEVO": {
+                "numerador": 1552,
+                "denominador": 2624,
+                "%": 59.15,
+                "color": "Gris"
+            },
+            "UMF 32 CUERAMARO": {
+                "numerador": 2130,
+                "denominador": 4853,
+                "%": 43.89,
+                "color": "Gris"
+            },
+            "UMF 22 ABASOLO": {
+                "numerador": 4825,
+                "denominador": 17781,
+                "%": 27.14,
+                "color": "Gris"
+            },
+            "UMF 23 APASEO GRANDE": {
+                "numerador": 10741,
+                "denominador": 36669,
+                "%": 29.29,
+                "color": "Gris"
+            },
+            "UMF 34 JARAL PROGRESO": {
+                "numerador": 4456,
+                "denominador": 11357,
+                "%": 39.24,
+                "color": "Gris"
+            },
+            "UMF 51 LEON": {
+                "numerador": 62421,
+                "denominador": 167564,
+                "%": 37.25,
+                "color": "Gris"
+            },
+            "TOTAL": {
+                "numerador": 792903,
+                "denominador": 2634690,
+                "%": 30.09,
+                "color": "Gris"
+            }
+        },
+        "MAYO": {
+            "UMF 46 GUANAJUATO": {
+                "numerador": 1327,
+                "denominador": 1904,
+                "%": 69.7,
+                "color": "Verde"
+            },
+            "UMF 50 GUANAJUATO": {
+                "numerador": 29055,
+                "denominador": 78696,
+                "%": 36.92,
+                "color": "Verde"
+            },
+            "UMFH 11 S.MIGUEL ALLEND": {
+                "numerador": 12493,
+                "denominador": 41326,
+                "%": 30.23,
+                "color": "Verde"
+            },
+            "UMFH 12 DOLORES HIDALGO": {
+                "numerador": 12354,
+                "denominador": 34930,
+                "%": 35.37,
+                "color": "Verde"
+            },
+            "UMF 14 SILAO": {
+                "numerador": 25483,
+                "denominador": 102511,
+                "%": 24.86,
+                "color": "Amarillo"
+            },
+            "HGSMF 2 IRAPUATO": {
+                "numerador": 65513,
+                "denominador": 197218,
+                "%": 33.22,
+                "color": "Verde"
+            },
+            "UMF 45 IRAPUATO": {
+                "numerador": 2887,
+                "denominador": 3880,
+                "%": 74.41,
+                "color": "Verde"
+            },
+            "UMF 44 IRAPUATO": {
+                "numerador": 6969,
+                "denominador": 25008,
+                "%": 27.87,
+                "color": "Verde"
+            },
+            "UMF 57 IRAPUATO": {
+                "numerador": 37982,
+                "denominador": 100429,
+                "%": 37.82,
+                "color": "Verde"
+            },
+            "UMF 16 S.CRUZ JUVENTINO": {
+                "numerador": 9055,
+                "denominador": 25717,
+                "%": 35.21,
+                "color": "Verde"
+            },
+            "UMF 05 COMONFORT": {
+                "numerador": 2751,
+                "denominador": 10897,
+                "%": 25.25,
+                "color": "Amarillo"
+            },
+            "UMF 49 CELAYA": {
+                "numerador": 65940,
+                "denominador": 172876,
+                "%": 38.14,
+                "color": "Verde"
+            },
+            "UMF 59 CELAYA": {
+                "numerador": 34262,
+                "denominador": 97899,
+                "%": 35.0,
+                "color": "Verde"
+            },
+            "UMFH 6 CORTAZAR": {
+                "numerador": 13855,
+                "denominador": 49074,
+                "%": 28.23,
+                "color": "Verde"
+            },
+            "HGSMF 13 ACAMBARO": {
+                "numerador": 12736,
+                "denominador": 34135,
+                "%": 37.31,
+                "color": "Verde"
+            },
+            "HGSMF 15 MOROLEON": {
+                "numerador": 8080,
+                "denominador": 23409,
+                "%": 34.52,
+                "color": "Verde"
+            },
+            "UMFH 08 SALVATIERRA": {
+                "numerador": 9107,
+                "denominador": 22437,
+                "%": 40.59,
+                "color": "Verde"
+            },
+            "HGZMF 03 SALAMANCA": {
+                "numerador": 42584,
+                "denominador": 138709,
+                "%": 30.7,
+                "color": "Verde"
+            },
+            "UMF 40 VILLAGRAN": {
+                "numerador": 13024,
+                "denominador": 39282,
+                "%": 33.16,
+                "color": "Verde"
+            },
+            "UMFH 09 PENJAMO": {
+                "numerador": 8832,
+                "denominador": 24156,
+                "%": 36.56,
+                "color": "Verde"
+            },
+            "HGZMF 21 LEON": {
+                "numerador": 71975,
+                "denominador": 217416,
+                "%": 33.1,
+                "color": "Verde"
+            },
+            "UMF 47": {
+                "numerador": 95204,
+                "denominador": 318544,
+                "%": 29.89,
+                "color": "Verde"
+            },
+            "UMF 53": {
+                "numerador": 72556,
+                "denominador": 237035,
+                "%": 30.61,
+                "color": "Verde"
+            },
+            "UMF 56 LAS MANDARINAS": {
+                "numerador": 24973,
+                "denominador": 69672,
+                "%": 35.84,
+                "color": "Verde"
+            },
+            "UMF 60 LEON": {
+                "numerador": 23666,
+                "denominador": 56983,
+                "%": 41.53,
+                "color": "Verde"
+            },
+            "HGSMF 07 SN FCO DEL RINCO": {
+                "numerador": 16442,
+                "denominador": 44831,
+                "%": 36.68,
+                "color": "Verde"
+            },
+            "UMF 27 PURISIMA": {
+                "numerador": 8035,
+                "denominador": 20623,
+                "%": 38.96,
+                "color": "Verde"
+            },
+            "UMF 17 SORIA": {
+                "numerador": 2658,
+                "denominador": 7594,
+                "%": 35.0,
+                "color": "Verde"
+            },
+            "UMF 26 OCAMPO": {
+                "numerador": 646,
+                "denominador": 2609,
+                "%": 24.76,
+                "color": "Amarillo"
+            },
+            "UMF 19 V.SANTIAGO": {
+                "numerador": 10386,
+                "denominador": 35072,
+                "%": 29.61,
+                "color": "Verde"
+            },
+            "HGSMF 20 S.LUIS PAZ": {
+                "numerador": 12246,
+                "denominador": 41058,
+                "%": 29.83,
+                "color": "Verde"
+            },
+            "UMF 30 S.FELIPE": {
+                "numerador": 3324,
+                "denominador": 12969,
+                "%": 25.63,
+                "color": "Amarillo"
+            },
+            "UMF 41 TARIMORO": {
+                "numerador": 2433,
+                "denominador": 6863,
+                "%": 35.45,
+                "color": "Verde"
+            },
+            "UMF 28 ROMITA": {
+                "numerador": 3564,
+                "denominador": 16415,
+                "%": 21.71,
+                "color": "Rojo"
+            },
+            "UMF 38 S.JOSE ITURBIDE": {
+                "numerador": 14925,
+                "denominador": 50945,
+                "%": 29.3,
+                "color": "Verde"
+            },
+            "UMF 25 JARAL BERRIO": {
+                "numerador": 1564,
+                "denominador": 8679,
+                "%": 18.02,
+                "color": "Rojo"
+            },
+            "UMF 29": {
+                "numerador": 1127,
+                "denominador": 2072,
+                "%": 54.39,
+                "color": "Verde"
+            },
+            "UMF 18 APASEO EL ALTO": {
+                "numerador": 2079,
+                "denominador": 8464,
+                "%": 24.56,
+                "color": "Amarillo"
+            },
+            "UMF 24 MANUEL DOBLADO": {
+                "numerador": 2224,
+                "denominador": 5595,
+                "%": 39.75,
+                "color": "Verde"
+            },
+            "UMF 36 YURIRIA": {
+                "numerador": 1912,
+                "denominador": 5910,
+                "%": 32.35,
+                "color": "Verde"
+            },
+            "UMF 35 PUEBLO NUEVO": {
+                "numerador": 1781,
+                "denominador": 2624,
+                "%": 67.87,
+                "color": "Verde"
+            },
+            "UMF 32 CUERAMARO": {
+                "numerador": 2379,
+                "denominador": 4853,
+                "%": 49.02,
+                "color": "Verde"
+            },
+            "UMF 22 ABASOLO": {
+                "numerador": 5447,
+                "denominador": 17781,
+                "%": 30.63,
+                "color": "Verde"
+            },
+            "UMF 23 APASEO GRANDE": {
+                "numerador": 11932,
+                "denominador": 36669,
+                "%": 32.54,
+                "color": "Verde"
+            },
+            "UMF 34 JARAL PROGRESO": {
+                "numerador": 5157,
+                "denominador": 11357,
+                "%": 45.41,
+                "color": "Verde"
+            },
+            "UMF 51 LEON": {
+                "numerador": 70573,
+                "denominador": 167564,
+                "%": 42.12,
+                "color": "Verde"
+            },
+            "TOTAL": {
+                "numerador": 883497,
+                "denominador": 2634690,
+                "%": 33.53,
+                "color": "Verde"
+            }
+        }
+    }
+}

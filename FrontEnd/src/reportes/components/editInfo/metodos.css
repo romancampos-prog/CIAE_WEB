@@ -1,0 +1,148 @@
+/* ── Contenedor ──────────────────────────────────────────────── */
+.ms-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* ── Tarjeta de modo ─────────────────────────────────────────── */
+.ms-card {
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--radius-md);
+  background: white;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+.ms-card:hover { border-color: #bbb; }
+.ms-card--activo {
+  border-color: var(--color-imss-primario);
+  box-shadow: 0 0 0 3px rgba(36, 92, 79, 0.08);
+}
+
+/* ── Fila principal ──────────────────────────────────────────── */
+.ms-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  user-select: none;
+}
+.ms-card--activo .ms-card-top { background: rgba(36, 92, 79, 0.04); }
+
+.ms-card-icon  { font-size: 16px; flex-shrink: 0; }
+.ms-card-label { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-main); }
+.ms-card--activo .ms-card-label { color: var(--color-imss-primario); font-weight: 700; }
+
+/* ── Botón ? ─────────────────────────────────────────────────── */
+.ms-info-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #d0d0d0;
+  background: white;
+  color: #aaa;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.ms-info-btn:hover,
+.ms-info-btn--open {
+  border-color: var(--color-oro-institucional);
+  background: var(--color-oro-institucional);
+  color: white;
+}
+
+/* ── Panel desplegable ───────────────────────────────────────── */
+.ms-info-panel {
+  border-top: 1px solid #f0f0f0;
+  padding: 14px 14px 12px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ms-info-texto {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Diagrama Excel ──────────────────────────────────────────── */
+.ms-diagrama { display: flex; flex-direction: column; gap: 6px; }
+.ms-diagrama-titulo {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #bbb;
+}
+
+.ms-excel-wrap {
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: 'Consolas', monospace;
+  font-size: 11px;
+  max-width: 320px;
+  width: 100%;
+}
+.ms-excel-wrap--chica { max-width: 160px; }
+
+.ms-excel-row {
+  display: flex;
+  border-bottom: 1px solid #ebebeb;
+}
+.ms-excel-row:last-of-type { border-bottom: none; }
+
+.ms-excel-header { background: #e8e8e8; font-weight: 700; color: #666; }
+
+.ms-excel-cell {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-right: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+.ms-excel-cell:last-child { border-right: none; }
+
+.ms-excel-cell--lbl { flex: 1; color: #555; font-size: 11px; min-width: 0; }
+.ms-excel-cell--val { width: 44px; justify-content: center; color: #333; }
+.ms-excel-cell--col { width: 44px; justify-content: center; font-weight: 700; color: #555; }
+.ms-excel-cell--num { width: 38px; justify-content: center; color: #999; font-weight: 700; }
+
+.ms-col-dato { background: rgba(26,58,143,0.08); color: var(--color-azul-tecnico); }
+
+.ms-row--hit { background: rgba(36,92,79,0.07); }
+.ms-row--hit .ms-excel-cell--lbl { color: var(--color-imss-primario); font-weight: 700; }
+.ms-val--hit { background: rgba(36,92,79,0.12); color: var(--color-imss-primario); font-weight: 700; }
+
+.ms-row--repeat { opacity: 0.5; }
+.ms-repeat-badge { color: #999; font-style: italic; }
+.ms-val--vacio { color: #ccc; }
+
+.ms-arrow { font-size: 9px; color: var(--color-tinto-gobierno); flex-shrink: 0; }
+
+/* ── Leyenda ─────────────────────────────────────────────────── */
+.ms-diagrama-leyenda {
+  font-size: 10px;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.ms-leyenda-hit    { color: var(--color-imss-primario); }
+.ms-leyenda-col    { color: var(--color-azul-tecnico); }
+.ms-leyenda-repeat { color: #ccc; }
+.ms-leyenda-sep    { width: 8px; }

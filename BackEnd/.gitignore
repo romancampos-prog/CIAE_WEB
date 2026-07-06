@@ -1,0 +1,32 @@
+# ── Secretos — NUNCA subir ───────────────────────────
+.env
+.env.*
+
+# ── Entorno virtual ───────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# ── Archivos de datos runtime / subidos por usuarios ──
+*.xlsx
+*.xls
+*.csv
+
+# ── Certificados ──────────────────────────────────────
+cert.pem
+key.pem
+*.pem
+
+# ── Logs ──────────────────────────────────────────────
+*.log
+
+# ── OS ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

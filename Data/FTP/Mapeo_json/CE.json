@@ -1,0 +1,68 @@
+{
+    "CE 01": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CE 01 - Promedio de atenciones preventivas por personal de enfermería.",
+        "descripcionNumerador": "Total de atenciones preventivas otorgadas del personal auxiliar de enfermería en salud pública (servicio 80) en el periodo evaluado",
+        "descripcionDenominador": "Días laborados del personal auxiliar de enfermería en salud pública (servicio 80) durante el periodo evaluado",
+        "nombreArchivoFinal": "CE 01",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "IAP03": {
+                "hoja": "Prod_Enf_Mens_Serv80",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "G",
+                "texto_buscar": "TOTAL DEL SERVICIO  [ 80 ]",
+                "columna_dato": [
+                    "L",
+                    "K"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(IAP03[0])",
+            "denominador": "(IAP03[1])",
+            "resultado": "round((numerador / denominador), 2)"
+        },
+        "semaforo": {
+            "Bajo": 12,
+            "Esperado": 16
+        },
+        "mostrar": true
+    },
+    "CE 02": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CE 02 - Promedio de atenciones integrales por personal de enfermería especialista en medicina de familia.",
+        "descripcionNumerador": "Total de atenciones integrales otorgadas del personal de enfermería especialista en medicina de familia (servicio 87) en el periodo evaluado.",
+        "descripcionDenominador": "Días laborados del personal de enfermería especialista en medicina de familia (servicio 87) durante el periodo evaluado.",
+        "nombreArchivoFinal": "CE 02",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "IAP03": {
+                "hoja": "Prod_Enf_Mens_Serv87",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "G",
+                "texto_buscar": "TOTAL DEL SERVICIO  [ 87 ]",
+                "columna_dato": [
+                    "M",
+                    "K"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(IAP03[0])",
+            "denominador": "(IAP03[1])",
+            "resultado": "round((numerador / denominador), 2)"
+        },
+        "semaforo": {
+            "Bajo": 12,
+            "Esperado": 16
+        },
+        "mostrar": true
+    }
+}

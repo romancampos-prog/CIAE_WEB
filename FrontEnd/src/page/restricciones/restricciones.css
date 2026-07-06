@@ -1,0 +1,174 @@
+/* ═══════════════════════════════════════
+   RESTRICCIONES — CIAE Institucional
+   ═══════════════════════════════════════ */
+.res-page-container {
+  max-width: 1100px; margin: 0 auto;
+  padding: 40px 24px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #1e293b;
+  background: #f2f5f4;
+  min-height: 100%;
+  animation: res-fadeIn 0.5s ease both;
+}
+@keyframes res-fadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header / nav */
+.res-nav-header { margin-bottom: 40px; }
+
+.res-back-btn {
+  background: none; border: none;
+  display: flex; align-items: center; gap: 8px;
+  color: #94a3b8; font-size: 13px; font-weight: 600;
+  cursor: pointer; padding: 8px 0;
+  transition: all 0.2s; font-family: inherit;
+}
+.res-back-btn:hover { color: #0b5445; transform: translateX(-4px); }
+
+.res-header-content {
+  margin-top: 14px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+
+.res-main-title {
+  font-size: 26px; font-weight: 800;
+  margin: 0; letter-spacing: -0.03em; color: #111827;
+}
+
+.res-indicator-pill {
+  font-size: 11px; font-weight: 700;
+  color: #0b5445;
+  background: #f0faf6;
+  padding: 4px 14px; border-radius: 100px;
+  border: 1px solid rgba(11,84,69,0.2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* Acordeones */
+.res-accordion-stack { display: flex; flex-direction: column; gap: 16px; }
+
+.res-card {
+  background: white;
+  border: 1px solid #e8ecef;
+  border-radius: 14px; overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border-left: 5px solid #7e0808;
+}
+.res-card:nth-child(1) { border-left-color: #7e0808; }
+.res-card:nth-child(2) { border-left-color: #9a7026; }
+.res-card:nth-child(3) { border-left-color: #0b5445; }
+.res-card:nth-child(4) { border-left-color: #1a3a8f; }
+
+.res-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+  transform: translateY(-1px);
+}
+
+/* Header acordeón */
+.res-card-header {
+  padding: 20px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; user-select: none;
+  transition: background 0.15s;
+}
+.res-card-header:hover { background: #fafbfc; }
+
+.res-error-info { display: flex; align-items: center; gap: 14px; }
+
+.res-icon { width: 20px; height: 20px; color: #475569; opacity: 0.85; }
+
+.res-error-name {
+  font-size: 16px; font-weight: 700; margin: 0;
+  color: #111827; letter-spacing: -0.01em;
+}
+
+.res-toggle-text {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  color: #94a3b8; background: #f8fafc;
+  padding: 5px 12px; border-radius: 100px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Cuerpo acordeón */
+.res-card-body {
+  padding: 0 24px 28px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.res-error-desc {
+  font-size: 13.5px; color: #64748b;
+  margin: 18px 0; line-height: 1.65;
+}
+
+/* Grid unidades */
+.res-units-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.res-unit-item {
+  background: #f8fafb;
+  border: 1px solid #e8ecef;
+  border-radius: 10px; padding: 18px;
+  transition: border-color 0.2s;
+}
+.res-unit-item:hover { border-color: rgba(11,84,69,0.2); }
+
+.res-unit-title {
+  font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin: 0 0 14px 0; color: #374151;
+}
+
+/* Ruta FTP */
+.res-path-block { margin-bottom: 10px; }
+
+.res-tags { display: flex; gap: 6px; margin-bottom: 8px; }
+
+.res-tag {
+  background: #1e293b; color: white;
+  font-size: 9.5px; font-weight: 700;
+  padding: 3px 9px; border-radius: 100px;
+}
+
+.res-path-box {
+  background: white; padding: 12px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  position: relative;
+}
+.res-path-box label {
+  display: block; font-size: 9px; font-weight: 800;
+  color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;
+}
+.res-path-box code {
+  font-family: 'Consolas', monospace; font-size: 11px;
+  color: #0b5445; word-break: break-all; line-height: 1.55;
+  background: none; padding: 0;
+}
+
+/* Animaciones */
+.animate-fade { animation: res-fadeIn 0.45s ease-out; }
+.animate-slide-in { animation: res-slideIn 0.3s cubic-bezier(0,0,0.2,1); }
+
+@keyframes res-slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Estado vacío */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 60vh; color: #94a3b8; gap: 14px;
+  text-align: center;
+}
+.empty-state button {
+  margin-top: 12px; padding: 10px 24px;
+  background: #0b5445; color: white;
+  border: none; border-radius: 100px;
+  cursor: pointer; font-weight: 700; font-family: inherit;
+  transition: background 0.2s;
+}
+.empty-state button:hover { background: #0e6655; }

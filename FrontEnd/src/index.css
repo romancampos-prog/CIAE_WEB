@@ -1,0 +1,51 @@
+/*INDEX.CSS  ESTILOS GLOALES CASI PARA TODA LA PAGINA*/
+
+/* Cuadrícula de fondo — reutilizable en todas las páginas */
+.ciae-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(11,84,69,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11,84,69,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+:root {
+  --font-principal: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-oro-institucional: rgb(167, 128, 45);
+  --color-imss-primario: rgb(36, 92, 79);
+  --color-tinto-gobierno: rgb(105, 28, 50);
+  --color-crema-superficie: rgb(220, 200, 163);
+  --color-arena-detalle: rgb(212, 188, 148);
+  --color-gris-neutral: rgb(164, 164, 164);
+  --bg-principal: #fdfdfb;
+}
+
+
+
+/* RESET TOTAL */
+*, *::before, *::after {
+  box-sizing: border-box; /* Evita que el padding cree scrolls */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Bloquea el scroll exterior */
+  font-family: var(--font-principal);
+  background-color: var(--bg-principal);
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  letter-spacing: -0.02em;
+}
