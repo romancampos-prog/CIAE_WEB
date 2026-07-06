@@ -1,7 +1,7 @@
 """
 Módulo  : reportes_controller.py
 Carpeta : reportes/controllers/
-Qué hace: Endpoints para generar y descargar reportes Excel (FTP, IN_ASS, categoría).
+Qué hace: Endpoints para generar y descargar reportes Excel (FTP, IASS, categoría).
 Usado en: main.py (prefix /reportes)
 """
 import asyncio
@@ -11,23 +11,21 @@ import json
 import traceback
 from typing import Optional, List
 
-import openpyxl
 import xlsxwriter
 from fastapi import APIRouter, Query, Depends, HTTPException, status, UploadFile, File, Form, Request
 
 from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
 from indicadores_FTP.services.FTP_service import obtenerInformacionIndicador, consultarTodosIndicadores
-from indicadores_IN_ASS.services.procesar_service import procesar_in_ass as ProcesarInAss
+from indicadores_IASS.services.procesar_service import procesar_IASS as ProcesarIASS
 from reportes.services.reporte_final import ExcelReporteFinal
 from reportes.services.reporte_categoria import preparar_datos_indicador, escribir_hoja_indicador
 from reportes.services.generar_excel import obtener_estilos_excel, _calcular_color
-from reportes.services.generar_in_ass import (
-    Excel_In_Ass01, Excel_In_Ass02, Excel_In_Ass03,
-    Excel_In_Ass04, Excel_In_Ass05, Excel_In_Ass06,
-    RUTA_BASE_IN_ASS, UNIDADES_UCI, UNIDADES_IASS,
-    _color_tasa_uci, _color_tasa_01
-) 
+from reportes.services.generar_iass import (
+    Excel_IASS01, Excel_IASS02, Excel_IASS03,
+    Excel_IASS04, Excel_IASS05, Excel_IASS06,
+    RUTA_BASE_IASS, UNIDADES_UCI,
+)
 from reportes.services.datos_json_service import (
     meses_con_datos as ftp_meses_con_datos,
     leer_datos_indicador,
@@ -40,8 +38,8 @@ router = APIRouter()
 ROLES_FTP_FULL  = ("admin", "trabajador_ftp")
 ROLES_TODOS     = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 ROLES_FTP_GRAF  = ROLES_TODOS
-ROLES_INASS     = ("admin", "trabajador_IAAS")
-ROLES_INASS_GRAF = ROLES_TODOS
+ROLES_IASS     = ("admin", "trabajador_IAAS")
+ROLES_IASS_GRAF = ROLES_TODOS
 
 
 # ─── /meses-generados ────────────────────────────────────────────────────────
@@ -187,208 +185,166 @@ async def ftp_datos_grafica(
 
 
 
-# ─── /InAss/* ─────────────────────────────────────────────────────────────────
+# ─── /IASS/* ─────────────────────────────────────────────────────────────────
 
 @router.get("/ASS_PRUEBA")
-async def IASS(payload: dict = Depends(solo_roles(*ROLES_INASS))):
-    archivo   = Excel_In_Ass01()
+async def IASS(payload: dict = Depends(solo_roles(*ROLES_IASS))):
+    archivo   = Excel_IASS01()
     excel_b64 = base64.b64encode(archivo.getvalue()).decode("utf-8")
-    return ApiResponse(success=True, message="IN_ASS 01 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IN_ASS_01.xlsx"})
+    return ApiResponse(success=True, message="IASS 01 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IASS_01.xlsx"})
 
 
 @router.get("/ASS_02")
-async def IASS_02(payload: dict = Depends(solo_roles(*ROLES_INASS))):
-    excel_b64 = base64.b64encode(Excel_In_Ass02().getvalue()).decode("utf-8")
-    return ApiResponse(success=True, message="IN_ASS 02 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IN_ASS_02.xlsx"})
+async def IASS_02(payload: dict = Depends(solo_roles(*ROLES_IASS))):
+    excel_b64 = base64.b64encode(Excel_IASS02().getvalue()).decode("utf-8")
+    return ApiResponse(success=True, message="IASS 02 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IASS_02.xlsx"})
 
 
 @router.get("/ASS_03")
-async def IASS_03(payload: dict = Depends(solo_roles(*ROLES_INASS))):
-    excel_b64 = base64.b64encode(Excel_In_Ass03().getvalue()).decode("utf-8")
-    return ApiResponse(success=True, message="IN_ASS 03 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IN_ASS_03.xlsx"})
+async def IASS_03(payload: dict = Depends(solo_roles(*ROLES_IASS))):
+    excel_b64 = base64.b64encode(Excel_IASS03().getvalue()).decode("utf-8")
+    return ApiResponse(success=True, message="IASS 03 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IASS_03.xlsx"})
 
 
 @router.get("/ASS_04")
-async def IASS_04(payload: dict = Depends(solo_roles(*ROLES_INASS))):
-    excel_b64 = base64.b64encode(Excel_In_Ass04().getvalue()).decode("utf-8")
-    return ApiResponse(success=True, message="IN_ASS 04 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IN_ASS_04.xlsx"})
+async def IASS_04(payload: dict = Depends(solo_roles(*ROLES_IASS))):
+    excel_b64 = base64.b64encode(Excel_IASS04().getvalue()).decode("utf-8")
+    return ApiResponse(success=True, message="IASS 04 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IASS_04.xlsx"})
 
 
 @router.get("/ASS_05")
-async def IASS_05(payload: dict = Depends(solo_roles(*ROLES_INASS))):
-    excel_b64 = base64.b64encode(Excel_In_Ass05().getvalue()).decode("utf-8")
-    return ApiResponse(success=True, message="IN_ASS 05 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IN_ASS_05.xlsx"})
+async def IASS_05(payload: dict = Depends(solo_roles(*ROLES_IASS))):
+    excel_b64 = base64.b64encode(Excel_IASS05().getvalue()).decode("utf-8")
+    return ApiResponse(success=True, message="IASS 05 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IASS_05.xlsx"})
 
 
 @router.get("/ASS_06")
-async def IASS_06(payload: dict = Depends(solo_roles(*ROLES_INASS))):
-    excel_b64 = base64.b64encode(Excel_In_Ass06().getvalue()).decode("utf-8")
-    return ApiResponse(success=True, message="IN_ASS 06 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IN_ASS_06.xlsx"})
+async def IASS_06(payload: dict = Depends(solo_roles(*ROLES_IASS))):
+    excel_b64 = base64.b64encode(Excel_IASS06().getvalue()).decode("utf-8")
+    return ApiResponse(success=True, message="IASS 06 generado", data={"archivo_b64": excel_b64, "nombre_archivo": "IASS_06.xlsx"})
 
 
-@router.get("/InAss/meses-guardados")
-async def inass_meses_guardados(
+_NOMBRE_A_NUM_IASS = {
+    "ENERO": "01", "FEBRERO": "02", "MARZO": "03", "ABRIL": "04",
+    "MAYO": "05", "JUNIO": "06", "JULIO": "07", "AGOSTO": "08",
+    "SEPTIEMBRE": "09", "OCTUBRE": "10", "NOVIEMBRE": "11", "DICIEMBRE": "12",
+}
+
+@router.get("/IASS/meses-guardados")
+async def IASS_meses_guardados(
     anio:    str = Query(...),
-    payload: dict = Depends(solo_roles(*ROLES_INASS_GRAF))
+    payload: dict = Depends(solo_roles(*ROLES_IASS_GRAF))
 ):
-    ruta = RUTA_BASE_IN_ASS / str(anio) / f"IN_ASS_{anio}.xlsx"
-    if not ruta.exists():
-        return ApiResponse(success=True, message="Sin archivo guardado", data={"meses": []})
+    ruta_json = RUTA_BASE_IASS / str(anio) / "IASS_02.json"
+    if not ruta_json.exists():
+        return ApiResponse(success=True, message="Sin datos guardados", data={"meses": []})
     try:
-        wb    = openpyxl.load_workbook(ruta, data_only=True)
-        ws    = wb["IN_ASS 02"]
-        meses = []
-        for m in range(1, 13):
-            col   = 2 + (m - 1) * 3
-            tiene = any(
-                isinstance(ws.cell(row=r, column=col).value, (int, float))
-                for r in range(5, 35)
-            )
-            if tiene:
-                meses.append(str(m).zfill(2))
-        wb.close()
+        with open(ruta_json, encoding="utf-8") as f:
+            data = json.load(f)
+        meses = sorted(
+            num for nombre, num in _NOMBRE_A_NUM_IASS.items()
+            if nombre in data.get("MESES", {})
+        )
         return ApiResponse(success=True, message="Meses guardados obtenidos", data={"meses": meses})
     except Exception as e:
-        print(f"[IN_ASS meses-guardados] {e}")
+        print(f"[IASS meses-guardados] {e}")
         return ApiResponse(success=False, message=str(e), data={"meses": []})
 
 
-@router.get("/InAss/descargar")
-async def inass_descargar(
+@router.get("/IASS/descargar")
+async def IASS_descargar(
     anio:    str = Query(...),
-    payload: dict = Depends(solo_roles(*ROLES_INASS))
+    payload: dict = Depends(solo_roles(*ROLES_IASS))
 ):
-    ruta = RUTA_BASE_IN_ASS / str(anio) / f"IN_ASS_{anio}.xlsx"
+    from reportes.services.generar_iass import Excel_IASS_Completo
+    ruta = RUTA_BASE_IASS / str(anio) / f"IASS_{anio}.xlsx"
     if not ruta.exists():
-        raise HTTPException(status_code=404, detail="No existe archivo guardado para ese año")
-    with open(ruta, "rb") as f:
-        contenido = f.read()
-    return ApiResponse(success=True, message=f"IN_ASS_{anio}.xlsx", data={
+        stream    = Excel_IASS_Completo(anio, "0", {})
+        contenido = stream.read()
+    else:
+        with open(ruta, "rb") as f:
+            contenido = f.read()
+    return ApiResponse(success=True, message=f"IASS_{anio}.xlsx", data={
         "archivo_b64":    base64.b64encode(contenido).decode("utf-8"),
-        "nombre_archivo": f"IN_ASS_{anio}.xlsx"
+        "nombre_archivo": f"IASS_{anio}.xlsx"
     })
 
 
 
 
-@router.get("/InAss/datos-grafica")
-async def inass_datos_grafica(
+@router.get("/IASS/datos-grafica")
+async def IASS_datos_grafica(
     anio:    str = Query(...),
-    payload: dict = Depends(solo_roles(*ROLES_INASS_GRAF))
+    payload: dict = Depends(solo_roles(*ROLES_IASS_GRAF))
 ):
-    ruta = RUTA_BASE_IN_ASS / str(anio) / f"IN_ASS_{anio}.xlsx"
-    if not ruta.exists():
-        return ApiResponse(success=True, message="Sin datos guardados", data={"unidades": [], "meses_con_datos": [], "datos": {}})
-    try:
-        wb        = openpyxl.load_workbook(ruta, data_only=True)
-        datos     = {}
-        meses_set = set()
-        N         = len(UNIDADES_IASS)
+    ruta_sesion = RUTA_BASE_IASS / str(anio)
+    datos: dict = {}
+    meses_set: set = set()
 
+    for ind_n in range(1, 7):
+        ind_key   = f"IASS 0{ind_n}"
+        ruta_json = ruta_sesion / f"IASS_0{ind_n}.json"
+        if not ruta_json.exists():
+            datos[ind_key] = {}
+            continue
         try:
-            ws01     = wb["IN_ASS 01"]
-            ind_data = {}
-            for m in range(1, 13):
-                mes_str = str(m).zfill(2)
-                if m <= 6:
-                    fila_ini = 7
-                    col_base = 1 + (m - 1) * 4
-                else:
-                    fila_ini = N + 11
-                    col_base = 1 + (m - 7) * 4
-                col_num  = col_base + 2
-                col_den  = col_base + 3
-                col_tasa = col_base + 4
-                mes_vals = {}
-                for i, unidad in enumerate(UNIDADES_IASS):
-                    if unidad == "DELEGACION":
-                        continue
-                    row = fila_ini + i
-                    n_v = ws01.cell(row=row, column=col_num).value
-                    d_v = ws01.cell(row=row, column=col_den).value
-                    t_v = ws01.cell(row=row, column=col_tasa).value
-                    if isinstance(n_v, (int, float)) or isinstance(t_v, (int, float)):
-                        mes_vals[unidad] = {
-                            "mes":         mes_str,
-                            "tasa":        t_v if isinstance(t_v, (int, float)) else 0,
-                            "numerador":   n_v if isinstance(n_v, (int, float)) else 0,
-                            "denominador": d_v if isinstance(d_v, (int, float)) else 0,
-                            "color":       _color_tasa_01(t_v, unidad),
-                        }
-                if mes_vals:
-                    meses_set.add(mes_str)
-                    for unidad, registro in mes_vals.items():
-                        ind_data.setdefault(unidad, []).append(registro)
-            datos["IN_ASS 01"] = ind_data
+            with open(ruta_json, encoding="utf-8") as f:
+                data = json.load(f)
         except Exception as e:
-            print(f"[IN_ASS datos-grafica] IN_ASS 01: {e}")
+            print(f"[IASS datos-grafica] {ind_key}: {e}")
+            datos[ind_key] = {}
+            continue
 
-        for num in ("02", "03", "04", "05", "06"):
-            key = f"IN_ASS {num}"
-            try:
-                ws       = wb[key]
-                ind_data = {}
-                for m in range(1, 13):
-                    col_num  = 2 + (m - 1) * 3
-                    col_den  = 3 + (m - 1) * 3
-                    col_tasa = 4 + (m - 1) * 3
-                    mes_str  = str(m).zfill(2)
-                    mes_vals = {}
-                    for i, unidad in enumerate(UNIDADES_UCI):
-                        row = 5 + i
-                        n_v = ws.cell(row=row, column=col_num).value
-                        d_v = ws.cell(row=row, column=col_den).value
-                        t_v = ws.cell(row=row, column=col_tasa).value
-                        if isinstance(n_v, (int, float)) or isinstance(t_v, (int, float)):
-                            mes_vals[unidad] = {
-                                "mes":         mes_str,
-                                "tasa":        t_v if isinstance(t_v, (int, float)) else 0,
-                                "numerador":   n_v if isinstance(n_v, (int, float)) else 0,
-                                "denominador": d_v if isinstance(d_v, (int, float)) else 0,
-                                "color":       _color_tasa_uci(t_v, key),
-                            }
-                    if mes_vals:
-                        meses_set.add(mes_str)
-                        for unidad, registro in mes_vals.items():
-                            ind_data.setdefault(unidad, []).append(registro)
-                datos[key] = ind_data
-            except Exception as e:
-                print(f"[IN_ASS datos-grafica] {key}: {e}")
+        ind_data: dict = {}
+        for mes_nombre, mes_data in data.get("MESES", {}).items():
+            mes_str = _NOMBRE_A_NUM_IASS.get(mes_nombre.upper())
+            if not mes_str:
+                continue
+            for unidad, vals in mes_data.get("DATOS", {}).items():
+                n_v   = vals.get("NUMERADOR")
+                d_v   = vals.get("DENOMINADOR")
+                t_v   = vals.get("TASA")
+                color = (vals.get("COLOR") or "Rojo").capitalize()
+                if n_v is not None or t_v is not None:
+                    meses_set.add(mes_str)
+                    ind_data.setdefault(unidad, []).append({
+                        "mes":         mes_str,
+                        "tasa":        t_v if t_v is not None else 0,
+                        "numerador":   n_v if n_v is not None else 0,
+                        "denominador": d_v if d_v is not None else 0,
+                        "color":       color,
+                    })
+        datos[ind_key] = ind_data
 
-        wb.close()
-        return ApiResponse(success=True, message="Datos de gráfica IN_ASS obtenidos", data={
-            "unidades":        list(UNIDADES_UCI),
-            "meses_con_datos": sorted(meses_set),
-            "datos":           datos
-        })
-    except Exception as e:
-        print(f"[IN_ASS datos-grafica] {e}")
-        return ApiResponse(success=False, message=str(e), data={"unidades": [], "meses_con_datos": [], "datos": {}})
+    return ApiResponse(success=True, message="Datos de gráfica IASS obtenidos", data={
+        "unidades":        list(UNIDADES_UCI),
+        "meses_con_datos": sorted(meses_set),
+        "datos":           datos,
+    })
 
 
 
 
-
-@router.post("/InAss/Generar")
-async def RecibirDatosInAss(
+@router.post("/IASS/Generar")
+async def RecibirDatosIASS(
     anio:                       str                  = Form(...),
     mes:                        str                  = Form(...),
     numerador:                  List[UploadFile]     = File(default=[]),
     denominador:                Optional[str]        = Form(None),
-    excel_denominador_inass_01: Optional[UploadFile] = File(None),
-    payload:                    dict                 = Depends(solo_roles(*ROLES_INASS))
+    excel_denominador_IASS_01: Optional[UploadFile] = File(None),
+    payload:                    dict                 = Depends(solo_roles(*ROLES_IASS))
 ):
     try:
         numerador_bytes            = {f.filename: await f.read() for f in numerador}
-        excel_denominador_01_bytes = await excel_denominador_inass_01.read() if excel_denominador_inass_01 else None
+        excel_denominador_01_bytes = await excel_denominador_IASS_01.read() if excel_denominador_IASS_01 else None
         denominador_dict           = json.loads(denominador) if denominador else {}
 
-        resultado = ProcesarInAss(
+        resultado = ProcesarIASS(
             anio                       = anio,
             mes                        = mes,
             numerador                  = numerador_bytes,
             denominador                = denominador_dict,
-            excel_denominador_inass_01 = excel_denominador_01_bytes
+            excel_denominador_IASS_01 = excel_denominador_01_bytes
         )
         return ApiResponse(success=True, message=resultado["mensaje"], data={
             "archivo_b64":    resultado["archivo_b64"],
@@ -403,7 +359,7 @@ async def RecibirDatosInAss(
         raise HTTPException(status_code=400, detail=detail)
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error al recibir datos IN_ASS: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al recibir datos IASS: {str(e)}")
 
 
 
@@ -488,6 +444,7 @@ async def generar_categoria(request: Request, payload: dict = Depends(solo_roles
 
     output = io.BytesIO()
     wb     = xlsxwriter.Workbook(output)
+    wb.set_properties({'author': 'Web CIAE'})
     fmt    = obtener_estilos_excel(wb)
 
     completados   = []

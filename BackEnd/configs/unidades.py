@@ -2,8 +2,8 @@
 Módulo  : unidades.py
 Carpeta : configs/
 Qué hace: Constantes institucionales — claves y nombres de unidades médicas IMSS Guanajuato.
-          Incluye constantes para FTP (UMF/UMFH/HGSMF) e IN_ASS (hospitales de segundo nivel).
-Usado en: indicadores_FTP, indicadores_IN_ASS
+          Incluye constantes para FTP (UMF/UMFH/HGSMF) e IASS (hospitales de segundo nivel).
+Usado en: indicadores_FTP, indicadores_IASS
 """
 
 UNIDADES_PREVIOS =  [
@@ -224,9 +224,9 @@ MESES = [
 ]
 
 
-# ─── Unidades IN_ASS ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# ─── Unidades IASS ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-ORDEN_IN_ASS01 = [
+ORDEN_IASS01 = [
     "HGS 54 SILAO",
     "HGZMF 21 LEON SUR",
     "HGSMF 7 SAN FCO. DEL R.",
@@ -240,7 +240,7 @@ ORDEN_IN_ASS01 = [
     "HGR 58 LEÓN",
 ]
 
-UNIDADES_HGS_IN_ASS01 = [
+UNIDADES_HGS_IASS01 = [
     "HGSMF 13 ACAMBARO",
     "HGS 54 SILAO",
     "HGSMF 7 SAN FCO. DEL R.",
@@ -249,7 +249,7 @@ UNIDADES_HGS_IN_ASS01 = [
     "HGSMF 20 SAN LUIS DE",
 ]
 
-ORDEN_DEMAS_IN_ASS = [
+ORDEN_DEMAS_IASS = [
     "HGZMF 2 IRAPUATO",
     "HGZMF 3 SALAMANCA",
     "HGZ 4 CELAYA",

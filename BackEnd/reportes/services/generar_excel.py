@@ -41,6 +41,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
     output = io.BytesIO()
     try:
         workbook  = xlsxwriter.Workbook(output)
+        workbook.set_properties({'author': 'Web CIAE'})
         worksheet = workbook.add_worksheet(indicador or "Base SIAIS")
         fmt       = obtener_estilos_excel(workbook)
 

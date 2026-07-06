@@ -52,7 +52,7 @@ const Login = () => {
       if (data.success) {
         login({ user: data.data.usuario, token: data.data.token });
         const destinos = {
-          trabajador_IAAS: '/CIAE/IndicadoresMedicos/INASS',
+          trabajador_IAAS: '/CIAE/IndicadoresMedicos/IASS',
           ftp:             '/CIAE/IndicadoresMedicos/FTP',
         };
         const payload = JSON.parse(atob(data.data.token.split('.')[1]));

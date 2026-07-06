@@ -120,8 +120,8 @@ const FTPPage = () => {
             </div>
           </div>
 
-          {/* IN_ASS */}
-          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/INASS')}>
+          {/* IASS */}
+          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS')}>
             <div className="hc-header hc-header--gold">
               <div className="hc-icon-box hc-icon-box--gold">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

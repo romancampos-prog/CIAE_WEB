@@ -117,50 +117,50 @@ export interface RecalcularPoblacionResponse {
   errores: string[];
 }
 
-// ─── Indicadores IN_ASS ──────────────────────────────────────────────────────
+// ─── Indicadores IASS ──────────────────────────────────────────────────────
 
-export interface IndicadorInAss {
+export interface IndicadorIASS {
   id: string;
   subT2: string;
 }
 
-export interface SemaforoInAssRango {
+export interface SemaforoIASSRango {
   Mayor: number;
   Menor: number;
 }
 
-export interface SemaforoInAssUmbrales {
-  Esperado: SemaforoInAssRango;
-  Medio: SemaforoInAssRango;
+export interface SemaforoIASSUmbrales {
+  Esperado: SemaforoIASSRango;
+  Medio: SemaforoIASSRango;
   Tasa?: number;
 }
 
-export interface SemaforoInAss01 {
-  HGS: SemaforoInAssUmbrales;
-  Otros: SemaforoInAssUmbrales;
+export interface SemaforoIASS01 {
+  HGS: SemaforoIASSUmbrales;
+  Otros: SemaforoIASSUmbrales;
   Tasa?: number;
 }
 
-export interface InAssInfo {
+export interface IASSInfo {
   titulo: string;
   descripcionNumerador: string;
   descripcionDenominador: string;
-  semaforo: SemaforoInAss01 | SemaforoInAssUmbrales;
+  semaforo: SemaforoIASS01 | SemaforoIASSUmbrales;
   unidades_hgs?: string[];
 }
 
-export interface DatosGraficaInAss {
+export interface DatosGraficaIASS {
   unidades: string[];
   meses_con_datos: string[];
   datos: Record<string, Record<string, DatoMes[]>>;
 }
 
-export interface DescargarInAssResponse {
+export interface DescargarIASSResponse {
   archivo_b64: string;
   nombre_archivo: string;
 }
 
-export interface GenerarInAssResponse {
+export interface GenerarIASSResponse {
   status: 'success' | 'error';
   archivo_b64: string;
   nombre_archivo: string;

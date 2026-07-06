@@ -26,8 +26,8 @@ Data/EPIDEMEOLOGIA/bases/
 Data/EPIDEMEOLOGIA/fecha_ultimo_repo/
 Data/EPIDEMEOLOGIA/resultados/
 Data/IASS/Historial_xlsx/
-Data/IASS/Data_IN_ASS/**/*.xlsx
-Data/IASS/Data_IN_ASS/**/*.xls
+Data/IASS/Data_IASS/**/*.xlsx
+Data/IASS/Data_IASS/**/*.xls
 
 # ── OS ───────────────────────────────────────────────
 .DS_Store

@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       '@auth':     path.resolve(__dirname, './src/auth'),
       '@ftp':      path.resolve(__dirname, './src/indicadores_FTP'),
-      '@inass':    path.resolve(__dirname, './src/indicadores_IN_ASS'),
+      '@iass':    path.resolve(__dirname, './src/indicadores_IASS'),
       '@epi':      path.resolve(__dirname, './src/epidemiologia'),
       '@reportes': path.resolve(__dirname, './src/reportes'),
       '@shared':   path.resolve(__dirname, './src/shared'),

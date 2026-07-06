@@ -14,7 +14,7 @@ from auth.controllers.auth_controller import router as auth_router
 from indicadores_FTP.controllers.FTP_controller          import router as ftp_router
 from indicadores_FTP.controllers.poblacionFTP            import router as poblacion_router
 
-from indicadores_IN_ASS.controllers.in_ass_controller    import router as in_ass_router
+from indicadores_IASS.controllers.iass_controller    import router as IASS_router
 
 from epidemeologia.controllers.archivos_controller       import router as epi_archivos_router
 from epidemeologia.controllers.pipeline_controller       import router as epi_pipeline_router
@@ -39,7 +39,7 @@ app.add_middleware(
 app.include_router(auth_router,          prefix="/auth")
 app.include_router(ftp_router,           prefix="/ftp")
 app.include_router(poblacion_router,     prefix="/ftp")
-app.include_router(in_ass_router,        prefix="/in-ass")
+app.include_router(IASS_router,        prefix="/iass")
 app.include_router(epi_archivos_router,  prefix="/epidemiologia")
 app.include_router(epi_pipeline_router,  prefix="/epidemiologia")
 app.include_router(epi_reportes_router,  prefix="/epidemiologia")

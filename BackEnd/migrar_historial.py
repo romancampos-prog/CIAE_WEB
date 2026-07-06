@@ -24,8 +24,8 @@ MESES_LISTA = [
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ]
 
-# Indicadores que pertenecen a otro sistema (IN_ASS, Px_Referidos, etc.)
-EXCLUIR_CATEGORIAS = {"IN_ASS", "Px_Referidos"}
+# Indicadores que pertenecen a otro sistema (IASS, Px_Referidos, etc.)
+EXCLUIR_CATEGORIAS = {"IASS", "Px_Referidos"}
 
 
 def cargar_semaforo(indicador: str) -> dict:

@@ -15,10 +15,10 @@ import HubIndicadoresMedicos from '@ftp/pages/FTPPage';
 import FTPMenu from '@ftp/pages/FTPLanding';
 import FTPGenerar from '@ftp/pages/IndicadoresPage';
 import FTPGraficas from '@ftp/pages/FTPGraficasPage';
-// Indicadores Médicos — sección IN_ASS
-import INASSMenu from '@inass/pages/INASSLanding';
-import INASSReporte from '@inass/pages/INASSPage';
-import INASSDatos from '@inass/pages/INASSGraficasPage';
+// Indicadores Médicos — sección IASS
+import IASSMenu from '@iass/pages/IASSLanding';
+import IASSReporte from '@iass/pages/IASSPage';
+import IASSDatos from '@iass/pages/IASSGraficasPage';
 // Epidemiología
 import Epidemiologia from '@epi/pages/EpidemiologiaApp';
 
@@ -102,20 +102,20 @@ export default function AppRouter() {
           
               } />
 
-              {/* Indicadores Médicos — IN_ASS (admin, visor, trabajador_IAAS) */}
-              <Route path="CIAE/IndicadoresMedicos/INASS" element={
+              {/* Indicadores Médicos — IASS (admin, visor, trabajador_IAAS) */}
+              <Route path="CIAE/IndicadoresMedicos/IASS" element={
                
-                  <INASSMenu />
+                  <IASSMenu />
            
               } />
-              <Route path="CIAE/IndicadoresMedicos/INASS/Reporte" element={
+              <Route path="CIAE/IndicadoresMedicos/IASS/Reporte" element={
                
-                  <INASSReporte />
+                  <IASSReporte />
               
               } />
-              <Route path="CIAE/IndicadoresMedicos/INASS/Datos" element={
+              <Route path="CIAE/IndicadoresMedicos/IASS/Datos" element={
                
-                  <INASSDatos />
+                  <IASSDatos />
              
               } />
 

@@ -16,7 +16,7 @@ MESES_NOMBRES = [
     "JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"
 ]
 
-EXCLUIR = {"IN_ASS", "Px_Referidos"}
+EXCLUIR = {"IASS", "Px_Referidos"}
 
 def leer_excel(ruta_excel):
     """Lee el Excel y devuelve {mes_nombre: {unidad: {num, den, pct}}}"""

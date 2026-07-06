@@ -36,10 +36,10 @@ RUTA_POBLACION        = DATA_DIR / "FTP" / "poblacion" / "POBLACION.json"
 RUTA_MAPEO_POBLACION  = DATA_DIR / "FTP" / "Mapeo_json" / "POBLACION.json"
 
 
-# ─── Rutas IN_ASS ─────────────────────────────────────────
+# ─── Rutas IASS ─────────────────────────────────────────
 RUTA_IASS        = DATA_DIR / "IASS"
-RUTA_IN_ASS_JSON = DATA_DIR / "IASS" / "Mapeo_json" / "IN_ASS.json"
-RUTA_DATA_IN_ASS = DATA_DIR / "IASS" / "Data_IN_ASS"
+RUTA_IASS_JSON = DATA_DIR / "IASS" / "Mapeo_json" / "IASS.json"
+RUTA_DATA_IASS = DATA_DIR / "IASS" / "Data_IASS"
 
 
 # ─── Rutas Epidemiología ──────────────────────────────────

@@ -7,7 +7,7 @@ export function useRol() {
   return {
     esAdmin:         rol === 'admin',
     puedeGenFTP:     rol === 'admin' || rol === 'trabajador_ftp',
-    puedeGenINASS:   rol === 'admin' || rol === 'trabajador_IAAS',
+    puedeGenIASS:   rol === 'admin' || rol === 'trabajador_IAAS',
     puedeVerEpi:     rol === 'admin',
   };
 }

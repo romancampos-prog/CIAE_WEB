@@ -1,0 +1,420 @@
+{
+  "INDICADOR": "IASS 05",
+  "ANIO": "2026",
+  "MESES": {
+    "ENERO": {
+      "GENERADO": "",
+      "UNIDADES_PENDIENTES": [],
+      "DATOS": {
+        "HGZMF 2 IRAPUATO": {
+          "NUMERADOR": 11.0,
+          "DENOMINADOR": 641.0,
+          "TASA": 17.1607,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 3 SALAMANCA": {
+          "NUMERADOR": 2.0,
+          "DENOMINADOR": 214.0,
+          "TASA": 9.3458,
+          "COLOR": "VERDE"
+        },
+        "HGZ 4 CELAYA": {
+          "NUMERADOR": 3.0,
+          "DENOMINADOR": 1244.0,
+          "TASA": 2.4116,
+          "COLOR": "AMARILLO"
+        },
+        "HGSZ 10 GUANAJUATO": {
+          "NUMERADOR": 1.0,
+          "DENOMINADOR": 78.0,
+          "TASA": 12.8205,
+          "COLOR": "VERDE"
+        },
+        "HGSMF 13 ACAMBARO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 0.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 21 LEON SUR": {
+          "NUMERADOR": 1.0,
+          "DENOMINADOR": 2618.0,
+          "TASA": 0.382,
+          "COLOR": "ROJO"
+        },
+        "HGS 54 SILAO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 129.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGR 58 LEÓN": {
+          "NUMERADOR": 6.0,
+          "DENOMINADOR": 1163.0,
+          "TASA": 5.1591,
+          "COLOR": "VERDE"
+        },
+        "HGSMF 7 SAN FCO. DEL R.": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 15 MOROLEON": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 20 SAN LUIS DE": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "DELEGACION": {
+          "NUMERADOR": 24.0,
+          "DENOMINADOR": 6087.0,
+          "TASA": 3.9428,
+          "COLOR": "AMARILLO"
+        }
+      }
+    },
+    "FEBRERO": {
+      "GENERADO": "",
+      "UNIDADES_PENDIENTES": [],
+      "DATOS": {
+        "HGZMF 2 IRAPUATO": {
+          "NUMERADOR": 7.0,
+          "DENOMINADOR": 518.0,
+          "TASA": 13.5135,
+          "COLOR": "VERDE"
+        },
+        "HGZMF 3 SALAMANCA": {
+          "NUMERADOR": 2.0,
+          "DENOMINADOR": 283.0,
+          "TASA": 7.0671,
+          "COLOR": "VERDE"
+        },
+        "HGZ 4 CELAYA": {
+          "NUMERADOR": 1.0,
+          "DENOMINADOR": 2758.0,
+          "TASA": 0.3626,
+          "COLOR": "ROJO"
+        },
+        "HGSZ 10 GUANAJUATO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 74.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 13 ACAMBARO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 0.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 21 LEON SUR": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 2553.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGS 54 SILAO": {
+          "NUMERADOR": 2.0,
+          "DENOMINADOR": 104.0,
+          "TASA": 19.2308,
+          "COLOR": "ROJO"
+        },
+        "HGR 58 LEÓN": {
+          "NUMERADOR": 12.0,
+          "DENOMINADOR": 1198.0,
+          "TASA": 10.0167,
+          "COLOR": "VERDE"
+        },
+        "HGSMF 7 SAN FCO. DEL R.": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 15 MOROLEON": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 20 SAN LUIS DE": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "DELEGACION": {
+          "NUMERADOR": 24.0,
+          "DENOMINADOR": 7488.0,
+          "TASA": 3.2051,
+          "COLOR": "AMARILLO"
+        }
+      }
+    },
+    "MARZO": {
+      "GENERADO": "",
+      "UNIDADES_PENDIENTES": [],
+      "DATOS": {
+        "HGZMF 2 IRAPUATO": {
+          "NUMERADOR": 4.0,
+          "DENOMINADOR": 453.0,
+          "TASA": 8.83,
+          "COLOR": "VERDE"
+        },
+        "HGZMF 3 SALAMANCA": {
+          "NUMERADOR": 3.0,
+          "DENOMINADOR": 183.0,
+          "TASA": 16.3934,
+          "COLOR": "ROJO"
+        },
+        "HGZ 4 CELAYA": {
+          "NUMERADOR": 3.0,
+          "DENOMINADOR": 1248.0,
+          "TASA": 2.4038,
+          "COLOR": "AMARILLO"
+        },
+        "HGSZ 10 GUANAJUATO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 111.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 13 ACAMBARO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 0.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 21 LEON SUR": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 1473.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGS 54 SILAO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 80.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGR 58 LEÓN": {
+          "NUMERADOR": 7.0,
+          "DENOMINADOR": 1200.0,
+          "TASA": 5.8333,
+          "COLOR": "VERDE"
+        },
+        "HGSMF 7 SAN FCO. DEL R.": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 15 MOROLEON": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 20 SAN LUIS DE": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "DELEGACION": {
+          "NUMERADOR": 17.0,
+          "DENOMINADOR": 4748.0,
+          "TASA": 3.5805,
+          "COLOR": "AMARILLO"
+        }
+      }
+    },
+    "ABRIL": {
+      "GENERADO": "",
+      "UNIDADES_PENDIENTES": [],
+      "DATOS": {
+        "HGZMF 2 IRAPUATO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 618.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 3 SALAMANCA": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 232.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZ 4 CELAYA": {
+          "NUMERADOR": 3.0,
+          "DENOMINADOR": 2238.0,
+          "TASA": 1.34,
+          "COLOR": "AMARILLO"
+        },
+        "HGSZ 10 GUANAJUATO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 80.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 13 ACAMBARO": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 0.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 21 LEON SUR": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": 1457.0,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGS 54 SILAO": {
+          "NUMERADOR": 2.0,
+          "DENOMINADOR": 150.0,
+          "TASA": 13.33,
+          "COLOR": "VERDE"
+        },
+        "HGR 58 LEÓN": {
+          "NUMERADOR": 5.0,
+          "DENOMINADOR": 1220.0,
+          "TASA": 4.1,
+          "COLOR": "AMARILLO"
+        },
+        "HGSMF 7 SAN FCO. DEL R.": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 15 MOROLEON": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGSMF 20 SAN LUIS DE": {
+          "NUMERADOR": 0.0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "DELEGACION": {
+          "NUMERADOR": 10.0,
+          "DENOMINADOR": 5995.0,
+          "TASA": 1.6681,
+          "COLOR": "AMARILLO"
+        }
+      }
+    },
+    "MAYO": {
+      "GENERADO": "2026-07-06T11:55:17",
+      "UNIDADES_PENDIENTES": [
+        "HGSMF 13 ACAMBARO",
+        "HGSMF 7 SAN FCO. DEL R.",
+        "HGSMF 15 MOROLEON",
+        "HGSMF 20 SAN LUIS DE",
+        "HGR 58 LEÓN",
+        "HGZMF 3 SALAMANCA"
+      ],
+      "INDICADORES_PENDIENTES": {
+        "HGSMF 13 ACAMBARO": [
+          "IASS 01",
+          "IASS 02",
+          "IASS 03",
+          "IASS 04",
+          "IASS 05",
+          "IASS 06"
+        ],
+        "HGSMF 7 SAN FCO. DEL R.": [
+          "IASS 01",
+          "IASS 02",
+          "IASS 03",
+          "IASS 04",
+          "IASS 05",
+          "IASS 06"
+        ],
+        "HGSMF 15 MOROLEON": [
+          "IASS 01",
+          "IASS 02",
+          "IASS 03",
+          "IASS 04",
+          "IASS 05",
+          "IASS 06"
+        ],
+        "HGSMF 20 SAN LUIS DE": [
+          "IASS 01",
+          "IASS 02",
+          "IASS 03",
+          "IASS 04",
+          "IASS 05",
+          "IASS 06"
+        ],
+        "HGR 58 LEÓN": [
+          "IASS 02",
+          "IASS 03",
+          "IASS 04",
+          "IASS 05",
+          "IASS 06"
+        ],
+        "HGZMF 3 SALAMANCA": [
+          "IASS 02",
+          "IASS 03",
+          "IASS 04",
+          "IASS 05"
+        ]
+      },
+      "DATOS": {
+        "HGZMF 21 LEON SUR": {
+          "NUMERADOR": 2,
+          "DENOMINADOR": 1360,
+          "TASA": 1.47,
+          "COLOR": "AMARILLO"
+        },
+        "HGS 54 SILAO": {
+          "NUMERADOR": 0,
+          "DENOMINADOR": 102,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGSZ 10 GUANAJUATO": {
+          "NUMERADOR": 0,
+          "DENOMINADOR": 90,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZ 4 CELAYA": {
+          "NUMERADOR": 5,
+          "DENOMINADOR": 935,
+          "TASA": 5.35,
+          "COLOR": "VERDE"
+        },
+        "HGR 58 LEÓN": {
+          "NUMERADOR": 4,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 2 IRAPUATO": {
+          "NUMERADOR": 5,
+          "DENOMINADOR": 394,
+          "TASA": 12.69,
+          "COLOR": "VERDE"
+        },
+        "HGZMF 3 SALAMANCA": {
+          "NUMERADOR": 3,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        }
+      }
+    }
+  }
+}
