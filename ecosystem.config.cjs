@@ -21,7 +21,7 @@ module.exports = {
       ].join(' '),
       cwd: path.join(__dirname, 'BackEnd'),
       interpreter: 'none',
-      env: { PYTHONUNBUFFERED: '1' },
+      env: { PYTHONUNBUFFERED: '1', PYTHONIOENCODING: 'utf-8' },
     },
   ],
 };

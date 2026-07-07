@@ -16,8 +16,8 @@ ORIGINS_DESARROLLO = [
 ]
 
 ORIGINS_PRODUCCION = [
-    "https://OCC00486WSIAIS5:8005",
-    "https://OCC00486WSIAIS5",
+    "https://occ00486wsciae:8005",
+    "https://occ00486wsciae",
     "https://localhost:8005",
     "https://localhost",
 ]
