@@ -5,10 +5,14 @@ import { descargarB64 } from '../../shared/utils/download';
 import { MESES_CORTOS, MESES_LARGOS_ARR } from '../../shared/constants/meses';
 import { CAT_COLOR } from '../constants/colores';
 
-export function useFTPGrafica(hoveredMes) {
+export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
+  const controlled = extIndSel !== undefined;
   const [anio]                          = useState('2026');
   const [listaIndicadores, setLista]    = useState({});
-  const [indSel, setIndSel]             = useState('');
+  const [localIndSel, setLocalIndSel]   = useState('');
+
+  const indSel    = controlled ? extIndSel    : localIndSel;
+  const setIndSel = controlled ? (onExtChange ?? (() => {})) : setLocalIndSel;
   const [indInfo, setIndInfo]           = useState(null);
   const [datos, setDatos]               = useState(null);
   const [unidadSel, setUnidadSel]       = useState('');
@@ -21,8 +25,10 @@ export function useFTPGrafica(hoveredMes) {
     getAllIndicadores().then(res => {
       const lista = res?.data ?? {};
       setLista(lista);
-      const primero = Object.values(lista)[0]?.indicadores?.[0];
-      if (primero) setIndSel(primero);
+      if (!controlled) {
+        const primero = Object.values(lista)[0]?.indicadores?.[0];
+        if (primero) setLocalIndSel(primero);
+      }
     }).catch(() => {});
   }, []);
 
@@ -163,6 +169,7 @@ export function useFTPGrafica(hoveredMes) {
     datos, unidadSel, setUnidadSel,
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel,
+    listaIndicadores,
     todosLosIndicadores, chartData, maxTasa,
     chartDataMes, maxTasaMes, unidadesStatus,
     rangosSem, esSemPorMes, indColor, categoria,

@@ -29,6 +29,15 @@ Data/IASS/Historial_xlsx/
 Data/IASS/Data_IASS/**/*.xlsx
 Data/IASS/Data_IASS/**/*.xls
 
+# ── Claude Code (sesiones locales, no se suben) ───────
+.claude/**
+!.claude/projects/*/memory/
+!.claude/projects/*/memory/**
+!.claude/projects/*/memory/MEMORY.md
+
+# ── Gemini CLI (archivos internos del agente) ─────────
+.gemini/
+
 # ── OS ───────────────────────────────────────────────
 .DS_Store
 Thumbs.db

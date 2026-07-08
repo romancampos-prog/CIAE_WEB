@@ -1,8 +1,9 @@
 import { HGS_COLOR } from '../../constants/colores';
 
 export default function TickMesUnidad({ x, y, payload, hgsSet, indSel }) {
-  const isHGS = indSel === 'IASS 01' && hgsSet.has(payload.value);
-  const label = payload.value.length > 15 ? payload.value.slice(0, 14) + '…' : payload.value;
+  const rawLabel = payload.value === 'TOTAL' ? 'TOTAL OOAD' : payload.value;
+  const isHGS = indSel === 'IASS 01' && hgsSet?.has(payload.value);
+  const label = rawLabel.length > 15 ? rawLabel.slice(0, 14) + '…' : rawLabel;
   return (
     <g transform={`translate(${x},${y})`}>
       <text

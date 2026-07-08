@@ -11,17 +11,9 @@ from configs.cors import ORIGINS, ORIGINS_REGEX
 
 from auth.controllers.auth_controller import router as auth_router
 
-from indicadores_FTP.controllers.FTP_controller          import router as ftp_router
-from indicadores_FTP.controllers.poblacionFTP            import router as poblacion_router
-
-from indicadores_IASS.controllers.iass_controller    import router as IASS_router
-
-from epidemeologia.controllers.archivos_controller       import router as epi_archivos_router
-from epidemeologia.controllers.pipeline_controller       import router as epi_pipeline_router
-from epidemeologia.controllers.reportes_controller       import router as epi_reportes_router
-
-from reportes.controllers.edicion_controller             import router as edicion_router
-from reportes.controllers.reportes_controller            import router as reportes_router
+import iass as iass_module
+import ftp_indicadores as ftp_module
+import epidemiologia as epi_module
 
 DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')
 
@@ -36,15 +28,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router,          prefix="/auth")
-app.include_router(ftp_router,           prefix="/ftp")
-app.include_router(poblacion_router,     prefix="/ftp")
-app.include_router(IASS_router,        prefix="/iass")
-app.include_router(epi_archivos_router,  prefix="/epidemiologia")
-app.include_router(epi_pipeline_router,  prefix="/epidemiologia")
-app.include_router(epi_reportes_router,  prefix="/epidemiologia")
-app.include_router(edicion_router,       prefix="/reportes/editar")
-app.include_router(reportes_router,      prefix="/reportes")
+app.include_router(auth_router, prefix="/auth")
+for _router, _prefix in ftp_module.ROUTERS:
+    app.include_router(_router, prefix=_prefix)
+
+for _router, _prefix in iass_module.ROUTERS:
+    app.include_router(_router, prefix=_prefix)
+    
+for _router, _prefix in epi_module.ROUTERS:
+    app.include_router(_router, prefix=_prefix)
 
 app.mount("/assets", StaticFiles(directory=os.path.join(DIST, "assets")), name="assets")
 

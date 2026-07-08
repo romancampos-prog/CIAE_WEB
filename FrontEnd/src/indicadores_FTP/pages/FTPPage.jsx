@@ -3,12 +3,14 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../assets/logo_imms.png';
 import { useAuth } from '../../auth/context/AuthContext';
+import { useRol } from '../../auth/hooks/useRol';
+import NavCard from '../../shared/components/NavCard';
 
 const getGreeting = () => {
   const h = new Date().getHours();
-  if (h >= 6  && h < 12) return { saludo: 'Buenos días',   icono: 'day' };
-  if (h >= 12 && h < 19) return { saludo: 'Buenas tardes', icono: 'afternoon' };
-  return                         { saludo: 'Buenas noches', icono: 'night' };
+  if (h >= 6  && h < 12) return { icono: 'day' };
+  if (h >= 12 && h < 19) return { icono: 'afternoon' };
+  return                         { icono: 'night' };
 };
 
 const IconDay = () => (
@@ -36,8 +38,22 @@ const FTPPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { icono } = getGreeting();
+  const { esVisitante, puedeGenFTP, puedeGenIASS } = useRol();
 
-  useEffect(() => { document.title = "Indicadores | CIAE"; }, []);
+  const puedeGenerar   = puedeGenFTP || puedeGenIASS;
+  const navDestGenerar =
+    puedeGenFTP && puedeGenIASS ? '/CIAE/IndicadoresMedicos/Generar'     :
+    puedeGenFTP                 ? '/CIAE/IndicadoresMedicos/FTP/Generar' :
+                                  '/CIAE/IndicadoresMedicos/IASS/Reporte';
+
+  useEffect(() => { document.title = 'Indicadores | CIAE'; }, []);
+
+  // Visitante va directo a gráficas
+  useEffect(() => {
+    if (esVisitante) navigate('/CIAE/IndicadoresMedicos/Graficas', { replace: true });
+  }, [esVisitante]);
+
+  if (esVisitante) return null;
 
   return (
     <div className="ftp-screen-container">
@@ -48,7 +64,6 @@ const FTPPage = () => {
         <div className="ciae-grid" />
       </div>
 
-      {/* Nav */}
       <header className="ftp-top-bar">
         <div className="ftp-nav-left">
           <img src={logo_imss} alt="IMSS" className="ftp-logo-top" />
@@ -70,7 +85,6 @@ const FTPPage = () => {
 
       <main className="ftp-main-content ftp-hub-main">
 
-        {/* Hero */}
         <div className="ftp-hero-hub">
           <div className="ftp-greeting">
             <span className="ftp-greeting-icon">
@@ -80,77 +94,43 @@ const FTPPage = () => {
             </span>
           </div>
           <h1 className="ftp-hub-title-main">Indicadores Médicos</h1>
-          <p className="ftp-hub-sub">Selecciona el tipo de indicador a trabajar</p>
+          <p className="ftp-hub-sub">¿Qué deseas hacer?</p>
         </div>
 
-        {/* Módulos */}
         <div className="home-cards ftp-hub-cards">
 
-          {/* FTP */}
-          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/FTP')}>
-            <div className="hc-header hc-header--green">
-              <div className="hc-icon-box hc-icon-box--green">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
-                </svg>
-              </div>
-              <div className="hc-header-text">
-                <p className="hc-eyebrow">Servidor FTP</p>
-                <h2 className="hc-name">FTP</h2>
-              </div>
-            </div>
-            <p className="hc-desc">
-              Descarga y genera reportes de indicadores institucionales
-              directamente desde el servidor FTP.
-            </p>
-            <div className="hc-footer">
-              <div className="hc-chips">
-                <span className="hc-chip hc-chip--green">CACU</span>
-                <span className="hc-chip hc-chip--green">CAMA</span>
-                <span className="hc-chip hc-chip--green">EH</span>
-                <span className="hc-chip hc-chip--green">DM</span>
-                <span className="hc-chip hc-chip--green">etc.</span>
-              </div>
-              <div className="hc-arrow hc-arrow--green">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </div>
-            </div>
-          </div>
+          <NavCard
+            titulo="Ver gráficas"
+            eyebrow="Consulta"
+            desc="Visualiza la tendencia mensual de todos los indicadores FTP e IASS por unidad médica."
+            chips={['FTP', 'IASS']}
+            color="green"
+            onClick={() => navigate('/CIAE/IndicadoresMedicos/Graficas')}
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </NavCard>
 
-          {/* IASS */}
-          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS')}>
-            <div className="hc-header hc-header--gold">
-              <div className="hc-icon-box hc-icon-box--gold">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2"/>
-                  <path d="M8 21h8m-4-4v4"/>
-                  <path d="M7 8h.01M11 8h6M7 12h.01M11 12h6"/>
-                </svg>
-              </div>
-              <div className="hc-header-text">
-                <p className="hc-eyebrow">Generador</p>
-                <h2 className="hc-name">IASS</h2>
-              </div>
-            </div>
-            <p className="hc-desc">
-              Genera los 6 reportes de atención a la salud por unidad médica
-              en un solo paso (IASS 01–06).
-            </p>
-            <div className="hc-footer">
-              <div className="hc-chips">
-                <span className="hc-chip hc-chip--gold">IASS 01–06</span>
-              </div>
-              <div className="hc-arrow hc-arrow--green">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </div>
-            </div>
-          </div>
+          {puedeGenerar && (
+            <NavCard
+              titulo="Generar indicadores"
+              eyebrow="Generación"
+              desc="Genera reportes Excel descargando datos del FTP o procesando archivos IASS."
+              chips={[
+                ...(puedeGenFTP  ? ['FTP']  : []),
+                ...(puedeGenIASS ? ['IASS'] : []),
+              ]}
+              color="gold"
+              onClick={() => navigate(navDestGenerar)}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </NavCard>
+          )}
 
         </div>
       </main>

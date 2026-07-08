@@ -246,6 +246,19 @@
   background: #0b5445; transform: translateX(4px);
   box-shadow: 0 6px 16px rgba(11,84,69,0.3);
 }
+/* gold arrow para cards color="gold" */
+.ftp-screen-container .hc-arrow--gold { background: #9a7026; box-shadow: 0 4px 12px rgba(154,112,38,0.35); }
+.ftp-screen-container .home-card:hover .hc-arrow--gold { background: #7a5010; transform: translateX(4px); }
+
+/* estados disabled */
+.ftp-screen-container .home-card--disabled { cursor: not-allowed; opacity: 0.6; }
+.ftp-screen-container .home-card--disabled:hover { transform: none !important; box-shadow: 0 8px 32px rgba(0,0,0,0.07) !important; }
+.ftp-screen-container .hc-arrow--disabled { background: #cbd5e1; box-shadow: none; }
+.ftp-screen-container .hc-chip--muted { color: #94a3b8; background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.25); }
+.ftp-screen-container .hc-header--gold { border-left: 5px solid #9a7026; }
+.ftp-screen-container .hc-icon-box--gold { background: linear-gradient(135deg, #7a5010, #9a7026); color: rgba(255,230,180,0.95); box-shadow: 0 6px 18px rgba(154,112,38,0.3); }
+.ftp-screen-container .hc-header--gold .hc-eyebrow { color: #9a7026; }
+.ftp-screen-container .hc-chip--gold { color: #9a7026; background: rgba(154,112,38,0.08); border: 1px solid rgba(154,112,38,0.2); }
 
 /* User chip en nav */
 .ftp-user-chip {

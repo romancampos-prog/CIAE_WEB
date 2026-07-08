@@ -54,8 +54,9 @@ export const getIASSDatosGrafica = async (anio) => {
     }
 };
 
-export const descargarIASSGuardado = async (anio) => {
-    const { data } = await api.get('/reportes/IASS/descargar', { params: { anio } });
+export const descargarIASSGuardado = async (anio, indicador = null) => {
+    const params = indicador ? { anio, indicador } : { anio };
+    const { data } = await api.get('/reportes/IASS/descargar', { params });
     return data.data ?? data;
 };
 

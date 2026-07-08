@@ -11,6 +11,9 @@ import ReporteRestricciones from '@shared/pages/restricciones/Restriciones';
 import GraficaIndicador from '@reportes/pages/pageGraficas';
 // Indicadores Médicos — hub
 import HubIndicadoresMedicos from '@ftp/pages/FTPPage';
+// Indicadores Médicos — gráficas unificadas y generar hub
+import GraficasUnificadas from '@ftp/pages/GraficasUnificadasPage';
+import GenerarHub from '@ftp/pages/GenerarHub';
 // Indicadores Médicos — sección FTP
 import FTPMenu from '@ftp/pages/FTPLanding';
 import FTPGenerar from '@ftp/pages/IndicadoresPage';
@@ -79,11 +82,13 @@ export default function AppRouter() {
               } />
 
               {/* Indicadores Médicos — hub */}
-              <Route path="CIAE/IndicadoresMedicos" element={
-              
-                  <HubIndicadoresMedicos />
-           
-              } />
+              <Route path="CIAE/IndicadoresMedicos" element={<HubIndicadoresMedicos />} />
+
+              {/* Indicadores Médicos — gráficas unificadas FTP + IASS */}
+              <Route path="CIAE/IndicadoresMedicos/Graficas" element={<GraficasUnificadas />} />
+
+              {/* Indicadores Médicos — hub de generación */}
+              <Route path="CIAE/IndicadoresMedicos/Generar" element={<GenerarHub />} />
 
               {/* Indicadores Médicos — FTP (admin, visor, ftp) */}
               <Route path="CIAE/IndicadoresMedicos/FTP" element={

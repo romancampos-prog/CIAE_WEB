@@ -5,9 +5,10 @@ export function useRol() {
   const rol = user?.rol;
 
   return {
-    esAdmin:         rol === 'admin',
-    puedeGenFTP:     rol === 'admin' || rol === 'trabajador_ftp',
-    puedeGenIASS:   rol === 'admin' || rol === 'trabajador_IAAS',
-    puedeVerEpi:     rol === 'admin',
+    esAdmin:       rol === 'admin',
+    esVisitante:   rol === 'visitante',
+    puedeGenFTP:   rol === 'admin' || rol === 'trabajador_ftp',
+    puedeGenIASS:  rol === 'admin' || rol === 'trabajador_IAAS',
+    puedeVerEpi:   rol === 'admin',
   };
 }

@@ -49,11 +49,11 @@ const IASSGraficasPage = () => {
         <div className="ia-nav-left">
           <img src={logo_imss} alt="IMSS" className="ia-logo" />
           <div className="ia-nav-sep" />
-          <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS')}>
+          <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/Graficas')}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
             </svg>
-            IASS
+            Gráficas
           </button>
         </div>
         <div className="ia-user-pill">
