@@ -145,7 +145,7 @@ export default function CargaPage() {
           }}>
             Carga de{' '}
             <span style={{
-              background: 'linear-gradient(90deg, #245c4f, #a7802d)',
+              backgroundImage: 'linear-gradient(90deg, #245c4f, #a7802d)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>bases de datos</span>

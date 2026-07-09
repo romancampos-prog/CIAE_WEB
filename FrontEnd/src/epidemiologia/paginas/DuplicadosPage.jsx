@@ -45,7 +45,7 @@ export default function DuplicadosPage() {
           }}>
             Duplicados{' '}
             <span style={{
-              background: `linear-gradient(90deg, ${COLOR}, #7c3aed)`,
+              backgroundImage: `linear-gradient(90deg, ${COLOR}, #7c3aed)`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>detectados</span>

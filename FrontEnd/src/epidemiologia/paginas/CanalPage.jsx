@@ -106,7 +106,7 @@ export default function CanalPage() {
           }}>
             Canal Endémico{' '}
             <span style={{
-              background: 'linear-gradient(90deg, #245c4f, #a7802d)',
+              backgroundImage: 'linear-gradient(90deg, #245c4f, #a7802d)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>{datos.año}</span>

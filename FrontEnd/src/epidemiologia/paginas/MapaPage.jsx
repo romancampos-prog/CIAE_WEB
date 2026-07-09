@@ -55,7 +55,7 @@ export default function MapaPage() {
           }}>
             {etiqueta}{' '}
             <span style={{
-              background: `linear-gradient(90deg, ${colorTema}, #a7802d)`,
+              backgroundImage: `linear-gradient(90deg, ${colorTema}, #a7802d)`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>{datos.año}</span>
