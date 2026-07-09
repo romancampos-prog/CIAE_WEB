@@ -8,11 +8,13 @@ export default defineConfig({
   resolve: {
     alias: {
       '@auth':     path.resolve(__dirname, './src/auth'),
-      '@ftp':      path.resolve(__dirname, './src/indicadores_FTP'),
-      '@iass':    path.resolve(__dirname, './src/indicadores_IASS'),
+      '@ftp':      path.resolve(__dirname, './src/indicadores/ftp'),
+      '@iass':     path.resolve(__dirname, './src/indicadores/iaas'),
       '@epi':      path.resolve(__dirname, './src/epidemiologia'),
-      '@reportes': path.resolve(__dirname, './src/reportes'),
-      '@shared':   path.resolve(__dirname, './src/shared'),
+      '@indReportes': path.resolve(__dirname, './src/indicadores/reportes'),
+      '@shared':    path.resolve(__dirname, './src/shared'),
+      '@indShared': path.resolve(__dirname, './src/indicadores/shared'),
+      '@paginas':   path.resolve(__dirname, './src/paginas'),
     },
   },
   server: {

@@ -1,0 +1,416 @@
+.mpob-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: mpob-fade-in 0.2s ease;
+}
+
+@keyframes mpob-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.mpob-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 40px;
+    width: 95%;
+    max-width: 540px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
+    animation: mpob-pop-in 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+@media (max-width: 600px) {
+    .mpob-card { width: calc(100% - 20px); padding: 24px 20px; }
+}
+
+@keyframes mpob-pop-in {
+    from { transform: scale(0.92) translateY(10px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.mpob-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mpob-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-imss-primario);
+    margin: 0;
+}
+
+.mpob-close {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.mpob-close:hover { background: #e2e8f0; }
+
+.mpob-drop-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: #f8fafc;
+    position: relative;
+}
+.mpob-drop-area:hover,
+.mpob-drop-area.mpob-drag-over {
+    border-color: var(--color-imss-primario);
+    background: #eef4fb;
+}
+.mpob-drop-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.mpob-drop-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.mpob-drop-label {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+}
+.mpob-drop-label span {
+    color: var(--color-imss-primario);
+    font-weight: 700;
+}
+
+.mpob-file-selected {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: #166534;
+    font-weight: 600;
+}
+
+.mpob-file-icon { font-size: 1.2rem; }
+
+.mpob-file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mpob-btn-quitar {
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0 4px;
+}
+
+.mpob-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.mpob-btn-cancel {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+}
+.mpob-btn-cancel:hover { background: #e2e8f0; }
+
+.mpob-btn-subir {
+    background: var(--color-imss-primario);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mpob-btn-subir:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mpob-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: mpob-spin 0.7s linear infinite;
+}
+@keyframes mpob-spin {
+    to { transform: rotate(360deg); }
+}
+
+.mpob-msg {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+}
+.mpob-msg.exito {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+.mpob-msg.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* ── Fase 2: recalcular ── */
+.mpob-recalc-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #f0fdf8;
+    border: 1px solid #6ee7b7;
+    border-radius: 14px;
+    padding: 18px 16px;
+}
+
+.mpob-recalc-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0b5445;
+    margin: 0 0 4px;
+}
+
+.mpob-recalc-desc {
+    font-size: 0.78rem;
+    color: #334155;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.mpob-recalc-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 0 6px;
+    text-align: center;
+}
+
+.mpob-recalc-result .mpob-recalc-title {
+    font-size: 1rem;
+}
+
+.mpob-recalc-warn {
+    font-size: 0.78rem;
+    color: #b45309;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ── Advertencias del upload ── */
+.mpob-advertencias {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mpob-adv-bloque {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 10px;
+    padding: 10px 13px;
+}
+
+.mpob-adv-titulo {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0 0 5px;
+}
+
+.mpob-adv-lista {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 80px;
+    overflow-y: auto;
+}
+
+.mpob-adv-lista li {
+    font-size: 0.72rem;
+    color: #78350f;
+}
+
+/* ── Bloque celdas vacías (errores de captura humana) ── */
+.mpob-adv-bloque--celdas {
+    background: #fff1f1;
+    border-color: #fca5a5;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.mpob-adv-titulo--celdas {
+    color: #991b1b;
+}
+
+.mpob-adv-unidad {
+    margin-top: 6px;
+}
+
+.mpob-adv-unidad-nombre {
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #7f1d1d;
+    margin: 0 0 2px;
+}
+
+.mpob-adv-lista--celdas li {
+    color: #b91c1c;
+    font-family: 'Consolas', monospace;
+}
+
+/* ── Bloque alias sugeridos ── */
+.mpob-adv-bloque--alias {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.mpob-adv-titulo--alias {
+    color: #166534;
+}
+
+.mpob-alias-tabla {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.mpob-alias-fila {
+    display: grid;
+    grid-template-columns: 1fr 20px 1fr;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    padding: 2px 0;
+}
+
+.mpob-alias-excel {
+    font-family: 'Consolas', monospace;
+    color: #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mpob-alias-arrow {
+    color: #6b7280;
+    text-align: center;
+    font-weight: 700;
+}
+
+.mpob-alias-sistema {
+    font-family: 'Consolas', monospace;
+    color: #166534;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mpob-btn-copiar-alias {
+    margin-top: 8px;
+    padding: 5px 14px;
+    background: #166534;
+    color: white;
+    border: none;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+.mpob-btn-copiar-alias:hover { background: #14532d; }
+
+.mpob-alias-hint {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    color: #4b7c5f;
+    line-height: 1.4;
+}
+.mpob-alias-hint code {
+    background: #dcfce7;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+}
+
+/* ── Aviso de fuente del archivo ── */
+.mpob-source-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: #1e3a5f;
+    line-height: 1.45;
+}
+
+.mpob-source-link {
+    color: #1d4ed8;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-all;
+}
+.mpob-source-link:hover { color: #1e40af; }

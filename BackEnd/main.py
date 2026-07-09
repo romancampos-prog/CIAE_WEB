@@ -3,6 +3,12 @@ mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
 import os
+import sys
+from pathlib import Path
+
+# iass y ftp_indicadores viven en indicadores/ — se exponen con su nombre original
+sys.path.insert(0, str(Path(__file__).parent / "indicadores"))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

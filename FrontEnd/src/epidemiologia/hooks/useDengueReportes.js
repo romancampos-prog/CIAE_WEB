@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { usePipeline } from '../context/PipelineContext'
+import { usePipeline } from '../contexto/PipelineContext'
 
 export function useDengueReporte(fetchFn, deps = []) {
   const { refetchKey = 0 } = usePipeline() || {}
