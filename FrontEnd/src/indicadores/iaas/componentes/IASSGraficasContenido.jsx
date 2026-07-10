@@ -5,7 +5,7 @@ import GraficaBarras  from '@indShared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '@indShared/componentes/graficas/PanelUnidades';
 import SemaforoUmbral from '@indShared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '@indShared/componentes/graficas/VistaToggle';
-import { MESES_CORTOS } from '@indShared/constantes/meses';
+import { MESES_CORTOS, MESES_LARGOS } from '@indShared/constantes/meses';
 
 const VISTAS_IASS = [
   { id: 'unidad',    label: 'Por unidad',  path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
@@ -13,7 +13,7 @@ const VISTAS_IASS = [
   { id: 'acumulado', label: 'Acum. por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></> },
 ];
 
-const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
+const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
 
@@ -41,24 +41,22 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
 
       {/* ── Título + ficha técnica ── */}
       <div className="ig-header">
-        <div className="ig-header-left">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <h1 className="ig-title" style={{ color: indColor, margin: 0 }}>{indSel}</h1>
-            {indInfo && (
-              <button className="ig-info-toggle" onClick={() => setInfoAbierta(v => !v)}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                {infoAbierta ? 'Ocultar detalle' : 'Ver detalle'}
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ transform: infoAbierta ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-            )}
-          </div>
+        <h1 className="ig-title" style={{ color: indColor }}>{indSel}</h1>
+        <div className="ig-header-detail-row">
+          {indInfo && (
+            <button className="ig-info-toggle" onClick={() => setInfoAbierta(v => !v)}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {infoAbierta ? 'Ocultar detalle' : 'Ver detalle'}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: infoAbierta ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+          )}
           {indInfo && infoAbierta && (
-            <div className="ig-desc-block ig-desc-block--open">
+            <div className="ig-desc-panel" style={{ '--ic': indColor }}>
               <p className="ig-desc-titulo">{indInfo.titulo}</p>
               <div className="ig-desc-meta">
                 <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.descripcionNumerador}</span>
@@ -92,64 +90,23 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
       {hayDatos && (
         <div className="ig-chart-card">
 
-          {/* Controles top */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px', flexWrap: 'wrap', marginBottom: '4px' }}>
-            <div className="ig-controls">
-              <div className="ig-control-group">
-                <label className="ig-control-label">Año</label>
-                <span className="ig-select" style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 700, color: indColor, cursor: 'default', userSelect: 'none' }}>
-                  2026
-                </span>
-              </div>
-              {vistaGrafica === 'acumulado' && (
-                <div className="ig-control-group">
-                  <label className="ig-control-label">Hasta</label>
-                  <select className="ig-select" value={mesSel} onChange={e => setMesSel(e.target.value)}>
-                    {datos?.meses_con_datos?.map(m => (
-                      <option key={m} value={m}>{MESES_CORTOS[parseInt(m) - 1]}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <button
-                className="ig-btn-dl"
-                onClick={() => handleDescargarInd(indSel)}
-                disabled={descargando}
-                title={`Descargar ${indSel} — ${anio}`}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                {descargando ? '…' : indSel}
-              </button>
-              <button
-                className="ig-btn-dl ig-btn-dl--secondary"
-                onClick={handleDescargar}
-                disabled={descargando}
-                title={`Descargar todos los IASS — ${anio}`}
-              >
-                {descargando ? '…' : `Todos IASS`}
-              </button>
-            </div>
-          </div>
-
           <div className="ig-body">
             {/* Panel izquierdo: meses en "Por mes", unidades en el resto */}
             {vistaGrafica === 'mes' ? (
-              <div className="ig-unit-list">
+              <div className="ig-unit-panel ig-unit-panel--mes">
                 <p className="ig-unit-list-title">Mes</p>
-                {datos?.meses_con_datos?.map(m => (
-                  <button
-                    key={m}
-                    className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
-                    style={mesSel === m ? { borderLeftColor: indColor } : {}}
-                    onClick={() => setMesSel(m)}
-                  >
-                    <span className="ig-unit-name">{MESES_CORTOS[parseInt(m) - 1]}</span>
-                  </button>
-                ))}
+                <div className="ig-unit-list">
+                  {datos?.meses_con_datos?.map(m => (
+                    <button
+                      key={m}
+                      className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
+                      style={mesSel === m ? { borderLeftColor: indColor } : {}}
+                      onClick={() => setMesSel(m)}
+                    >
+                      <span className="ig-unit-name">{MESES_LARGOS[m]}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : (
               <PanelUnidades
@@ -168,8 +125,60 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
             )}
 
             {/* Área de gráfica */}
-            <div className="ig-chart-area">
-              <VistaToggle vistas={VISTAS_IASS} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+            <div className="ig-chart-area" style={{ position: 'relative' }}>
+              {iconSrc && <img src={iconSrc} alt="" className="ig-chart-watermark" />}
+              <div className="ig-chart-topbar">
+                <VistaToggle vistas={VISTAS_IASS} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+                <div className="ig-controls">
+                  <div className="ig-control-group">
+                    <label className="ig-control-label">Año</label>
+                    <span className="ig-select" style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 700, color: indColor, cursor: 'default', userSelect: 'none' }}>
+                      {anio}
+                    </span>
+                  </div>
+                  {vistaGrafica === 'acumulado' && (
+                    <div className="ig-control-group">
+                      <label className="ig-control-label">Hasta</label>
+                      <select className="ig-select" value={mesSel} onChange={e => setMesSel(e.target.value)}>
+                        {datos?.meses_con_datos?.map(m => (
+                          <option key={m} value={m}>{MESES_CORTOS[parseInt(m) - 1]}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <div className="ig-control-group">
+                    <label className="ig-control-label">Descargar excel</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="ig-btn-dl"
+                        onClick={() => handleDescargarInd(indSel)}
+                        disabled={descargando}
+                        title={`Descargar ${indSel} — ${anio}`}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="7 10 12 15 17 10"/>
+                          <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        {descargando ? '…' : indSel}
+                      </button>
+                      <button
+                        className="ig-btn-dl ig-btn-dl--secondary"
+                        onClick={handleDescargar}
+                        disabled={descargando}
+                        title={`Descargar todos los IASS — ${anio}`}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="7 10 12 15 17 10"/>
+                          <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        {descargando ? '…' : 'Todos IASS'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div className="ig-chart-top">
                 <div className="ig-chart-badges">

@@ -5,13 +5,7 @@ import logo_imss from '../../../assets/logo_imms.png';
 import { useAuth } from '@auth/contexto/AuthContext';
 import { useRol } from '@auth/hooks/useRol';
 import NavCard from '@shared/componentes/NavCard';
-
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h >= 6  && h < 12) return { icono: 'day' };
-  if (h >= 12 && h < 19) return { icono: 'afternoon' };
-  return                         { icono: 'night' };
-};
+import { getGreeting } from '../utils/horario';
 
 const IconDay = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -34,6 +28,11 @@ const IconNight = () => (
   </svg>
 );
 
+/**
+ * Página de inicio del módulo Indicadores Médicos.
+ * Muestra las tarjetas de navegación a Gráficas y Generar según el rol del usuario.
+ * Los visitantes son redirigidos automáticamente a Gráficas.
+ */
 const FTPPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -100,10 +99,10 @@ const FTPPage = () => {
         <div className="home-cards ftp-hub-cards">
 
           <NavCard
-            titulo="Ver gráficas"
+            titulo="Seguimiento de Indicadores"
             eyebrow="Consulta"
-            desc="Visualiza la tendencia mensual de todos los indicadores FTP e IAAS por unidad médica."
-            chips={['FTP', 'IAAS']}
+            desc="Identifica tendencias de cumplimiento y resultados por unidad médica conforme al MMIM."
+            chips={['Tendencias', 'Cumplimiento']}
             color="green"
             onClick={() => navigate('/CIAE/IndicadoresMedicos/Graficas')}
           >
@@ -116,11 +115,8 @@ const FTPPage = () => {
             <NavCard
               titulo="Generar indicadores"
               eyebrow="Generación"
-              desc="Genera reportes Excel descargando datos del FTP o procesando archivos IAAS."
-              chips={[
-                ...(puedeGenFTP  ? ['FTP']  : []),
-                ...(puedeGenIASS ? ['IAAS'] : []),
-              ]}
+              desc="Produce los reportes de indicadores médicos para evaluación del desempeño por unidad conforme al MMIM."
+              chips={['Reportes', 'Excel']}
               color="gold"
               onClick={() => navigate(navDestGenerar)}
             >

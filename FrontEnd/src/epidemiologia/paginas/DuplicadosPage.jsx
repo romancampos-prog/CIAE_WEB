@@ -3,10 +3,16 @@ import SeccionDuplicados from '../componentes/duplicados/SeccionDuplicados'
 import SeccionPosiblesDuplicados from '../componentes/duplicados/SeccionPosiblesDuplicados'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getDuplicados, getPosiblesDuplicados } from '../api/reportes'
+import { agruparPorMetodo } from '../utils/calculos'
 
 const COLOR        = '#4f46e5'
 const COLOR_POSIBLE = '#b45309'
 
+/**
+ * Página de duplicados detectados en la base de dengue.
+ * Muestra los registros eliminados (confirmados) separados de los posibles
+ * duplicados que requieren revisión manual.
+ */
 export default function DuplicadosPage() {
   const { datos: datosConf,    cargando: cargConf,    error: errConf    } = useDengueReporte(getDuplicados)
   const { datos: datosPosible, cargando: cargPosible, error: errPosible } = useDengueReporte(getPosiblesDuplicados)
@@ -22,7 +28,7 @@ export default function DuplicadosPage() {
 
   const confirmados = Array.isArray(datosConf)    ? datosConf    : []
   const posibles    = Array.isArray(datosPosible) ? datosPosible : []
-  const metodos     = confirmados.reduce((acc, r) => { acc[r.METODO] = (acc[r.METODO] || 0) + 1; return acc }, {})
+  const metodos     = agruparPorMetodo(confirmados)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

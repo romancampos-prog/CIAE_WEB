@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 import { usePipeline } from '../contexto/PipelineContext'
 
+/**
+ * Hook genérico para cargar un reporte de dengue desde la API.
+ * Se re-ejecuta automáticamente cuando el pipeline completa un nuevo análisis
+ * (detectado a través del `refetchKey` del PipelineContext).
+ *
+ * @param {Function} fetchFn - Función que devuelve una promesa Axios con los datos del reporte
+ * @param {Array} [deps=[]] - Dependencias adicionales que provocan una nueva carga (ej. parámetros de ruta)
+ * @returns {{ datos: any, cargando: boolean, error: string|null }}
+ */
 export function useDengueReporte(fetchFn, deps = []) {
   const { refetchKey = 0 } = usePipeline() || {}
   const [datos,    setDatos]    = useState(null)

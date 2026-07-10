@@ -8,6 +8,11 @@ const MENSAJES = [
   'Casi listo…',
 ]
 
+/**
+ * Pantalla de carga con corgi animado para el módulo Epidemiología.
+ * Si no se pasa `texto`, rota mensajes genéricos cada 2.5 s.
+ * @param {{ texto?: string }} props
+ */
 export default function DengueSpinner({ texto }) {
   const [idx, setIdx] = useState(0)
 

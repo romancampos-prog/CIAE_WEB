@@ -12,6 +12,20 @@ import { useIndicadores } from '../hooks/useIndicadores';
 import InformacionIndicador from '@indReportes/componentes/InformacionIndicador/InformacionIndicador';
 import { useEffect, useState } from 'react';
 
+import iconoCama  from '../../../assets/icono_cama.png';
+import iconoCacu  from '../../../assets/icono_cacu.png';
+import iconoEh    from '../../../assets/icono_eh.png';
+import iconoDm    from '../../../assets/icono_dm.png';
+import iconoMt    from '../../../assets/icono_mt.png';
+import iconoCupn  from '../../../assets/icono_cupn.png';
+import iconoSOb   from '../../../assets/icono_S_Ob.png';
+import iconoCe    from '../../../assets/icono_ce (2).png';
+
+const CAT_ICON = {
+  CAMA: iconoCama, CACU: iconoCacu, EH: iconoEh,  DM: iconoDm,
+  MT:   iconoMt,  CUPN: iconoCupn, S_Ob: iconoSOb, CE: iconoCe,
+};
+
 const IcoDownload = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -26,6 +40,12 @@ const IcoAll = () => (
   </svg>
 );
 
+/**
+ * Página de generación de indicadores FTP.
+ * Combina el sidebar de categorías/indicadores con el panel de configuración del reporte.
+ * Soporta generación individual (un indicador) y por lote (toda la categoría).
+ * El drawer de ficha técnica se abre sobre el contenido sin cambiar de ruta.
+ */
 const IndicadoresPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -43,7 +63,11 @@ const IndicadoresPage = () => {
     generarReporte, generarTodos, MESES_LARGOS,
   } = useIndicadores(user);
 
+  const catIcon = CAT_ICON[categoria];
+
   const [abiertas, setAbiertas] = useState(() => new Set([categoria]))
+
+  /** Abre o cierra el accordion de una categoría; cambia la categoría activa si se abre una nueva */
   const toggleAbrir = (cat) => {
     setAbiertas(prev => {
       const next = new Set(prev)
@@ -164,12 +188,14 @@ const IndicadoresPage = () => {
 
         {/* ══ PANEL DERECHO ══ */}
         <section className="ind-config-panel">
+          <div className="ind-config-layout">
           <div className="ind-config-inner">
 
             {indicadorSel ? (
               <>
                 {/* ── 1. INDICADOR ── */}
                 <div className="ind-sel-card" style={{ '--fc': catColor }}>
+                  {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
                   <p className="ind-sel-eyebrow">Indicador</p>
                   <h2 className="ind-sel-name" style={{ color: catColor }}>{indicadorSel}</h2>
                   {infoIndicador?.titulo && (
@@ -322,7 +348,7 @@ const IndicadoresPage = () => {
                 {puedeGenFTP && (
                   <button
                     className={`cfg-btn-generate ind-gen-btn ${!canGenerar ? 'cfg-btn-generate--disabled' : ''}`}
-                    style={canGenerar ? { '--gen-color': confirmandoFaltantes ? '#ea580c' : catColor } : {}}
+                    style={{ '--gen-color': confirmandoFaltantes ? '#ea580c' : catColor }}
                     disabled={!canGenerar}
                     onClick={generarReporte}
                   >
@@ -345,6 +371,7 @@ const IndicadoresPage = () => {
 
                 {/* 1. Card categoría */}
                 <div className="ind-sel-card" style={{ '--fc': catColor }}>
+                  {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
                   <p className="ind-sel-eyebrow">Categoría · generar todos</p>
                   <h2 className="ind-sel-name" style={{ color: catColor }}>{categoria}</h2>
                   <p className="ind-sel-desc">
@@ -353,7 +380,7 @@ const IndicadoresPage = () => {
                 </div>
 
                 {/* 2. Período del batch */}
-                <div className="ind-period-block" style={{ marginBottom: 20 }}>
+                <div className="ind-period-block" style={{ marginBottom: 12 }}>
                   <p className="ind-period-label">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -469,7 +496,7 @@ const IndicadoresPage = () => {
                   {puedeGenFTP && (
                     <button
                       className={`cfg-btn-generate ind-gen-btn ${!canBatch ? 'cfg-btn-generate--disabled' : ''}`}
-                      style={canBatch ? { '--gen-color': catColor } : {}}
+                      style={{ '--gen-color': catColor }}
                       disabled={!canBatch}
                       onClick={generarTodos}
                     >
@@ -490,7 +517,16 @@ const IndicadoresPage = () => {
               </>
             )}
 
-          </div>
+          </div>{/* ind-config-inner */}
+
+          {catIcon && (
+            <div className="ind-icon-side" style={{ '--ic': catColor }}>
+              <div className="ind-icon-side-inner">
+                <img src={catIcon} alt="" className="ind-icon-side-img" />
+              </div>
+            </div>
+          )}
+          </div>{/* ind-config-layout */}
         </section>
 
       </main>

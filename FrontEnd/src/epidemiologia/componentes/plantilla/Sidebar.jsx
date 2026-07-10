@@ -2,14 +2,20 @@ import { NavLink } from 'react-router-dom'
 import { usePipeline } from '../../contexto/PipelineContext'
 
 const NAV = [
-  { to: '/CIAE/Epidemiologia',                  icono: '📂', label: 'Carga de datos',   bloqueable: false },
-  { to: '/CIAE/Epidemiologia/canal',            icono: '📊', label: 'Canal endémico',   bloqueable: true  },
-  { to: '/CIAE/Epidemiologia/mapa/situacion',   icono: '🗺️', label: 'Mapa situación',   bloqueable: true  },
-  { to: '/CIAE/Epidemiologia/mapa/confirmados', icono: '🗺️', label: 'Mapa confirmados', bloqueable: true  },
-  { to: '/CIAE/Epidemiologia/alertas',          icono: '⚠️', label: 'Alertas SisCep',   bloqueable: true  },
-  { to: '/CIAE/Epidemiologia/duplicados',       icono: '⧉',  label: 'Duplicados',        bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue',                  icono: '📂', label: 'Carga de datos',   bloqueable: false },
+  { to: '/CIAE/Epidemiologia/dengue/canal',            icono: '📊', label: 'Canal endémico',   bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue/mapa/situacion',   icono: '🗺️', label: 'Mapa situación',   bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue/mapa/confirmados', icono: '🗺️', label: 'Mapa confirmados', bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue/alertas',          icono: '⚠️', label: 'Alertas SisCep',   bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue/duplicados',       icono: '⧉',  label: 'Duplicados',       bloqueable: true  },
 ]
 
+/**
+ * Sidebar de navegación del módulo Epidemiología.
+ * Soporta modo colapsado (solo iconos). Deshabilita las rutas de reporte
+ * mientras el pipeline está en ejecución para evitar lecturas de datos parciales.
+ * @param {{ collapsed: boolean, onToggle: Function }} props
+ */
 export default function DengueSidebar({ collapsed, onToggle }) {
   const { estado } = usePipeline()
   const corriendo  = !!estado?.corriendo
@@ -59,7 +65,7 @@ export default function DengueSidebar({ collapsed, onToggle }) {
             <NavLink
               key={to}
               to={to}
-              end={to === '/CIAE/Epidemiologia'}
+              end={to === '/CIAE/Epidemiologia/dengue'}
               className={({ isActive }) => `epi-nav-link${isActive ? ' active' : ''}`}
               title={collapsed ? label : ''}
             >

@@ -2,6 +2,7 @@ import SeccionAlerta from '../componentes/alertas/SeccionAlerta'
 import DengueSpinner from '../componentes/comun/Spinner'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getAlertasSiscep } from '../api/reportes'
+import { calcularKpisAlertas } from '../utils/calculos'
 
 const SECCIONES = [
   { clave: 'muestras_rechazadas',  titulo: 'Alerta 1 — Muestras rechazadas',                     descripcion: 'Muestras rechazadas por el laboratorio. Debe retomarse una nueva muestra.',                                                           tipo: 'cols_caso', color: '#691c32' },
@@ -11,6 +12,11 @@ const SECCIONES = [
   { clave: 'graves_sin_muestra',   titulo: 'Alerta 5 — Casos graves sin muestra',                 descripcion: 'Dengue con Signos de Alarma o Grave con muestra no tomada. La muestra es obligatoria en casos graves.',                              tipo: 'cols_caso', color: '#691c32', prioritaria: true },
 ]
 
+/**
+ * Página de alertas operativas SisCep.
+ * Muestra 5 tipos de alerta como acordeones (rechazadas, pendientes, sin muestra, etc.)
+ * más la tabla de casos negativos por unidad médica.
+ */
 export default function AlertasSiscepPage() {
   const { datos, cargando, error } = useDengueReporte(getAlertasSiscep)
 
@@ -23,9 +29,7 @@ export default function AlertasSiscepPage() {
     </div>
   )
 
-  const totalRegistros  = SECCIONES.reduce((s, { clave }) => s + (datos[clave]?.length || 0), 0)
-  const seccionesActivas = SECCIONES.filter(({ clave }) => (datos[clave]?.length || 0) > 0).length
-  const prioritarias    = datos.graves_sin_muestra?.length || 0
+  const { totalRegistros, seccionesActivas, prioritarias } = calcularKpisAlertas(datos, SECCIONES)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

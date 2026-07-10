@@ -15,6 +15,11 @@ const PASOS_MSGS = [
   'Casi listo…',
 ]
 
+/**
+ * Overlay de pantalla completa que bloquea la UI mientras corre el pipeline.
+ * Rota automáticamente mensajes de progreso cada 2.5 s.
+ * @param {{ paso: string|null }} props - Paso actual reportado por el backend (o null)
+ */
 function CorgiOverlay({ paso }) {
   const [idx, setIdx] = useState(0)
 
@@ -85,6 +90,11 @@ function CorgiOverlay({ paso }) {
   )
 }
 
+/**
+ * Página de carga de archivos y ejecución del pipeline de dengue.
+ * Muestra el progreso de carga (Base Operativa → Base SisCep → Ejecutar) y
+ * bloquea la UI con el overlay corgi mientras el análisis está en curso.
+ */
 export default function CargaPage() {
   const { estado, ejecutar } = usePipeline()
   const [listos, setListos] = useState({ operativa: false, siscep: false })
@@ -95,6 +105,11 @@ export default function CargaPage() {
     if (estado?.ultimo_reporte) setToastTick(t => t + 1)
   }, [estado?.ultimo_reporte])
 
+  /**
+   * Fábrica de handler de subida de archivos.
+   * @param {'operativa'|'siscep'} tipo - Tipo de archivo a subir
+   * @returns {Function} Handler async que sube el archivo y marca ese paso como listo
+   */
   const handleSubir = (tipo) => async (archivo) => {
     const fn = tipo === 'operativa' ? subirOperativa : subirSiscep
     const { data } = await fn(archivo)

@@ -6,6 +6,7 @@ import BrotesPanel from '../componentes/mapa/BrotesPanel'
 import DengueSpinner from '../componentes/comun/Spinner'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getMapa } from '../api/reportes'
+import { getTemaMapa } from '../utils/calculos'
 
 const SEMAFORO = [
   { color: '#2d8a57', label: 'Bajo' },
@@ -14,16 +15,19 @@ const SEMAFORO = [
   { color: '#c0392b', label: 'Crítico' },
 ]
 
+/**
+ * Página del mapa de dengue por municipio.
+ * Muestra la distribución geoespacial (mapa Leaflet) o la tabla de unidades médicas
+ * según la pestaña activa, más el panel de brotes si existen.
+ * El parámetro `tipo` puede ser 'situacion' (notificados) o 'confirmados'.
+ */
 export default function MapaPage() {
   const { tipo } = useParams()
   const { datos, cargando, error } = useDengueReporte(() => getMapa(tipo), [tipo])
   const [tabActiva, setTabActiva]       = useState('mapa')
   const [panelBrotes, setPanelBrotes]   = useState(false)
 
-  const etiqueta   = tipo === 'situacion' ? 'Casos Notificados' : 'Casos Confirmados'
-  const colorTema  = tipo === 'situacion' ? '#245c4f' : '#691c32'
-  const bgTema     = tipo === 'situacion' ? 'rgba(36,92,79,0.07)' : 'rgba(105,28,50,0.07)'
-  const bordeTema  = tipo === 'situacion' ? 'rgba(36,92,79,0.18)' : 'rgba(105,28,50,0.18)'
+  const { etiqueta, colorTema, bgTema, bordeTema } = getTemaMapa(tipo)
 
   if (cargando) return <DengueSpinner texto={`Cargando mapa de ${etiqueta.toLowerCase()}…`} />
 

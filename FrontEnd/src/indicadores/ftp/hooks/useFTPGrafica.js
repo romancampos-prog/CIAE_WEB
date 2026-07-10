@@ -2,9 +2,27 @@ import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getFTPDatosGrafica, getIndicador } from '../api/indicadores';
 import { getReporte, generarCategoria } from '@indReportes/api/reportes';
 import { descargarB64 } from '@indShared/utilidades/download';
-import { MESES_CORTOS, MESES_LARGOS_ARR } from '@indShared/constantes/meses';
+import { MESES_LARGOS_ARR } from '@indShared/constantes/meses';
 import { CAT_COLOR } from '../constantes/colores';
+import {
+  buildFTPChartDataUnidad,
+  buildFTPChartDataMes,
+  calcularRangosFTP,
+} from '../utils/calculos';
 
+/**
+ * Hook principal de gráficas FTP.
+ * Carga la lista de indicadores, los datos históricos del indicador seleccionado y
+ * calcula los datasets para las vistas por unidad y por mes.
+ *
+ * Puede operar en modo controlado (indicador gestionado desde el componente padre)
+ * o en modo independiente (el hook gestiona su propio `indSel`).
+ *
+ * @param {number|null} hoveredMes - Mes sobre el que el usuario tiene el cursor (para el semáforo)
+ * @param {string} [extIndSel] - Indicador seleccionado externamente (modo controlado)
+ * @param {Function} [onExtChange] - Callback al cambiar el indicador en modo controlado
+ * @returns {Object} Estado y datos listos para renderizar las gráficas
+ */
 export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const controlled = extIndSel !== undefined;
   const [anio]                          = useState('2026');
@@ -21,6 +39,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const [vistaGrafica, setVistaGrafica] = useState('unidad');
   const [mesSel, setMesSel]             = useState('');
 
+  /** Carga inicial de la lista de indicadores agrupados por categoría */
   useEffect(() => {
     getAllIndicadores().then(res => {
       const lista = res?.data ?? {};
@@ -32,6 +51,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     }).catch(() => {});
   }, []);
 
+  /** Recarga datos históricos y ficha técnica cuando cambia el indicador o el año */
   useEffect(() => {
     if (!indSel) return;
     setCargando(true);
@@ -50,6 +70,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     }).finally(() => setCargando(false));
   }, [indSel, anio]);
 
+  /** Lista plana de todos los indicadores (para el selector de la UI) */
   const todosLosIndicadores = useMemo(() => {
     const acc = [];
     Object.values(listaIndicadores).forEach(cat => {
@@ -58,54 +79,29 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     return acc;
   }, [listaIndicadores]);
 
-  const chartData = useMemo(() => {
-    if (!datos || !unidadSel || !datos.meses_con_datos?.length) return [];
-    const arr = datos.datos?.[unidadSel] ?? [];
-    return datos.meses_con_datos.map(mes => {
-      const reg      = arr.find(r => r.mes === mes);
-      const esSemana = !!reg?.semana;
-      const mesCorto = MESES_CORTOS[parseInt(mes) - 1];
-      return {
-        mes:         esSemana ? `S${reg.semana}·${mesCorto}` : mesCorto,
-        mesNum:      parseInt(mes),
-        tasa:        reg?.tasa        ?? 0,
-        numerador:   reg?.numerador   ?? 0,
-        denominador: reg?.denominador ?? 0,
-        color:       reg?.color       ?? 'Rojo',
-        esSemana,
-        semana:      reg?.semana      ?? null,
-      };
-    });
-  }, [datos, unidadSel]);
+  /** Tendencia mensual de la unidad seleccionada */
+  const chartData = useMemo(
+    () => buildFTPChartDataUnidad(datos, unidadSel),
+    [datos, unidadSel]
+  );
 
   const maxTasa = useMemo(
     () => Math.max(...chartData.map(d => d.tasa ?? 0), 1) * 1.25,
     [chartData]
   );
 
-  const chartDataMes = useMemo(() => {
-    if (!datos?.unidades || !mesSel) return [];
-    const rows = datos.unidades.map(u => {
-      const arr = datos.datos?.[u] ?? [];
-      const reg = arr.find(r => r.mes === mesSel);
-      return {
-        unidad:      u,
-        tasa:        reg?.tasa        ?? 0,
-        numerador:   reg?.numerador   ?? 0,
-        denominador: reg?.denominador ?? 0,
-        color:       reg?.color       ?? 'Rojo',
-      };
-    });
-    const sinTotal = rows.filter(r => r.unidad !== 'TOTAL');
-    const total    = rows.find(r => r.unidad === 'TOTAL');
-    return total ? [...sinTotal, total] : sinTotal;
-  }, [datos, mesSel]);
+  /** Todas las unidades en el mes seleccionado (TOTAL al final) */
+  const chartDataMes = useMemo(
+    () => buildFTPChartDataMes(datos, mesSel),
+    [datos, mesSel]
+  );
 
   const maxTasaMes = useMemo(
     () => Math.max(...chartDataMes.map(d => d.tasa ?? 0), 1) * 1.25,
     [chartDataMes]
   );
 
+  /** Color de semáforo de cada unidad en el último mes disponible */
   const unidadesStatus = useMemo(() => {
     if (!datos?.unidades) return [];
     const ultimoMes = datos.meses_con_datos?.[datos.meses_con_datos.length - 1];
@@ -124,29 +120,26 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     ? (hoveredMes ?? ultimoMesNum)
     : parseInt(mesSel || '1');
 
+  /** True cuando el indicador tiene umbrales de semáforo por mes (ej. CACU) */
   const esSemPorMes = useMemo(() => {
     const sem = indInfo?.semaforo;
     if (!sem) return false;
     return MESES_LARGOS_ARR.some(m => m in sem);
   }, [indInfo]);
 
-  const rangosSem = useMemo(() => {
-    const sem = indInfo?.semaforo;
-    if (!sem) return null;
-    const nombreMes = MESES_LARGOS_ARR[mesParaSem - 1];
-    const limites   = (nombreMes && sem[nombreMes]) ? sem[nombreMes] : sem;
-    const esp       = limites?.Esperado;
-    if (esp === undefined) return null;
-    const tieneAlto = 'Alto' in limites;
-    const critico   = tieneAlto ? limites.Alto : limites.Bajo;
-    return tieneAlto
-      ? { Verde: `≤ ${esp}`, Amarillo: `> ${esp} – < ${critico}`, Rojo: `≥ ${critico}`, _mes: nombreMes }
-      : { Verde: `≥ ${esp}`, Amarillo: `> ${critico} – < ${esp}`, Rojo: `≤ ${critico}`, _mes: nombreMes };
-  }, [indInfo, mesParaSem]);
+  /** Textos de semáforo formateados para el mes/unidad activa */
+  const rangosSem = useMemo(
+    () => calcularRangosFTP(indInfo, mesParaSem, MESES_LARGOS_ARR),
+    [indInfo, mesParaSem]
+  );
 
   const indColor  = CAT_COLOR[indSel?.split(' ')[0]] ?? '#0b5445';
   const categoria = indSel?.split(' ')[0] ?? '';
 
+  /**
+   * Descarga el Excel de un indicador específico para un mes dado.
+   * @param {string} mes - Mes en formato "MM"
+   */
   const descargarIndicador = async (mes) => {
     if (!indSel || !mes || descargando) return;
     setDescargando(true);
@@ -157,6 +150,10 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     finally { setDescargando(false); }
   };
 
+  /**
+   * Descarga el Excel de todos los indicadores de una categoría para un mes dado.
+   * @param {string} mes - Mes en formato "MM"
+   */
   const descargarCategoria = async (mes) => {
     if (!categoria || !mes || descargando) return;
     setDescargando(true);

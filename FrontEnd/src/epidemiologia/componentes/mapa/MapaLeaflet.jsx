@@ -3,6 +3,13 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+/**
+ * Interpolación lineal de color entre dos colores hex.
+ * @param {string} a - Color inicial en formato `#rrggbb`
+ * @param {string} b - Color final en formato `#rrggbb`
+ * @param {number} t - Factor 0-1
+ * @returns {string} Color interpolado en formato `rgb(r,g,b)`
+ */
 function lerp(a, b, t) {
   const ah = parseInt(a.slice(1), 16), bh = parseInt(b.slice(1), 16)
   const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff
@@ -13,6 +20,13 @@ function lerp(a, b, t) {
   return `rgb(${r},${g},${bl})`
 }
 
+/**
+ * Devuelve un color según la razón `casos/maxCasos`, usando el gradiente del canal endémico.
+ * Sin casos → gris neutro.
+ * @param {number} casos
+ * @param {number} maxCasos
+ * @returns {string}
+ */
 function getColor(casos, maxCasos) {
   if (!casos || casos === 0) return '#d4d4d4'
   const r = casos / maxCasos
@@ -22,6 +36,10 @@ function getColor(casos, maxCasos) {
   return '#cc0000'
 }
 
+/**
+ * Hook de Leaflet que ajusta el viewport al bounding box del GeoJSON cada vez que cambia.
+ * @param {{ geojsonData: object }} props
+ */
 function FitBounds({ geojsonData }) {
   const map = useMap()
   useEffect(() => {
@@ -38,6 +56,10 @@ function FitBounds({ geojsonData }) {
   return null
 }
 
+/**
+ * Llama a `invalidateSize` a los 100 ms y a los 800 ms del montaje para compensar
+ * la animación de entrada de la página que hace que Leaflet calcule el tamaño incorrectamente.
+ */
 function InvalidateOnMount() {
   const map = useMap()
   useEffect(() => {
@@ -50,6 +72,11 @@ function InvalidateOnMount() {
   return null
 }
 
+/**
+ * Mapa Leaflet con municipios de Guanajuato coloreados por número de casos.
+ * Usa CartoDB como capa base y calcula el gradiente respecto al municipio con más casos.
+ * @param {{ geojson: object|null, etiqueta: string }} props  etiqueta se muestra en el tooltip del municipio
+ */
 export default function MapaLeaflet({ geojson, etiqueta }) {
   if (!geojson) return null
 

@@ -3,6 +3,10 @@ import { Outlet } from 'react-router-dom'
 import DengueHeader from './Header'
 import DengueSidebar from './Sidebar'
 
+/**
+ * Layout raíz del módulo Epidemiología.
+ * Combina el topbar, el sidebar colapsable y el Outlet de React Router.
+ */
 export default function DengueLayout() {
   const [collapsed, setCollapsed] = useState(false)
 

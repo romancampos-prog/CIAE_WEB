@@ -14,6 +14,10 @@ const UploadIcon = () => (
   </svg>
 );
 
+/**
+ * Hub de selección de módulo de generación.
+ * Muestra las tarjetas FTP e IAAS; las deshabilita si el usuario no tiene permiso.
+ */
 const GenerarHub = () => {
   const navigate = useNavigate();
   const { user } = useAuth();

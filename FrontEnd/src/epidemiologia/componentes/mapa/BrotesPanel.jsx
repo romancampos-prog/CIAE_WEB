@@ -6,6 +6,11 @@ const estiloTitulo  = {
   textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 12,
 }
 
+/**
+ * Panel deslizante que agrupa los brotes detectados: espaciales (concentración geográfica)
+ * y temporales (incremento inusual semana a semana). Delega la apertura/cierre a PanelDeslizante.
+ * @param {{ brotes_espacial?: object[], brotes_temporal?: object[], ocultarBoton?: boolean, open?: boolean, onToggle?: Function }} props
+ */
 export default function BrotesPanel({ brotes_espacial = [], brotes_temporal = [], ocultarBoton, open, onToggle }) {
   const total = brotes_espacial.length + brotes_temporal.length
 

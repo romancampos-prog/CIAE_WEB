@@ -7,6 +7,12 @@ const ZONA_COLORES = {
   epidemica: '#cc0000',
 }
 
+/**
+ * Gráfica de canal endémico usando Plotly.
+ * Dibuja 4 zonas coloreadas (éxito / seguridad / alerta / epidémica) y una línea
+ * con marcadores para los casos del año en curso, coloreados según la zona de cada semana.
+ * @param {{ datos: { semanas:number[], q1:number[], mediana:number[], q3:number[], casos_actual:number[], zonas:string[], año:number } }} props
+ */
 export default function CanalChart({ datos }) {
   const { semanas, q1, mediana, q3, casos_actual, zonas, año } = datos
 

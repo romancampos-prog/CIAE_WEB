@@ -2,10 +2,18 @@
    MODAL RESTRICCIONES — wrapper (los res-* vienen de restricciones.css)
    ═══════════════════════════════════════════════════════ */
 
-/* ── Overlay (extends .modal-overlay) ── */
+/* ── Overlay base ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; justify-content: center; align-items: center;
+  background: rgba(0, 0, 0, 0.38);
+  padding: 16px;
+}
+
+/* ── Overlay restricciones (blur extra) ── */
 .mrest-overlay {
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ── Caja principal ── */

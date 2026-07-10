@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 
-# iass y ftp_indicadores viven en indicadores/ — se exponen con su nombre original
+# iass y ftp viven en indicadores/ — se exponen con su nombre original
 sys.path.insert(0, str(Path(__file__).parent / "indicadores"))
 
 from fastapi import FastAPI
@@ -17,8 +17,8 @@ from configs.cors import ORIGINS, ORIGINS_REGEX
 
 from auth.controllers.auth_controller import router as auth_router
 
-import iass as iass_module
-import ftp_indicadores as ftp_module
+import iaas as iass_module
+import ftp as ftp_module
 import epidemiologia as epi_module
 
 DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')

@@ -1,3 +1,8 @@
+/**
+ * Tabla de ranking de unidades médicas ordenada de mayor a menor número de casos.
+ * Las primeras 3 posiciones se destacan con color. Cada fila incluye una barra de proporción.
+ * @param {{ unidades: Array<{ unidad:string, n:number }> }} props
+ */
 export default function TablaUnidades({ unidades }) {
   if (!unidades?.length) return null
   const max = unidades[0]?.n || 1

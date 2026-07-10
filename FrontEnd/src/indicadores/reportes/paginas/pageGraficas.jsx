@@ -219,13 +219,13 @@ export default function PageGrafica() {
 
       {/* Panel lateral ficha técnica */}
       {verDetalle && (
-        <div className="side-panel-overlay" onClick={() => setVerDetalle(false)}>
-          <div className="side-panel-content" onClick={e => e.stopPropagation()}>
-            <header className="panel-header">
+        <div className="pg-panel-overlay" onClick={() => setVerDetalle(false)}>
+          <div className="pg-panel-content" onClick={e => e.stopPropagation()}>
+            <header className="pg-panel-header">
               <h2>Ficha Técnica — {Indicador}</h2>
-              <button className="close-panel" onClick={() => setVerDetalle(false)}>✕</button>
+              <button className="pg-close-panel" onClick={() => setVerDetalle(false)}>✕</button>
             </header>
-            <div className="panel-scroll-area">
+            <div className="pg-panel-scroll">
               <InformacionIndicador data={infoIndicador} />
             </div>
           </div>

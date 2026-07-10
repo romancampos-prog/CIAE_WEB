@@ -17,6 +17,11 @@ const COLOR_CLASIF = {
   'SIN CLASIFICAR': { bg: 'rgba(164,164,164,0.1)', color: '#64748b' },
 }
 
+/**
+ * Acordeón de duplicados confirmados.
+ * Cada fila de la tabla es expandible para revelar el VEC_ID que el algoritmo conservó.
+ * @param {{ registros: object[] }} props
+ */
 export default function SeccionDuplicados({ registros }) {
   const [abierto, setAbierto]         = useState(registros.length > 0)
   const [expandido, setExpandido]     = useState(null)   // VEC_ID del rechazado con sub-fila abierta

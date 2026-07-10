@@ -3,6 +3,12 @@ import { createPortal } from 'react-dom'
 
 const DURACION = 6000
 
+/**
+ * Toast de notificación que muestra el nombre del último reporte generado.
+ * Se dispara cada vez que `trigger` cambia y se cierra automáticamente a los 6 s.
+ * Incluye una barra de progreso animada que indica el tiempo restante.
+ * @param {{ ultimoReporte: string|null, trigger?: number }} props
+ */
 export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
   const [visible,  setVisible]  = useState(false)
   const [saliendo, setSaliendo] = useState(false)

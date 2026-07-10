@@ -8,6 +8,10 @@ const COLOR_CLASIF = {
   'SIN CLASIFICAR': { bg: 'rgba(164,164,164,0.1)', color: '#64748b' },
 }
 
+/**
+ * Badge coloreado según la clasificación final del caso (POSITIVO / NEGATIVO / SIN CLASIFICAR).
+ * @param {{ valor: string }} props
+ */
 function BadgeClasif({ valor }) {
   const estilo = COLOR_CLASIF[valor] || COLOR_CLASIF['SIN CLASIFICAR']
   return (
@@ -19,6 +23,10 @@ function BadgeClasif({ valor }) {
   )
 }
 
+/**
+ * Muestra un porcentaje de similitud; se colorea según umbral (≥95% → tinto, ≥85% → ámbar).
+ * @param {{ valor: number }} props  valor entre 0 y 1
+ */
 function Pct({ valor }) {
   const pct   = Math.round(valor * 100)
   const color = pct >= 95 ? '#691c32' : pct >= 85 ? COLOR : '#64748b'
@@ -27,6 +35,11 @@ function Pct({ valor }) {
   )
 }
 
+/**
+ * Acordeón de pares con similitud ≥ 80 % que no fueron confirmados como duplicados.
+ * Cada fila es expandible para ver el detalle comparativo de ambos registros.
+ * @param {{ registros: object[] }} props
+ */
 export default function SeccionPosiblesDuplicados({ registros }) {
   const [abierto, setAbierto]     = useState(false)
   const [expandido, setExpandido] = useState(null)   // índice del par expandido

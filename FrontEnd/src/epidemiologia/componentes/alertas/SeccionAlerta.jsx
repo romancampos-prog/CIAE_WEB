@@ -9,6 +9,12 @@ const CAMPOS = {
   cols_pend: ['VEC_ID', 'DES_UNI_MED_NOTIF', 'IDE_NOM', 'IDE_APE_PAT', 'IDE_APE_MAT', 'ESTATUS_SISCEP', 'SEM'],
 }
 
+/**
+ * Tarjeta acordeón para una categoría de alerta SisCep.
+ * Muestra un encabezado con badge de conteo; al expandirse, despliega
+ * la tabla de registros. Las alertas prioritarias abren por defecto.
+ * @param {{ titulo:string, descripcion:string, registros:object[], tipo?:'cols_caso'|'cols_pend', color:string, prioritaria?:boolean }} props
+ */
 export default function SeccionAlerta({ titulo, descripcion, registros, tipo = 'cols_caso', color, prioritaria = false }) {
   const [abierto, setAbierto] = useState(prioritaria && registros.length > 0)
   const cabeceras = CABECERAS[tipo]

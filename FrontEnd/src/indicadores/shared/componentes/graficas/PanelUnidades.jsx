@@ -61,9 +61,8 @@ const PanelUnidades = ({
   };
 
   return (
-    <div className="ig-unit-list">
+    <div className="ig-unit-panel">
       <p className="ig-unit-list-title">Unidades</p>
-
       <div className="ig-unit-search-wrap">
         <svg className="ig-unit-search-icon" width="11" height="11" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -80,23 +79,25 @@ const PanelUnidades = ({
         )}
       </div>
 
-      {filtradas.map(renderItem)}
+      <div className="ig-unit-list">
+        {filtradas.map(renderItem)}
 
-      {totalItem && (
-        <>
-          <div className="ig-unit-total-sep" />
-          <button
-            className={`ig-unit-item ig-unit-item--total${unidadSel === totalItem.unidad && vistaGrafica === 'unidad' ? ' ig-unit-item--active' : ''}`}
-            style={unidadSel === totalItem.unidad && vistaGrafica === 'unidad' ? { borderLeftColor: indColor } : {}}
-            onClick={() => onSelect(totalItem.unidad)}
-          >
-            <span className="ig-unit-name">TOTAL OOAD</span>
-            {totalItem.color === 'Rojo' && (
-              <span className="ig-unit-rojo-badge" title="Umbral rojo en último mes">!</span>
-            )}
-          </button>
-        </>
-      )}
+        {totalItem && (
+          <>
+            <div className="ig-unit-total-sep" />
+            <button
+              className={`ig-unit-item ig-unit-item--total${unidadSel === totalItem.unidad && vistaGrafica === 'unidad' ? ' ig-unit-item--active' : ''}`}
+              style={unidadSel === totalItem.unidad && vistaGrafica === 'unidad' ? { borderLeftColor: indColor } : {}}
+              onClick={() => onSelect(totalItem.unidad)}
+            >
+              <span className="ig-unit-name">TOTAL OOAD</span>
+              {totalItem.color === 'Rojo' && (
+                <span className="ig-unit-rojo-badge" title="Umbral rojo en último mes">!</span>
+              )}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };

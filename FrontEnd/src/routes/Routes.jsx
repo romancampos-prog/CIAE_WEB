@@ -33,13 +33,9 @@ export default function AppRouter() {
             <Route path="CIAE/LOGIN" element={<Login />} />
 
             <Route element={<ProtectedLayout />}>
-              <Route path="CIAE/Inicio"        element={<Inicio />} />
-
-              {/* Módulo Indicadores Médicos (FTP + IAAS) */}
-              <Route path="CIAE/IndicadoresMedicos/*" element={<IndicadoresRoutes />} />
-
-              {/* Módulo Epidemiología */}
-              <Route path="CIAE/Epidemiologia/*" element={<EpiRoutes />} />
+              <Route path="CIAE/Inicio" element={<Inicio />} />
+              <Route path="CIAE/IndicadoresMedicos/*" element={<IndicadoresRoutes />} /> {/* Módulo Indicadores Médicos (FTP + IAAS) */}
+              <Route path="CIAE/Epidemiologia/*" element={<EpiRoutes />} /> {/* Módulo Epidemiología */}
             </Route>
 
             <Route path="*" element={<Navigate to="/CIAE/LOGIN" replace />} />

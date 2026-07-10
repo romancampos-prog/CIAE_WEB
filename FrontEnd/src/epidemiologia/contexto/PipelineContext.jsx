@@ -3,12 +3,21 @@ import { getEstado, ejecutar as apiEjecutar } from '../api/pipeline'
 
 const PipelineContext = createContext(null)
 
+/**
+ * Proveedor del contexto del pipeline de dengue.
+ * Mantiene el estado global del pipeline (corriendo, completado, error, último reporte),
+ * hace polling automático mientras está activo y emite `refetchKey` para que los reportes
+ * se recarguen al completarse un nuevo análisis.
+ *
+ * @param {{ children: React.ReactNode }} props
+ */
 export function PipelineProvider({ children }) {
   const [estado,     setEstado]     = useState(null)
   const [refetchKey, setRefetchKey] = useState(0)
-  const intervalRef    = useRef(null)
+  const intervalRef     = useRef(null)
   const yaCompletadoRef = useRef(false)
 
+  /** Cancela el intervalo de polling activo */
   const detenerPolling = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -16,10 +25,15 @@ export function PipelineProvider({ children }) {
     }
   }
 
+  /**
+   * Consulta el estado del pipeline.
+   * Si acaba de completarse por primera vez en esta sesión, incrementa `refetchKey`
+   * para notificar a los hooks de reporte que recarguen sus datos.
+   */
   const fetchEstado = useCallback(async () => {
     try {
       const { data: res } = await getEstado()
-      const estado = res.data          // extrae el objeto interno del ApiResponse
+      const estado = res.data
       setEstado(estado)
 
       if (estado.completado && !yaCompletadoRef.current) {
@@ -38,6 +52,10 @@ export function PipelineProvider({ children }) {
     return detenerPolling
   }, [])
 
+  /**
+   * Inicia la ejecución del pipeline completo.
+   * Resetea el flag de completado y activa el polling para actualizar el estado.
+   */
   const ejecutar = async () => {
     try {
       await apiEjecutar()
@@ -56,6 +74,10 @@ export function PipelineProvider({ children }) {
   )
 }
 
+/**
+ * Accede al contexto del pipeline desde cualquier componente hijo de PipelineProvider.
+ * @returns {{ estado: Object|null, refetchKey: number, ejecutar: Function }}
+ */
 export function usePipeline() {
   return useContext(PipelineContext)
 }

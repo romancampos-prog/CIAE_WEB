@@ -408,13 +408,13 @@ const ConfiguracionReporte = () => {
 
       {/* Side Panel Ficha Técnica */}
       {verDetalle && (
-        <div className="side-panel-overlay" onClick={() => setVerDetalle(false)}>
-          <div className="side-panel-content" onClick={e => e.stopPropagation()}>
-            <header className="panel-header">
+        <div className="cfg-panel-overlay" onClick={() => setVerDetalle(false)}>
+          <div className="cfg-panel-content" onClick={e => e.stopPropagation()}>
+            <header className="cfg-panel-header">
               <h2>Ficha Técnica — {indicadorSel}</h2>
-              <button className="close-panel" onClick={() => setVerDetalle(false)}>✕</button>
+              <button className="cfg-close-panel" onClick={() => setVerDetalle(false)}>✕</button>
             </header>
-            <div className="panel-scroll-area">
+            <div className="cfg-panel-scroll">
               <InformacionIndicador data={infoIndicador} />
             </div>
           </div>

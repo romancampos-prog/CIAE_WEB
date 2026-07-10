@@ -5,9 +5,7 @@ import GraficaBarras  from '@indShared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '@indShared/componentes/graficas/PanelUnidades';
 import SemaforoUmbral from '@indShared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '@indShared/componentes/graficas/VistaToggle';
-import { MESES_CORTOS } from '@indShared/constantes/meses';
-
-const MESES = MESES_CORTOS;
+import { MESES_CORTOS, MESES_LARGOS } from '@indShared/constantes/meses';
 
 const VISTAS_FTP = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
@@ -16,7 +14,7 @@ const VISTAS_FTP = [
 
 const POR_PAGINA = 20;
 
-const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
+const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
   const { puedeGenFTP } = useRol();
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
@@ -47,26 +45,22 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
 
       {/* ── Título + ficha técnica ── */}
       <div className="ig-header">
-        <div className="ig-header-left">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <h1 className="ig-title" style={{ color: indColor, margin: 0 }}>
-              {indSel || 'Indicadores FTP'}
-            </h1>
-            {indInfo && (
-              <button className="ig-info-toggle" onClick={() => setInfoAbierta(v => !v)}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                {infoAbierta ? 'Ocultar detalle' : 'Ver detalle'}
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ transform: infoAbierta ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-            )}
-          </div>
+        <h1 className="ig-title" style={{ color: indColor }}>{indSel || 'Indicadores FTP'}</h1>
+        <div className="ig-header-detail-row">
+          {indInfo && (
+            <button className="ig-info-toggle" onClick={() => setInfoAbierta(v => !v)}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {infoAbierta ? 'Ocultar detalle' : 'Ver detalle'}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: infoAbierta ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+          )}
           {indInfo && infoAbierta && (
-            <div className="ig-desc-block ig-desc-block--open">
+            <div className="ig-desc-panel" style={{ '--ic': indColor }}>
               <p className="ig-desc-titulo">{indInfo.titulo}</p>
               <div className="ig-desc-meta">
                 <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.descripcionNumerador}</span>
@@ -100,68 +94,83 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
       {!cargando && datos?.meses_con_datos?.length > 0 && (
         <div className="ig-chart-card">
 
-          {/* Controles top */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            <div className="ig-controls">
-              <div className="ig-control-group">
-                <label className="ig-control-label">Año</label>
-                <span className="ig-select" style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 700, color: indColor, cursor: 'default' }}>
-                  {anio}
-                </span>
-              </div>
-              {vistaGrafica === 'mes' && (
-                <div className="ig-control-group">
-                  <label className="ig-control-label">Mes</label>
-                  <select className="ig-select" value={mesSel} onChange={e => setMesSel(e.target.value)}>
-                    {datos?.meses_con_datos?.map(m => (
-                      <option key={m} value={m}>{MESES[parseInt(m) - 1]}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {puedeGenFTP && mesSel && (
-                <>
-                  <button
-                    className="ig-btn-dl"
-                    disabled={descargando}
-                    onClick={() => descargarIndicador(mesSel)}
-                    title={`Descargar ${indSel} — ${MESES[parseInt(mesSel) - 1]} ${anio}`}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    {descargando ? '…' : indSel}
-                  </button>
-                  <button
-                    className="ig-btn-dl ig-btn-dl--secondary"
-                    disabled={descargando}
-                    onClick={() => descargarCategoria(mesSel)}
-                    title={`Descargar todos ${categoria} — ${MESES[parseInt(mesSel) - 1]} ${anio}`}
-                  >
-                    {descargando ? '…' : `Todos ${categoria}`}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
           <div className="ig-body">
-            {/* Panel unidades */}
-            <PanelUnidades
-              unidades={unidadesStatus}
-              unidadSel={unidadSel}
-              vistaGrafica={vistaGrafica}
-              indColor={indColor}
-              busq={busqUnidad}
-              onBusq={setBusqUnidad}
-              onSelect={u => { setUnidadSel(u); setVistaGrafica('unidad'); }}
-            />
+            {/* Panel izquierdo */}
+            {vistaGrafica === 'mes' ? (
+              <div className="ig-unit-panel ig-unit-panel--mes">
+                <p className="ig-unit-list-title">Mes</p>
+                <div className="ig-unit-list">
+                  {datos?.meses_con_datos?.map(m => (
+                    <button
+                      key={m}
+                      className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
+                      style={mesSel === m ? { borderLeftColor: indColor } : {}}
+                      onClick={() => setMesSel(m)}
+                    >
+                      <span className="ig-unit-name">{MESES_LARGOS[m]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <PanelUnidades
+                unidades={unidadesStatus}
+                unidadSel={unidadSel}
+                vistaGrafica={vistaGrafica}
+                indColor={indColor}
+                busq={busqUnidad}
+                onBusq={setBusqUnidad}
+                onSelect={u => { setUnidadSel(u); setVistaGrafica('unidad'); }}
+              />
+            )}
 
             {/* Área de gráfica */}
-            <div className="ig-chart-area">
-              <VistaToggle vistas={VISTAS_FTP} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+            <div className="ig-chart-area" style={{ position: 'relative' }}>
+              {iconSrc && <img src={iconSrc} alt="" className="ig-chart-watermark" />}
+              <div className="ig-chart-topbar">
+                <VistaToggle vistas={VISTAS_FTP} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+                <div className="ig-controls">
+                  <div className="ig-control-group">
+                    <label className="ig-control-label">Año</label>
+                    <span className="ig-select" style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 700, color: indColor, cursor: 'default' }}>
+                      {anio}
+                    </span>
+                  </div>
+                  {puedeGenFTP && mesSel && (
+                    <div className="ig-control-group">
+                      <label className="ig-control-label">Descargar excel</label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          className="ig-btn-dl"
+                          disabled={descargando}
+                          onClick={() => descargarIndicador(mesSel)}
+                          title={`Descargar ${indSel} — ${MESES_CORTOS[parseInt(mesSel) - 1]} ${anio}`}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                          </svg>
+                          {descargando ? '…' : indSel}
+                        </button>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          disabled={descargando}
+                          onClick={() => descargarCategoria(mesSel)}
+                          title={`Descargar todos ${categoria} — ${MESES_CORTOS[parseInt(mesSel) - 1]} ${anio}`}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                          </svg>
+                          {descargando ? '…' : `Todos ${categoria}`}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="ig-chart-top">
                 <div className="ig-chart-badges">
@@ -176,7 +185,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange }) => {
                   {vistaGrafica === 'mes' && (
                     <>
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {MESES[parseInt(mesSel) - 1]} {anio}
+                        {MESES_CORTOS[parseInt(mesSel) - 1]} {anio}
                       </span>
                       <span className="ig-badge ig-badge--neutral">Todas las unidades</span>
                     </>

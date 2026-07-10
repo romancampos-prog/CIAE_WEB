@@ -309,7 +309,7 @@
 /* ══════════════════════════════════════
    SIDE PANEL — Ficha Técnica
    ══════════════════════════════════════ */
-.side-panel-overlay {
+.cfg-panel-overlay {
   position: fixed; inset: 0;
   background: rgba(5,16,12,0.65);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -318,7 +318,7 @@
 }
 @keyframes cfg-overlayIn { from{opacity:0} to{opacity:1} }
 
-.side-panel-content {
+.cfg-panel-content {
   width: 100%; max-width: 660px;
   background: white; height: 100%;
   display: flex; flex-direction: column;
@@ -327,7 +327,7 @@
 }
 @keyframes cfg-panelIn { from{transform:translateX(100%);opacity:.5} to{transform:translateX(0);opacity:1} }
 
-.panel-header {
+.cfg-panel-header {
   padding: 0 28px; height: 68px;
   border-bottom: 1px solid #eef0f3;
   display: flex; justify-content: space-between; align-items: center;
@@ -335,13 +335,13 @@
   background: linear-gradient(135deg, #0b5445 0%, #0e6655 100%);
   position: relative;
 }
-.panel-header::after {
+.cfg-panel-header::after {
   content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
   background: linear-gradient(90deg, rgba(154,112,38,0.6), transparent);
 }
-.panel-header h2 { font-size: 0.95rem; color: white; margin: 0; font-weight: 700; }
+.cfg-panel-header h2 { font-size: 0.95rem; color: white; margin: 0; font-weight: 700; }
 
-.close-panel {
+.cfg-close-panel {
   width: 34px; height: 34px;
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.25);
@@ -349,14 +349,14 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; color: white; transition: all 0.2s; font-family: inherit;
 }
-.close-panel:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
+.cfg-close-panel:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
-.panel-scroll-area {
+.cfg-panel-scroll {
   flex: 1; overflow-y: auto; background: #f7f9f8;
   scrollbar-width: thin; scrollbar-color: rgba(11,84,69,0.2) transparent;
 }
-.panel-scroll-area::-webkit-scrollbar { width: 5px; }
-.panel-scroll-area::-webkit-scrollbar-thumb { background: rgba(11,84,69,0.2); border-radius: 3px; }
+.cfg-panel-scroll::-webkit-scrollbar { width: 5px; }
+.cfg-panel-scroll::-webkit-scrollbar-thumb { background: rgba(11,84,69,0.2); border-radius: 3px; }
 
 /* ── Responsive ── */
 @media (max-width: 800px) {

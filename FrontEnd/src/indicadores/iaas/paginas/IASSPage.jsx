@@ -4,6 +4,8 @@ import { useAuth } from '@auth/contexto/AuthContext';
 import { useRol } from '@auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
 import { getUnidadesIASS, getIndicadoresIASS, generarIASS, getSesionIASS } from '../api/IASS';
+import { descargarB64 } from '@indShared/utilidades/download';
+import { mesDisponible, calcularFaltantes } from '../utils/calculos';
 import { UploadIcon, CheckIcon, XIcon, FileIcon } from '@indShared/componentes/Icons';
 import ModalLoading from '@shared/componentes/modal/ModalCargando';
 import ModalUnidadTardia from '../componentes/modalUnidadTardia/ModalUnidadTardia';
@@ -11,6 +13,12 @@ import IASSErrorToast from './IASSErrorToast';
 import IASSValidacionPanel from './IASSValidacionPanel';
 import './IASS.css';
 
+/**
+ * Página de captura y generación de reportes IAAS.
+ * Permite al usuario cargar el Excel global de IAAS 01, los Excels por unidad y
+ * los denominadores manuales de IAAS 02–06 para generar los 6 reportes del período.
+ * Solo visible para roles con permiso `puedeGenIASS`.
+ */
 const IASSPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -32,13 +40,6 @@ const IASSPage = () => {
 
   const [anio, setAnio] = useState(String(anioDefault));
   const [mes,  setMes]  = useState(String(mesDefault).padStart(2, '0'));
-
-  const mesDisponible = (mesNum, anioSel) => {
-    if (parseInt(anioSel) < anioActual) return true;
-    if (mesNum < mesHoy) return true;
-    if (mesNum === mesHoy && diaHoy >= 25) return true;
-    return false;
-  };
 
   const [numeradores, setNumeradores]       = useState(null);
   const [dragOver, setDragOver]             = useState(false);
@@ -72,6 +73,7 @@ const IASSPage = () => {
 
   useEffect(() => { setAdvertencias(null); }, [numeradores, archivosUnidad, denominadores]);
 
+  /** Recarga el estado de sesión del período seleccionado (unidades pendientes, denominadores guardados) */
   const cargarSesion = useCallback(async () => {
     const s = await getSesionIASS(anio, mes);
     setSesion(s);
@@ -79,6 +81,7 @@ const IASSPage = () => {
 
   useEffect(() => { cargarSesion(); }, [cargarSesion]);
 
+  /** Limpia todos los archivos y denominadores capturados sin perder la estructura de unidades */
   const limpiarCampos = useCallback(() => {
     setNumeradores(null);
     setArchivosUnidad({});
@@ -99,35 +102,20 @@ const IASSPage = () => {
   const rowOk         = (u) => !!archivosUnidad[u] && indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
   const completos     = unidades.filter(rowOk).length;
 
-  const calcularFaltantes = () => {
-    const lista = [];
-    if (!numeradores) lista.push('Falta el Excel global de IAAS 01');
-    const sinExcel = unidades.filter(u => !archivosUnidad[u]);
-    if (sinExcel.length) lista.push(`${sinExcel.length} unidad(es) sin Excel: ${sinExcel.join(', ')}`);
-    const sinDenom = unidades.filter(u => archivosUnidad[u] && indicadores.some(d => !(denominadores[u]?.[d.id])));
-    if (sinDenom.length) lista.push(`Denominadores incompletos en: ${sinDenom.join(', ')}`);
-    return lista;
-  };
-
+  /**
+   * Valida los datos y dispara la generación de reportes.
+   * Si hay faltantes y el usuario no ha confirmado, muestra advertencias en lugar de proceder.
+   * Si el servidor responde con 400, muestra errores de validación en el panel o el toast.
+   */
   const handleGenerar = () => {
-    const faltantes = calcularFaltantes();
+    const faltantes = calcularFaltantes(numeradores, unidades, archivosUnidad, denominadores, indicadores);
     if (faltantes.length > 0 && advertencias === null) { setAdvertencias(faltantes); return; }
     setAdvertencias(null);
     setGenerando(true);
     generarIASS(anio, mes, archivosUnidad, denominadores, numeradores)
       .then(res => {
         if (res.success && res.data?.archivo_b64) {
-          const bytes = atob(res.data.archivo_b64);
-          const arr   = new Uint8Array(bytes.length);
-          for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-          const blob  = new Blob([arr], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          const url   = window.URL.createObjectURL(blob);
-          const link  = document.createElement('a');
-          link.href   = url;
-          link.setAttribute('download', res.data.nombre_archivo);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
         }
         setGenerando(false);
         limpiarCampos();
@@ -224,7 +212,7 @@ const IASSPage = () => {
                     {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
                       .map((m, i) => {
                         const mesNum = i + 1;
-                        if (!mesDisponible(mesNum, anio)) return null;
+                        if (!mesDisponible(mesNum, anio, { anioActual, mesHoy, diaHoy })) return null;
                         return <option key={i} value={String(mesNum).padStart(2, '0')}>{m}</option>;
                       })}
                   </select>
@@ -432,19 +420,7 @@ const IASSPage = () => {
         numeradoresGuardados={sesion?.numeradores_guardados ?? {}}
         indicadoresInfo={indicadores}
         onSuccess={(data) => {
-          if (data?.archivo_b64) {
-            const bytes = atob(data.archivo_b64);
-            const arr   = new Uint8Array(bytes.length);
-            for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-            const blob  = new Blob([arr], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const url   = URL.createObjectURL(blob);
-            const a     = document.createElement('a');
-            a.href      = url;
-            a.download  = data.nombre_archivo;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
+          if (data?.archivo_b64) descargarB64(data.archivo_b64, data.nombre_archivo);
           cargarSesion();
         }}
       />

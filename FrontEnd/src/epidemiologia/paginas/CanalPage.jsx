@@ -4,8 +4,12 @@ import DengueSpinner from '../componentes/comun/Spinner'
 import { useState } from 'react'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getCanal } from '../api/reportes'
+import { calcularKpisCanal } from '../utils/calculos'
 
-/* ── Panel de alertas (sin cambios funcionales) ── */
+/**
+ * Panel lateral de semanas que superaron el umbral histórico del canal endémico.
+ * @param {{ alertas: Array<{ sem: number, casos: number, umbral: number, zona: string }> }} props
+ */
 function AlertaCanal({ alertas }) {
   return (
     <div style={{ padding: '16px 20px' }}>
@@ -65,6 +69,11 @@ const ZONAS = [
   { color: '#cc0000', bg: 'rgba(220,50,50,0.08)',  borde: 'rgba(220,50,50,0.2)',    label: 'Epidémica', sub: '> Q3'             },
 ]
 
+/**
+ * Página del Canal Endémico de dengue.
+ * Muestra KPIs del año, la gráfica de comparativo histórico por semana y
+ * un panel deslizante con las semanas que superaron el umbral.
+ */
 export default function CanalPage() {
   const { datos, cargando, error } = useDengueReporte(getCanal)
   const [panelAbierto, setPanelAbierto] = useState(false)
@@ -78,12 +87,7 @@ export default function CanalPage() {
     </div>
   )
 
-  /* KPIs derivados de los datos (sin cambiar la lógica del backend) */
-  const totalCasos   = datos.casos_actual.reduce((a, b) => a + b, 0)
-  const picoCasos    = Math.max(...datos.casos_actual)
-  const picaSemana   = datos.semanas[datos.casos_actual.indexOf(picoCasos)]
-  const semsAlerta   = datos.alertas.length
-  const semsConDatos = datos.casos_actual.filter(c => c > 0).length
+  const { totalCasos, picoCasos, picaSemana, semsAlerta, semsConDatos } = calcularKpisCanal(datos)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>

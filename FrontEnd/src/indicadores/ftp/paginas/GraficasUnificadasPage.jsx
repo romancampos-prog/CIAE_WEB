@@ -10,6 +10,22 @@ import IASSGraficasContenido from '@iass/componentes/IASSGraficasContenido';
 import './ftp.css';
 import '@indShared/estilos/graficas.css';
 
+import iconoCama  from '../../../assets/icono_cama.png';
+import iconoCacu  from '../../../assets/icono_cacu.png';
+import iconoEh    from '../../../assets/icono_eh.png';
+import iconoDm    from '../../../assets/icono_dm.png';
+import iconoMt    from '../../../assets/icono_mt.png';
+import iconoCupn  from '../../../assets/icono_cupn.png';
+import iconoSOb   from '../../../assets/icono_S_Ob.png';
+import iconoCe    from '../../../assets/icono_ce (2).png';
+import iconoIaas  from '../../../assets/icono_iaas.png';
+
+const CAT_ICON = {
+  CAMA: iconoCama, CACU: iconoCacu, EH: iconoEh,  DM: iconoDm,
+  MT:   iconoMt,  CUPN: iconoCupn, S_Ob: iconoSOb, CE: iconoCe,
+  IAAS: iconoIaas,
+};
+
 const IASS_COLOR = '#1a5276';
 
 const MenuIcon = () => (
@@ -54,6 +70,13 @@ const GraficasUnificadasPage = () => {
       if (inds.includes(indSel)) return color;
     }
     return '#0b5445';
+  }, [indSel, todosGrupos]);
+
+  const indCat = useMemo(() => {
+    for (const { cat, inds } of todosGrupos) {
+      if (inds.includes(indSel)) return cat;
+    }
+    return null;
   }, [indSel, todosGrupos]);
 
   // Auto-abrir la categoría del indicador activo
@@ -106,7 +129,11 @@ const GraficasUnificadasPage = () => {
             <span className="ig-float-trigger-cat">Indicadores</span>
             <span className="ig-float-trigger-ind">{indSel || '…'}</span>
           </span>
-          <span className="ig-float-trigger-dot" style={{ background: indColor }} />
+          <span className="ig-float-trigger-dot" style={{ background: `${indColor}22` }}>
+            {CAT_ICON[indCat] && (
+              <img src={CAT_ICON[indCat]} alt="" className="ig-float-trigger-icon" />
+            )}
+          </span>
         </button>
       )}
 
@@ -166,8 +193,8 @@ const GraficasUnificadasPage = () => {
       </aside>
 
       {/* Contenido según módulo */}
-      {modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} />}
-      {modulo === 'iass' && <IASSGraficasContenido indSel={indSel} onIndSelChange={setIndSel} />}
+      {modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
+      {modulo === 'iass' && <IASSGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
     </div>
   );
 };

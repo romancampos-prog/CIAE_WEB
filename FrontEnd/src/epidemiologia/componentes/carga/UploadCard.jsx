@@ -1,5 +1,9 @@
 import { useRef, useState } from 'react'
 
+/**
+ * Icono SVG estilizado de archivo Excel.
+ * @param {{ size?: number, light?: boolean }} props
+ */
 const IconExcel = ({ size = 52, light = false }) => (
   <svg width={size} height={size} viewBox="0 0 52 52" fill="none">
     <rect x="4" y="2" width="32" height="42" rx="4"
@@ -41,6 +45,12 @@ const TEMAS = {
   },
 }
 
+/**
+ * Tarjeta de subida de archivos .xlsx con drag-and-drop.
+ * Maneja los estados: vacío, subiendo, ok y error.
+ * Los temas `tinto` y `verde` corresponden al color de fondo de la tarjeta.
+ * @param {{ titulo:string, hint:string, onUpload:(archivo:File)=>Promise<{nombre:string,bytes:number}>, nombreActual?:string, paso:number, tema?:'tinto'|'verde' }} props
+ */
 export default function UploadCard({ titulo, hint, onUpload, nombreActual, paso, tema = 'tinto' }) {
   const inputRef   = useRef(null)
   const [estado, setEstado]   = useState(nombreActual ? 'ok' : 'vacio')

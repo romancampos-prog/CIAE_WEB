@@ -3,13 +3,7 @@ import { useAuth } from '@auth/contexto/AuthContext';
 import { useRol } from '@auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
 import './ftp.css';
-
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h >= 6  && h < 12) return { saludo: 'Buenos días',   icono: 'day' };
-  if (h >= 12 && h < 19) return { saludo: 'Buenas tardes', icono: 'afternoon' };
-  return                         { saludo: 'Buenas noches', icono: 'night' };
-};
+import { getGreeting } from '../utils/horario';
 
 const IconDay = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -32,6 +26,10 @@ const IconNight = () => (
   </svg>
 );
 
+/**
+ * Página de inicio del sub-módulo FTP.
+ * Presenta las tarjetas Ver datos y Generar reporte según el rol del usuario.
+ */
 const FTPLanding = () => {
   const navigate = useNavigate();
   const { user } = useAuth();

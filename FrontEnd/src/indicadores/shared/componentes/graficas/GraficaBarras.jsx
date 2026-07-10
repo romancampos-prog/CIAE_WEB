@@ -51,7 +51,7 @@ const GraficaBarras = ({
         };
 
   return (
-    <ResponsiveContainer width="100%" height={360}>
+    <ResponsiveContainer width="100%" height={440}>
       <ComposedChart
         key={chartKey}
         data={data}

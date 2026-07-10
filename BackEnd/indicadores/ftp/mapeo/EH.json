@@ -1,0 +1,165 @@
+{
+    "EH 01": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
+        "descripcionNumerador": "Número de derechohabiente de 20 años y más, con detección de hipertensión arterial, acumulados al mes del reporte",
+        "descripcionDenominador": "Población de 20 años y más, adscrita a Médico Familiar menos Prevalencia de hipertensión arterial específicas por grupo de edad y sexo",
+        "nombreArchivoFinal": "EH 01",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "CP02": {
+                "hoja": "IMCPUM",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "DD",
+                "texto_buscar": "TOTAL DE LA UNIDAD",
+                "columna_dato": [
+                    "DJ",
+                    "EX",
+                    "GG"
+                ]
+            },
+            "CP03": {
+                "hoja": "04CobDM_HTA_COL",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "M",
+                "texto_buscar": "TOTAL DE LA UNIDAD",
+                "columna_dato": [
+                    "O",
+                    "S"
+                ]
+            },
+            "poblacion_m": {
+                "modo": "JSON_POBLACION",
+                "grupo": "Mujeres",
+                "columnas": [
+                    "20 a 24",
+                    "25  a 29",
+                    "30 a 34",
+                    "35 a 39",
+                    "40 a 44",
+                    "45 a 49",
+                    "50 a 54",
+                    "55 a 59"
+                ]
+            },
+            "poblacion_h": {
+                "modo": "JSON_POBLACION",
+                "grupo": "Hombres",
+                "columnas": [
+                    "20 a 24",
+                    "25  a 29",
+                    "30 a 34",
+                    "35 a 39",
+                    "40 a 44",
+                    "45 a 49",
+                    "50 a 54",
+                    "55 a 59"
+                ]
+            },
+            "poblacion_t": {
+                "modo": "JSON_POBLACION",
+                "grupo": "Todos",
+                "columnas": [
+                    "60 a 64",
+                    "65 a 69",
+                    "70 a 74",
+                    "75 a 79",
+                    "80 a 84",
+                    "85 y más"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "sum(CP02[0:3]) + sum(CP03[0:2])",
+            "denominador": "sum([ (sum(poblacion_m[0:2]) * (1 - 0.012)), (sum(poblacion_h[0:2]) * (1 - 0.016)), (sum(poblacion_m[2:8]) * (1 - 0.158)), (sum(poblacion_h[2:8]) * (1 - 0.135)), (sum(poblacion_t) * (1 - 0.433)) ])",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": 4.8,
+                "Esperado": 5.8
+            },
+            "Febrero": {
+                "Bajo": 9.5,
+                "Esperado": 11.5
+            },
+            "Marzo": {
+                "Bajo": 14.3,
+                "Esperado": 17.3
+            },
+            "Abril": {
+                "Bajo": 19.0,
+                "Esperado": 23.0
+            },
+            "Mayo": {
+                "Bajo": 23.8,
+                "Esperado": 28.8
+            },
+            "Junio": {
+                "Bajo": 28.6,
+                "Esperado": 34.5
+            },
+            "Julio": {
+                "Bajo": 33.3,
+                "Esperado": 40.3
+            },
+            "Agosto": {
+                "Bajo": 38.1,
+                "Esperado": 46.0
+            },
+            "Septiembre": {
+                "Bajo": 42.8,
+                "Esperado": 51.8
+            },
+            "Octubre": {
+                "Bajo": 47.6,
+                "Esperado": 57.5
+            },
+            "Noviembre": {
+                "Bajo": 52.3,
+                "Esperado": 63.3
+            },
+            "Diciembre": {
+                "Bajo": 57.1,
+                "Esperado": 69.0
+            }
+        },
+        "mostrar": true
+    },
+    "EH 02": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
+        "descripcionNumerador": "Número de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial (CIE-10: I10 - I15) con cifras de tensión arterial sistólica menor de 140 mmHg y diastólica menor de 90 mmHg atendidos en el período",
+        "descripcionDenominador": "Total de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial atendidos en el período",
+        "nombreArchivoFinal": "EH 02",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "IN22": {
+                "hoja": "Indicadores_MM2018",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "A",
+                "texto_buscar": "T O T A L E S",
+                "columna_dato": [
+                    "M",
+                    "P"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(IN22[1])",
+            "denominador": "(IN22[0])",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Bajo": 83.5,
+            "Esperado": 85.2
+        },
+        "mostrar": true
+    }
+}

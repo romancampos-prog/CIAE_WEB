@@ -4,7 +4,16 @@ import { getReporte, getMesesGenerados, generarCategoria } from '@indReportes/ap
 import { descargarB64 } from '@indShared/utilidades/download';
 import { MESES_LARGOS } from '@indShared/constantes/meses';
 import { COLORS } from '../constantes/colores';
+import { calcularMesesDisponibles, calcularSemDataFTP } from '../utils/calculos';
 
+/**
+ * Hook de generación de indicadores FTP.
+ * Gestiona la selección de categoría, indicador, período y tipo (previo/final),
+ * y expone las funciones para generar un indicador individual o toda la categoría.
+ *
+ * @param {{ user: string, rol: string }|null} user - Usuario autenticado
+ * @returns {Object} Estado y acciones del panel de generación
+ */
 export function useIndicadores(user) {
   const esVisor = user?.rol !== 'admin' && user?.rol !== 'trabajador_ftp';
 
@@ -12,7 +21,6 @@ export function useIndicadores(user) {
   const anioActual   = fechaHoy.getFullYear();
   const mesActualNum = fechaHoy.getMonth() + 1;
   const diaActual    = fechaHoy.getDate();
-  const mesMaxVisor  = diaActual >= 30 ? mesActualNum : mesActualNum - 1;
 
   const [allIndicadores, setAllIndicadores] = useState({});
   const [cargandoLista, setCargandoLista]   = useState(true);
@@ -32,6 +40,7 @@ export function useIndicadores(user) {
   const [resultadoBatch, setResultadoBatch] = useState(null);
   const [modalPoblacion, setModalPoblacion] = useState(false);
 
+  /** Carga inicial de todos los indicadores agrupados por categoría */
   useEffect(() => {
     getAllIndicadores()
       .then(res => {
@@ -43,19 +52,21 @@ export function useIndicadores(user) {
       .finally(() => setCargandoLista(false));
   }, []);
 
+  /** Persiste la categoría en sessionStorage y limpia el estado derivado al cambiarla */
   useEffect(() => {
     sessionStorage.setItem('categoria_actual', categoria);
     setInfoIndicador(null);
     setMesesFaltantes([]);
     setResultadoBatch(null);
-    // setIndicadorSel se maneja explícitamente en toggleAbrir del componente
   }, [categoria]);
 
+  /** Carga la ficha técnica del indicador seleccionado */
   useEffect(() => {
     if (!indicadorSel) { setInfoIndicador(null); return; }
     getIndicador(indicadorSel).then(res => setInfoIndicador(res.data)).catch(console.error);
   }, [indicadorSel]);
 
+  /** Detecta meses previos sin reporte generado cuando el tipo es "final" */
   useEffect(() => {
     setConfirmandoFaltantes(false);
     if (!datos.mes || !indicadorSel || tipo !== 'final') { setMesesFaltantes([]); return; }
@@ -70,42 +81,29 @@ export function useIndicadores(user) {
     });
   }, [datos.mes, datos.ano, indicadorSel, tipo]);
 
+  /** Meses disponibles para selección según rol, tipo de reporte y fecha actual */
   const mesesDisponibles = useMemo(() => {
     const todos = Object.entries(MESES_LARGOS);
-    if (parseInt(datos.ano) === anioActual) {
-      let limite;
-      if (esVisor) {
-        limite = diaActual >= 30 ? mesActualNum : mesActualNum - 1;
-      } else if (tipo === 'final') {
-        limite = diaActual >= 26 ? mesActualNum : mesActualNum - 1;
-      } else {
-        limite = mesActualNum;
-      }
-      return todos.filter(([k]) => parseInt(k) > 0 && parseInt(k) <= limite);
-    }
-    return todos;
-  }, [datos.ano, anioActual, mesActualNum, diaActual, esVisor, mesMaxVisor, tipo]);
+    return calcularMesesDisponibles(todos, datos.ano, { anioActual, esVisor, diaActual, mesActualNum, tipo });
+  }, [datos.ano, anioActual, mesActualNum, diaActual, esVisor, tipo]);
 
-  const semData = useMemo(() => {
-    if (!infoIndicador?.semaforo) return null;
-    const mesTexto = MESES_LARGOS[datos.mes];
-    const sem = (mesTexto && infoIndicador.semaforo[mesTexto])
-      ? infoIndicador.semaforo[mesTexto] : infoIndicador.semaforo;
-    if (!sem || (sem.Bajo === undefined && sem.Esperado === undefined)) return null;
-    const esDesc = sem.Alto !== undefined;
-    return {
-      txtVerde:    esDesc ? `≤ ${sem.Esperado}%` : `≥ ${sem.Esperado}%`,
-      txtAmarillo: esDesc ? `> ${sem.Esperado}% — < ${sem.Alto}%` : `> ${sem.Bajo}% — < ${sem.Esperado}%`,
-      txtRojo:     esDesc ? `≥ ${sem.Alto}%`     : `≤ ${sem.Bajo}%`,
-    };
-  }, [infoIndicador, datos.mes]);
+  /** Textos de semáforo del indicador seleccionado para el mes activo */
+  const semData = useMemo(
+    () => calcularSemDataFTP(infoIndicador, datos.mes, MESES_LARGOS),
+    [infoIndicador, datos.mes]
+  );
 
-  const catData    = allIndicadores[categoria];
+  const catData     = allIndicadores[categoria];
   const indicadores = catData?.indicadores ?? [];
-  const catColor   = COLORS[categoria] ?? '#0b5445';
-  const canGenerar = !!indicadorSel && !!datos.mes && !cargando && !cargandoBatch;
-  const canBatch   = !!datos.mes && !cargando && !cargandoBatch && indicadores.length > 0;
+  const catColor    = COLORS[categoria] ?? '#0b5445';
+  const canGenerar  = !!indicadorSel && !!datos.mes && !cargando && !cargandoBatch;
+  const canBatch    = !!datos.mes && !cargando && !cargandoBatch && indicadores.length > 0;
 
+  /**
+   * Genera el reporte del indicador seleccionado para el período configurado.
+   * Si hay meses previos sin reporte, pide confirmación antes de proceder.
+   * Muestra el modal de restricciones si el backend lo reporta.
+   */
   async function generarReporte() {
     if (!canGenerar) return;
     if (mesesFaltantes.length > 0 && !confirmandoFaltantes) {
@@ -130,6 +128,10 @@ export function useIndicadores(user) {
     finally { setCargando(false); }
   }
 
+  /**
+   * Genera todos los indicadores de la categoría activa en un único Excel.
+   * Muestra el modal de restricciones si el backend lo reporta.
+   */
   async function generarTodos() {
     if (!canBatch) return;
     setCargandoBatch(true);

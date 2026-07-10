@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
+/**
+ * Drawer lateral que desliza desde la derecha con overlay.
+ * Puede funcionar en modo controlado (props `open`/`onToggle`) o autogestionado.
+ * Se oculta completamente cuando `badge` es 0.
+ * @param {{ titulo:string, badge:number, children:React.ReactNode, labelBoton?:string, ocultarBoton?:boolean, open?:boolean, onToggle?:Function }} props
+ */
 export default function PanelDeslizante({ titulo, badge, children, labelBoton, ocultarBoton, open, onToggle }) {
   const [interno, setInterno] = useState(false)
   const abierto = open !== undefined ? open : interno
