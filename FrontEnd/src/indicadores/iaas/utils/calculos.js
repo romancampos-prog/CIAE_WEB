@@ -1,4 +1,4 @@
-import { MESES_CORTOS } from '@indShared/constantes/meses';
+import { MESES_CORTOS } from '../../shared/constantes/meses';
 
 export const TOTAL_KEY = 'TOTAL OOAD';
 

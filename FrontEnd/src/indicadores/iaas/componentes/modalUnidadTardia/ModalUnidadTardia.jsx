@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { completarUnidadTardia } from '../../api/IASS';
-import { UploadIcon, XIcon, FileIcon } from '@indShared/componentes/Icons';
+import { UploadIcon, XIcon, FileIcon } from '../../../shared/componentes/Icons';
 import './ModalUnidadTardia.css';
 
 const TODOS_IND = ['IAAS 01', 'IAAS 02', 'IAAS 03', 'IAAS 04', 'IAAS 05', 'IAAS 06'];

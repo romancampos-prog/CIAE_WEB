@@ -1,4 +1,4 @@
-import { MESES_CORTOS } from '@indShared/constantes/meses';
+import { MESES_CORTOS } from '../../shared/constantes/meses';
 
 /**
  * Construye los puntos de la gráfica de tendencia mensual para una unidad FTP.

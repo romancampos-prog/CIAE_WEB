@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getFTPDatosGrafica, getIndicador } from '../api/indicadores';
-import { getReporte, generarCategoria } from '@indReportes/api/reportes';
-import { descargarB64 } from '@indShared/utilidades/download';
-import { MESES_LARGOS_ARR } from '@indShared/constantes/meses';
+import { getReporte, generarCategoria } from '../../reportes_grafica/api/reportes';
+import { descargarB64 } from '../../shared/utilidades/download';
+import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 import { CAT_COLOR } from '../constantes/colores';
 import {
   buildFTPChartDataUnidad,
@@ -11,17 +11,17 @@ import {
 } from '../utils/calculos';
 
 /**
- * Hook principal de gráficas FTP.
- * Carga la lista de indicadores, los datos históricos del indicador seleccionado y
+ * Hook principal de grÃ¡ficas FTP.
+ * Carga la lista de indicadores, los datos histÃ³ricos del indicador seleccionado y
  * calcula los datasets para las vistas por unidad y por mes.
  *
  * Puede operar en modo controlado (indicador gestionado desde el componente padre)
  * o en modo independiente (el hook gestiona su propio `indSel`).
  *
- * @param {number|null} hoveredMes - Mes sobre el que el usuario tiene el cursor (para el semáforo)
+ * @param {number|null} hoveredMes - Mes sobre el que el usuario tiene el cursor (para el semÃ¡foro)
  * @param {string} [extIndSel] - Indicador seleccionado externamente (modo controlado)
  * @param {Function} [onExtChange] - Callback al cambiar el indicador en modo controlado
- * @returns {Object} Estado y datos listos para renderizar las gráficas
+ * @returns {Object} Estado y datos listos para renderizar las grÃ¡ficas
  */
 export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const controlled = extIndSel !== undefined;
@@ -39,7 +39,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const [vistaGrafica, setVistaGrafica] = useState('unidad');
   const [mesSel, setMesSel]             = useState('');
 
-  /** Carga inicial de la lista de indicadores agrupados por categoría */
+  /** Carga inicial de la lista de indicadores agrupados por categorÃ­a */
   useEffect(() => {
     getAllIndicadores().then(res => {
       const lista = res?.data ?? {};
@@ -51,7 +51,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     }).catch(() => {});
   }, []);
 
-  /** Recarga datos históricos y ficha técnica cuando cambia el indicador o el año */
+  /** Recarga datos histÃ³ricos y ficha tÃ©cnica cuando cambia el indicador o el aÃ±o */
   useEffect(() => {
     if (!indSel) return;
     setCargando(true);
@@ -101,7 +101,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     [chartDataMes]
   );
 
-  /** Color de semáforo de cada unidad en el último mes disponible */
+  /** Color de semÃ¡foro de cada unidad en el Ãºltimo mes disponible */
   const unidadesStatus = useMemo(() => {
     if (!datos?.unidades) return [];
     const ultimoMes = datos.meses_con_datos?.[datos.meses_con_datos.length - 1];
@@ -120,14 +120,14 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     ? (hoveredMes ?? ultimoMesNum)
     : parseInt(mesSel || '1');
 
-  /** True cuando el indicador tiene umbrales de semáforo por mes (ej. CACU) */
+  /** True cuando el indicador tiene umbrales de semÃ¡foro por mes (ej. CACU) */
   const esSemPorMes = useMemo(() => {
     const sem = indInfo?.semaforo;
     if (!sem) return false;
     return MESES_LARGOS_ARR.some(m => m in sem);
   }, [indInfo]);
 
-  /** Textos de semáforo formateados para el mes/unidad activa */
+  /** Textos de semÃ¡foro formateados para el mes/unidad activa */
   const rangosSem = useMemo(
     () => calcularRangosFTP(indInfo, mesParaSem, MESES_LARGOS_ARR),
     [indInfo, mesParaSem]
@@ -137,7 +137,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const categoria = indSel?.split(' ')[0] ?? '';
 
   /**
-   * Descarga el Excel de un indicador específico para un mes dado.
+   * Descarga el Excel de un indicador especÃ­fico para un mes dado.
    * @param {string} mes - Mes en formato "MM"
    */
   const descargarIndicador = async (mes) => {
@@ -151,7 +151,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   };
 
   /**
-   * Descarga el Excel de todos los indicadores de una categoría para un mes dado.
+   * Descarga el Excel de todos los indicadores de una categorÃ­a para un mes dado.
    * @param {string} mes - Mes en formato "MM"
    */
   const descargarCategoria = async (mes) => {

@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene la lista de indicadores IAAS disponibles en el sistema.

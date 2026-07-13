@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@auth/contexto/AuthContext';
-import { useRol } from '@auth/hooks/useRol';
+import { useAuth } from '../../../auth/contexto/AuthContext';
+import { useRol } from '../../../auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
 import './ftp.css';
 import { getGreeting } from '../utils/horario';
@@ -70,7 +70,7 @@ const FTPLanding = () => {
         <div className="ftp-hub-cards">
 
           {/* Ver datos */}
-          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/FTP/Graficas')}>
+          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/Graficas')}>
             <div className="hc-header hc-header--green">
               <div className="hc-icon-box hc-icon-box--green">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

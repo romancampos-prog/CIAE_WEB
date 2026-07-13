@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene el estado actual del pipeline de dengue (corriendo, paso, completado, error, último reporte).

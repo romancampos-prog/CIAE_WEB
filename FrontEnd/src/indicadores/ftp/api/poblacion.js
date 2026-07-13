@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Sube el archivo de población al servidor para actualizar los denominadores de todos los indicadores FTP.

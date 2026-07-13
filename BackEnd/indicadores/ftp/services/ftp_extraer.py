@@ -74,8 +74,80 @@ def registrar_error(logErrores, id_error, unidad, repo, ruta_afectada):
         })
 
 
+def _diagnosticar_segmento(ftp, buscado: str) -> str:
+    import difflib
+
+    try:
+        disponibles = ftp.nlst()
+    except Exception:
+        return "no se pudo listar el directorio padre"
+
+    if not disponibles:
+        return "el directorio padre está vacío"
+
+    b = buscado
+    b_strip  = b.strip()
+    b_lower  = b.lower()
+    b_snorm  = b_strip.lower()
+
+    for d in disponibles:
+        d_strip = d.strip()
+        d_lower = d.lower()
+        d_snorm = d_strip.lower()
+
+        # Coincidencia exacta — problema de permisos
+        if d == b:
+            return "la carpeta existe pero no se pudo acceder (¿permisos?)"
+
+        # Sólo espacios en el buscado
+        if d == b_strip and b != b_strip:
+            lados = []
+            if b.startswith(' '): lados.append(f"{len(b) - len(b.lstrip())} al inicio")
+            if b.endswith(' '):   lados.append(f"{len(b) - len(b.rstrip())} al final")
+            return f"espacio(s) extra en la ruta buscada ({', '.join(lados)}) — real: '{d}'"
+
+        # Sólo espacios en la carpeta del FTP
+        if d_strip == b and d != d_strip:
+            lados = []
+            if d.startswith(' '): lados.append(f"{len(d) - len(d.lstrip())} al inicio")
+            if d.endswith(' '):   lados.append(f"{len(d) - len(d.rstrip())} al final")
+            return f"la carpeta en el FTP tiene espacio(s) extra ({', '.join(lados)}) — real: '{d}'"
+
+        # Espacios en ambos lados pero coinciden al quitar espacios
+        if d_strip == b_strip and (d != d_strip or b != b_strip):
+            return f"espacios extra en ambos lados — real en FTP: '{d}', buscado: '{b}'"
+
+        # Sólo diferencia de mayúsculas/minúsculas (sin espacios)
+        if d_lower == b_lower and d != b:
+            difs = [f"pos {i}: '{x}'→'{y}'" for i, (x, y) in enumerate(zip(d, b)) if x != y]
+            return f"mayúsculas distintas — real: '{d}' · diferencias: {', '.join(difs)}"
+
+        # Mayúsculas + espacios combinados
+        if d_snorm == b_snorm and d != b:
+            return f"mayúsculas/espacios distintos — real: '{d}', buscado: '{b}'"
+
+    # Búsqueda de la carpeta más parecida con difflib
+    candidatos = difflib.get_close_matches(b, disponibles, n=1, cutoff=0.55)
+    if candidatos:
+        c = candidatos[0]
+        difs = []
+        for i, (x, y) in enumerate(zip(b, c)):
+            if x != y:
+                difs.append(f"pos {i}: '{x}'→'{y}'")
+        if len(b) != len(c):
+            difs.append(f"longitud {len(b)} vs {len(c)}")
+        detalle = ", ".join(difs[:4]) if difs else "nombres muy similares"
+        pct = int(difflib.SequenceMatcher(None, b.lower(), c.lower()).ratio() * 100)
+        return f"carpeta más parecida: '{c}' ({pct}% similar) — {detalle}"
+
+    # Sin candidatos: mostrar lo disponible en ese nivel
+    muestra = ", ".join(f"'{d}'" for d in disponibles[:6])
+    sufijo  = f" … ({len(disponibles)} en total)" if len(disponibles) > 6 else ""
+    return f"no existe en este nivel — carpetas disponibles: {muestra}{sufijo}"
+
+
 def _navegar_ruta(ftp, carpeta_remota: str):
-    """Navega la ruta segmento por segmento. Retorna (True, None) o (False, segmento_que_fallo)."""
+    """Navega la ruta segmento por segmento. Retorna (True, None, None) o (False, segmento, diagnostico)."""
     ftp.cwd('/')
     for segmento in carpeta_remota.split("/"):
         if not segmento:
@@ -83,8 +155,9 @@ def _navegar_ruta(ftp, carpeta_remota: str):
         try:
             ftp.cwd(segmento)
         except Exception:
-            return False, segmento
-    return True, None
+            diagnostico = _diagnosticar_segmento(ftp, segmento)
+            return False, segmento, diagnostico
+    return True, None, None
 
 
 def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionarioGlobal, logErrores, subcarpeta_base, meses_mapeo=None):
@@ -101,9 +174,9 @@ def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionari
             carpeta_remota = f"01. DATAMARTEM/ArchsData_Previos_{ano}/{ano}{mes}/{unidad_ruta}/1.SIAIS_Reportes/Semana_{s_val}/{subcarpeta_base}_S{s_val}"
 
         try:
-            ok, seg_fallido = _navegar_ruta(ftp, carpeta_remota)
+            ok, seg_fallido, diag = _navegar_ruta(ftp, carpeta_remota)
             if not ok:
-                ruta_log = f"{carpeta_remota}  ✗ fallo en: '{seg_fallido}'"
+                ruta_log = f"{carpeta_remota}  ✗ fallo en: '{seg_fallido}' — {diag}"
                 registrar_error(logErrores, "RUTA_INVALIDA", nombre_final, repo, ruta_log)
                 diccionarioGlobal[nombre_final][repo] = None
                 continue
@@ -197,9 +270,9 @@ def ExtraerPB(ftp, repo, ano, infoReporte, diccionarioGlobal, logErrores, meses_
         nombre_final     = nombres_destino[i]
 
         try:
-            ok, seg_fallido = _navegar_ruta(ftp, carpeta_pb)
+            ok, seg_fallido, diag = _navegar_ruta(ftp, carpeta_pb)
             if not ok:
-                ruta_log = f"{carpeta_pb}  ✗ fallo en: '{seg_fallido}'"
+                ruta_log = f"{carpeta_pb}  ✗ fallo en: '{seg_fallido}' — {diag}"
                 registrar_error(logErrores, "RUTA_INVALIDA", nombre_final, repo, ruta_log)
                 continue
 

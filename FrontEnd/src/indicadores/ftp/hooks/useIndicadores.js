@@ -1,18 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getIndicador } from '../api/indicadores';
-import { getReporte, getMesesGenerados, generarCategoria } from '@indReportes/api/reportes';
-import { descargarB64 } from '@indShared/utilidades/download';
-import { MESES_LARGOS } from '@indShared/constantes/meses';
+import { getReporte, getMesesGenerados, generarCategoria } from '../../reportes_grafica/api/reportes';
+import { descargarB64 } from '../../shared/utilidades/download';
+import { MESES_LARGOS } from '../../shared/constantes/meses';
 import { COLORS } from '../constantes/colores';
 import { calcularMesesDisponibles, calcularSemDataFTP } from '../utils/calculos';
 
 /**
- * Hook de generación de indicadores FTP.
- * Gestiona la selección de categoría, indicador, período y tipo (previo/final),
- * y expone las funciones para generar un indicador individual o toda la categoría.
+ * Hook de generaciÃ³n de indicadores FTP.
+ * Gestiona la selecciÃ³n de categorÃ­a, indicador, perÃ­odo y tipo (previo/final),
+ * y expone las funciones para generar un indicador individual o toda la categorÃ­a.
  *
  * @param {{ user: string, rol: string }|null} user - Usuario autenticado
- * @returns {Object} Estado y acciones del panel de generación
+ * @returns {Object} Estado y acciones del panel de generaciÃ³n
  */
 export function useIndicadores(user) {
   const esVisor = user?.rol !== 'admin' && user?.rol !== 'trabajador_ftp';
@@ -40,7 +40,7 @@ export function useIndicadores(user) {
   const [resultadoBatch, setResultadoBatch] = useState(null);
   const [modalPoblacion, setModalPoblacion] = useState(false);
 
-  /** Carga inicial de todos los indicadores agrupados por categoría */
+  /** Carga inicial de todos los indicadores agrupados por categorÃ­a */
   useEffect(() => {
     getAllIndicadores()
       .then(res => {
@@ -52,7 +52,7 @@ export function useIndicadores(user) {
       .finally(() => setCargandoLista(false));
   }, []);
 
-  /** Persiste la categoría en sessionStorage y limpia el estado derivado al cambiarla */
+  /** Persiste la categorÃ­a en sessionStorage y limpia el estado derivado al cambiarla */
   useEffect(() => {
     sessionStorage.setItem('categoria_actual', categoria);
     setInfoIndicador(null);
@@ -60,7 +60,7 @@ export function useIndicadores(user) {
     setResultadoBatch(null);
   }, [categoria]);
 
-  /** Carga la ficha técnica del indicador seleccionado */
+  /** Carga la ficha tÃ©cnica del indicador seleccionado */
   useEffect(() => {
     if (!indicadorSel) { setInfoIndicador(null); return; }
     getIndicador(indicadorSel).then(res => setInfoIndicador(res.data)).catch(console.error);
@@ -81,13 +81,13 @@ export function useIndicadores(user) {
     });
   }, [datos.mes, datos.ano, indicadorSel, tipo]);
 
-  /** Meses disponibles para selección según rol, tipo de reporte y fecha actual */
+  /** Meses disponibles para selecciÃ³n segÃºn rol, tipo de reporte y fecha actual */
   const mesesDisponibles = useMemo(() => {
     const todos = Object.entries(MESES_LARGOS);
     return calcularMesesDisponibles(todos, datos.ano, { anioActual, esVisor, diaActual, mesActualNum, tipo });
   }, [datos.ano, anioActual, mesActualNum, diaActual, esVisor, tipo]);
 
-  /** Textos de semáforo del indicador seleccionado para el mes activo */
+  /** Textos de semÃ¡foro del indicador seleccionado para el mes activo */
   const semData = useMemo(
     () => calcularSemDataFTP(infoIndicador, datos.mes, MESES_LARGOS),
     [infoIndicador, datos.mes]
@@ -100,8 +100,8 @@ export function useIndicadores(user) {
   const canBatch    = !!datos.mes && !cargando && !cargandoBatch && indicadores.length > 0;
 
   /**
-   * Genera el reporte del indicador seleccionado para el período configurado.
-   * Si hay meses previos sin reporte, pide confirmación antes de proceder.
+   * Genera el reporte del indicador seleccionado para el perÃ­odo configurado.
+   * Si hay meses previos sin reporte, pide confirmaciÃ³n antes de proceder.
    * Muestra el modal de restricciones si el backend lo reporta.
    */
   async function generarReporte() {
@@ -124,12 +124,12 @@ export function useIndicadores(user) {
       } else {
         alert(res.message || 'Error al generar el reporte.');
       }
-    } catch { alert('Error de conexión con el servidor.'); }
+    } catch { alert('Error de conexiÃ³n con el servidor.'); }
     finally { setCargando(false); }
   }
 
   /**
-   * Genera todos los indicadores de la categoría activa en un único Excel.
+   * Genera todos los indicadores de la categorÃ­a activa en un Ãºnico Excel.
    * Muestra el modal de restricciones si el backend lo reporta.
    */
   async function generarTodos() {
@@ -147,9 +147,9 @@ export function useIndicadores(user) {
           setMostrarRestricciones(true);
         }
       } else {
-        alert(res.message || 'Error al generar la categoría.');
+        alert(res.message || 'Error al generar la categorÃ­a.');
       }
-    } catch { alert('Error de conexión con el servidor.'); }
+    } catch { alert('Error de conexiÃ³n con el servidor.'); }
     finally { setCargandoBatch(false); }
   }
 

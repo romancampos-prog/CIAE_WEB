@@ -1,14 +1,14 @@
 import './config.css';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getIndicador } from '@ftp/api/indicadores';
+import { getIndicador } from '../../ftp/api/indicadores';
 import { getReporte, getMesesGenerados } from '../api/reportes';
-import ModalLoading from '@shared/componentes/modal/ModalCargando';
+import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalExito from '../componentes/modal/ModalExito';
 import ToastWarning from '../componentes/avisos/ToastWarning';
 import logo_imss from '../../../assets/logo_imms.png';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
-import { useAuth } from '@auth/contexto/AuthContext';
+import { useAuth } from '../../../auth/contexto/AuthContext';
 
 const ConfiguracionReporte = () => {
   const navigate   = useNavigate();
@@ -389,7 +389,7 @@ const ConfiguracionReporte = () => {
         onConfirm={() => setExito({...exito, abierto: false})}
         onClose={() => { setExito({...exito, abierto: false}); navigate('/CIAE/IndicadoresMedicos'); }}
         PageGraficar={() => {
-          navigate('/CIAE/IndicadoresMedicos/GraficaReporte', {
+          navigate('/CIAE/IndicadoresMedicos/Grafica/GraficaReporte', {
             state: {
               Indicador: indicadorSel,
               semaforo:  semData,
@@ -402,7 +402,7 @@ const ConfiguracionReporte = () => {
       />
       <ToastWarning
         visible={mostrarToast}
-        onClick={() => navigate('/CIAE/IndicadoresMedicos/Restricciones', { state: { restricciones: exito.restricciones, indicador: indicadorSel } })}
+        onClick={() => navigate('/CIAE/IndicadoresMedicos/Grafica/Restricciones', { state: { restricciones: exito.restricciones, indicador: indicadorSel } })}
         onClose={() => setMostrarToast(false)}
       />
 

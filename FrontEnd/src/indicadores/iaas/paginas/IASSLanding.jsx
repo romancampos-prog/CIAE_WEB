@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@auth/contexto/AuthContext';
-import { useRol } from '@auth/hooks/useRol';
+import { useAuth } from '../../../auth/contexto/AuthContext';
+import { useRol } from '../../../auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
 import { getIASSMesesGuardados } from '../api/IASS';
-import './IASS.css';
+import './iass.css';
 
 const NOMBRES_MESES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -93,7 +93,7 @@ const IASSLanding = () => {
           {/* Ver datos */}
           <div
             className={`home-card${!mesesGuardados?.length ? ' home-card--disabled' : ''}`}
-            onClick={() => { if (mesesGuardados?.length) navigate('/CIAE/IndicadoresMedicos/IASS/Datos'); }}
+            onClick={() => { if (mesesGuardados?.length) navigate('/CIAE/IndicadoresMedicos/Graficas'); }}
           >
             <div className="hc-header hc-header--green">
               <div className="hc-icon-box hc-icon-box--green">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '@paginas/restricciones/restricciones.css';
+import '../../../../paginas/restricciones/restricciones.css';
 import './modalRestricciones.css';
 
 const SEVERIDAD = {

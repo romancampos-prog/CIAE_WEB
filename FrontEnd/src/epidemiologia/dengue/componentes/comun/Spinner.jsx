@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import corgiGif from '../../../assets/corgi.gif'
+import corgiGif from '../../../../assets/corgi.gif'
 
 const MENSAJES = [
   'Cargando datos…',

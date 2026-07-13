@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene los datos del canal endémico: casos actuales, semanas y alertas históricas.

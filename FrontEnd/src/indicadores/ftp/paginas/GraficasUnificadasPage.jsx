@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../../assets/logo_imms.png';
-import { useAuth } from '@auth/contexto/AuthContext';
+import { useAuth } from '../../../auth/contexto/AuthContext';
 import { getAllIndicadores } from '../api/indicadores';
 import { CAT_COLOR } from '../constantes/colores';
-import { INDICADORES as IASS_INDS } from '@iass/constantes/colores';
+import { INDICADORES as IASS_INDS } from '../../iaas/constantes/colores';
 import FTPGraficasContenido from '../componentes/graficasFTP/FTPGraficasContenido';
-import IASSGraficasContenido from '@iass/componentes/IASSGraficasContenido';
+import IASSGraficasContenido from '../../iaas/componentes/IASSGraficasContenido';
 import './ftp.css';
-import '@indShared/estilos/graficas.css';
+import '../../shared/estilos/graficas.css';
 
 import iconoCama  from '../../../assets/icono_cama.png';
 import iconoCacu  from '../../../assets/icono_cacu.png';

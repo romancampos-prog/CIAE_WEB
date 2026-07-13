@@ -2,9 +2,9 @@ import './ftp.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../../assets/logo_imms.png';
-import { useAuth } from '@auth/contexto/AuthContext';
-import { useRol } from '@auth/hooks/useRol';
-import NavCard from '@shared/componentes/NavCard';
+import { useAuth } from '../../../auth/contexto/AuthContext';
+import { useRol } from '../../../auth/hooks/useRol';
+import NavCard from '../../../shared/componentes/NavCard';
 
 const UploadIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

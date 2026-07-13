@@ -1,23 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@auth/contexto/AuthContext';
-import { useRol } from '@auth/hooks/useRol';
+import { useAuth } from '../../../auth/contexto/AuthContext';
+import { useRol } from '../../../auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
 import { getUnidadesIASS, getIndicadoresIASS, generarIASS, getSesionIASS } from '../api/IASS';
-import { descargarB64 } from '@indShared/utilidades/download';
+import { descargarB64 } from '../../shared/utilidades/download';
 import { mesDisponible, calcularFaltantes } from '../utils/calculos';
-import { UploadIcon, CheckIcon, XIcon, FileIcon } from '@indShared/componentes/Icons';
-import ModalLoading from '@shared/componentes/modal/ModalCargando';
+import { UploadIcon, CheckIcon, XIcon, FileIcon } from '../../shared/componentes/Icons';
+import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalUnidadTardia from '../componentes/modalUnidadTardia/ModalUnidadTardia';
 import IASSErrorToast from './IASSErrorToast';
 import IASSValidacionPanel from './IASSValidacionPanel';
-import './IASS.css';
-
-/**
- * Página de captura y generación de reportes IAAS.
- * Permite al usuario cargar el Excel global de IAAS 01, los Excels por unidad y
- * los denominadores manuales de IAAS 02–06 para generar los 6 reportes del período.
- * Solo visible para roles con permiso `puedeGenIASS`.
+import './iass.css';
  */
 const IASSPage = () => {
   const navigate = useNavigate();
@@ -153,7 +147,7 @@ const IASSPage = () => {
           <div className="ia-nav-left">
             <img src={logo_imss} alt="IMSS" className="ia-logo" />
             <div className="ia-nav-sep" />
-            <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/Generar')}>
+            <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS')}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
               </svg>

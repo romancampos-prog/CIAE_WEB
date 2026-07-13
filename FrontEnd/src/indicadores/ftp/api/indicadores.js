@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene todos los indicadores FTP agrupados por categoría.

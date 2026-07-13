@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getIASSDatosGrafica, descargarIASSGuardado, infoBasicaInAass } from '../api/IASS';
-import { descargarB64 } from '@indShared/utilidades/download';
-import { MESES_CORTOS } from '@indShared/constantes/meses';
+import { descargarB64 } from '../../shared/utilidades/download';
+import { MESES_CORTOS } from '../../shared/constantes/meses';
 import { COLOR_IND, HGS_COLOR, HGS_BG } from '../constantes/colores';
-import { COLOR_SEMAFORO } from '@indShared/constantes/semaforo';
+import { COLOR_SEMAFORO } from '../../shared/constantes/semaforo';
 import {
   TOTAL_KEY,
   calcularColorIASS,

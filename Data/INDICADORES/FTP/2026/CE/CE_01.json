@@ -1483,10 +1483,10 @@
         "%": null
       },
       "HGSMF 07 SN FCO DEL RINCO": {
-        "numerador": null,
-        "denominador": null,
-        "color": "Gris",
-        "%": null
+        "numerador": 1200,
+        "denominador": 75,
+        "color": "Verde",
+        "%": 16.0
       },
       "UMF 27 PURISIMA": {
         "numerador": 1125,
@@ -1609,10 +1609,10 @@
         "%": null
       },
       "TOTAL": {
-        "numerador": 58742,
-        "denominador": 3290,
+        "numerador": 59942,
+        "denominador": 3365,
         "color": "Verde",
-        "%": 1785.47
+        "%": 1781.34
       }
     }
   }

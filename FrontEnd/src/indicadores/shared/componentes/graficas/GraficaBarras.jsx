@@ -2,7 +2,7 @@ import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell, LabelList,
 } from 'recharts';
-import ChartTooltip from '@ftp/componentes/graficasFTP/ChartTooltip';
+import ChartTooltip from '../../../ftp/componentes/graficasFTP/ChartTooltip';
 import { COLOR_SEMAFORO } from '../../constantes/semaforo';
 
 /**

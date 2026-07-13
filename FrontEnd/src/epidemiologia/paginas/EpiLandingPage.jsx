@@ -1,7 +1,11 @@
+// react
 import { useNavigate } from 'react-router-dom'
-import DengueHeader from '../componentes/plantilla/Header'
-import NavCard from '@shared/componentes/NavCard'
-import '@paginas/inicio/inicio.css'
+// propios
+import { useAuth } from '../../auth/contexto/AuthContext'
+import NavCard from '../../shared/componentes/NavCard'
+import logo from '../../assets/logo_imms.png'
+import '../../paginas/inicio/inicio.css'
+import '../epi.css'
 
 const IconMosquito = () => (
   <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,12 +29,9 @@ const IconMosquito = () => (
 )
 
 
-/**
- * Pantalla de selección de enfermedad en el módulo Epidemiología.
- * Muestra tarjetas de navegación: una activa (Dengue) y las pendientes de desarrollo.
- */
 export default function EpiLandingPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   return (
     <div className="epi-root">
@@ -39,7 +40,29 @@ export default function EpiLandingPage() {
       <div className="epi-blob epi-blob-3" aria-hidden="true" />
       <div className="epi-grid"            aria-hidden="true" />
 
-      <DengueHeader />
+      <header className="epi-topbar">
+        <div className="epi-topbar-left">
+          <img src={logo} alt="IMSS" style={{ height: 38 }} />
+          <div className="epi-nav-divider" />
+          <span className="epi-nav-label">Vigilancia Epidemiológica</span>
+        </div>
+        <div className="epi-topbar-right">
+          {user && (
+            <div className="epi-user-chip">
+              <span className="epi-user-dot" />
+              <span>{user.user || 'Usuario'}</span>
+            </div>
+          )}
+          <button className="epi-btn-back" onClick={() => navigate('/CIAE/Inicio')}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Inicio
+          </button>
+        </div>
+      </header>
 
       <main style={{
         flex: 1,

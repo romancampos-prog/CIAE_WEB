@@ -3,7 +3,7 @@ import UploadCard from '../componentes/carga/UploadCard'
 import { subirOperativa, subirSiscep } from '../api/archivos'
 import { usePipeline } from '../contexto/PipelineContext'
 import ReporteToast from '../componentes/comun/ReporteToast'
-import corgiGif from '../../assets/corgi.gif'
+import corgiGif from '../../../assets/corgi.gif'
 
 const PASOS_MSGS = [
   'Analizando bases de datos…',

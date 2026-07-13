@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import GBarras from '@ftp/componentes/graficasFTP/GBarras';
-import FilterPanel from '@ftp/componentes/graficasFTP/FilterPanel';
+import GBarras from '../../ftp/componentes/graficasFTP/GBarras';
+import FilterPanel from '../../ftp/componentes/graficasFTP/FilterPanel';
 import logo_imss from '../../../assets/logo_imms.png';
 import './pageGrafica.css';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
-import { getIndicador } from '@ftp/api/indicadores';
+import { getIndicador } from '../../ftp/api/indicadores';
 
 export default function PageGrafica() {
   const location  = useLocation();
@@ -48,8 +48,8 @@ export default function PageGrafica() {
   const esDescendente    = semaforo?.Alto !== undefined;
 
   const handleVolver = () => {
-    if (retornoSeguro) navigate('/CIAE/IndicadoresMedicos/Config', { state: { indicador: Indicador, retornoSeguro } });
-    else navigate(-1);
+    if (retornoSeguro) navigate('/CIAE/IndicadoresMedicos/Grafica/Config', { state: { indicador: Indicador, retornoSeguro } });
+    else navigate('/CIAE/IndicadoresMedicos/Grafica/Config');
   };
 
   return (

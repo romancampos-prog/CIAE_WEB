@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useRol } from '@auth/hooks/useRol';
+import { useRol } from '../../../../auth/hooks/useRol';
 import { useFTPGrafica } from '../../hooks/useFTPGrafica';
-import GraficaBarras  from '@indShared/componentes/graficas/GraficaBarras';
-import PanelUnidades  from '@indShared/componentes/graficas/PanelUnidades';
-import SemaforoUmbral from '@indShared/componentes/graficas/SemaforoUmbral';
-import VistaToggle    from '@indShared/componentes/graficas/VistaToggle';
-import { MESES_CORTOS, MESES_LARGOS } from '@indShared/constantes/meses';
+import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
+import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
+import SemaforoUmbral from '../../../shared/componentes/graficas/SemaforoUmbral';
+import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
+import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 
 const VISTAS_FTP = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },

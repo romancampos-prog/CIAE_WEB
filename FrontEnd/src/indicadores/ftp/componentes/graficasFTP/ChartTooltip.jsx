@@ -1,4 +1,4 @@
-import { COLOR_SEMAFORO } from '@indShared/constantes/semaforo';
+import { COLOR_SEMAFORO } from '../../../shared/constantes/semaforo';
 
 export default function ChartTooltip({ active, payload, label, indSel }) {
   if (!active || !payload?.length) return null;

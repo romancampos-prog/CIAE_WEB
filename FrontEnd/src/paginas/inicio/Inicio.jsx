@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useAuth } from '@auth/contexto/AuthContext';
+import { useAuth } from '../../auth/contexto/AuthContext';
 import logo_imss from '../../assets/logo_imms.png';
-import NavCard from '@shared/componentes/NavCard';
+import NavCard from '../../shared/componentes/NavCard';
 import "./inicio.css";
 
 const getGreeting = () => {

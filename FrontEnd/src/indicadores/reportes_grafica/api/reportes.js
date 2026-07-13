@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 export const getMesesGenerados = async (indicador, ano) => {
     try {

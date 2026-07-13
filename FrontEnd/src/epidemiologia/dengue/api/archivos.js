@@ -1,4 +1,4 @@
-import api from '@shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Sube el archivo de base operativa (SINAVE) para el análisis de dengue.

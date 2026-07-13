@@ -2,9 +2,9 @@ import './ftp.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../../assets/logo_imms.png';
-import { useAuth } from '@auth/contexto/AuthContext';
-import { useRol } from '@auth/hooks/useRol';
-import NavCard from '@shared/componentes/NavCard';
+import { useAuth } from '../../../auth/contexto/AuthContext';
+import { useRol } from '../../../auth/hooks/useRol';
+import NavCard from '../../../shared/componentes/NavCard';
 import { getGreeting } from '../utils/horario';
 
 const IconDay = () => (

@@ -1,14 +1,14 @@
 import { Routes, Route } from 'react-router-dom'
-import { PipelineProvider } from '../contexto/PipelineContext'
-import DengueLayout from '../componentes/plantilla/Layout'
+import { PipelineProvider } from '../dengue/contexto/PipelineContext'
+import DengueLayout from '../dengue/componentes/plantilla/Layout'
 import EpiLandingPage from './EpiLandingPage'
-import CargaPage from './CargaPage'
-import CanalPage from './CanalPage'
-import MapaPage from './MapaPage'
-import AlertasSiscepPage from './AlertasSiscepPage'
-import DuplicadosPage from './DuplicadosPage'
+import CargaPage from '../dengue/paginas/CargaPage'
+import CanalPage from '../dengue/paginas/CanalPage'
+import MapaPage from '../dengue/paginas/MapaPage'
+import AlertasSiscepPage from '../dengue/paginas/AlertasSiscepPage'
+import DuplicadosPage from '../dengue/paginas/DuplicadosPage'
 import '../epi.css';
-import '../dengue.css';
+import '../dengue/dengue.css';
 
 /**
  * Punto de entrada del módulo Epidemiología.

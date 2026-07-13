@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { AuthProvider } from '@auth/contexto/AuthContext';
-import Inicio from '@paginas/inicio/Inicio';
-import Login from '@auth/paginas/Auth';
-import Footer from '@shared/componentes/Footer';
-import ProtectedRoute from '@auth/componentes/RouteProtected';
-import IndicadoresRoutes from '@ftp/routes/IndicadoresRoutes';
-import EpiRoutes from '@epi/routes/EpiRoutes';
+import { AuthProvider } from '../auth/contexto/AuthContext';
+import Inicio from '../paginas/inicio/Inicio';
+import Login from '../auth/paginas/Auth';
+import Footer from '../shared/componentes/Footer';
+import ProtectedRoute from '../auth/componentes/RouteProtected';
+import IndicadoresRoutes from '../indicadores/routes/IndicadoresRoutes';
+import EpiRoutes from '../epidemiologia/routes/EpiRoutes';
 
 const ProtectedLayout = () => (
   <ProtectedRoute>
