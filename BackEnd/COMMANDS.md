@@ -1,20 +1,42 @@
-# Comandos del proyecto BackEnd
+# Comandos — Backend
 
-## Primera vez (solo una vez) -- se uso para crear un entorno virtual para las dependicas con py
-python -m venv venv    
-pip install -r requirements.txt
+> Referencia completa (versiones, frontend, PM2, producción) en `/COMMANDS.md` (raíz del proyecto).
 
-## #------- PARA TRABAJAR EN EL PROYECTO EJECUTARE EN ORDEN -------# 
-## Cada vez que abres el proyecto
-venv\Scripts\activate.bat
+## Activar entorno virtual
+
+```bash
+# Windows
 venv\Scripts\activate
 
-## Iniciar el servidor  --servidor trabajando en el puerto 8005
-uvicorn main:app --reload --port 8005
+# Linux / Mac
+source venv/bin/activate
+```
 
-## Cuando instalas una librería nueva
+## Iniciar servidor de desarrollo
+
+```bash
+uvicorn main:app --reload --port 8005
+```
+
+> API en `http://localhost:8005` · Docs en `http://localhost:8005/docs`
+
+## Instalar nueva librería
+
+```bash
 pip install nombre-libreria
 pip freeze > requirements.txt
+```
+
+## Primera vez (entorno nuevo)
+
+```bash
+python -m venv venv
+venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+```
 
 ## Salir del entorno virtual
+
+```bash
 deactivate
+```

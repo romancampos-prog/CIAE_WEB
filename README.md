@@ -417,3 +417,468 @@ Al reiniciar el servidor, los datos del ultimo pipeline se recuperan automaticam
 
 Solo usuarios con rol `admin` pueden ejecutar el pipeline y ver el estado.
 Los roles se configuran en `BackEnd/.env` (ver tabla de archivos no versionados arriba).
+
+---
+
+## SECCION 8 — ARQUITECTURA DEL FRONTEND
+
+### Mapa de carpetas
+
+```
+FrontEnd/src/
+│
+├── assets/               imagenes, iconos, logos
+├── auth/                 login, contexto de sesion, guards de ruta
+├── shared/               componentes globales (Footer, NavCard)
+├── paginas/              paginas que no pertenecen a ningun modulo (Inicio, Restriciones)
+├── routes/               Routes.jsx — el unico router que conoce todos los modulos
+│
+├── indicadores/          MODULO: Indicadores Medicos
+│   ├── routes/           IndicadoresRoutes.jsx
+│   ├── ftp/              sub-modulo FTP
+│   │   ├── api/          llamadas axios al backend
+│   │   ├── componentes/  piezas visuales (graficas, modales)
+│   │   ├── constantes/   colores.js
+│   │   ├── hooks/        logica reutilizable con estado
+│   │   ├── paginas/      vistas completas registradas como rutas
+│   │   ├── routes/       FTPRoutes.jsx
+│   │   └── utils/        funciones puras sin estado
+│   ├── iaas/             sub-modulo IAAS  (misma estructura que ftp/)
+│   ├── reportes_grafica/ sub-modulo Reportes/Graficas  (misma estructura)
+│   └── shared/           compartido solo entre sub-modulos de indicadores
+│
+└── epidemiologia/        MODULO: Epidemiologia
+    ├── routes/           EpiRoutes.jsx
+    ├── paginas/          EpiLandingPage, EpidemiologiaApp
+    └── dengue/           todo lo especifico de dengue (api, componentes, paginas, hooks)
+```
+
+---
+
+### Arbol de rutas completo
+
+```
+/CIAE/LOGIN
+/CIAE/Inicio
+/CIAE/IndicadoresMedicos/              → FTPPage          (hub de acceso)
+/CIAE/IndicadoresMedicos/Graficas      → GraficasUnificadasPage
+/CIAE/IndicadoresMedicos/Generar       → GenerarHub
+/CIAE/IndicadoresMedicos/FTP/          → FTPLanding
+/CIAE/IndicadoresMedicos/FTP/Generar   → IndicadoresPage
+/CIAE/IndicadoresMedicos/IASS/         → IASSLanding
+/CIAE/IndicadoresMedicos/IASS/Reporte  → IASSPage
+/CIAE/IndicadoresMedicos/Grafica/Config          → ConfigPage
+/CIAE/IndicadoresMedicos/Grafica/GraficaReporte  → pageGraficas
+/CIAE/IndicadoresMedicos/Grafica/Restricciones   → Restriciones
+/CIAE/Epidemiologia/                   → EpiLandingPage
+/CIAE/Epidemiologia/dengue/            → CargaPage
+/CIAE/Epidemiologia/dengue/canal       → CanalPage
+/CIAE/Epidemiologia/dengue/mapa/:tipo  → MapaPage
+/CIAE/Epidemiologia/dengue/alertas     → AlertasSiscepPage
+/CIAE/Epidemiologia/dengue/duplicados  → DuplicadosPage
+```
+
+El router raiz solo delega — no conoce las rutas hijas:
+
+```jsx
+// routes/Routes.jsx
+<Route path="CIAE/IndicadoresMedicos/*" element={<IndicadoresRoutes />} />
+<Route path="CIAE/Epidemiologia/*"      element={<EpiRoutes />} />
+```
+
+Cada modulo resuelve sus propias rutas internas:
+
+```jsx
+// indicadores/routes/IndicadoresRoutes.jsx
+<Routes>
+  <Route index           element={<FTPPage />} />
+  <Route path="Graficas" element={<GraficasUnificadasPage />} />
+  <Route path="FTP/*"    element={<FTPRoutes />} />   {/* delega a FTPRoutes */}
+  <Route path="IASS/*"   element={<IASSRoutes />} />  {/* delega a IASSRoutes */}
+  <Route path="Grafica/*" element={<GraficaRoutes />} />
+</Routes>
+```
+
+---
+
+### Como crear una nueva pagina
+
+Ejemplo: agregar una pagina `ResumenPage` al sub-modulo FTP.
+
+**1. Crear el archivo de la pagina**
+
+```jsx
+// indicadores/ftp/paginas/ResumenPage.jsx
+
+// react
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+// propios
+import logo from '../../../assets/logo_imms.png'
+import './ftp.css'
+
+export default function ResumenPage() {
+  const navigate = useNavigate()
+
+  useEffect(() => { document.title = 'Resumen | CIAE' }, [])
+
+  return (
+    <div className="ftp-root">
+      <header className="ftp-nav">
+        <img src={logo} alt="IMSS" className="ftp-logo" />
+        <button className="ftp-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/FTP')}>
+          Volver
+        </button>
+      </header>
+
+      <main>
+        {/* contenido */}
+      </main>
+    </div>
+  )
+}
+```
+
+**2. Registrar la ruta en FTPRoutes**
+
+```jsx
+// indicadores/ftp/routes/FTPRoutes.jsx
+
+// react
+import { Routes, Route } from 'react-router-dom'
+// propios
+import FTPMenu     from '../paginas/FTPLanding'
+import FTPGenerar  from '../paginas/IndicadoresPage'
+import ResumenPage from '../paginas/ResumenPage'   // nueva pagina
+
+export default function FTPRoutes() {
+  return (
+    <Routes>
+      <Route index          element={<FTPMenu />} />
+      <Route path="Generar" element={<FTPGenerar />} />
+      <Route path="Resumen" element={<ResumenPage />} />  {/* nueva ruta */}
+    </Routes>
+  )
+}
+```
+
+**3. Navegar hacia ella desde cualquier componente**
+
+```jsx
+navigate('/CIAE/IndicadoresMedicos/FTP/Resumen')
+```
+
+---
+
+### Reglas de codigo — Frontend
+
+#### Imports: siempre con separador de seccion
+
+```jsx
+// react
+import { useState, useEffect } from 'react'
+import { useNavigate }         from 'react-router-dom'
+// propios
+import TarjetaIndicador from '../componentes/TarjetaIndicador'
+import { CAT_COLOR }    from '../constantes/colores'
+import logo             from '../../../assets/logo_imms.png'
+import './mi-pagina.css'
+```
+
+> Sin aliases (`@/`, `@assets/`, etc.). Siempre rutas relativas desde el archivo actual.
+
+#### Navegacion: siempre rutas absolutas
+
+```jsx
+// CORRECTO — ruta absoluta
+navigate('/CIAE/IndicadoresMedicos/FTP')
+navigate('/CIAE/IndicadoresMedicos/FTP/Generar')
+navigate('/CIAE/Inicio')
+
+// INCORRECTO — nunca esto
+navigate(-1)
+navigate('Generar')
+navigate('./FTP')
+```
+
+#### Paginas vs Componentes
+
+| Tipo | Carpeta | Caracteristica |
+|---|---|---|
+| Pagina | `paginas/` | Es una ruta del router. Tiene su propio header, layout completo |
+| Componente | `componentes/` | Se importa dentro de una pagina. No aparece en ningun routes/ |
+
+Si algo solo lo usa una pagina y no aparece en routes, va en `componentes/`, no en `paginas/`.
+
+#### Sistema de colores por categoria
+
+Los colores de cada categoria de indicador se definen una sola vez en `ftp/constantes/colores.js` y se aplican via CSS custom property `--ic`:
+
+```js
+// ftp/constantes/colores.js
+export const COLORS = {
+  CAMA: '#b54870',  CACU: '#0d9488',  EH: '#691c32',
+  DM:   '#1a3a8f',  MT:   '#065f46',  CUPN: '#336699',
+}
+export const CAT_COLOR = {           // version mas oscura para contraste
+  CAMA: '#8d3456',  CACU: '#0f766e', EH: '#4e1224',
+  DM:   '#5c35a0',  MT:   '#7E0808', CUPN: '#336699',
+}
+```
+
+```jsx
+// En la pagina o componente — pasar el color como CSS variable
+<div className="mi-card" style={{ '--ic': CAT_COLOR[cat] }}>
+  <span>{indicador}</span>
+</div>
+```
+
+```css
+/* En el CSS — consumir --ic con color-mix para tintes suaves */
+.mi-card {
+  border-left: 3px solid var(--ic);
+  background:  color-mix(in srgb, var(--ic) 10%, transparent);
+}
+
+.mi-card:hover {
+  background: color-mix(in srgb, var(--ic) 18%, transparent);
+}
+```
+
+#### Comentarios: solo el "por que", nunca el "que"
+
+```jsx
+// MAL — el nombre ya dice lo que hace
+/** Componente que muestra las tarjetas de cada indicador */
+const TarjetasIndicador = () => { ... }
+
+// MAL — comentario de tarea/contexto que rota con el tiempo
+// Agregado para el flujo de generacion FINAL (issue #47)
+const [modoFinal, setModoFinal] = useState(false)
+
+// BIEN — explica una restriccion no obvia
+// El backend espera el mes como string "01".."12", no como numero
+const mesStr = String(mes).padStart(2, '0')
+```
+
+---
+
+## SECCION 9 — ARQUITECTURA DEL BACKEND
+
+### Mapa de carpetas
+
+```
+BackEnd/
+│
+├── configs/              configuracion global del sistema
+│   ├── cors.py           origenes CORS permitidos (cambiar hostname aqui)
+│   └── settings.py       DATA_DIR, variables de entorno (.env)
+│
+├── auth/                 autenticacion JWT
+│   ├── controllers/      auth_controller.py
+│   ├── models/
+│   └── services/
+│
+├── indicadores/          MODULO: Indicadores Medicos
+│   ├── __init__.py       expone ROUTERS — main.py los registra desde aqui
+│   ├── ftp/              sub-modulo FTP (descarga archivos del servidor FTP)
+│   │   ├── controllers/  un archivo por dominio, no por metodo HTTP
+│   │   ├── models/       esquemas Pydantic para validar entrada/salida
+│   │   ├── services/     logica de negocio pura
+│   │   ├── mapeo/        JSON de configuracion por indicador
+│   │   └── config.py     rutas de Data/, constantes del sub-modulo
+│   └── iaas/             sub-modulo IAAS (carga manual de Excel)
+│       ├── controllers/
+│       ├── services/
+│       └── config.py
+│
+├── epidemiologia/        MODULO: Epidemiologia
+│   ├── __init__.py       expone ROUTERS
+│   ├── controllers/
+│   ├── modulos/          algoritmos de negocio (clustering, canal, alertas)
+│   ├── services/         orquestacion de los modulos
+│   └── config.py
+│
+├── main.py               punto de entrada — registra todos los routers
+└── requirements.txt
+```
+
+---
+
+### Como fluye una peticion
+
+```
+Navegador  →  POST /ftp/generar?indicador=CAMA C1&ano=2025&mes=06
+                      │
+                      ▼
+            ftp_controller.py       recibe, valida parametros con Pydantic
+                      │
+                      ▼
+            ftp_service.py          orquesta el proceso completo
+              │         │
+              ▼         ▼
+        ftp_extraer.py   reporte_final.py
+        (descarga Excel  (calcula numerador/
+         del servidor)    denominador/resultado)
+                      │
+                      ▼
+            datos_json_service.py   guarda historico en JSON
+                      │
+                      ▼
+            generar_excel.py        construye el .xlsx
+                      │
+                      ▼
+            FileResponse con el archivo generado
+```
+
+---
+
+### Como crear un nuevo endpoint
+
+Ejemplo: agregar `GET /ftp/resumen` que devuelve un resumen de meses generados.
+
+**1. Crear el service** (logica pura, sin saber que es HTTP)
+
+```python
+# indicadores/ftp/services/resumen_service.py
+from ftp.services.datos_json_service import leer_datos_indicador
+
+def obtener_resumen(indicador: str, ano: str) -> dict:
+    datos = leer_datos_indicador(indicador, ano)
+    meses = list(datos.get("MESES", {}).keys())
+    return {"indicador": indicador, "ano": ano, "meses_generados": meses}
+```
+
+**2. Crear o agregar al controller** (solo HTTP: recibir, llamar service, responder)
+
+```python
+# indicadores/ftp/controllers/ftp_controller.py
+from fastapi import APIRouter
+from ftp.services.resumen_service import obtener_resumen
+
+router = APIRouter()
+
+@router.get("/resumen")
+def resumen(indicador: str, ano: str):
+    return obtener_resumen(indicador, ano)
+```
+
+**3. Verificar que el router ya esta registrado en `__init__.py`**
+
+```python
+# indicadores/__init__.py
+from ftp.controllers.ftp_controller import router as ftp_router
+
+ROUTERS = [
+    (ftp_router, "/ftp"),   # ya registrado — nada mas que hacer
+    ...
+]
+```
+
+El endpoint queda disponible en `/ftp/resumen?indicador=CAMA C1&ano=2025`.
+
+---
+
+### Como agregar un modulo nuevo
+
+Ejemplo: modulo `vacunacion/`.
+
+```
+BackEnd/vacunacion/
+├── __init__.py
+├── config.py
+├── controllers/
+│   └── vacunacion_controller.py
+└── services/
+    └── vacunacion_service.py
+```
+
+```python
+# vacunacion/__init__.py
+from vacunacion.controllers.vacunacion_controller import router as vac_router
+
+ROUTERS = [
+    (vac_router, "/vacunacion"),
+]
+```
+
+```python
+# main.py — agregar estas tres lineas
+import vacunacion as vac_module
+
+for _router, _prefix in vac_module.ROUTERS:
+    app.include_router(_router, prefix=_prefix)
+```
+
+---
+
+### Responsabilidad por capa
+
+| Capa | Regla |
+|---|---|
+| `controller` | Solo HTTP: recibir parametros, llamar al service, devolver respuesta. Sin logica de negocio. |
+| `service` | Solo logica: calculos, lectura/escritura de archivos, llamadas FTP. No sabe que es HTTP. |
+| `config.py` | Solo constantes y rutas de archivos del modulo. No importa otros modulos. |
+
+Un controller por dominio, nunca por metodo HTTP:
+
+```
+# CORRECTO
+ftp_controller.py        — todo lo relacionado con extraccion FTP
+reportes_controller.py   — todo lo relacionado con reportes
+poblacion_controller.py  — todo lo relacionado con poblacion
+
+# INCORRECTO
+get_controller.py
+post_controller.py
+```
+
+---
+
+### Estructura del historico JSON
+
+Los datos de cada indicador se persisten en `Data/INDICADORES/FTP/{ano}/{categoria}/{indicador}.json`:
+
+```json
+{
+  "INDICADOR": "CAMA C1",
+  "ANO": "2025",
+  "MESES": {
+    "ENERO": {
+      "HGZ01": { "numerador": 120, "denominador": 500, "%": 24.0 },
+      "HGZ02": { "numerador":  88, "denominador": 420, "%": 20.9 }
+    },
+    "FEBRERO": {
+      "HGZ01": { "numerador": 135, "denominador": 512, "%": 26.4 }
+    }
+  }
+}
+```
+
+Para leer o escribir estos archivos usar siempre `ftp/services/datos_json_service.py` — nunca acceder al JSON directamente desde un controller o service ajeno.
+
+---
+
+### Variables de entorno
+
+Todas las credenciales viven en `BackEnd/.env` (no esta en git). Se leen via `configs/settings.py`:
+
+```python
+# configs/settings.py
+from dotenv import load_dotenv
+load_dotenv()
+
+DATA_DIR = Path(os.getenv("DATA_DIR"))   # carpeta raiz de datos
+FTP_HOST = os.getenv("FTP_HOST")         # servidor FTP
+FTP_USER = os.getenv("FTP_USER")
+FTP_PASS = os.getenv("FTP_PASS")
+```
+
+```env
+# BackEnd/.env  (pedirlo al responsable del proyecto)
+DATA_DIR=C:/ROMAN_PTDAM_2026/WEB_CIAE/Data
+FTP_HOST=192.168.x.x
+FTP_USER=usuario
+FTP_PASS=contrasena
+SECRET_KEY=clave-jwt
+```

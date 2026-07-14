@@ -1,0 +1,94 @@
+{
+    "CACU 01": {
+        "fechaModificacion": "04/03/2026",
+        "titulo": "CACU 01 - Cobertura de tamizaje de primera vez de cáncer cérvico uterino en mujeres entre 25 y 64 años.",
+        "descripcionNumerador": "Número de mujeres entre 25 y 64 años, con tamizaje de cáncer cérvico uterino, a través de la prueba de papanicolau de primera vez acumuladas al mes del reporte.",
+        "descripcionDenominador": "Población de mujeres entre 25 y 64 años, adscritas a médico familiar menos Prevalencia de mujeres histerectomizadas a aplicables por grupo de edad",
+        "nombreArchivoFinal": "CACU 01",
+        "decimales": {
+            "baja": "0.59",
+            "sube": "0.60"
+        },
+        "reporte": {
+            "CP02": {
+                "hoja": "IMCPUM",
+                "modo": "INTERSECCION",
+                "columna_etiqueta": "CO",
+                "texto_buscar": "TOTAL DE LA UNIDAD",
+                "columna_dato": [
+                    "CQ"
+                ]
+            },
+            "poblacion": {
+                "modo": "JSON_POBLACION",
+                "grupo": "Mujeres",
+                "columnas": [
+                    "25  a 29",
+                    "30 a 34",
+                    "35 a 39",
+                    "40 a 44",
+                    "45 a 49",
+                    "50 a 54",
+                    "55 a 59",
+                    "60 a 64"
+                ]
+            }
+        },
+        "operacion": {
+            "numerador": "(CP02[0])",
+            "denominador": "sum([ (poblacion[0] * (1 - 0.004)), (sum(poblacion[1:3]) * (1 - 0.029)), (sum(poblacion[3:5]) * (1 - 0.109)), (sum(poblacion[5:7]) * (1 - 0.211)), (poblacion[7] * (1 - 0.295)) ])",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": 1.7,
+                "Esperado": 2.3
+            },
+            "Febrero": {
+                "Bajo": 3.4,
+                "Esperado": 4.5
+            },
+            "Marzo": {
+                "Bajo": 5.1,
+                "Esperado": 6.8
+            },
+            "Abril": {
+                "Bajo": 6.8,
+                "Esperado": 9.9
+            },
+            "Mayo": {
+                "Bajo": 8.6,
+                "Esperado": 11.3
+            },
+            "Junio": {
+                "Bajo": 10.3,
+                "Esperado": 13.5
+            },
+            "Julio": {
+                "Bajo": 12.0,
+                "Esperado": 15.8
+            },
+            "Agosto": {
+                "Bajo": 13.7,
+                "Esperado": 18.8
+            },
+            "Septiembre": {
+                "Bajo": 15.4,
+                "Esperado": 20.3
+            },
+            "Octubre": {
+                "Bajo": 17.1,
+                "Esperado": 22.5
+            },
+            "Noviembre": {
+                "Bajo": 18.8,
+                "Esperado": 24.8
+            },
+            "Diciembre": {
+                "Bajo": 20.5,
+                "Esperado": 27.0
+            }
+        },
+        "mostrar": true
+    }
+}

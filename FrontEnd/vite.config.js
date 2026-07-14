@@ -1,20 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@auth':     path.resolve(__dirname, './src/auth'),
-      '@ftp':      path.resolve(__dirname, './src/indicadores_FTP'),
-      '@iass':    path.resolve(__dirname, './src/indicadores_IASS'),
-      '@epi':      path.resolve(__dirname, './src/epidemiologia'),
-      '@reportes': path.resolve(__dirname, './src/reportes'),
-      '@shared':   path.resolve(__dirname, './src/shared'),
-    },
-  },
   server: {
     port: 5173,
     host: true,
