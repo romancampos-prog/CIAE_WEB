@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+﻿import { Fragment } from 'react';
 import { COLOR_SEMAFORO } from '../../constantes/semaforo';
 
 /**
@@ -7,7 +7,7 @@ import { COLOR_SEMAFORO } from '../../constantes/semaforo';
  * Props:
  *   rangos      — array de objetos { Verde, Amarillo, Rojo, _mes?, _label? }
  *                 FTP pasa [ rangosSem ] (uno solo)
- *                 IASS puede pasar [ rangosSem, rangosSemExtra ] (dos columnas)
+ *                 IAAS puede pasar [ rangosSem, rangosSemExtra ] (dos columnas)
  *   indColor    — string — color del indicador (para sub-etiqueta)
  */
 const SemaforoUmbral = ({ rangos = [], indColor }) => {

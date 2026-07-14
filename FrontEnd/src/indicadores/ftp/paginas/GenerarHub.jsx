@@ -1,4 +1,4 @@
-import './ftp.css';
+﻿import './ftp.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../../assets/logo_imms.png';
@@ -21,7 +21,7 @@ const UploadIcon = () => (
 const GenerarHub = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { puedeGenFTP, puedeGenIASS } = useRol();
+  const { puedeGenFTP, puedeGenIAAS } = useRol();
 
   useEffect(() => { document.title = 'Generar | CIAE'; }, []);
 
@@ -80,8 +80,8 @@ const GenerarHub = () => {
             desc="Sube archivos por unidad y genera los 6 reportes de atención a la salud en un solo paso."
             chips={['IAAS 01–06']}
             color="gold"
-            disabled={!puedeGenIASS}
-            onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS/Reporte')}
+            disabled={!puedeGenIAAS}
+            onClick={() => navigate('/CIAE/IndicadoresMedicos/IAAS/Reporte')}
           >
             <UploadIcon />
           </NavCard>

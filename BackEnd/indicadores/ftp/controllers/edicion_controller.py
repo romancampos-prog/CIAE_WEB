@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/InfoGeneral")
-async def EditarInformacionGeneral(data: InfoGeneralUpdate, payload: dict = Depends(solo_roles("admin"))):
+async def editar_informacion_general(data: InfoGeneralUpdate, payload: dict = Depends(solo_roles("admin"))):
     try:
         resultado = editar_service.editar_general(data)
         if resultado.get("status") == "error":
@@ -25,7 +25,7 @@ async def EditarInformacionGeneral(data: InfoGeneralUpdate, payload: dict = Depe
 
 
 @router.post("/infoSemaforo")
-async def EditarSemaforo(data: SemaforoUpdate, payload: dict = Depends(solo_roles("admin"))):
+async def editar_semaforo(data: SemaforoUpdate, payload: dict = Depends(solo_roles("admin"))):
     try:
         resultado = editar_service.editar_semaforo(data)
         if resultado.get("status") == "error":

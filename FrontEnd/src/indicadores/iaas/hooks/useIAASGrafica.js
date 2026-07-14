@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { getIASSDatosGrafica, descargarIASSGuardado, infoBasicaInAass } from '../api/IASS';
-import { descargarB64 } from '../../shared/utilidades/download';
+﻿import { useState, useEffect, useMemo } from 'react';
+import { getIAASDatosGrafica, descargarIAASGuardado, infoBasicaInAass } from '../api/IAAS';
+import { descargarB64 } from '../../shared/utils/download';
 import { MESES_CORTOS } from '../../shared/constantes/meses';
 import { COLOR_IND, HGS_COLOR, HGS_BG } from '../constantes/colores';
 import { COLOR_SEMAFORO } from '../../shared/constantes/semaforo';
 import {
   TOTAL_KEY,
-  calcularColorIASS,
+  calcularColorIAAS,
   calcularRangos01,
   buildChartDataUnidad,
   buildChartDataMes,
@@ -26,7 +26,7 @@ export { TOTAL_KEY };
  * @param {Function} [onExtChange] - Callback para notificar cambio de indicador al padre
  * @returns {Object} Estado y datos listos para renderizar las gráficas
  */
-export function useIASSGrafica(extIndSel, onExtChange) {
+export function useIAASGrafica(extIndSel, onExtChange) {
   const controlled = extIndSel !== undefined;
   const [anio]                            = useState('2026');
   const [datos, setDatos]                 = useState(null);
@@ -37,7 +37,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
   const setIndSel = controlled ? (onExtChange ?? (() => {})) : setLocalIndSel;
   const [cargando, setCargando]           = useState(false);
   const [descargando, setDescargando]     = useState(false);
-  const [infoAllInAass, setInfoIASS]      = useState({});
+  const [infoAllInAass, setInfoIAAS]      = useState({});
   const [vistaGrafica, setVistaGrafica]   = useState('unidad');
   const [mesSel, setMesSel]               = useState('');
 
@@ -47,15 +47,15 @@ export function useIASSGrafica(extIndSel, onExtChange) {
         setCargando(true);
         setDatos(null);
         setUnidadSel('');
-        const d = await getIASSDatosGrafica(anio);
+        const d = await getIAASDatosGrafica(anio);
         setDatos(d);
         if (d.unidades?.length > 0) setUnidadSel(d.unidades[0]);
         if (d.meses_con_datos?.length > 0)
           setMesSel(d.meses_con_datos[d.meses_con_datos.length - 1]);
         const respuestaInfo = await infoBasicaInAass();
-        setInfoIASS(respuestaInfo.data);
+        setInfoIAAS(respuestaInfo.data);
       } catch (error) {
-        console.error('Error cargando datos IASS:', error);
+        console.error('Error cargando datos IAAS:', error);
       } finally {
         setCargando(false);
       }
@@ -69,7 +69,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
    */
   const _descargar = (indicador = null) => {
     setDescargando(true);
-    descargarIASSGuardado(anio, indicador)
+    descargarIAASGuardado(anio, indicador)
       .then(res => descargarB64(res.archivo_b64, res.nombre_archivo))
       .catch(() => {})
       .finally(() => setDescargando(false));
@@ -126,7 +126,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
       return {
         unidad: u, tasa: acumTasa,
         numerador: acumNum, denominador: acumDen,
-        color: calcularColorIASS(acumTasa, u, sem, indSel, unidadTipoMap),
+        color: calcularColorIAAS(acumTasa, u, sem, indSel, unidadTipoMap),
       };
     });
 
@@ -136,7 +136,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
       {
         unidad: TOTAL_KEY, tasa: grandTasa,
         numerador: grandNum, denominador: grandDen,
-        color: calcularColorIASS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
+        color: calcularColorIAAS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
       },
     ];
   }, [datos, indSel, mesSel, indInfo, sem, unidadTipoMap]);
@@ -164,7 +164,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
     const grandTasa = grandDen > 0 ? (grandNum / grandDen) * factor : 0;
     return [
       ...porUnidad,
-      { unidad: TOTAL_KEY, color: calcularColorIASS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap) },
+      { unidad: TOTAL_KEY, color: calcularColorIAAS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap) },
     ];
   }, [datos, indSel, indInfo, sem, unidadTipoMap]);
 
@@ -185,7 +185,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
       return {
         mes: MESES_CORTOS[parseInt(mes) - 1],
         tasa, numerador: cumNum, denominador: cumDen,
-        color: calcularColorIASS(tasa, unidadSel, sem, indSel, unidadTipoMap),
+        color: calcularColorIAAS(tasa, unidadSel, sem, indSel, unidadTipoMap),
       };
     });
   }, [datos, indSel, unidadSel, mesSel, indInfo, sem, unidadTipoMap]);
@@ -218,7 +218,7 @@ export function useIASSGrafica(extIndSel, onExtChange) {
       return {
         mes: MESES_CORTOS[parseInt(mes) - 1],
         tasa, numerador: cumNum, denominador: cumDen,
-        color: calcularColorIASS(tasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
+        color: calcularColorIAAS(tasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
       };
     });
   }, [datos, indSel, mesSel, indInfo, sem, unidadTipoMap]);

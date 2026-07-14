@@ -1,22 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
-import { getUnidadesIASS, getIndicadoresIASS, generarIASS, getSesionIASS } from '../api/IASS';
-import { descargarB64 } from '../../shared/utilidades/download';
+import { getUnidadesIAAS, getIndicadoresIAAS, generarIAAS, getSesionIAAS } from '../api/IAAS';
+import { descargarB64 } from '../../shared/utils/download';
 import { mesDisponible, calcularFaltantes } from '../utils/calculos';
 import { UploadIcon, CheckIcon, XIcon, FileIcon } from '../../shared/componentes/Icons';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalUnidadTardia from '../componentes/modalUnidadTardia/ModalUnidadTardia';
-import IASSErrorToast from './IASSErrorToast';
-import IASSValidacionPanel from './IASSValidacionPanel';
+import IAASErrorToast from './IAASErrorToast';
+import IAASValidacionPanel from './IAASValidacionPanel';
 import './iass.css';
- */
-const IASSPage = () => {
+const IAASPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { puedeGenIASS } = useRol();
+  const { puedeGenIAAS } = useRol();
 
   const [unidades, setUnidades]       = useState([]);
   const [indicadores, setIndicadores] = useState([]);
@@ -51,7 +50,7 @@ const IASSPage = () => {
 
   useEffect(() => {
     document.title = 'IAAS — Nuevo reporte | CIAE';
-    Promise.all([getUnidadesIASS(), getIndicadoresIASS()]).then(([unids, inds]) => {
+    Promise.all([getUnidadesIAAS(), getIndicadoresIAAS()]).then(([unids, inds]) => {
       const denoms = inds.filter(i => i.id !== 'IAAS 01');
       setIndicadores(denoms);
       setUnidades(unids);
@@ -69,7 +68,7 @@ const IASSPage = () => {
 
   /** Recarga el estado de sesión del período seleccionado (unidades pendientes, denominadores guardados) */
   const cargarSesion = useCallback(async () => {
-    const s = await getSesionIASS(anio, mes);
+    const s = await getSesionIAAS(anio, mes);
     setSesion(s);
   }, [anio, mes]);
 
@@ -106,7 +105,7 @@ const IASSPage = () => {
     if (faltantes.length > 0 && advertencias === null) { setAdvertencias(faltantes); return; }
     setAdvertencias(null);
     setGenerando(true);
-    generarIASS(anio, mes, archivosUnidad, denominadores, numeradores)
+    generarIAAS(anio, mes, archivosUnidad, denominadores, numeradores)
       .then(res => {
         if (res.success && res.data?.archivo_b64) {
           descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
@@ -147,7 +146,7 @@ const IASSPage = () => {
           <div className="ia-nav-left">
             <img src={logo_imss} alt="IMSS" className="ia-logo" />
             <div className="ia-nav-sep" />
-            <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS')}>
+            <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/IAAS')}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
               </svg>
@@ -344,7 +343,7 @@ const IASSPage = () => {
             )}
 
             {/* Footer del card — action bar integrada */}
-            {puedeGenIASS && (
+            {puedeGenIAAS && (
               <div className="ia-action-bar">
                 <div className="ia-progress-pills">
                   <span className={`ia-pill ${numeradores ? 'ia-pill--ok' : ''}`}>
@@ -399,8 +398,8 @@ const IASSPage = () => {
       )}
 
       <ModalLoading isOpen={generando} />
-      <IASSErrorToast mensaje={errorMensaje} trigger={errorTrigger} />
-      <IASSValidacionPanel errores={errorLista} trigger={errorListaTrigger} />
+      <IAASErrorToast mensaje={errorMensaje} trigger={errorTrigger} />
+      <IAASValidacionPanel errores={errorLista} trigger={errorListaTrigger} />
 
       <ModalUnidadTardia
         isOpen={modalTardia}
@@ -422,4 +421,4 @@ const IASSPage = () => {
   );
 };
 
-export default IASSPage;
+export default IAASPage;

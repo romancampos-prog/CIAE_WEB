@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../../assets/logo_imms.png';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { getAllIndicadores } from '../api/indicadores';
 import { CAT_COLOR } from '../constantes/colores';
-import { INDICADORES as IASS_INDS } from '../../iaas/constantes/colores';
+import { INDICADORES as IAAS_INDS } from '../../iaas/constantes/colores';
 import FTPGraficasContenido from '../componentes/graficasFTP/FTPGraficasContenido';
-import IASSGraficasContenido from '../../iaas/componentes/IASSGraficasContenido';
+import IAASGraficasContenido from '../../iaas/componentes/IAASGraficasContenido';
 import './ftp.css';
 import '../../shared/estilos/graficas.css';
 
@@ -26,7 +26,7 @@ const CAT_ICON = {
   IAAS: iconoIaas,
 };
 
-const IASS_COLOR = '#1a5276';
+const IAAS_COLOR = '#1a5276';
 
 const MenuIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -62,7 +62,7 @@ const GraficasUnificadasPage = () => {
     ...Object.entries(ftpLista).map(([cat, data]) => ({
       cat, color: CAT_COLOR[cat] ?? '#0b5445', inds: data.indicadores ?? [],
     })),
-    { cat: 'IAAS', color: IASS_COLOR, inds: IASS_INDS },
+    { cat: 'IAAS', color: IAAS_COLOR, inds: IAAS_INDS },
   ], [ftpLista]);
 
   const indColor = useMemo(() => {
@@ -192,9 +192,9 @@ const GraficasUnificadasPage = () => {
         </div>
       </aside>
 
-      {/* Contenido según módulo */}
-      {modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
-      {modulo === 'iass' && <IASSGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
+      {/* Contenido según módulo — no renderiza hasta tener indicador */}
+      {indSel && modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
+      {indSel && modulo === 'iass' && <IAASGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
     </div>
   );
 };

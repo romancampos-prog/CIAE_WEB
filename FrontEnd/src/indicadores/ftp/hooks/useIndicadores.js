@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getIndicador } from '../api/indicadores';
 import { getReporte, getMesesGenerados, generarCategoria } from '../../reportes_grafica/api/reportes';
-import { descargarB64 } from '../../shared/utilidades/download';
+import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
 import { COLORS } from '../constantes/colores';
 import { calcularMesesDisponibles, calcularSemDataFTP } from '../utils/calculos';

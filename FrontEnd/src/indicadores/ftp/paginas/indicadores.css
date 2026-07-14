@@ -241,6 +241,7 @@
   cursor: pointer; text-align: left; transition: background 0.14s, color 0.14s;
   font-family: inherit;
 }
+.ind-cat-btn-meta { display: flex; align-items: center; gap: 5px; }
 .ind-cat-btn:hover { background: rgba(0,0,0,0.04); }
 .ind-cat-btn--active {
   background: color-mix(in srgb, var(--cc) 10%, transparent);
@@ -506,6 +507,13 @@
   font-size: 0.82rem; color: #64748b;
   line-height: 1.5; margin: 0;
 }
+
+/* cfg overrides dentro del bloque período */
+.ind-period-block .cfg-tabs   { padding: 0; }
+.ind-period-block .cfg-fields { padding: 0; }
+
+/* cfg-warning sin margen exterior cuando está en el panel de config */
+.ind-config-inner .cfg-warning { margin: 0 0 12px; }
 
 /* ── Bloque período ── */
 .ind-period-block {

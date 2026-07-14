@@ -1,6 +1,6 @@
 ﻿"""
 Módulo  : canal_service.py
-Carpeta : epidemeologia/services/
+Carpeta : epidemiologia/services/
 Qué hace: Calcula el canal endémico de dengue usando series de tiempo históricas.
 Usado en: pipeline_service.py
 """

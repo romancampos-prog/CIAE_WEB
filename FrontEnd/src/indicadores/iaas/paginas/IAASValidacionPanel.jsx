@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-export default function IASSValidacionPanel({ errores, trigger = 0 }) {
+export default function IAASValidacionPanel({ errores, trigger = 0 }) {
   const [visible,  setVisible]  = useState(false)
   const [saliendo, setSaliendo] = useState(false)
 

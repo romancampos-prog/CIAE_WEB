@@ -1,4 +1,4 @@
-import { MESES_CORTOS } from '../../shared/constantes/meses';
+﻿import { MESES_CORTOS } from '../../shared/constantes/meses';
 
 export const TOTAL_KEY = 'TOTAL OOAD';
 
@@ -24,7 +24,7 @@ export function tipoSemaforo(unidad, unidadTipoMap) {
  * @param {Object<string,string>} unidadTipoMap - Mapa unidad → tipo para IAAS 01
  * @returns {'Verde'|'Amarillo'|'Rojo'} Color del semáforo
  */
-export function calcularColorIASS(tasa, unidad, sem, indSel, unidadTipoMap) {
+export function calcularColorIAAS(tasa, unidad, sem, indSel, unidadTipoMap) {
   if (!sem) return 'Rojo';
   if (indSel === 'IAAS 01') {
     const tipo     = tipoSemaforo(unidad, unidadTipoMap);
@@ -123,7 +123,7 @@ export function buildChartDataUnidad(datos, unidadSel, indSel, indInfo, sem, uni
       return {
         mes: MESES_CORTOS[parseInt(mes) - 1],
         tasa, numerador: sumNum, denominador: sumDen,
-        color: calcularColorIASS(tasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
+        color: calcularColorIAAS(tasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
       };
     });
   }
@@ -176,7 +176,7 @@ export function buildChartDataMes(datos, mesSel, indSel, indInfo, sem, unidadTip
     {
       unidad: TOTAL_KEY, tasa: grandTasa,
       numerador: grandNum, denominador: grandDen,
-      color: calcularColorIASS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
+      color: calcularColorIAAS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
     },
   ];
 }

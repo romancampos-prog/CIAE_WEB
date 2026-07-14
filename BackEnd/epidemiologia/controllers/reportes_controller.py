@@ -1,6 +1,6 @@
 ﻿"""
 Módulo  : reportes_controller.py
-Carpeta : epidemeologia/controllers/
+Carpeta : epidemiologia/controllers/
 Qué hace: Endpoints para consultar canal endémico, mapas, alertas y duplicados de dengue.
 Usado en: main.py (prefix /epidemiologia)
 """

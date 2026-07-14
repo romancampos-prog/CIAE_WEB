@@ -1,4 +1,4 @@
-import { useAuth } from '../contexto/AuthContext';
+﻿import { useAuth } from '../contexto/AuthContext';
 
 export function useRol() {
   const { user } = useAuth();
@@ -8,7 +8,7 @@ export function useRol() {
     esAdmin:       rol === 'admin',
     esVisitante:   rol === 'visitante',
     puedeGenFTP:   rol === 'admin' || rol === 'trabajador_ftp',
-    puedeGenIASS:  rol === 'admin' || rol === 'trabajador_IAAS',
+    puedeGenIAAS:  rol === 'admin' || rol === 'trabajador_IAAS',
     puedeVerEpi:   rol === 'admin',
   };
 }

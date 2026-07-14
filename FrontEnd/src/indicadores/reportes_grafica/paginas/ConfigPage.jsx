@@ -9,12 +9,13 @@ import ToastWarning from '../componentes/avisos/ToastWarning';
 import logo_imss from '../../../assets/logo_imms.png';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
 import { useAuth } from '../../../auth/contexto/AuthContext';
+import { MESES_LARGOS } from '../../shared/constantes/meses';
 
 const ConfiguracionReporte = () => {
   const navigate   = useNavigate();
   const location   = useLocation();
   const { user }   = useAuth();
-  const esVisor    = user?.rol === 'visor';
+  const esVisor    = user?.rol === 'visitante';
   const indicadorSel = location.state?.indicador;
 
   /* ── Lógica de fechas ── */
@@ -34,12 +35,6 @@ const ConfiguracionReporte = () => {
   const [verDetalle,     setVerDetalle]     = useState(false);
   const [mesesFaltantes, setMesesFaltantes] = useState([]);
 
-  const nombreMeses = {
-    "01":"Enero","02":"Febrero","03":"Marzo","04":"Abril",
-    "05":"Mayo","06":"Junio","07":"Julio","08":"Agosto",
-    "09":"Septiembre","10":"Octubre","11":"Noviembre","12":"Diciembre"
-  };
-
   /* Retorno desde gráficas */
   useEffect(() => {
     if (location.state?.retornoSeguro) {
@@ -52,7 +47,7 @@ const ConfiguracionReporte = () => {
 
   /* Meses disponibles */
   const mesesDisponibles = useMemo(() => {
-    const todos = Object.entries(nombreMeses);
+    const todos = Object.entries(MESES_LARGOS);
     if (parseInt(datos.ano) === anioActual) {
       const limite = esVisor ? mesMaxVisor : mesActualNum;
       return todos.filter(([key]) => parseInt(key) <= limite);
@@ -76,7 +71,7 @@ const ConfiguracionReporte = () => {
       const faltantes = [];
       for (let i = 1; i < mesNum; i++) {
         const key = String(i).padStart(2, '0');
-        if (!generados.includes(key)) faltantes.push(nombreMeses[key]);
+        if (!generados.includes(key)) faltantes.push(MESES_LARGOS[key]);
       }
       setMesesFaltantes(faltantes);
     });
@@ -85,7 +80,7 @@ const ConfiguracionReporte = () => {
   /* Semáforo */
   const semData = useMemo(() => {
     if (!infoIndicador?.semaforo) return null;
-    const mesTexto = nombreMeses[datos.mes];
+    const mesTexto = MESES_LARGOS[datos.mes];
     let sem = (mesTexto && infoIndicador.semaforo[mesTexto])
       ? infoIndicador.semaforo[mesTexto] : infoIndicador.semaforo;
     if (!sem || (sem.Bajo === undefined && sem.Esperado === undefined)) return null;
@@ -318,7 +313,7 @@ const ConfiguracionReporte = () => {
                 <div className="cfg-sem-section">
                   <p className="cfg-sem-label">
                     {datos.mes
-                      ? `Rangos de desempeño — ${nombreMeses[datos.mes]}`
+                      ? `Rangos de desempeño — ${MESES_LARGOS[datos.mes]}`
                       : 'Selecciona un mes para ver rangos'}
                   </p>
 
@@ -393,7 +388,7 @@ const ConfiguracionReporte = () => {
             state: {
               Indicador: indicadorSel,
               semaforo:  semData,
-              fecha:     `${nombreMeses[datos.mes] || ''} ${datos.ano}`,
+              fecha:     `${MESES_LARGOS[datos.mes] || ''} ${datos.ano}`,
               datosMapa: graficar,
               retornoSeguro: { abierto: true, restricciones: exito.restricciones, datosPrevios: datos, tipoPrevio: tipo, datosGrafica: graficar }
             }

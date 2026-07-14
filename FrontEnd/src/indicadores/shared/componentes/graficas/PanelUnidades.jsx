@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Panel lateral de selección de unidades.
  *
  * Props:
@@ -9,9 +9,9 @@
  *   busq          — string                    — texto del buscador
  *   onBusq        — fn(valor)                 — cambia el buscador
  *   onSelect      — fn(unidad)                — selecciona unidad (cambia a vista 'unidad')
- *   // Opcionales IASS:
+ *   // Opcionales IAAS:
  *   hgsSet        — Set                       — unidades con clasificación HGS
- *   mostrarHgs    — bool                      — solo activo para IASS 01
+ *   mostrarHgs    — bool                      — solo activo para IAAS 01
  *   HGS_COLOR     — string
  *   HGS_BG        — string
  */
@@ -37,7 +37,7 @@ const PanelUnidades = ({
   );
 
   const renderItem = ({ unidad, color }) => {
-    const activa = unidadSel === unidad && vistaGrafica === 'unidad';
+    const activa = unidadSel === unidad && vistaGrafica !== 'mes';
     return (
       <button
         key={unidad}
@@ -86,8 +86,8 @@ const PanelUnidades = ({
           <>
             <div className="ig-unit-total-sep" />
             <button
-              className={`ig-unit-item ig-unit-item--total${unidadSel === totalItem.unidad && vistaGrafica === 'unidad' ? ' ig-unit-item--active' : ''}`}
-              style={unidadSel === totalItem.unidad && vistaGrafica === 'unidad' ? { borderLeftColor: indColor } : {}}
+              className={`ig-unit-item ig-unit-item--total${unidadSel === totalItem.unidad && vistaGrafica !== 'mes' ? ' ig-unit-item--active' : ''}`}
+              style={unidadSel === totalItem.unidad && vistaGrafica !== 'mes' ? { borderLeftColor: indColor } : {}}
               onClick={() => onSelect(totalItem.unidad)}
             >
               <span className="ig-unit-name">TOTAL OOAD</span>

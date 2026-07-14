@@ -1,4 +1,4 @@
-"""
+﻿"""
 Extrae numerador y denominador de los Excel subidos, calcula tasa y semáforo.
 Usado en: iass/services/procesar_service.py
 """
@@ -6,7 +6,7 @@ import io
 import json
 import pandas as pd
 from openpyxl.utils import column_index_from_string
-from iaas.config import UNIDADES_HGS_IASS01, ORDEN_IASS01, UNIDAD_TIPO_IASS01
+from iaas.config import UNIDADES_HGS_IAAS01, ORDEN_IAAS01, UNIDAD_TIPO_IAAS01
 from iaas.services.info_service import obtener_config_indicador
 
 
@@ -68,13 +68,13 @@ def _validar_encabezado_excel(excel_bytes: bytes, unidad_esperada: str, config_n
     return errores
 
 
-def calcular_IASS(indicador: str, numeradores: dict, denominador=None) -> dict:
+def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
     resultado = {}
 
     if indicador == "IAAS 01":
         if denominador is None:
             return {}
-        dens = _get_denominador_IASS01(denominador)
+        dens = _get_denominador_IAAS01(denominador)
         nums = _get_numerador(numeradores, indicador)
 
         for u in set(nums) | set(dens):
@@ -82,7 +82,7 @@ def calcular_IASS(indicador: str, numeradores: dict, denominador=None) -> dict:
                 "numerador":   nums.get(u, 0),
                 "denominador": dens.get(u)
             }
-        return _semaforo_IASS01(resultado)
+        return _semaforo_IAAS01(resultado)
 
     else:
         nums     = _get_numerador(numeradores, indicador)
@@ -140,7 +140,7 @@ def _get_numerador(lista_exceles: dict, indicador: str) -> dict:
     return resultado
 
 
-def _get_denominador_IASS01(excel_bytes: bytes) -> dict:
+def _get_denominador_IAAS01(excel_bytes: bytes) -> dict:
     config     = obtener_config_indicador("IAAS 01")
     den        = config.get("Denominador", {})
     hoja       = den.get("hoja")
@@ -162,7 +162,7 @@ def _get_denominador_IASS01(excel_bytes: bytes) -> dict:
             raise ValueError(json.dumps(errores))
 
         col_b = df.iloc[:, _letra(col_unidad)].astype(str)
-        numeros_esperados = [u.split()[1] for u in ORDEN_IASS01]
+        numeros_esperados = [u.split()[1] for u in ORDEN_IAAS01]
         if not any(col_b.str.contains(rf'\b{num}\b', na=False).any() for num in numeros_esperados):
             errores.append("[Denominador global] No se encontraron las unidades de IAAS 01 en la columna de unidades.")
 
@@ -171,7 +171,7 @@ def _get_denominador_IASS01(excel_bytes: bytes) -> dict:
 
     resultado = {}
 
-    for unidad in ORDEN_IASS01:
+    for unidad in ORDEN_IAAS01:
         numero = unidad.split()[1]
         df_unidad = df[
             df.iloc[:, _letra(col_unidad)].str.contains(rf'\b{numero}\b', na=False) &
@@ -186,14 +186,14 @@ def _get_denominador_IASS01(excel_bytes: bytes) -> dict:
     return resultado
 
 
-def _semaforo_general(IASS: dict, indicador: str) -> dict:
+def _semaforo_general(IAAS: dict, indicador: str) -> dict:
     umbrales         = obtener_config_indicador(indicador).get("Semaforo", {})
     umbral_esperado  = umbrales.get("Esperado")
     umbral_medio     = umbrales.get("Medio")
     tasa_multiplicar = umbrales.get("Tasa")
     resultado        = {}
 
-    for unidad, data in IASS.items():
+    for unidad, data in IAAS.items():
         numerador   = data.get("numerador")
         denominador = data.get("denominador")
         tasa = round(((numerador or 0) / denominador) * tasa_multiplicar, 2) if denominador else None
@@ -242,7 +242,7 @@ def calcular_unidad_tardia(
 
     for ind in indicadores_seleccionados:
         if ind == "IAAS 01":
-            if unidad not in ORDEN_IASS01:
+            if unidad not in ORDEN_IAAS01:
                 continue
             num = (
                 _get_numerador(nums_unidad, "IAAS 01").get(unidad, 0)
@@ -251,7 +251,7 @@ def calcular_unidad_tardia(
             )
             den = (datos_sesion.get("IAAS 01", {}).get(unidad) or {}).get("denominador")
             raw = {unidad: {"numerador": num, "denominador": den}}
-            resultado["IAAS 01"] = _semaforo_IASS01(raw)
+            resultado["IAAS 01"] = _semaforo_IAAS01(raw)
         else:
             num = (
                 _get_numerador(nums_unidad, ind).get(unidad, 0)
@@ -266,17 +266,17 @@ def calcular_unidad_tardia(
     return resultado
 
 
-def _semaforo_IASS01(IASS: dict) -> dict:
+def _semaforo_IAAS01(IAAS: dict) -> dict:
     semaforo_json    = obtener_config_indicador("IAAS 01").get("Semaforo", {})
     tasa_multiplicar = semaforo_json.get("Tasa")
     resultado        = {}
 
-    for unidad, data in IASS.items():
+    for unidad, data in IAAS.items():
         numerador   = data.get("numerador")
         denominador = data.get("denominador")
         tasa = round(((numerador or 0) / denominador) * tasa_multiplicar, 2) if denominador else None
 
-        tipo     = UNIDAD_TIPO_IASS01.get(unidad, "OOAD")
+        tipo     = UNIDAD_TIPO_IAAS01.get(unidad, "OOAD")
         umbrales = semaforo_json.get(tipo) or semaforo_json.get("OOAD", {})
         esperado = umbrales.get("Esperado", {})
         medio    = umbrales.get("Medio", {})

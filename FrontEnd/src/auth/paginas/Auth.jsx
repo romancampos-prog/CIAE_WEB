@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth_login } from '../api/auth';
 import { useAuth } from '../contexto/AuthContext';
@@ -52,7 +52,7 @@ const Login = () => {
       if (data.success) {
         login({ user: data.data.usuario, token: data.data.token });
         const destinos = {
-          trabajador_IAAS: '/CIAE/IndicadoresMedicos/IASS',
+          trabajador_IAAS: '/CIAE/IndicadoresMedicos/IAAS',
           ftp:             '/CIAE/IndicadoresMedicos/FTP',
         };
         const payload = JSON.parse(atob(data.data.token.split('.')[1]));

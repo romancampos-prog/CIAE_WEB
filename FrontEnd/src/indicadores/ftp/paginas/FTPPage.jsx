@@ -1,4 +1,4 @@
-import './ftp.css';
+﻿import './ftp.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_imss from '../../../assets/logo_imms.png';
@@ -37,13 +37,13 @@ const FTPPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { icono } = getGreeting();
-  const { esVisitante, puedeGenFTP, puedeGenIASS } = useRol();
+  const { esVisitante, puedeGenFTP, puedeGenIAAS } = useRol();
 
-  const puedeGenerar   = puedeGenFTP || puedeGenIASS;
+  const puedeGenerar   = puedeGenFTP || puedeGenIAAS;
   const navDestGenerar =
-    puedeGenFTP && puedeGenIASS ? '/CIAE/IndicadoresMedicos/Generar'     :
+    puedeGenFTP && puedeGenIAAS ? '/CIAE/IndicadoresMedicos/Generar'     :
     puedeGenFTP                 ? '/CIAE/IndicadoresMedicos/FTP/Generar' :
-                                  '/CIAE/IndicadoresMedicos/IASS/Reporte';
+                                  '/CIAE/IndicadoresMedicos/IAAS/Reporte';
 
   useEffect(() => { document.title = 'Indicadores | CIAE'; }, []);
 

@@ -1,15 +1,15 @@
-import api from '../../../shared/api/axiosInstance';
+﻿import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene la lista de indicadores IAAS disponibles en el sistema.
  * @returns {Promise<Array>} Lista de indicadores con id y descripción
  */
-export const getIndicadoresIASS = async () => {
+export const getIndicadoresIAAS = async () => {
     try {
         const { data } = await api.get('/iass/indicadores');
         return data.data ?? [];
     } catch (error) {
-        console.error('Error al obtener indicadores IASS:', error);
+        console.error('Error al obtener indicadores IAAS:', error);
         return [];
     }
 };
@@ -18,12 +18,12 @@ export const getIndicadoresIASS = async () => {
  * Obtiene la lista de unidades médicas participantes en IAAS.
  * @returns {Promise<Array<string>>} Lista de claves de unidad
  */
-export const getUnidadesIASS = async () => {
+export const getUnidadesIAAS = async () => {
     try {
         const { data } = await api.get('/iass/unidades');
         return data.data ?? [];
     } catch (error) {
-        console.error('Error al obtener unidades IASS:', error);
+        console.error('Error al obtener unidades IAAS:', error);
         return [];
     }
 };
@@ -43,14 +43,14 @@ export const infoBasicaInAass = async () => {
  * @param {string} mes - Mes en formato "MM" (ej. "03")
  * @param {Object<string, File>} numerador - Archivos Excel por unidad (numeradores IAAS 01–06)
  * @param {Object<string, Object<string, string>>} denominador - Denominadores por unidad e indicador
- * @param {File|null} excel_denominador_IASS_01 - Excel global para calcular el denominador de IAAS 01
+ * @param {File|null} excel_denominador_IAAS_01 - Excel global para calcular el denominador de IAAS 01
  * @returns {Promise<Object>} Resultado de generación con archivo_b64 y nombre_archivo
  */
-export const generarIASS = async (anio, mes, numerador, denominador, excel_denominador_IASS_01) => {
+export const generarIAAS = async (anio, mes, numerador, denominador, excel_denominador_IAAS_01) => {
     const form = new FormData();
     form.append('anio', anio);
     form.append('mes', mes);
-    if (excel_denominador_IASS_01) form.append('excel_denominador_IASS_01', excel_denominador_IASS_01);
+    if (excel_denominador_IAAS_01) form.append('excel_denominador_IAAS_01', excel_denominador_IAAS_01);
     if (numerador) Object.entries(numerador).forEach(([unidad, file]) => {
         form.append('numerador', new File([file], unidad, { type: file.type }));
     });
@@ -62,7 +62,7 @@ export const generarIASS = async (anio, mes, numerador, denominador, excel_denom
         });
     });
     form.append('denominador', JSON.stringify(denPorIndicador));
-    const { data } = await api.post('/reportes/IASS/Generar', form);
+    const { data } = await api.post('/reportes/IAAS/Generar', form);
     return data;
 };
 
@@ -71,9 +71,9 @@ export const generarIASS = async (anio, mes, numerador, denominador, excel_denom
  * @param {string} anio - Año a consultar
  * @returns {Promise<{unidades: string[], meses_con_datos: string[], datos: Object}>}
  */
-export const getIASSDatosGrafica = async (anio) => {
+export const getIAASDatosGrafica = async (anio) => {
     try {
-        const { data } = await api.get('/reportes/IASS/datos-grafica', { params: { anio } });
+        const { data } = await api.get('/reportes/IAAS/datos-grafica', { params: { anio } });
         return data.data ?? { unidades: [], meses_con_datos: [], datos: {} };
     } catch {
         return { unidades: [], meses_con_datos: [], datos: {} };
@@ -86,9 +86,9 @@ export const getIASSDatosGrafica = async (anio) => {
  * @param {string|null} indicador - Si se especifica, descarga solo ese indicador; si es null descarga todos
  * @returns {Promise<{archivo_b64: string, nombre_archivo: string}>}
  */
-export const descargarIASSGuardado = async (anio, indicador = null) => {
+export const descargarIAASGuardado = async (anio, indicador = null) => {
     const params = indicador ? { anio, indicador } : { anio };
-    const { data } = await api.get('/reportes/IASS/descargar', { params });
+    const { data } = await api.get('/reportes/IAAS/descargar', { params });
     return data.data ?? data;
 };
 
@@ -98,7 +98,7 @@ export const descargarIASSGuardado = async (anio, indicador = null) => {
  * @param {string} mes - Mes en formato "MM"
  * @returns {Promise<Object|null>} Datos de sesión o null si no existe
  */
-export const getSesionIASS = async (anio, mes) => {
+export const getSesionIAAS = async (anio, mes) => {
     try {
         const { data } = await api.get('/iass/sesion', { params: { anio, mes } });
         return data.data ?? null;
@@ -136,9 +136,9 @@ export const completarUnidadTardia = async (anio, mes, unidad, indicadores, deno
  * @param {string} anio - Año a consultar
  * @returns {Promise<string[]>} Lista de meses en formato "MM" con reporte guardado
  */
-export const getIASSMesesGuardados = async (anio) => {
+export const getIAASMesesGuardados = async (anio) => {
     try {
-        const { data } = await api.get('/reportes/IASS/meses-guardados', { params: { anio } });
+        const { data } = await api.get('/reportes/IAAS/meses-guardados', { params: { anio } });
         return data.data?.meses ?? [];
     } catch {
         return [];

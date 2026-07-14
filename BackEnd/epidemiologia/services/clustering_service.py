@@ -1,6 +1,6 @@
 ﻿"""
 Módulo  : clustering_service.py
-Carpeta : epidemeologia/services/
+Carpeta : epidemiologia/services/
 Qué hace: Ejecuta el análisis de clustering geoespacial sobre los casos de dengue.
 Usado en: pipeline_service.py
 """

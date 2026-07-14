@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getFTPDatosGrafica, getIndicador } from '../api/indicadores';
 import { getReporte, generarCategoria } from '../../reportes_grafica/api/reportes';
-import { descargarB64 } from '../../shared/utilidades/download';
+import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 import { CAT_COLOR } from '../constantes/colores';
 import {

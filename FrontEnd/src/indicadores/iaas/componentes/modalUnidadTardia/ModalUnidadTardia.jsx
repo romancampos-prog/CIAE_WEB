@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { completarUnidadTardia } from '../../api/IASS';
+﻿import { useState, useEffect, useRef } from 'react';
+import { completarUnidadTardia } from '../../api/IAAS';
 import { UploadIcon, XIcon, FileIcon } from '../../../shared/componentes/Icons';
 import './ModalUnidadTardia.css';
 
@@ -205,7 +205,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                 {[...selInd].map(ind => {
                   const numGuardado = unidad ? numeradoresGuardados[unidad]?.[ind] : undefined;
                   const tieneNum    = numGuardado != null;
-                  const esIASS01    = ind === 'IAAS 01';
+                  const esIAAS01    = ind === 'IAAS 01';
                   const info        = indicadoresInfo.find(i => i.id === ind);
                   return (
                     <div key={ind} className="mut-det-row">
@@ -213,7 +213,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                       <span className={`mut-ind-num ${tieneNum ? 'mut-ind-num--ok' : 'mut-ind-num--miss'}`}>
                         Num: {tieneNum ? numGuardado : 'falta'}
                       </span>
-                      {!esIASS01 ? (
+                      {!esIAAS01 ? (
                         <input
                           type="number" min="0" className="mut-den-input"
                           placeholder={info?.subT2 ? info.subT2.slice(0, 16) : 'Denominador'}

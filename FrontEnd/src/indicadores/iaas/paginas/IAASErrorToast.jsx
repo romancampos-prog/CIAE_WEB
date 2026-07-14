@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 const DURACION = 8000
 
-export default function IASSErrorToast({ mensaje, trigger = 0 }) {
+export default function IAASErrorToast({ mensaje, trigger = 0 }) {
   const [visible,  setVisible]  = useState(false)
   const [saliendo, setSaliendo] = useState(false)
   const [progreso, setProgreso] = useState(100)

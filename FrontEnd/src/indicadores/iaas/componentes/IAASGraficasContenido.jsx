@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useIASSGrafica } from '../hooks/useIASSGrafica';
+﻿import { useState } from 'react';
+import { useIAASGrafica } from '../hooks/useIAASGrafica';
 import TickMesUnidad  from './graficas/TickMesUnidad';
 import GraficaBarras  from '../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../shared/componentes/graficas/PanelUnidades';
@@ -7,13 +7,13 @@ import SemaforoUmbral from '../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../shared/componentes/graficas/VistaToggle';
 import { MESES_CORTOS, MESES_LARGOS } from '../../shared/constantes/meses';
 
-const VISTAS_IASS = [
+const VISTAS_IAAS = [
   { id: 'unidad',    label: 'Por unidad',  path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
   { id: 'mes',       label: 'Por mes',     path: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
   { id: 'acumulado', label: 'Acum. por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></> },
 ];
 
-const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
+const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
 
@@ -27,12 +27,12 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =
     chartDataMes, maxTasaMes,
     chartDataAcumuladoUnidad, maxTasaAcumuladoUnidad,
     chartDataAcumuladoTotal, maxTasaAcumuladoTotal,
-    unidadesStatus, indInfo, hgsSet,
+    unidadesStatus, unidadesStatusDisplay, indInfo, hgsSet,
     rangosSem, rangosSemExtra,
     indColor, sinDatos, hayDatos,
     HGS_COLOR, HGS_BG,
     TOTAL_KEY,
-  } = useIASSGrafica(extIndSel, onIndSelChange);
+  } = useIAASGrafica(extIndSel, onIndSelChange);
 
   const esTotal = unidadSel === TOTAL_KEY;
 
@@ -110,7 +110,7 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =
               </div>
             ) : (
               <PanelUnidades
-                unidades={unidadesStatus}
+                unidades={unidadesStatusDisplay}
                 unidadSel={unidadSel}
                 vistaGrafica={vistaGrafica}
                 indColor={indColor}
@@ -128,7 +128,7 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =
             <div className="ig-chart-area" style={{ position: 'relative' }}>
               {iconSrc && <img src={iconSrc} alt="" className="ig-chart-watermark" />}
               <div className="ig-chart-topbar">
-                <VistaToggle vistas={VISTAS_IASS} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+                <VistaToggle vistas={VISTAS_IAAS} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
                 <div className="ig-controls">
                   <div className="ig-control-group">
                     <label className="ig-control-label">Año</label>
@@ -166,14 +166,14 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =
                         className="ig-btn-dl ig-btn-dl--secondary"
                         onClick={handleDescargar}
                         disabled={descargando}
-                        title={`Descargar todos los IASS — ${anio}`}
+                        title={`Descargar todos los IAAS — ${anio}`}
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                           <polyline points="7 10 12 15 17 10"/>
                           <line x1="12" y1="15" x2="12" y2="3"/>
                         </svg>
-                        {descargando ? '…' : 'Todos IASS'}
+                        {descargando ? '…' : 'Todos IAAS'}
                       </button>
                     </div>
                   </div>
@@ -278,4 +278,4 @@ const IASSGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =
   );
 };
 
-export default IASSGraficasContenido;
+export default IAASGraficasContenido;

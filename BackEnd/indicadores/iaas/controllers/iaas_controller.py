@@ -1,5 +1,5 @@
-"""
-Endpoints de consulta y actualización del módulo IASS.
+﻿"""
+Endpoints de consulta y actualización del módulo IAAS.
 Usado en: iass/router expuesto en main.py (prefix /iass)
 """
 import json
@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from auth.services.jwt_utils import solo_roles
 from auth.services.auth_service import verificar_credenciales
 from iaas.services.info_service import (
-    infoAllIASS,
-    obtenerUnidadesIASS,
-    obtenerIndicadoresIASS,
+    infoAllIAAS,
+    obtenerUnidadesIAAS,
+    obtenerIndicadoresIAAS,
 )
 from iaas.services.procesar_service import (
     completar_unidad_tardia,
@@ -23,32 +23,32 @@ from configs.response import ApiResponse
 
 router = APIRouter()
 
-ROLES_IASS_VISTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
+ROLES_IAAS_VISTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 
 
 @router.get("/info")
-async def get_info_all(payload: dict = Depends(solo_roles(*ROLES_IASS_VISTA))):
-    resultado = infoAllIASS()
-    return ApiResponse(success=True, message="Información de indicadores IASS obtenida", data=resultado)
+async def get_info_all(payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA))):
+    resultado = infoAllIAAS()
+    return ApiResponse(success=True, message="Información de indicadores IAAS obtenida", data=resultado)
 
 
 @router.get("/unidades")
-async def get_unidades(payload: dict = Depends(solo_roles(*ROLES_IASS_VISTA))):
-    resultado = obtenerUnidadesIASS()
-    return ApiResponse(success=True, message="Unidades IASS obtenidas", data=resultado)
+async def get_unidades(payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA))):
+    resultado = obtenerUnidadesIAAS()
+    return ApiResponse(success=True, message="Unidades IAAS obtenidas", data=resultado)
 
 
 @router.get("/indicadores")
-async def get_indicadores(payload: dict = Depends(solo_roles(*ROLES_IASS_VISTA))):
-    resultado = obtenerIndicadoresIASS()
-    return ApiResponse(success=True, message="Indicadores IASS obtenidos", data=resultado)
+async def get_indicadores(payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA))):
+    resultado = obtenerIndicadoresIAAS()
+    return ApiResponse(success=True, message="Indicadores IAAS obtenidos", data=resultado)
 
 
 @router.get("/sesion")
 async def get_sesion(
     anio: str,
     mes:  str,
-    payload: dict = Depends(solo_roles(*ROLES_IASS_VISTA)),
+    payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA)),
 ):
     mes_nombre = MESES_NOMBRE.get(mes, mes)
     ruta       = _ruta_sesion(anio)

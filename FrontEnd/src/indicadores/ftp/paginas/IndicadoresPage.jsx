@@ -1,4 +1,4 @@
-﻿import './ftp.css';
+import './ftp.css';
 import './indicadores.css';
 import './config.css';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,8 @@ import ModalRestricciones from '../../shared/componentes/modal/ModalRestriccione
 import { useIndicadores } from '../hooks/useIndicadores';
 import InformacionIndicador from '../../reportes_grafica/componentes/InformacionIndicador/InformacionIndicador';
 import { useEffect, useState } from 'react';
+import SidebarCategorias from '../componentes/SidebarCategorias';
+import PeriodoReporte from '../componentes/PeriodoReporte';
 
 import iconoCama  from '../../../assets/icono_cama.png';
 import iconoCacu  from '../../../assets/icono_cacu.png';
@@ -40,12 +42,6 @@ const IcoAll = () => (
   </svg>
 );
 
-/**
- * PÃ¡gina de generaciÃ³n de indicadores FTP.
- * Combina el sidebar de categorÃ­as/indicadores con el panel de configuraciÃ³n del reporte.
- * Soporta generaciÃ³n individual (un indicador) y por lote (toda la categorÃ­a).
- * El drawer de ficha tÃ©cnica se abre sobre el contenido sin cambiar de ruta.
- */
 const IndicadoresPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -67,17 +63,16 @@ const IndicadoresPage = () => {
 
   const [abiertas, setAbiertas] = useState(() => new Set([categoria]))
 
-  /** Abre o cierra el accordion de una categorÃ­a; cambia la categorÃ­a activa si se abre una nueva */
   const toggleAbrir = (cat) => {
     setAbiertas(prev => {
       const next = new Set(prev)
       if (next.has(cat)) {
-        next.delete(cat)                       // cerrar: sin cambio de estado
+        next.delete(cat)
       } else {
         next.add(cat)
         if (cat !== categoria) {
-          setCategoria(cat)                    // cambiar categorÃ­a solo si es diferente
-          setIndicadorSel(null)               // limpiar indicador al cambiar categorÃ­a
+          setCategoria(cat)
+          setIndicadorSel(null)
         }
       }
       return next
@@ -114,7 +109,7 @@ const IndicadoresPage = () => {
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              Actualizar PoblaciÃ³n
+              Actualizar Población
             </button>
           )}
           <div className="ind-user-chip">
@@ -128,72 +123,26 @@ const IndicadoresPage = () => {
 
       <main className="ind-hub-main">
 
-        {/* â•â• SIDEBAR â•â• */}
-        <aside className="ind-sidebar">
-          <p className="ind-sidebar-label">CategorÃ­as</p>
-          <div className="ind-cat-list">
-            {cargandoLista
-              ? [1,2,3,4,5].map(i => <div key={i} className="ind-cat-shimmer" />)
-              : Object.keys(allIndicadores).map(cat => {
-                  const abierto  = abiertas.has(cat)
-                  const esActiva = categoria === cat
-                  const cc       = allIndicadores[cat]?.color ?? catColor
-                  const catInds  = allIndicadores[cat]?.indicadores ?? []
-                  return (
-                    <div key={cat} className="ind-cat-group">
-                      <button
-                        className={`ind-cat-btn ${esActiva ? 'ind-cat-btn--active' : ''} ${abierto ? 'ind-cat-btn--open' : ''}`}
-                        style={esActiva ? { '--cc': cc } : {}}
-                        onClick={() => toggleAbrir(cat)}
-                      >
-                        <span>{cat}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <span className="ind-cat-count">{catInds.length}</span>
-                          <svg
-                            width="10" height="10" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" strokeWidth="2.5"
-                            strokeLinecap="round" strokeLinejoin="round"
-                            className={`ind-cat-chevron ${abierto ? 'ind-cat-chevron--open' : ''}`}
-                          >
-                            <polyline points="6 9 12 15 18 9" />
-                          </svg>
-                        </div>
-                      </button>
+        <SidebarCategorias
+          allIndicadores={allIndicadores}
+          cargandoLista={cargandoLista}
+          categoria={categoria}
+          indicadorSel={indicadorSel}
+          abiertas={abiertas}
+          onToggle={toggleAbrir}
+          onSelectIndicador={(cat, ind) => {
+            setCategoria(cat)
+            setIndicadorSel(ind === indicadorSel ? null : ind)
+          }}
+        />
 
-                      {abierto && (
-                        <div className="ind-ind-list ind-ind-list--accordion" style={{ '--acc-color': cc }}>
-                          {catInds.map(ind => (
-                            <button
-                              key={ind}
-                              className={`ind-ind-btn ${indicadorSel === ind ? 'ind-ind-btn--active' : ''}`}
-                              style={indicadorSel === ind ? { '--cc': cc } : {}}
-                              onClick={() => { setCategoria(cat); setIndicadorSel(ind === indicadorSel ? null : ind) }}
-                            >
-                              <span className="ind-ind-name">{ind}</span>
-                              {indicadorSel === ind && (
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })
-            }
-          </div>
-        </aside>
-
-        {/* â•â• PANEL DERECHO â•â• */}
         <section className="ind-config-panel">
           <div className="ind-config-layout">
           <div className="ind-config-inner">
 
             {indicadorSel ? (
               <>
-                {/* â”€â”€ 1. INDICADOR â”€â”€ */}
+                {/* ── 1. INDICADOR ── */}
                 <div className="ind-sel-card" style={{ '--fc': catColor }}>
                   {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
                   <p className="ind-sel-eyebrow">Indicador</p>
@@ -213,123 +162,54 @@ const IndicadoresPage = () => {
                         <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
                         <polyline points="10 9 9 9 8 9"/>
                       </svg>
-                      Ver ficha tÃ©cnica
+                      Ver ficha técnica
                     </button>
                   )}
                 </div>
 
-                {/* â”€â”€ 2. PERÃODO â”€â”€ */}
-                <div className="ind-period-block">
-                  <p className="ind-period-label">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    PerÃ­odo del reporte
-                  </p>
+                {/* ── 2. PERÍODO ── */}
+                <PeriodoReporte
+                  tipo={tipo}
+                  datos={datos}
+                  mesesDisponibles={mesesDisponibles}
+                  catColor={catColor}
+                  esVisor={esVisor}
+                  onTipoChange={setTipo}
+                  onDatosChange={setDatos}
+                />
 
-                  {!esVisor && (
-                    <div className="cfg-tabs" style={{ padding: 0 }}>
-                      <button
-                        className={`cfg-tab ${tipo === 'previo' ? 'cfg-tab--active' : ''}`}
-                        style={tipo === 'previo' ? { background: catColor, borderColor: catColor } : {}}
-                        onClick={() => { setTipo('previo'); setDatos(p => ({...p, semana: '1'})); }}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        Previo
-                      </button>
-                      <button
-                        className={`cfg-tab ${tipo === 'final' ? 'cfg-tab--active' : ''}`}
-                        style={tipo === 'final' ? { background: catColor, borderColor: catColor } : {}}
-                        onClick={() => { setTipo('final'); setDatos(p => ({...p, semana: null})); }}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        Definitivo
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="cfg-fields" style={{ padding: 0 }}>
-                    <div className="cfg-field">
-                      <label className="cfg-label">AÃ±o</label>
-                      <div className="cfg-select-wrap">
-                        <svg className="cfg-select-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                        </svg>
-                        <select className="cfg-select" value={datos.ano}
-                          onChange={e => setDatos({...datos, ano: e.target.value, mes: ''})}>
-                          <option value="2026">2026</option>
-                          <option value="2025">2025</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="cfg-field">
-                      <label className="cfg-label">Mes</label>
-                      <div className="cfg-select-wrap">
-                        <svg className="cfg-select-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        <select className="cfg-select" value={datos.mes}
-                          onChange={e => setDatos({...datos, mes: e.target.value})}>
-                          <option value="">Seleccionar mesâ€¦</option>
-                          {mesesDisponibles.map(([val, name]) => (
-                            <option key={val} value={val}>{name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    {tipo === 'previo' && !esVisor && (
-                      <div className="cfg-field cfg-field-full">
-                        <label className="cfg-label">Semana EpidemiolÃ³gica</label>
-                        <div className="cfg-select-wrap">
-                          <svg className="cfg-select-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                          </svg>
-                          <select className="cfg-select" value={datos.semana || ''}
-                            onChange={e => setDatos({...datos, semana: e.target.value})}>
-                            {[1,2,3,4,5].map(s => <option key={s} value={s.toString()}>Semana {s}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* â”€â”€ 3. ALERTAS â”€â”€ */}
+                {/* ── 3. ALERTAS ── */}
                 {mesesFaltantes.length > 0 && tipo === 'final' && (
-                  <div className="cfg-warning" style={{
-                    margin: '0 0 12px',
-                    ...(confirmandoFaltantes ? {
+                  <div
+                    className="cfg-warning"
+                    style={confirmandoFaltantes ? {
                       background: 'rgba(234,88,12,0.1)',
                       borderColor: '#ea580c',
                       boxShadow: '0 0 0 3px rgba(234,88,12,0.15)',
-                    } : {})
-                  }}>
+                    } : undefined}
+                  >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={confirmandoFaltantes ? '#ea580c' : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                       <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
                     <div>
                       <strong style={confirmandoFaltantes ? { color: '#ea580c' } : {}}>
-                        {confirmandoFaltantes ? 'Â¿Generar sin estos meses?' : 'Meses pendientes:'}
+                        {confirmandoFaltantes ? '¿Generar sin estos meses?' : 'Meses pendientes:'}
                       </strong>{' '}
                       {mesesFaltantes.join(', ')}
-                      <p style={{ margin: '2px 0 0', fontSize: '0.76rem' }}>
+                      <p>
                         {confirmandoFaltantes
-                          ? 'El historial quedarÃ¡ incompleto. Haz clic de nuevo para confirmar.'
-                          : 'GenÃ©ralos primero para tener el historial completo.'}
+                          ? 'El historial quedará incompleto. Haz clic de nuevo para confirmar.'
+                          : 'Généralos primero para tener el historial completo.'}
                       </p>
                     </div>
                   </div>
                 )}
 
-                {/* â”€â”€ 4. SEMÃFORO â”€â”€ */}
+                {/* ── 4. SEMÁFORO ── */}
                 {semData && datos.mes && (
                   <div className="cfg-sem-section ind-sem-block">
-                    <p className="cfg-sem-label">Rangos de desempeÃ±o â€” {MESES_LARGOS[datos.mes]}</p>
+                    <p className="cfg-sem-label">Rangos de desempeño – {MESES_LARGOS[datos.mes]}</p>
                     <div className="cfg-sem-grid">
                       <div className="cfg-sem-block cfg-sem-verde">
                         <span className="cfg-sem-dot" /><div><small>Esperado</small><strong>{semData.txtVerde}</strong></div>
@@ -344,7 +224,7 @@ const IndicadoresPage = () => {
                   </div>
                 )}
 
-                {/* â”€â”€ 5. GENERAR â”€â”€ */}
+                {/* ── 5. GENERAR ── */}
                 {puedeGenFTP && (
                   <button
                     className={`cfg-btn-generate ind-gen-btn ${!canGenerar ? 'cfg-btn-generate--disabled' : ''}`}
@@ -355,10 +235,10 @@ const IndicadoresPage = () => {
                     <span className="cfg-btn-shimmer" />
                     <span className="cfg-btn-content">
                       {cargando
-                        ? <><span className="cfg-spinner" /> Generandoâ€¦</>
+                        ? <><span className="cfg-spinner" /> Generando…</>
                         : confirmandoFaltantes
                           ? <><IcoDownload /> Generar de todas formas</>
-                          : <><IcoDownload /> Generar â€” {indicadorSel}</>
+                          : <><IcoDownload /> Generar – {indicadorSel}</>
                       }
                     </span>
                   </button>
@@ -367,95 +247,29 @@ const IndicadoresPage = () => {
 
             ) : (
               <>
-                {/* â”€â”€ BATCH â”€â”€ */}
+                {/* ── BATCH ── */}
 
-                {/* 1. Card categorÃ­a */}
+                {/* 1. Card categoría */}
                 <div className="ind-sel-card" style={{ '--fc': catColor }}>
                   {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
-                  <p className="ind-sel-eyebrow">CategorÃ­a Â· generar todos</p>
+                  <p className="ind-sel-eyebrow">Categoría · generar todos</p>
                   <h2 className="ind-sel-name" style={{ color: catColor }}>{categoria}</h2>
                   <p className="ind-sel-desc">
-                    {indicadores.length} indicador{indicadores.length !== 1 ? 'es' : ''} Â· se generarÃ¡ un Excel con una pestaÃ±a por indicador
+                    {indicadores.length} indicador{indicadores.length !== 1 ? 'es' : ''} · se generará un Excel con una pestaña por indicador
                   </p>
                 </div>
 
-                {/* 2. PerÃ­odo del batch */}
-                <div className="ind-period-block" style={{ marginBottom: 12 }}>
-                  <p className="ind-period-label">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    PerÃ­odo del reporte
-                  </p>
-                  {!esVisor && (
-                    <div className="cfg-tabs" style={{ padding: 0 }}>
-                      <button
-                        className={`cfg-tab ${tipo === 'previo' ? 'cfg-tab--active' : ''}`}
-                        style={tipo === 'previo' ? { background: catColor, borderColor: catColor } : {}}
-                        onClick={() => { setTipo('previo'); setDatos(p => ({...p, semana: '1'})); }}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        Previo
-                      </button>
-                      <button
-                        className={`cfg-tab ${tipo === 'final' ? 'cfg-tab--active' : ''}`}
-                        style={tipo === 'final' ? { background: catColor, borderColor: catColor } : {}}
-                        onClick={() => { setTipo('final'); setDatos(p => ({...p, semana: null})); }}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        Final
-                      </button>
-                    </div>
-                  )}
-                  <div className="cfg-fields" style={{ padding: 0 }}>
-                    <div className="cfg-field">
-                      <label className="cfg-label">AÃ±o</label>
-                      <div className="cfg-select-wrap">
-                        <svg className="cfg-select-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                        </svg>
-                        <select className="cfg-select" value={datos.ano}
-                          onChange={e => setDatos({...datos, ano: e.target.value, mes: ''})}>
-                          <option value="2026">2026</option>
-                          <option value="2025">2025</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="cfg-field">
-                      <label className="cfg-label">Mes</label>
-                      <div className="cfg-select-wrap">
-                        <svg className="cfg-select-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        <select className="cfg-select" value={datos.mes}
-                          onChange={e => setDatos({...datos, mes: e.target.value})}>
-                          <option value="">Seleccionar mesâ€¦</option>
-                          {mesesDisponibles.map(([val, name]) => (
-                            <option key={val} value={val}>{name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    {tipo === 'previo' && !esVisor && (
-                      <div className="cfg-field cfg-field-full">
-                        <label className="cfg-label">Semana EpidemiolÃ³gica</label>
-                        <div className="cfg-select-wrap">
-                          <svg className="cfg-select-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                          </svg>
-                          <select className="cfg-select" value={datos.semana || ''}
-                            onChange={e => setDatos({...datos, semana: e.target.value})}>
-                            {[1,2,3,4,5].map(s => <option key={s} value={s.toString()}>Semana {s}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* 2. Período del batch */}
+                <PeriodoReporte
+                  tipo={tipo}
+                  datos={datos}
+                  mesesDisponibles={mesesDisponibles}
+                  catColor={catColor}
+                  esVisor={esVisor}
+                  style={{ marginBottom: 12 }}
+                  onTipoChange={setTipo}
+                  onDatosChange={setDatos}
+                />
 
                 {/* 3. Batch panel */}
                 <div className="ind-batch-panel">
@@ -464,8 +278,8 @@ const IndicadoresPage = () => {
                       <div key={ind} className="ind-batch-ind-row">
                         <span className="ind-batch-ind-dot" style={{ background: catColor }} />
                         <span className="ind-batch-ind-name">{ind}</span>
-                        {resultadoBatch?.completados.includes(ind) && <span className="ind-batch-ind-ok">âœ“</span>}
-                        {resultadoBatch?.errores[ind] && <span className="ind-batch-ind-err">âœ—</span>}
+                        {resultadoBatch?.completados.includes(ind) && <span className="ind-batch-ind-ok">✓</span>}
+                        {resultadoBatch?.errores[ind] && <span className="ind-batch-ind-err">✗</span>}
                       </div>
                     ))}
                   </div>
@@ -487,7 +301,7 @@ const IndicadoresPage = () => {
                             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                             <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                           </svg>
-                          {Object.keys(resultadoBatch.errores).length} con errores Â· ver detalle
+                          {Object.keys(resultadoBatch.errores).length} con errores · ver detalle
                         </button>
                       )}
                     </div>
@@ -503,15 +317,15 @@ const IndicadoresPage = () => {
                       <span className="cfg-btn-shimmer" />
                       <span className="cfg-btn-content">
                         {cargandoBatch
-                          ? <><span className="cfg-spinner" /> Generando {indicadores.length} indicadoresâ€¦</>
-                          : <><IcoAll /> Generar todos Â· {categoria} ({indicadores.length})</>
+                          ? <><span className="cfg-spinner" /> Generando {indicadores.length} indicadores…</>
+                          : <><IcoAll /> Generar todos · {categoria} ({indicadores.length})</>
                         }
                       </span>
                     </button>
                   )}
 
                   <p className="ind-batch-tip">
-                    O selecciona un indicador especÃ­fico del panel izquierdo.
+                    O selecciona un indicador específico del panel izquierdo.
                   </p>
                 </div>
               </>
@@ -531,17 +345,17 @@ const IndicadoresPage = () => {
 
       </main>
 
-      {/* â•â• DRAWER FICHA TÃ‰CNICA â•â• */}
+      {/* ══ DRAWER FICHA TÉCNICA ══ */}
       {fichaAbierta && infoIndicador && (
         <>
           <div className="ind-ficha-backdrop" onClick={() => setFichaAbierta(false)} />
           <div className="ind-ficha-drawer">
             <div className="ind-ficha-header" style={{ '--fc': catColor }}>
               <div>
-                <p className="ind-ficha-eyebrow">Ficha tÃ©cnica del indicador</p>
+                <p className="ind-ficha-eyebrow">Ficha técnica del indicador</p>
                 <h3 className="ind-ficha-title" style={{ color: catColor }}>{indicadorSel}</h3>
               </div>
-              <button className="ind-ficha-close" onClick={() => setFichaAbierta(false)}>âœ•</button>
+              <button className="ind-ficha-close" onClick={() => setFichaAbierta(false)}>✕</button>
             </div>
             <div className="ind-ficha-body">
               <InformacionIndicador data={infoIndicador} />

@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════
+﻿/* ═══════════════════════════════════════
    FTP PAGE — CIAE
    ═══════════════════════════════════════ */
 .ftp-screen-container {
@@ -299,11 +299,11 @@
   border-left: 4px solid #0b5445;
   cursor: default;
 }
-.ftp-module-card--IASS {
+.ftp-module-card--IAAS {
   border-left: 4px solid #9a7026;
   cursor: pointer;
 }
-.ftp-module-card--IASS:hover {
+.ftp-module-card--IAAS:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(154,112,38,0.15);
   border-color: #9a7026;

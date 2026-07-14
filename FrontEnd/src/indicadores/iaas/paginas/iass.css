@@ -1,5 +1,5 @@
 ﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   IASS â€” CIAE  (rediseÃ±o visual)
+   IAAS â€” CIAE  (rediseÃ±o visual)
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .ia-root {
@@ -231,7 +231,7 @@
 }
 .ia-step-progress--done { background: rgba(11,84,69,0.08); color: #0b5445; }
 
-/* â”€â”€ IASS 01 global inline (dentro de la card) â”€â”€ */
+/* â”€â”€ IAAS 01 global inline (dentro de la card) â”€â”€ */
 .ia-global-inline {
   display: flex; align-items: center; gap: 12px;
   margin: 0 0 0 0;

@@ -1,6 +1,6 @@
 ﻿"""
 Módulo  : alertas_service.py
-Carpeta : epidemeologia/services/
+Carpeta : epidemiologia/services/
 Qué hace: Procesa alertas del SisCep — muestras rechazadas, pendientes, graves sin muestra.
 Usado en: pipeline_service.py
 """

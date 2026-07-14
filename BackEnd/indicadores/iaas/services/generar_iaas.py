@@ -1,22 +1,22 @@
-"""
-Genera el Excel completo IASS (01-06) con históricos, semáforo y acumulados.
+﻿"""
+Genera el Excel completo IAAS (01-06) con históricos, semáforo y acumulados.
 Usado en: iass/services/procesar_service.py, iass/controllers/reportes_controller.py
 """
 import json
 import io
 import xlsxwriter
 import openpyxl
-from iaas.config import MESES, ORDEN_IASS01, ORDEN_DEMAS_IASS, UNIDADES_HGS_IASS01
-from iaas.config import RUTA_IASS_JSON, RUTA_DATA_IASS
+from iaas.config import MESES, ORDEN_IAAS01, ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01
+from iaas.config import RUTA_IAAS_JSON, RUTA_DATA_IAAS
 
-with open(RUTA_IASS_JSON, encoding="utf-8") as _f:
+with open(RUTA_IAAS_JSON, encoding="utf-8") as _f:
     _CFG = json.load(_f)
 
-RUTA_BASE_IASS = RUTA_DATA_IASS
+RUTA_BASE_IAAS = RUTA_DATA_IAAS
 
-UNIDADES_IASS     = ORDEN_IASS01 + ["DELEGACION"]
-UNIDADES_UCI      = ORDEN_DEMAS_IASS
-_UNIDADES_HGS_SET = set(UNIDADES_HGS_IASS01)
+UNIDADES_IAAS     = ORDEN_IAAS01 + ["DELEGACION"]
+UNIDADES_UCI      = ORDEN_DEMAS_IAAS
+_UNIDADES_HGS_SET = set(UNIDADES_HGS_IAAS01)
 
 
 def _color_tasa_01(tasa, unidad):
@@ -55,8 +55,8 @@ _NOMBRE_A_NUM = {
 }
 
 
-def _leer_historicos_IASS(anio: str, mes_num: int) -> dict:
-    ruta_sesion = RUTA_DATA_IASS / str(anio)
+def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
+    ruta_sesion = RUTA_DATA_IAAS / str(anio)
     historicos  = {}
 
     for ind_n in range(1, 7):
@@ -70,7 +70,7 @@ def _leer_historicos_IASS(anio: str, mes_num: int) -> dict:
             with open(ruta_json, encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
-            print(f"[IASS JSON] Error leyendo {ruta_json}: {e}")
+            print(f"[IAAS JSON] Error leyendo {ruta_json}: {e}")
             historicos[ind_key] = {}
             continue
 
@@ -93,18 +93,18 @@ def _leer_historicos_IASS(anio: str, mes_num: int) -> dict:
         historicos[ind_key] = h_ind
 
     total = sum(len(v) for v in historicos.values())
-    print(f"[IASS JSON] {total} meses de datos cargados")
+    print(f"[IAAS JSON] {total} meses de datos cargados")
     return historicos
 
 
 def _escribir_unidades(hoja, estilos, fila_inicio, columna):
-    for unidad in UNIDADES_IASS:
+    for unidad in UNIDADES_IAAS:
         estilo = estilos["delegacion_txt"] if unidad == "DELEGACIÓN" else estilos["lista_unidades_txt"]
         hoja.write(fila_inicio, columna, unidad, estilo)
         fila_inicio += 1
 
 
-def _escribir_bloque_mesIASS_01(hoja, estilos, fila_titulo_mes, fila_subencabezado, col_inicio, cantidad_unidades, nombre_mes):
+def _escribir_bloque_mesIAAS_01(hoja, estilos, fila_titulo_mes, fila_subencabezado, col_inicio, cantidad_unidades, nombre_mes):
     hoja.merge_range(fila_titulo_mes, col_inicio, fila_titulo_mes, col_inicio + 3, nombre_mes, estilos["encabezado_meses"])
     hoja.set_row(fila_subencabezado, 28)
     hoja.write(fila_subencabezado, col_inicio,     "EGRESOS",            estilos["lista_unidades_txt"])
@@ -123,7 +123,7 @@ def _escribir_bloque_mesIASS_01(hoja, estilos, fila_titulo_mes, fila_subencabeza
         hoja.write(fila_delegacion, col_inicio + offset, "", estilos["delegacion_txt"])
 
 
-def _escribir_IASS01(libro, estilos):
+def _escribir_IAAS01(libro, estilos):
     fila_titulo1       = 0
     fila_titulo2       = 1
     fila_titulo3       = 2
@@ -145,7 +145,7 @@ def _escribir_IASS01(libro, estilos):
         "NOTA:LA SUMATORIA INCLUYE UNICAMENTE LAS 8 UNIDADES QUE ENTRAN A EVALUACIÓN QUE SON LA 2, 3, 4, 10, 13, 21, 54, 58",
         estilos["titulo_tabla"])
 
-    cantidad_unidades = len(UNIDADES_IASS)
+    cantidad_unidades = len(UNIDADES_IAAS)
     hoja.merge_range(fila_encab_meses, 0, fila_subencabezado, 0, "UNIDADES", estilos["unidades_txt"])
     _escribir_unidades(hoja, estilos, fila_subencabezado + 1, 0)
 
@@ -153,14 +153,14 @@ def _escribir_IASS01(libro, estilos):
     for mes in MESES:
         if mes == "JULIO":
             break
-        _escribir_bloque_mesIASS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_mes, cantidad_unidades, mes)
+        _escribir_bloque_mesIAAS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_mes, cantidad_unidades, mes)
         col_inicio_mes += 4
 
     col_inicio_acumulado = 27
     for mes in MESES[1:]:
         if mes == "JULIO":
             break
-        _escribir_bloque_mesIASS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_acumulado, cantidad_unidades, mes)
+        _escribir_bloque_mesIAAS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_acumulado, cantidad_unidades, mes)
         col_inicio_acumulado += 4
 
     fila_encab_meses   = fila_nota + 1 + cantidad_unidades + 4
@@ -170,27 +170,27 @@ def _escribir_IASS01(libro, estilos):
 
     col_inicio_mes = 1
     for mes in MESES[6:]:
-        _escribir_bloque_mesIASS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_mes, cantidad_unidades, mes)
+        _escribir_bloque_mesIAAS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_mes, cantidad_unidades, mes)
         col_inicio_mes += 4
 
     col_inicio_acumulado = 27
     for mes in MESES[6:]:
-        _escribir_bloque_mesIASS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_acumulado, cantidad_unidades, mes)
+        _escribir_bloque_mesIAAS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, col_inicio_acumulado, cantidad_unidades, mes)
         col_inicio_acumulado += 4
 
     fila_encab_meses   = fila_nota + 1 + cantidad_unidades + 4 + cantidad_unidades + 4
     fila_subencabezado = fila_encab_meses + 1
     hoja.merge_range(fila_encab_meses, 0, fila_subencabezado, 0, "UNIDADES", estilos["unidades_txt"])
     _escribir_unidades(hoja, estilos, fila_subencabezado + 1, 0)
-    _escribir_bloque_mesIASS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, 1, cantidad_unidades, "Anual")
+    _escribir_bloque_mesIAAS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, 1, cantidad_unidades, "Anual")
 
 
-def Excel_IASS01():
+def Excel_IAAS01():
     salida  = io.BytesIO()
     libro   = xlsxwriter.Workbook(salida)
     libro.set_properties({'author': 'Web CIAE'})
-    estilos = Estilos_IASS01(libro)
-    _escribir_IASS01(libro, estilos)
+    estilos = Estilos_IAAS01(libro)
+    _escribir_IAAS01(libro, estilos)
     libro.close()
     salida.seek(0)
     return salida
@@ -201,7 +201,7 @@ _COLOR_DORADO = "#9A7026"
 _COLOR_ROJO   = "#7E0808"
 
 
-def Estilos_IASS01(libro):
+def Estilos_IAAS01(libro):
     _cap = {"font_size": 9, "align": "center", "valign": "vcenter",
             "bold": True, "border": 1, "border_color": "#A6A6A6", "num_format": "0.00"}
     return {
@@ -235,7 +235,7 @@ def Estilos_IASS01(libro):
     }
 
 
-_IASS_UCI_CONFIG = {
+_IAAS_UCI_CONFIG = {
     num: {
         "codigo":   _CFG[f"IAAS {num}"]["Titulo2"],
         "titulo":   _CFG[f"IAAS {num}"]["Titulo1"],
@@ -281,8 +281,8 @@ def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg):
     return fila_hosp1 + cant_unidades - 1
 
 
-def _escribir_IASS_UCI(libro, estilos, numero: str):
-    cfg        = _IASS_UCI_CONFIG[numero]
+def _escribir_IAAS_UCI(libro, estilos, numero: str):
+    cfg        = _IAAS_UCI_CONFIG[numero]
     COLS_MES   = 3
     TOTAL_COLS = 1 + 12 * COLS_MES
 
@@ -306,30 +306,30 @@ def _escribir_IASS_UCI(libro, estilos, numero: str):
         hoja.write(fila_delega, c, "", estilos["delegacion_txt"])
 
 
-def _Excel_IASS_UCI(numero: str) -> io.BytesIO:
+def _Excel_IAAS_UCI(numero: str) -> io.BytesIO:
     salida  = io.BytesIO()
     libro   = xlsxwriter.Workbook(salida)
     libro.set_properties({'author': 'Web CIAE'})
-    estilos = Estilos_IASS01(libro)
-    _escribir_IASS_UCI(libro, estilos, numero)
+    estilos = Estilos_IAAS01(libro)
+    _escribir_IAAS_UCI(libro, estilos, numero)
     libro.close()
     salida.seek(0)
     return salida
 
 
-def Excel_IASS02(): return _Excel_IASS_UCI("02")
-def Excel_IASS03(): return _Excel_IASS_UCI("03")
-def Excel_IASS04(): return _Excel_IASS_UCI("04")
-def Excel_IASS05(): return _Excel_IASS_UCI("05")
-def Excel_IASS06(): return _Excel_IASS_UCI("06")
+def Excel_IAAS02(): return _Excel_IAAS_UCI("02")
+def Excel_IAAS03(): return _Excel_IAAS_UCI("03")
+def Excel_IAAS04(): return _Excel_IAAS_UCI("04")
+def Excel_IAAS05(): return _Excel_IAAS_UCI("05")
+def Excel_IAAS06(): return _Excel_IAAS_UCI("06")
 
 
 def _estilo_tasa(estilos, color):
     return estilos.get(color, estilos["sin_datos"])
 
 
-def _escribir_acumulado_IASS01(hoja, estilos, all_months):
-    N = len(UNIDADES_IASS)
+def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
+    N = len(UNIDADES_IAAS)
 
     for mes_target in range(2, 13):
         if mes_target not in all_months:
@@ -345,7 +345,7 @@ def _escribir_acumulado_IASS01(hoja, estilos, all_months):
         sum_del_n = 0
         sum_del_d = 0
 
-        for i, unidad in enumerate(UNIDADES_IASS):
+        for i, unidad in enumerate(UNIDADES_IAAS):
             if unidad == "DELEGACION":
                 continue
 
@@ -383,7 +383,7 @@ def _escribir_acumulado_IASS01(hoja, estilos, all_months):
         hoja.write(fila_del, col_base + 3, tasa_del,  _estilo_tasa(estilos, color_del))
 
 
-def _escribir_acumulado_IASS_uci(hoja, estilos, all_months, indicador):
+def _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, indicador):
     N         = len(UNIDADES_UCI)
     fila_ini  = N + 8
     fila_del  = 2 * N + 8
@@ -433,7 +433,7 @@ def _escribir_acumulado_IASS_uci(hoja, estilos, all_months, indicador):
         hoja.write(fila_del, col_base + 2, tasa_del,  _estilo_tasa(estilos, color_del))
 
 
-def _escribir_datos_IASS_uci(hoja, estilos, mes_num, datos):
+def _escribir_datos_IAAS_uci(hoja, estilos, mes_num, datos):
     col_base = 1 + (mes_num - 1) * 3
     for i, unidad in enumerate(UNIDADES_UCI):
         v      = datos.get(unidad)
@@ -452,8 +452,8 @@ def _escribir_datos_IASS_uci(hoja, estilos, mes_num, datos):
         hoja.write(fila, col_base + 2, tasa if tasa is not None else 0, _estilo_tasa(estilos, v.get("color")))
 
 
-def _escribir_datos_IASS01(hoja, estilos, mes_num, datos):
-    N = len(UNIDADES_IASS)
+def _escribir_datos_IAAS01(hoja, estilos, mes_num, datos):
+    N = len(UNIDADES_IAAS)
     if mes_num <= 6:
         fila_inicio = 6
         col_base    = 1 + (mes_num - 1) * 4
@@ -466,7 +466,7 @@ def _escribir_datos_IASS01(hoja, estilos, mes_num, datos):
     sum_den        = sum((v.get("denominador") or 0) for v in unidades_datos.values())
     tasa_deleg     = round((sum_num / sum_den) * 1000, 2) if sum_den else 0
 
-    for i, unidad in enumerate(UNIDADES_IASS):
+    for i, unidad in enumerate(UNIDADES_IAAS):
         fila = fila_inicio + i
 
         if unidad == "DELEGACION":
@@ -489,29 +489,29 @@ def _escribir_datos_IASS01(hoja, estilos, mes_num, datos):
         hoja.write(fila, col_base + 3, tasa if tasa is not None else 0, _estilo_tasa(estilos, v.get("color")))
 
 
-def Excel_IASS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:
+def Excel_IAAS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:
     mes_num      = int(mes)
-    ruta_archivo = RUTA_BASE_IASS / str(anio) / f"IAAS_{anio}.xlsx"
-    historicos   = _leer_historicos_IASS(anio, mes_num)
+    ruta_archivo = RUTA_BASE_IAAS / str(anio) / f"IAAS_{anio}.xlsx"
+    historicos   = _leer_historicos_IAAS(anio, mes_num)
 
     salida  = io.BytesIO()
     libro   = xlsxwriter.Workbook(salida)
     libro.set_properties({'author': 'Web CIAE'})
-    estilos = Estilos_IASS01(libro)
+    estilos = Estilos_IAAS01(libro)
 
-    _escribir_IASS01(libro, estilos)
+    _escribir_IAAS01(libro, estilos)
     for num in ("02", "03", "04", "05", "06"):
-        _escribir_IASS_UCI(libro, estilos, num)
+        _escribir_IAAS_UCI(libro, estilos, num)
 
     hoja01 = libro.get_worksheet_by_name("IAAS 01")
     if hoja01:
         all_months_01 = dict(historicos.get("IAAS 01", {}))
         for m, mes_datos in all_months_01.items():
-            _escribir_datos_IASS01(hoja01, estilos, m, mes_datos)
+            _escribir_datos_IAAS01(hoja01, estilos, m, mes_datos)
         if datos.get("IAAS 01"):
             all_months_01[mes_num] = datos["IAAS 01"]
-            _escribir_datos_IASS01(hoja01, estilos, mes_num, datos["IAAS 01"])
-        _escribir_acumulado_IASS01(hoja01, estilos, all_months_01)
+            _escribir_datos_IAAS01(hoja01, estilos, mes_num, datos["IAAS 01"])
+        _escribir_acumulado_IAAS01(hoja01, estilos, all_months_01)
 
     for num in ("02", "03", "04", "05", "06"):
         key  = f"IAAS {num}"
@@ -524,9 +524,9 @@ def Excel_IASS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:
             all_months[mes_num] = datos[key]
 
         for m, mes_datos in all_months.items():
-            _escribir_datos_IASS_uci(hoja, estilos, m, mes_datos)
+            _escribir_datos_IAAS_uci(hoja, estilos, m, mes_datos)
 
-        _escribir_acumulado_IASS_uci(hoja, estilos, all_months, key)
+        _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, key)
 
     libro.close()
     salida.seek(0)
@@ -536,7 +536,7 @@ def Excel_IASS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:
         with open(ruta_archivo, "wb") as f:
             f.write(salida.read())
         salida.seek(0)
-        print(f"[IASS] Guardado: {ruta_archivo}")
+        print(f"[IAAS] Guardado: {ruta_archivo}")
     except PermissionError:
         salida.seek(0)
         raise PermissionError(f"El archivo IAAS_{anio}.xlsx está abierto en Excel. Ciérralo e intenta de nuevo.")

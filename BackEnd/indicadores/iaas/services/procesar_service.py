@@ -1,16 +1,16 @@
-"""
-Orquesta el procesamiento de todos los IASS y genera el Excel final.
+﻿"""
+Orquesta el procesamiento de todos los IAAS y genera el Excel final.
 Persiste los datos en JSON por indicador (sesion/{anio}/IAAS_0N.json).
-Usado en: iass/controllers/iass_controller.py, iass/controllers/reportes_controller.py
+Usado en: iass/controllers/iaas_controller.py, iass/controllers/reportes_controller.py
 """
 import json
 import base64
 import datetime
 from pathlib import Path
 
-from iaas.config import RUTA_DATA_IASS
-from iaas.config import ORDEN_DEMAS_IASS
-from iaas.services.extraccion_service import calcular_IASS
+from iaas.config import RUTA_DATA_IAAS
+from iaas.config import ORDEN_DEMAS_IAAS
+from iaas.services.extraccion_service import calcular_IAAS
 
 MESES_NOMBRE = {
     "01": "ENERO",  "02": "FEBRERO",   "03": "MARZO",    "04": "ABRIL",
@@ -20,13 +20,13 @@ MESES_NOMBRE = {
 
 
 def _ruta_sesion(anio: str) -> Path:
-    return RUTA_DATA_IASS / anio
+    return RUTA_DATA_IAAS / anio
 
 
 def _calcular_indicadores_pendientes(datos: dict, numerador: dict) -> tuple[list, dict]:
     pendientes_ind: dict[str, list] = {}
 
-    for u in ORDEN_DEMAS_IASS:
+    for u in ORDEN_DEMAS_IAAS:
         if u not in numerador:
             pendientes_ind[u] = [
                 "IAAS 01", "IAAS 02", "IAAS 03",
@@ -138,7 +138,7 @@ def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
         return [], {}
 
     pendientes_ind: dict[str, list] = {}
-    for unidad in ORDEN_DEMAS_IASS:
+    for unidad in ORDEN_DEMAS_IAAS:
         inds_pend = []
         for ind_n in range(1, 7):
             ind_key    = f"IAAS 0{ind_n}"
@@ -152,7 +152,7 @@ def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
 
 
 def _recalcular_delegacion(datos_ind: dict, ind: str) -> dict:
-    from iaas.services.extraccion_service import _semaforo_IASS01, _semaforo_general
+    from iaas.services.extraccion_service import _semaforo_IAAS01, _semaforo_general
     total_num = sum(
         (v.get("numerador") or 0)
         for u, v in datos_ind.items()
@@ -164,31 +164,31 @@ def _recalcular_delegacion(datos_ind: dict, ind: str) -> dict:
         if u not in ("DELEGACION", "Delegación") and isinstance(v, dict)
     )
     raw = {"DELEGACION": {"numerador": total_num, "denominador": total_den or None}}
-    result = _semaforo_IASS01(raw) if ind == "IAAS 01" else _semaforo_general(raw, ind)
+    result = _semaforo_IAAS01(raw) if ind == "IAAS 01" else _semaforo_general(raw, ind)
     datos_ind["DELEGACION"] = result.get("DELEGACION", {})
     return datos_ind
 
 
-def procesar_IASS(anio: str, mes: str, numerador: dict, denominador: dict,
-                    excel_denominador_IASS_01: bytes | None) -> dict:
+def procesar_IAAS(anio: str, mes: str, numerador: dict, denominador: dict,
+                    excel_denominador_IAAS_01: bytes | None) -> dict:
     datos = {
-        "IAAS 01": calcular_IASS("IAAS 01", numerador, excel_denominador_IASS_01),
-        "IAAS 02": calcular_IASS("IAAS 02", numerador, denominador),
-        "IAAS 03": calcular_IASS("IAAS 03", numerador, denominador),
-        "IAAS 04": calcular_IASS("IAAS 04", numerador, denominador),
-        "IAAS 05": calcular_IASS("IAAS 05", numerador, denominador),
-        "IAAS 06": calcular_IASS("IAAS 06", numerador, denominador),
+        "IAAS 01": calcular_IAAS("IAAS 01", numerador, excel_denominador_IAAS_01),
+        "IAAS 02": calcular_IAAS("IAAS 02", numerador, denominador),
+        "IAAS 03": calcular_IAAS("IAAS 03", numerador, denominador),
+        "IAAS 04": calcular_IAAS("IAAS 04", numerador, denominador),
+        "IAAS 05": calcular_IAAS("IAAS 05", numerador, denominador),
+        "IAAS 06": calcular_IAAS("IAAS 06", numerador, denominador),
     }
 
     unidades_pendientes, indicadores_pendientes = _calcular_indicadores_pendientes(datos, numerador)
     _guardar_sesion_json(anio, mes, datos, unidades_pendientes, indicadores_pendientes)
 
-    from iaas.services.generar_iass import Excel_IASS_Completo
-    stream      = Excel_IASS_Completo(anio, mes, datos)
+    from iaas.services.generar_iaas import Excel_IAAS_Completo
+    stream      = Excel_IAAS_Completo(anio, mes, datos)
     archivo_b64 = base64.b64encode(stream.read()).decode("utf-8")
 
     return {
-        "mensaje":             "Reporte IASS generado",
+        "mensaje":             "Reporte IAAS generado",
         "archivo_b64":         archivo_b64,
         "nombre_archivo":      f"IAAS_{anio}_{mes}.xlsx",
         "unidades_pendientes": unidades_pendientes,
@@ -229,8 +229,8 @@ def completar_unidad_tardia(anio: str, mes: str, unidad: str,
 
     _guardar_sesion_json(anio, mes, datos_completos, pendientes, ind_pend)
 
-    from iaas.services.generar_iass import Excel_IASS_Completo
-    stream      = Excel_IASS_Completo(anio, mes, datos_completos)
+    from iaas.services.generar_iaas import Excel_IAAS_Completo
+    stream      = Excel_IAAS_Completo(anio, mes, datos_completos)
     archivo_b64 = base64.b64encode(stream.read()).decode("utf-8")
 
     return {

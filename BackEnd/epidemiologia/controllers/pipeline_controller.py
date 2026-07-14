@@ -1,6 +1,6 @@
 ﻿"""
 Módulo  : pipeline_controller.py
-Carpeta : epidemeologia/controllers/
+Carpeta : epidemiologia/controllers/
 Qué hace: Endpoints para consultar el estado del pipeline y ejecutarlo.
 Usado en: main.py (prefix /epidemiologia)
 """

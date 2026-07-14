@@ -1,6 +1,6 @@
 ﻿"""
 Módulo  : pipeline_service.py
-Carpeta : epidemeologia/services/
+Carpeta : epidemiologia/services/
 Qué hace: Orquesta el pipeline completo de análisis epidemiológico en un hilo en segundo plano.
           Los resultados se persisten en JSON para sobrevivir reinicios del servidor.
 Usado en: pipeline_controller.py, reportes_controller.py

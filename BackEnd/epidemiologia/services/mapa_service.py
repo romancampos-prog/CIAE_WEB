@@ -1,6 +1,6 @@
-"""
+﻿"""
 Módulo  : mapa_service.py
-Carpeta : epidemeologia/services/
+Carpeta : epidemiologia/services/
 Qué hace: Transforma resultados de clustering en estructura GeoJSON para el mapa Leaflet del front.
 Usado en: pipeline_service.py
 """

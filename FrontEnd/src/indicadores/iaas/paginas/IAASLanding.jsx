@@ -1,59 +1,27 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
-import { getIASSMesesGuardados } from '../api/IASS';
+import { getIAASMesesGuardados } from '../api/IAAS';
+import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 import './iass.css';
 
-const NOMBRES_MESES = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
-];
-
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h >= 6  && h < 12) return { saludo: 'Buenos días',   icono: 'day' };
-  if (h >= 12 && h < 19) return { saludo: 'Buenas tardes', icono: 'afternoon' };
-  return                         { saludo: 'Buenas noches', icono: 'night' };
-};
-
-const IconDay = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="5"/>
-    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-  </svg>
-);
-const IconAfternoon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 12h.01M12 2a10 10 0 0 1 0 20"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2"/>
-    <circle cx="12" cy="12" r="4"/>
-  </svg>
-);
-const IconNight = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </svg>
-);
-
-const IASSLanding = () => {
+const IAASLanding = () => {
   const navigate   = useNavigate();
   const { user }   = useAuth();
-  const { puedeGenIASS } = useRol();
+  const { puedeGenIAAS } = useRol();
   const anioActual = String(new Date().getFullYear());
   const [mesesGuardados, setMesesGuardados] = useState(null);
 
   useEffect(() => { document.title = 'IAAS | CIAE'; }, []);
 
   useEffect(() => {
-    getIASSMesesGuardados(anioActual).then(setMesesGuardados);
+    getIAASMesesGuardados(anioActual).then(setMesesGuardados);
   }, []);
 
   const ultimoMes = mesesGuardados?.length
-    ? NOMBRES_MESES[parseInt(mesesGuardados[mesesGuardados.length - 1]) - 1]
+    ? MESES_LARGOS_ARR[parseInt(mesesGuardados[mesesGuardados.length - 1]) - 1]
     : null;
 
   return (
@@ -133,8 +101,8 @@ const IASSLanding = () => {
           </div>
 
           {/* Nuevo reporte */}
-          {puedeGenIASS && (
-          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/IASS/Reporte')}>
+          {puedeGenIAAS && (
+          <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/IAAS/Reporte')}>
             <div className="hc-header hc-header--gold">
               <div className="hc-icon-box hc-icon-box--gold">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -170,4 +138,4 @@ const IASSLanding = () => {
   );
 };
 
-export default IASSLanding;
+export default IAASLanding;
