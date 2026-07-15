@@ -53,7 +53,13 @@ def _validar_encabezado_excel(excel_bytes: bytes, unidad_esperada: str, config_n
             if len(vals) > 0:
                 def _clave(nombre: str) -> str:
                     tokens = nombre.strip().upper().split()
-                    return " ".join(tokens[:2]) if len(tokens) >= 2 else nombre.strip().upper()
+                    if len(tokens) < 2:
+                        return nombre.strip().upper()
+                    tipo = tokens[0]
+                    # HGS == HGSZ, HGSMF == HGSZMF: quitar la Z intermedia
+                    if tipo.startswith('HGSZ'):
+                        tipo = 'HGS' + tipo[4:]
+                    return f"{tipo} {tokens[1]}"
 
                 excel_clave    = _clave(str(vals.iloc[0]))
                 esperada_clave = _clave(unidad_esperada)
