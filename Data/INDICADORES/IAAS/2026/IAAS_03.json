@@ -421,6 +421,116 @@
           "COLOR": "ROJO"
         }
       }
+    },
+    "JUNIO": {
+      "GENERADO": "2026-07-15T10:42:51",
+      "UNIDADES_PENDIENTES": [
+        "HGS 10 GUANAJUATO",
+        "HGSMF 13 ACAMBARO",
+        "HGSMF 7 SAN FCO. DEL R.",
+        "HGSMF 15 MOROLEON",
+        "HGSMF 20 SAN LUIS DE",
+        "HGR 58 LEÓN",
+        "HGZMF 3 SALAMANCA"
+      ],
+      "INDICADORES_PENDIENTES": {
+        "HGS 10 GUANAJUATO": [
+          "IAAS 01",
+          "IAAS 02",
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05",
+          "IAAS 06"
+        ],
+        "HGSMF 13 ACAMBARO": [
+          "IAAS 01",
+          "IAAS 02",
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05",
+          "IAAS 06"
+        ],
+        "HGSMF 7 SAN FCO. DEL R.": [
+          "IAAS 01",
+          "IAAS 02",
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05",
+          "IAAS 06"
+        ],
+        "HGSMF 15 MOROLEON": [
+          "IAAS 01",
+          "IAAS 02",
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05",
+          "IAAS 06"
+        ],
+        "HGSMF 20 SAN LUIS DE": [
+          "IAAS 01",
+          "IAAS 02",
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05",
+          "IAAS 06"
+        ],
+        "HGR 58 LEÓN": [
+          "IAAS 02",
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05",
+          "IAAS 06"
+        ],
+        "HGZMF 3 SALAMANCA": [
+          "IAAS 03",
+          "IAAS 04",
+          "IAAS 05"
+        ]
+      },
+      "DATOS": {
+        "HGZ 4 CELAYA": {
+          "NUMERADOR": 6,
+          "DENOMINADOR": 451,
+          "TASA": 13.3,
+          "COLOR": "VERDE"
+        },
+        "HGR 58 LEÓN": {
+          "NUMERADOR": 3,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 2 IRAPUATO": {
+          "NUMERADOR": 2,
+          "DENOMINADOR": 65,
+          "TASA": 30.77,
+          "COLOR": "ROJO"
+        },
+        "HGSZ 10 GUANAJUATO": {
+          "NUMERADOR": 0,
+          "DENOMINADOR": 9,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 3 SALAMANCA": {
+          "NUMERADOR": 0,
+          "DENOMINADOR": null,
+          "TASA": null,
+          "COLOR": "ROJO"
+        },
+        "HGS 54 SILAO": {
+          "NUMERADOR": 0,
+          "DENOMINADOR": 5,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        },
+        "HGZMF 21 LEON SUR": {
+          "NUMERADOR": 0,
+          "DENOMINADOR": 486,
+          "TASA": 0.0,
+          "COLOR": "ROJO"
+        }
+      }
     }
   }
 }
