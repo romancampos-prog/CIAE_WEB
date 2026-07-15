@@ -1,33 +1,14 @@
+# Reglas específicas de cada parte viven en su propio .gitignore:
+# BackEnd/.gitignore (venv, .env, __pycache__, etc.)
+# FrontEnd/.gitignore (node_modules, dist, certs, .env, etc.)
+# Aquí solo va lo que aplica a todo el repo.
+
 # ── Backend viejo (no se sube) ───────────────────────
 back1/
 
-# ── Secretos / variables de entorno ──────────────────
-BackEnd/.env
-FrontEnd/.env
-FrontEnd/.env.development.local
-
-# ── Certificados SSL (contienen llave privada) ────────
-FrontEnd/certs/
-
-# ── Entorno virtual Python ────────────────────────────
-BackEnd/venv/
-__pycache__/
-*.pyc
-*.pyo
-
-# ── Build y dependencias del frontend ─────────────────
-FrontEnd/dist/
-FrontEnd/node_modules/
-
 # ── Datos runtime generados / subidos por usuarios ───
-Data/FTP/Historial_xlsx/
-Data/FTP/POBLACION/
-Data/EPIDEMEOLOGIA/bases/
-Data/EPIDEMEOLOGIA/fecha_ultimo_repo/
-Data/EPIDEMEOLOGIA/resultados/
-Data/IASS/Historial_xlsx/
-Data/IASS/Data_IASS/**/*.xlsx
-Data/IASS/Data_IASS/**/*.xls
+# Es el "estado" de cada servidor: nunca se debe versionar ni pisar entre máquinas.
+Data/
 
 # ── Claude Code (sesiones locales, no se suben) ───────
 .claude/**
