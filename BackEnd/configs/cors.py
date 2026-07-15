@@ -16,7 +16,7 @@ ORIGINS_DESARROLLO = [
 ]
 
 ORIGINS_PRODUCCION = [
-    "https://occ00486wsciae:8005",
+    "https://occ00486wsciae:8005", #NO SE BORRA LINK DEL SERVIDOR CORRIENDO
     "https://occ00486wsciae",
     "https://localhost:8005",
     "https://localhost",
