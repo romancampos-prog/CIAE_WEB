@@ -166,7 +166,7 @@ export function buildChartDataMes(datos, mesSel, indSel, indInfo, sem, unidadTip
       tasa:        reg?.tasa        ?? 0,
       numerador:   reg?.numerador   ?? 0,
       denominador: reg?.denominador ?? 0,
-      color:       reg?.color       ?? 'Rojo',
+      color:       reg?.color       ?? 'Gris',
     };
   });
 

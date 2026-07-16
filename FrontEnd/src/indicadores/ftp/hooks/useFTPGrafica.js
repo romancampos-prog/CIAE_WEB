@@ -9,6 +9,7 @@ import {
   buildFTPChartDataMes,
   calcularRangosFTP,
 } from '../utils/calculos';
+import { contarSemaforo } from '../../shared/utils/contarSemaforo';
 
 /**
  * Hook principal de grÃ¡ficas FTP.
@@ -112,6 +113,9 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     [chartDataMes]
   );
 
+  /** Conteo Verde/Amarillo/Rojo/Gris del mes seleccionado — para la vista "Por mes" */
+  const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
+
   /** Color de semÃ¡foro de cada unidad en el Ãºltimo mes disponible */
   const unidadesStatus = useMemo(() => {
     if (!datos?.unidades) return [];
@@ -122,6 +126,9 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
       return { unidad: u, color: reg?.color ?? 'Gris' };
     });
   }, [datos]);
+
+  /** Conteo Verde/Amarillo/Rojo/Gris del último mes disponible — para la vista "Por unidad" */
+  const cumplimientoUltimoMes = useMemo(() => contarSemaforo(unidadesStatus), [unidadesStatus]);
 
   const ultimoMesNum = useMemo(
     () => parseInt(datos?.meses_con_datos?.at(-1) ?? '1'),
@@ -183,6 +190,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     listaIndicadores,
     todosLosIndicadores, chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes, unidadesStatus,
+    cumplimientoMes, cumplimientoUltimoMes,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   };

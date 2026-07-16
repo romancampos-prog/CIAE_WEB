@@ -5,7 +5,8 @@ import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
 import SemaforoUmbral from '../../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
-import TotalTile      from '../../../shared/componentes/graficas/TotalTile';
+import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
+import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 
 const VISTAS_FTP = [
@@ -29,6 +30,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
     mesSel, setMesSel,
     chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes, unidadesStatus,
+    cumplimientoMes, cumplimientoUltimoMes,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   } = useFTPGrafica(hoveredMes, extIndSel, onIndSelChange);
@@ -196,6 +198,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                         {unidadSel === 'TOTAL' ? 'TOTAL OOAD' : unidadSel}
                       </span>
                       <span className="ig-badge ig-badge--neutral">{anio}</span>
+                      <CumplimientoTile conteo={cumplimientoUltimoMes} />
                     </>
                   )}
                   {vistaGrafica === 'mes' && (
@@ -262,7 +265,10 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       </div>
                     )}
                   </div>
-                  <TotalTile total={totalMes} indColor={indColor} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
+                    <TotalTile total={totalMes} indColor={indColor} />
+                    <CumplimientoTile conteo={cumplimientoMes} />
+                  </div>
                 </div>
               )}
             </div>

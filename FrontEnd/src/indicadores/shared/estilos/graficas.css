@@ -266,6 +266,23 @@
 .ig-total-tile-meta {
   font-size: 0.66rem; color: #94a3b8; margin: 2px 0 0;
 }
+
+/* ── Conteo compacto Verde/Amarillo/Rojo/Gris ── */
+.ig-cumplimiento {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 8px 10px;
+  padding: 6px 10px; border-radius: 14px;
+  background: #f8fafc; border: 1.5px solid #e2e8f0;
+}
+.ig-cumplimiento-item {
+  display: flex; align-items: center; gap: 5px;
+}
+.ig-cumplimiento-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.ig-cumplimiento-num {
+  font-size: 0.8rem; font-weight: 800; color: #1e293b;
+}
 .ig-semaforo {
   display: flex; align-items: center; gap: 14px;
   margin-left: auto; flex-wrap: wrap;

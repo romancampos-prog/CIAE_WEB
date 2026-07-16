@@ -11,6 +11,7 @@ import {
   buildChartDataUnidad,
   buildChartDataMes,
 } from '../utils/calculos';
+import { contarSemaforo } from '../../shared/utils/contarSemaforo';
 
 export { TOTAL_KEY };
 
@@ -179,6 +180,15 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     ];
   }, [datos, indSel, indInfo, sem, unidadTipoMap]);
 
+  /** Conteo Verde/Amarillo/Rojo/Gris del mes seleccionado — para la vista "Por mes" */
+  const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
+
+  /** Conteo Verde/Amarillo/Rojo/Gris del último mes disponible (sin TOTAL) — para la vista "Por unidad" */
+  const cumplimientoUltimoMes = useMemo(
+    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== TOTAL_KEY)),
+    [unidadesStatus]
+  );
+
   /** Evolución acumulada mes a mes de la unidad seleccionada */
   const chartDataAcumuladoUnidad = useMemo(() => {
     if (!datos?.unidades || !mesSel || !indInfo || !unidadSel || unidadSel === TOTAL_KEY) return [];
@@ -284,6 +294,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     mesSel, setMesSel,
     chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes,
+    cumplimientoMes, cumplimientoUltimoMes,
     chartDataAcumulado, maxTasaAcumulado,
     chartDataAcumuladoUnidad, maxTasaAcumuladoUnidad,
     chartDataAcumuladoTotal, maxTasaAcumuladoTotal,

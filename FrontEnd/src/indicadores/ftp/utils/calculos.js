@@ -44,7 +44,7 @@ export function buildFTPChartDataMes(datos, mesSel) {
       tasa:        reg?.tasa        ?? 0,
       numerador:   reg?.numerador   ?? 0,
       denominador: reg?.denominador ?? 0,
-      color:       reg?.color       ?? 'Rojo',
+      color:       reg?.color       ?? 'Gris',
     };
   });
   const sinTotal = rows.filter(r => r.unidad !== 'TOTAL');
