@@ -5,6 +5,7 @@ import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
 import SemaforoUmbral from '../../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
+import TotalTile      from '../../../shared/componentes/graficas/TotalTile';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 
 const VISTAS_FTP = [
@@ -27,7 +28,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel,
     chartData, maxTasa,
-    chartDataMes, maxTasaMes, unidadesStatus,
+    chartDataMes, maxTasaMes, totalMes, unidadesStatus,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   } = useFTPGrafica(hoveredMes, extIndSel, onIndSelChange);
@@ -224,42 +225,45 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               )}
 
               {vistaGrafica === 'mes' && (
-                <>
-                  <GraficaBarras
-                    chartKey={`m-${indSel}-${mesSel}-p${pagina}`}
-                    data={dataPaginada}
-                    xKey="unidad"
-                    maxTasa={maxTasaMes}
-                    indSel={indSel}
-                    maxBarSize={32}
-                    barRadius={[6, 6, 0, 0]}
-                    bottomMargin={64}
-                    labelSize="9px"
-                  />
-                  {totalPaginas > 1 && (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
-                      <button
-                        className="ig-btn-dl ig-btn-dl--secondary"
-                        onClick={() => setPagina(p => p - 1)}
-                        disabled={pagina === 0}
-                        style={{ padding: '4px 14px', fontSize: '0.78rem' }}
-                      >
-                        ‹ Anterior
-                      </button>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
-                        {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, chartDataMes.length)} de {chartDataMes.length} unidades
-                      </span>
-                      <button
-                        className="ig-btn-dl ig-btn-dl--secondary"
-                        onClick={() => setPagina(p => p + 1)}
-                        disabled={pagina >= totalPaginas - 1}
-                        style={{ padding: '4px 14px', fontSize: '0.78rem' }}
-                      >
-                        Siguiente ›
-                      </button>
-                    </div>
-                  )}
-                </>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <GraficaBarras
+                      chartKey={`m-${indSel}-${mesSel}-p${pagina}`}
+                      data={dataPaginada}
+                      xKey="unidad"
+                      maxTasa={maxTasaMes}
+                      indSel={indSel}
+                      maxBarSize={32}
+                      barRadius={[6, 6, 0, 0]}
+                      bottomMargin={64}
+                      labelSize="9px"
+                    />
+                    {totalPaginas > 1 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          onClick={() => setPagina(p => p - 1)}
+                          disabled={pagina === 0}
+                          style={{ padding: '4px 14px', fontSize: '0.78rem' }}
+                        >
+                          ‹ Anterior
+                        </button>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                          {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, chartDataMes.length)} de {chartDataMes.length} unidades
+                        </span>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          onClick={() => setPagina(p => p + 1)}
+                          disabled={pagina >= totalPaginas - 1}
+                          style={{ padding: '4px 14px', fontSize: '0.78rem' }}
+                        >
+                          Siguiente ›
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <TotalTile total={totalMes} indColor={indColor} />
+                </div>
               )}
             </div>
           </div>

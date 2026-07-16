@@ -90,10 +90,21 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     [chartData]
   );
 
-  /** Todas las unidades en el mes seleccionado (TOTAL al final) */
-  const chartDataMes = useMemo(
+  /** Todas las unidades en el mes seleccionado + TOTAL por separado */
+  const chartDataMesConTotal = useMemo(
     () => buildFTPChartDataMes(datos, mesSel),
     [datos, mesSel]
+  );
+
+  /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
+  const totalMes = useMemo(
+    () => chartDataMesConTotal.find(d => d.unidad === 'TOTAL') ?? null,
+    [chartDataMesConTotal]
+  );
+
+  const chartDataMes = useMemo(
+    () => chartDataMesConTotal.filter(d => d.unidad !== 'TOTAL'),
+    [chartDataMesConTotal]
   );
 
   const maxTasaMes = useMemo(
@@ -171,7 +182,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     mesSel, setMesSel,
     listaIndicadores,
     todosLosIndicadores, chartData, maxTasa,
-    chartDataMes, maxTasaMes, unidadesStatus,
+    chartDataMes, maxTasaMes, totalMes, unidadesStatus,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   };

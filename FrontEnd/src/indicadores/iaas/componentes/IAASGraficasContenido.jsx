@@ -5,6 +5,7 @@ import GraficaBarras  from '../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../shared/componentes/graficas/PanelUnidades';
 import SemaforoUmbral from '../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../shared/componentes/graficas/VistaToggle';
+import TotalTile      from '../../shared/componentes/graficas/TotalTile';
 import { MESES_CORTOS, MESES_LARGOS } from '../../shared/constantes/meses';
 
 const VISTAS_IAAS = [
@@ -24,7 +25,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
     vistaGrafica, setVistaGrafica,
     mesSel, setMesSel,
     chartData, maxTasa,
-    chartDataMes, maxTasaMes,
+    chartDataMes, maxTasaMes, totalMes,
     chartDataAcumuladoUnidad, maxTasaAcumuladoUnidad,
     chartDataAcumuladoTotal, maxTasaAcumuladoTotal,
     unidadesStatus, unidadesStatusDisplay, indInfo, hgsSet,
@@ -216,7 +217,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
                         {MESES_CORTOS[parseInt(mesSel) - 1]} {anio}
                       </span>
-                      <span className="ig-badge ig-badge--neutral">Todas las unidades + TOTAL</span>
+                      <span className="ig-badge ig-badge--neutral">Todas las unidades</span>
                     </>
                   )}
                   {vistaGrafica === 'acumulado' && (
@@ -248,17 +249,22 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
               )}
 
               {vistaGrafica === 'mes' && (
-                <GraficaBarras
-                  chartKey={`m-${indSel}-${mesSel}`}
-                  data={chartDataMes}
-                  xKey="unidad"
-                  maxTasa={maxTasaMes}
-                  indSel={indSel}
-                  maxBarSize={44}
-                  bottomMargin={64}
-                  labelSize="9px"
-                  tickEl={<TickMesUnidad hgsSet={hgsSet} indSel={indSel} />}
-                />
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <GraficaBarras
+                      chartKey={`m-${indSel}-${mesSel}`}
+                      data={chartDataMes}
+                      xKey="unidad"
+                      maxTasa={maxTasaMes}
+                      indSel={indSel}
+                      maxBarSize={44}
+                      bottomMargin={64}
+                      labelSize="9px"
+                      tickEl={<TickMesUnidad hgsSet={hgsSet} indSel={indSel} />}
+                    />
+                  </div>
+                  <TotalTile total={totalMes} indColor={indColor} />
+                </div>
               )}
 
               {vistaGrafica === 'acumulado' && !esTotal && (

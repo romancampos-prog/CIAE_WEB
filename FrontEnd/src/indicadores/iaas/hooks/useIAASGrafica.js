@@ -97,10 +97,21 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     [chartData]
   );
 
-  /** Todas las unidades en el mes seleccionado + TOTAL OOAD */
-  const chartDataMes = useMemo(
+  /** Todas las unidades en el mes seleccionado + TOTAL OOAD por separado */
+  const chartDataMesConTotal = useMemo(
     () => buildChartDataMes(datos, mesSel, indSel, indInfo, sem, unidadTipoMap),
     [datos, indSel, mesSel, indInfo, sem, unidadTipoMap]
+  );
+
+  /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
+  const totalMes = useMemo(
+    () => chartDataMesConTotal.find(d => d.unidad === TOTAL_KEY) ?? null,
+    [chartDataMesConTotal]
+  );
+
+  const chartDataMes = useMemo(
+    () => chartDataMesConTotal.filter(d => d.unidad !== TOTAL_KEY),
+    [chartDataMesConTotal]
   );
 
   const maxTasaMes = useMemo(
@@ -272,7 +283,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     vistaGrafica, setVistaGrafica,
     mesSel, setMesSel,
     chartData, maxTasa,
-    chartDataMes, maxTasaMes,
+    chartDataMes, maxTasaMes, totalMes,
     chartDataAcumulado, maxTasaAcumulado,
     chartDataAcumuladoUnidad, maxTasaAcumuladoUnidad,
     chartDataAcumuladoTotal, maxTasaAcumuladoTotal,
