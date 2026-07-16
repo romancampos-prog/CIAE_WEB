@@ -56,6 +56,12 @@ const PanelUnidades = ({
         {color === 'Rojo' && (
           <span className="ig-unit-rojo-badge" title="Umbral rojo en último mes">!</span>
         )}
+        {color === "Gris" && (
+          <span className="ig-unit-gris-badge" title="Sin datos en último mes">?</span>
+        )}
+        {color === "Amarillo" && (
+          <span className="ig-unit-amarillo-badge" title="Umbral amarillo en último mes">!</span>
+        )}
       </button>
     );
   };

@@ -301,11 +301,31 @@
 .ig-unit-rojo-badge {
   flex-shrink: 0;
   width: 16px; height: 16px; border-radius: 50%;
-  background: #7E0808; color: #fff;
+  background: var(--color-tinto-gobierno); color: #fff;
   font-size: 0.65rem; font-weight: 900;
   display: flex; align-items: center; justify-content: center;
   line-height: 1;
 }
+
+.ig-unit-gris-badge {
+  flex-shrink: 0;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--color-gris-neutral); color: #fff;
+  font-size: 0.65rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+
+.ig-unit-amarillo-badge {
+  flex-shrink: 0;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--color-oro-institucional); color: #fff;
+  font-size: 0.65rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
 .ig-unit-total-sep {
   height: 1px; background: rgba(15,23,42,0.1);
   margin: 6px 4px;
