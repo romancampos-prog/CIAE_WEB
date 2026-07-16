@@ -14,7 +14,8 @@ load_dotenv()
 
 # ─── Rutas base ───────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR  = BASE_DIR.parent / "Data"
+# Por seguridad, los datos viven fuera del repo (sibling de WEB_CIAE_SERVER), en BD_CIAE.
+DATA_DIR  = BASE_DIR.parent.parent / "BD_CIAE"
 
 
 # ─── Auth ─────────────────────────────────────────────────

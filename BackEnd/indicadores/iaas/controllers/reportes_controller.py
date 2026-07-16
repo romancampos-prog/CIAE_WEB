@@ -73,7 +73,7 @@ async def IAAS_descargar(
 
     if indicador and indicador in _EXCEL_POR_IND:
         num      = indicador.replace("IAAS ", "").zfill(2)
-        stream   = _EXCEL_POR_IND[indicador]()
+        stream   = _EXCEL_POR_IND[indicador](anio)
         nombre   = f"IAAS_{num}_{anio}.xlsx"
         contenido = stream.read()
     else:

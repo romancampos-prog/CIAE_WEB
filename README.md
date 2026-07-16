@@ -14,7 +14,41 @@ Este sistema fue creado por un par de ingenieros expertos en el analisis de dato
 | Actualizar el sistema | [Seccion 4](#seccion-4--actualizar-el-sistema) |
 | Comandos rapidos de PM2 | [Seccion 5](#seccion-5--comandos-pm2) |
 | Correr en modo desarrollo | [Seccion 6](#seccion-6--modo-desarrollo) |
+| Arreglar el venv tras mover/renombrar la carpeta | [Seccion 6.1](#seccion-61--arreglar-el-venv-tras-mover-o-renombrar-la-carpeta) |
 | Modulo Epidemiologia | [Seccion 7](#seccion-7--modulo-epidemiologia-dengue) |
+| Entender la estructura de carpetas | [Estructura del proyecto](#estructura-del-proyecto) |
+
+---
+
+## ESTRUCTURA DEL PROYECTO
+
+> Lee esto primero si es tu primera vez trabajando en el proyecto.
+
+El proyecto vive en dos carpetas **hermanas** (una junto a la otra, no una dentro de la otra):
+
+```
+WEB_CIAE_SERVER_TODO/
+│
+├── WEB_CIAE_SERVER/        ← el repositorio git (lo que clonas)
+│   ├── BackEnd/            API en FastAPI
+│   ├── FrontEnd/           React
+│   └── .git/
+│
+└── BD_CIAE/                ← datos, NUNCA esta en git
+    ├── EPIDEMIOLOGIA/
+    └── INDICADORES/
+```
+
+`BD_CIAE` **queda fuera del repositorio a proposito**: antes vivia como `Data/` dentro de `WEB_CIAE_SERVER` (ignorada por `.gitignore`), pero al estar dentro del repo corria el riesgo de que un `git clean`, `checkout` u otra operacion la borrara. Al sacarla como carpeta hermana, git nunca la toca.
+
+`BackEnd/configs/settings.py` calcula la ruta automaticamente — no hace falta configurar nada:
+
+```python
+BASE_DIR = Path(__file__).resolve().parent.parent   # BackEnd/
+DATA_DIR = BASE_DIR.parent.parent / "BD_CIAE"        # sube dos niveles y entra a BD_CIAE
+```
+
+> Importante: al clonar el repositorio en una PC nueva, tambien hay que crear/copiar la carpeta `BD_CIAE` como hermana de `WEB_CIAE_SERVER` (mismo nivel). Pedirla al responsable del proyecto junto con los `.env`.
 
 ---
 
@@ -62,6 +96,9 @@ Copiar la URL que te da, ejemplo: `https://github.com/usuario/ciae.git`
 PS C:\ROMAN_PTDAM_2026\WEB_CIAE> git init
 PS C:\ROMAN_PTDAM_2026\WEB_CIAE> git branch -M main
 ```
+
+> `git init` se corre **dentro de `WEB_CIAE_SERVER`** — git solo rastrea esa carpeta.
+> `BD_CIAE` es una carpeta hermana, un nivel arriba: git nunca la ve, nunca la sube y nunca la puede borrar (ver [Estructura del proyecto](#estructura-del-proyecto)).
 
 ---
 
@@ -376,6 +413,28 @@ PS C:\ROMAN_PTDAM_2026\WEB_CIAE\FrontEnd> npm run dev
 
 ---
 
+## SECCION 6.1 — ARREGLAR EL VENV TRAS MOVER O RENOMBRAR LA CARPETA
+
+> Sintoma: al correr `uvicorn main:app --reload --port 8005` aparece:
+> `Fatal error in launcher: Unable to create process using '"...\venv\Scripts\python.exe" ...': El sistema no puede encontrar el archivo especificado.`
+
+**Causa:** el venv guarda la ruta absoluta de la carpeta donde se creo dentro de los ejecutables de `venv\Scripts\` (`uvicorn.exe`, `pip.exe`, etc). Si despues se mueve o renombra la carpeta del proyecto (por ejemplo `WEB_CIAE_SERVER` → `WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER`), esos `.exe` siguen apuntando a la ruta vieja, que ya no existe. `venv\Scripts\python.exe` en si sigue funcionando (por eso `activate` no falla), pero los lanzadores no.
+
+No tiene arreglo editable — hay que recrear el venv en la ruta actual:
+
+```
+PS D:\WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER> cd BackEnd
+PS D:\WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER\BackEnd> deactivate
+PS D:\WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER\BackEnd> Remove-Item -Recurse -Force venv
+PS D:\WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER\BackEnd> python -m venv venv
+PS D:\WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER\BackEnd> venv\Scripts\activate
+PS D:\WEB_CIAE_SERVER_TODO\WEB_CIAE_SERVER\BackEnd> pip install -r requirements.txt
+```
+
+> Si tienes varias versiones de Python instaladas, usa la misma que se uso originalmente (revisa `venv\pyvenv.cfg` **antes** de borrarlo, campo `version`) con el lanzador `py`, ejemplo: `py -3.14 -m venv venv`.
+
+---
+
 ## SECCION 7 — MODULO EPIDEMIOLOGIA (DENGUE)
 
 ### Que hace
@@ -400,18 +459,18 @@ El proceso corre en segundo plano. Los iconos del menu lateral se deshabilitan m
 
 ### Persistencia de resultados
 
-Los resultados se guardan en `Data/EPIDEMEOLOGIA/resultados/` como archivos JSON.
+Los resultados se guardan en `BD_CIAE/EPIDEMIOLOGIA/resultados/` como archivos JSON.
 Al reiniciar el servidor, los datos del ultimo pipeline se recuperan automaticamente sin necesidad de volver a ejecutarlo.
 
-> Estos archivos estan en `.gitignore` — no se suben al repositorio.
+> Estos archivos viven en `BD_CIAE`, fuera del repositorio — no se suben a git (ver [Estructura del proyecto](#estructura-del-proyecto)).
 
 ### Archivos de datos (nunca en git)
 
 | Carpeta | Contenido |
 |---|---|
-| `Data/EPIDEMEOLOGIA/bases/` | Excel cargados por el usuario |
-| `Data/EPIDEMEOLOGIA/resultados/` | JSON del ultimo pipeline ejecutado |
-| `Data/EPIDEMEOLOGIA/fecha_ultimo_repo/` | Fecha del ultimo reporte generado |
+| `BD_CIAE/EPIDEMIOLOGIA/bases/` | Excel cargados por el usuario |
+| `BD_CIAE/EPIDEMIOLOGIA/resultados/` | JSON del ultimo pipeline ejecutado |
+| `BD_CIAE/EPIDEMIOLOGIA/fecha_ultimo_repo/` | Fecha del ultimo reporte generado |
 
 ### Roles con acceso al pipeline
 
@@ -686,7 +745,7 @@ BackEnd/
 │   │   ├── models/       esquemas Pydantic para validar entrada/salida
 │   │   ├── services/     logica de negocio pura
 │   │   ├── mapeo/        JSON de configuracion por indicador
-│   │   └── config.py     rutas de Data/, constantes del sub-modulo
+│   │   └── config.py     rutas de BD_CIAE/, constantes del sub-modulo
 │   └── iaas/             sub-modulo IAAS (carga manual de Excel)
 │       ├── controllers/
 │       ├── services/
@@ -837,7 +896,7 @@ post_controller.py
 
 ### Estructura del historico JSON
 
-Los datos de cada indicador se persisten en `Data/INDICADORES/FTP/{ano}/{categoria}/{indicador}.json`:
+Los datos de cada indicador se persisten en `BD_CIAE/INDICADORES/FTP/{ano}/{categoria}/{indicador}.json`:
 
 ```json
 {
@@ -868,16 +927,19 @@ Todas las credenciales viven en `BackEnd/.env` (no esta en git). Se leen via `co
 from dotenv import load_dotenv
 load_dotenv()
 
-DATA_DIR = Path(os.getenv("DATA_DIR"))   # carpeta raiz de datos
-FTP_HOST = os.getenv("FTP_HOST")         # servidor FTP
-FTP_USER = os.getenv("FTP_USER")
-FTP_PASS = os.getenv("FTP_PASS")
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR.parent.parent / "BD_CIAE"   # carpeta hermana de WEB_CIAE_SERVER, no viene del .env
+
+FTP_SERVER = os.getenv("FTP_SERVER")     # servidor FTP
+FTP_USER   = os.getenv("FTP_USER")
+FTP_PASS   = os.getenv("FTP_PASS")
 ```
+
+> `DATA_DIR` **no** se configura en el `.env` — se calcula solo a partir de la ubicacion del proyecto (ver [Estructura del proyecto](#estructura-del-proyecto)).
 
 ```env
 # BackEnd/.env  (pedirlo al responsable del proyecto)
-DATA_DIR=C:/ROMAN_PTDAM_2026/WEB_CIAE/Data
-FTP_HOST=192.168.x.x
+FTP_SERVER=192.168.x.x
 FTP_USER=usuario
 FTP_PASS=contrasena
 SECRET_KEY=clave-jwt
