@@ -208,6 +208,25 @@
   user-select: none;
   z-index: 0;
 }
+
+/* ── Píldoras de indicadores hermanos (misma categoría) ── */
+.ig-hermanos-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 14px; position: relative; z-index: 1;
+}
+.ig-hermano-btn {
+  padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+  border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.ig-hermano-btn:hover {
+  border-color: #cbd5e1; color: #475569;
+}
+.ig-hermano-btn--active {
+  border-color: var(--ic, #0b5445); color: var(--ic, #0b5445);
+  background: color-mix(in srgb, var(--ic, #0b5445) 10%, white);
+}
+
 .ig-chart-top {
   display: flex; align-items: center;
   gap: 16px; margin-bottom: 20px; flex-wrap: wrap;

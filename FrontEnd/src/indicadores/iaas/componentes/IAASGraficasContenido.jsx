@@ -13,13 +13,13 @@ const VISTAS_IAAS = [
   { id: 'acumulado', label: 'Acum. por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></> },
 ];
 
-const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
+const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
 
   const {
     anio, datos, indSel,
-    unidadSel, setUnidadSel,
+    unidadSel, setUnidadSel,  
     cargando, descargando, handleDescargar, handleDescargarInd,
     vistaGrafica, setVistaGrafica,
     mesSel, setMesSel,
@@ -126,6 +126,21 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =
 
             {/* Área de gráfica */}
             <div className="ig-chart-area" style={{ position: 'relative' }}>
+              {indsHermanos.length > 1 && (
+                <div className="ig-hermanos-row">
+                  {indsHermanos.map(ind => (
+                    <button
+                      key={ind}
+                      className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
+                      style={ind === indSel ? { '--ic': indColor } : {}}
+                      onClick={() => onIndSelChange(ind)}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {iconSrc && <img src={iconSrc} alt="" className="ig-chart-watermark" />}
               <div className="ig-chart-topbar">
                 <VistaToggle vistas={VISTAS_IAAS} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />

@@ -14,7 +14,7 @@ const VISTAS_FTP = [
 
 const POR_PAGINA = 20;
 
-const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
+const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
   const { puedeGenFTP } = useRol();
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
@@ -71,8 +71,8 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
         </div>
       </div>
 
-      {/* ── Skeleton ── */}
-      {cargando && (
+      {/* ── Skeleton (solo primera carga, sin datos previos que mostrar) ── */}
+      {cargando && !datos && (
         <div className="ig-skeleton">
           {[180, 260, 220, 300, 240, 280, 200, 320, 190, 270].map((h, i) => (
             <div key={i} className="ig-skeleton-bar" style={{ height: `${h}px` }} />
@@ -91,8 +91,8 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
       )}
 
       {/* ── Gráfica ── */}
-      {!cargando && datos?.meses_con_datos?.length > 0 && (
-        <div className="ig-chart-card">
+      {datos?.meses_con_datos?.length > 0 && (
+        <div className="ig-chart-card" style={{ opacity: cargando ? 0.55 : 1, transition: 'opacity 0.15s' }}>
 
           <div className="ig-body">
             {/* Panel izquierdo */}
@@ -126,6 +126,21 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
 
             {/* Área de gráfica */}
             <div className="ig-chart-area" style={{ position: 'relative' }}>
+              {indsHermanos.length > 1 && (
+                <div className="ig-hermanos-row">
+                  {indsHermanos.map(ind => (
+                    <button
+                      key={ind}
+                      className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
+                      style={ind === indSel ? { '--ic': indColor } : {}}
+                      onClick={() => onIndSelChange(ind)}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {iconSrc && <img src={iconSrc} alt="" className="ig-chart-watermark" />}
               <div className="ig-chart-topbar">
                 <VistaToggle vistas={VISTAS_FTP} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />

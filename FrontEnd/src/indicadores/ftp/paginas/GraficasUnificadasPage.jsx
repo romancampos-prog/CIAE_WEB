@@ -79,6 +79,11 @@ const GraficasUnificadasPage = () => {
     return null;
   }, [indSel, todosGrupos]);
 
+  const indsHermanos = useMemo(() => {
+    const grupo = todosGrupos.find(({cat}) => cat === indCat);
+    return grupo?.inds ?? [];
+  }, [indCat, todosGrupos]);
+
   // Auto-abrir la categoría del indicador activo
   useEffect(() => {
     for (const { cat, inds } of todosGrupos) {
@@ -193,8 +198,8 @@ const GraficasUnificadasPage = () => {
       </aside>
 
       {/* Contenido según módulo — no renderiza hasta tener indicador */}
-      {indSel && modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
-      {indSel && modulo === 'iass' && <IAASGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} />}
+      {indSel && modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} indsHermanos={indsHermanos} />}
+      {indSel && modulo === 'iass' && <IAASGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} indsHermanos={indsHermanos} />} 
     </div>
   );
 };
