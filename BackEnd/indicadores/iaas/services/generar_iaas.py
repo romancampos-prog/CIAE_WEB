@@ -185,12 +185,20 @@ def _escribir_IAAS01(libro, estilos):
     _escribir_bloque_mesIAAS_01(hoja, estilos, fila_encab_meses, fila_subencabezado, 1, cantidad_unidades, "Anual")
 
 
-def Excel_IAAS01():
+def Excel_IAAS01(anio: str = None):
     salida  = io.BytesIO()
     libro   = xlsxwriter.Workbook(salida)
     libro.set_properties({'author': 'Web CIAE'})
     estilos = Estilos_IAAS01(libro)
     _escribir_IAAS01(libro, estilos)
+
+    if anio:
+        hoja = libro.get_worksheet_by_name("IAAS 01")
+        all_months = dict(_leer_historicos_IAAS(anio, 0).get("IAAS 01", {}))
+        for m, mes_datos in all_months.items():
+            _escribir_datos_IAAS01(hoja, estilos, m, mes_datos)
+        _escribir_acumulado_IAAS01(hoja, estilos, all_months)
+
     libro.close()
     salida.seek(0)
     return salida
@@ -306,22 +314,31 @@ def _escribir_IAAS_UCI(libro, estilos, numero: str):
         hoja.write(fila_delega, c, "", estilos["delegacion_txt"])
 
 
-def _Excel_IAAS_UCI(numero: str) -> io.BytesIO:
+def _Excel_IAAS_UCI(numero: str, anio: str = None) -> io.BytesIO:
     salida  = io.BytesIO()
     libro   = xlsxwriter.Workbook(salida)
     libro.set_properties({'author': 'Web CIAE'})
     estilos = Estilos_IAAS01(libro)
     _escribir_IAAS_UCI(libro, estilos, numero)
+
+    if anio:
+        clave      = f"IAAS {numero}"
+        hoja       = libro.get_worksheet_by_name(clave)
+        all_months = dict(_leer_historicos_IAAS(anio, 0).get(clave, {}))
+        for m, mes_datos in all_months.items():
+            _escribir_datos_IAAS_uci(hoja, estilos, m, mes_datos)
+        _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, clave)
+
     libro.close()
     salida.seek(0)
     return salida
 
 
-def Excel_IAAS02(): return _Excel_IAAS_UCI("02")
-def Excel_IAAS03(): return _Excel_IAAS_UCI("03")
-def Excel_IAAS04(): return _Excel_IAAS_UCI("04")
-def Excel_IAAS05(): return _Excel_IAAS_UCI("05")
-def Excel_IAAS06(): return _Excel_IAAS_UCI("06")
+def Excel_IAAS02(anio: str = None): return _Excel_IAAS_UCI("02", anio)
+def Excel_IAAS03(anio: str = None): return _Excel_IAAS_UCI("03", anio)
+def Excel_IAAS04(anio: str = None): return _Excel_IAAS_UCI("04", anio)
+def Excel_IAAS05(anio: str = None): return _Excel_IAAS_UCI("05", anio)
+def Excel_IAAS06(anio: str = None): return _Excel_IAAS_UCI("06", anio)
 
 
 def _estilo_tasa(estilos, color):
