@@ -42,6 +42,10 @@
   gap: 20px; margin-bottom: 24px;
 }
 .ig-header-left { flex: 1; min-width: 0; }
+.ig-title-block {
+  display: flex; flex-direction: column; gap: 10px;
+  flex-shrink: 0;
+}
 .ig-header-detail-row {
   flex: 1; min-width: 0;
   display: flex; align-items: flex-start; gap: 12px;
@@ -61,6 +65,11 @@
   transition: all 0.2s; white-space: nowrap;
 }
 .ig-info-toggle:hover { border-color: #94a3b8; color: #334155; background: #fff; }
+.ig-info-toggle--active {
+  border-color: var(--ic, #0b5445); color: var(--ic, #0b5445);
+  background: color-mix(in srgb, var(--ic, #0b5445) 8%, white);
+}
+.ig-info-toggle--active:hover { color: var(--ic, #0b5445); }
 
 .ig-desc-block {
   max-width: 680px; display: flex; flex-direction: column; gap: 10px;
@@ -136,7 +145,13 @@
 }
 .ig-select:focus { border-color: #0b5445; box-shadow: 0 0 0 3px rgba(11,84,69,0.08); }
 .ig-select--wide { min-width: 185px; }
+.ig-select--sm { padding: 6px 26px 6px 10px; font-size: 0.74rem; border-radius: 9px; }
 .ig-select:disabled { opacity: 0.5; cursor: default; }
+.ig-year-chip {
+  font-size: 0.74rem; font-weight: 700; color: #64748b;
+  background: #f1f5f9; padding: 5px 12px; border-radius: 100px;
+  white-space: nowrap;
+}
 .ig-btn-dl {
   display: flex; align-items: center; gap: 6px;
   background: #1e293b; color: white;
@@ -159,6 +174,9 @@
 .ig-btn-dl--secondary:hover:not(:disabled) {
   background: #f1f5f9; color: #1e293b; border-color: #cbd5e1;
   box-shadow: none; transform: none;
+}
+.ig-btn-dl--icon {
+  padding: 8px; align-self: center;
 }
 
 /* ── Skeleton (barras de gráfica) ── */
@@ -227,10 +245,6 @@
   background: color-mix(in srgb, var(--ic, #0b5445) 10%, white);
 }
 
-.ig-chart-top {
-  display: flex; align-items: center;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
-}
 .ig-chart-badges { display: flex; align-items: center; gap: 8px; }
 .ig-badge {
   font-size: 0.77rem; font-weight: 700;
@@ -264,24 +278,57 @@
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 .ig-total-tile-meta {
-  font-size: 0.66rem; color: #94a3b8; margin: 2px 0 0;
+  display: flex; flex-direction: column; gap: 4px;
+  width: 100%; margin-top: 6px; padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--status, #94a3b8) 20%, transparent);
+}
+.ig-total-tile-meta-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+}
+.ig-total-tile-meta-row span {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.4px; color: #94a3b8;
+}
+.ig-total-tile-meta-row strong {
+  font-size: 0.72rem; font-weight: 700; color: #475569;
+  font-variant-numeric: tabular-nums;
 }
 
-/* ── Conteo compacto Verde/Amarillo/Rojo/Gris ── */
-.ig-cumplimiento {
+/* ── Franja de KPIs por color de semáforo (conteo + %), "Unidades" una sola vez ── */
+.ig-kpi-strip {
+  display: flex; align-items: stretch; border-radius: 9px; overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+.ig-kpi-titulo {
   display: flex; align-items: center; justify-content: center;
-  flex-wrap: wrap; gap: 8px 10px;
-  padding: 6px 10px; border-radius: 14px;
-  background: #f8fafc; border: 1.5px solid #e2e8f0;
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: #94a3b8; background: rgba(0,0,0,0.02);
+  padding: 0 10px; border-right: 1px solid rgba(0,0,0,0.08);
+  white-space: nowrap; transition: background 0.15s ease, color 0.15s ease;
 }
-.ig-cumplimiento-item {
-  display: flex; align-items: center; gap: 5px;
+.ig-kpi-titulo--clickeable { cursor: pointer; }
+.ig-kpi-titulo--clickeable:hover { background: rgba(0,0,0,0.05); color: #64748b; }
+.ig-kpi-item {
+  flex: 1; min-width: 64px; display: flex; align-items: center; justify-content: center;
+  gap: 5px; padding: 8px 6px;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  background: color-mix(in srgb, var(--status, #94a3b8) 5%, white);
+  transition: background 0.15s ease;
 }
-.ig-cumplimiento-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+.ig-kpi-item:last-child { border-right: none; }
+.ig-kpi-item--clickeable { cursor: pointer; }
+.ig-kpi-item--clickeable:hover { background: color-mix(in srgb, var(--status, #94a3b8) 12%, white); }
+.ig-kpi-item--activo {
+  background: color-mix(in srgb, var(--status, #94a3b8) 20%, white);
+  box-shadow: inset 0 -2px 0 var(--status, #94a3b8);
 }
-.ig-cumplimiento-num {
-  font-size: 0.8rem; font-weight: 800; color: #1e293b;
+.ig-kpi-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--status, #94a3b8); flex-shrink: 0; }
+.ig-kpi-num {
+  font-size: 0.95rem; font-weight: 800; color: #1e293b; line-height: 1;
+}
+.ig-kpi-pct {
+  font-size: 0.68rem; font-weight: 700; color: var(--status, #94a3b8);
 }
 .ig-semaforo {
   display: flex; align-items: center; gap: 14px;
@@ -409,10 +456,41 @@
   display: flex; flex-direction: column; gap: 0;
 }
 .ig-chart-topbar {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 10px;
 }
 .ig-chart-topbar .ig-vista-toggle { margin-bottom: 0; }
+.ig-chart-topbar-left {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.ig-umbral-row {
+  margin-bottom: 14px;
+  animation: ig-desc-in 0.15s ease;
+}
+
+/* ── Switch de Acumulado ── */
+.ig-acumulado-switch {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 12px 5px 6px; border-radius: 100px;
+  border: 1px solid #e2e8f0; background: rgba(255,255,255,0.7);
+  cursor: pointer; font-size: 0.72rem; font-weight: 700; color: #64748b;
+  transition: color 0.2s, border-color 0.2s; font-family: inherit; white-space: nowrap;
+}
+.ig-acumulado-switch:hover { border-color: #cbd5e1; }
+.ig-acumulado-switch--on { color: var(--ic, #0b5445); }
+.ig-acumulado-switch-track {
+  width: 30px; height: 17px; border-radius: 100px; flex-shrink: 0;
+  background: #cbd5e1; position: relative;
+  transition: background 0.2s;
+}
+.ig-acumulado-switch--on .ig-acumulado-switch-track { background: var(--ic, #0b5445); }
+.ig-acumulado-switch-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
+}
+.ig-acumulado-switch--on .ig-acumulado-switch-thumb { transform: translateX(13px); }
 
 /* ── Toggle vista ── */
 .ig-vista-toggle {

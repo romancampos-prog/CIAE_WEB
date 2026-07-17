@@ -18,9 +18,9 @@ export function buildFTPChartDataUnidad(datos, unidadSel) {
       mes:         esSemana ? `S${reg.semana}·${mesCorto}` : mesCorto,
       mesNum:      parseInt(mes),
       tasa:        reg?.tasa        ?? 0,
-      numerador:   reg?.numerador   ?? 0,
-      denominador: reg?.denominador ?? 0,
-      color:       reg?.color       ?? 'Rojo',
+      numerador:   reg?.numerador   ?? null,
+      denominador: reg?.denominador ?? null,
+      color:       reg?.color       ?? 'Gris',
       esSemana,
       semana:      reg?.semana      ?? null,
     };
@@ -42,8 +42,8 @@ export function buildFTPChartDataMes(datos, mesSel) {
     return {
       unidad:      u,
       tasa:        reg?.tasa        ?? 0,
-      numerador:   reg?.numerador   ?? 0,
-      denominador: reg?.denominador ?? 0,
+      numerador:   reg?.numerador   ?? null,
+      denominador: reg?.denominador ?? null,
       color:       reg?.color       ?? 'Gris',
     };
   });

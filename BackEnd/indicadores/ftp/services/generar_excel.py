@@ -132,6 +132,9 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                     fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
 
                     if res is None:
+                        # Gris = dato incompleto -- se muestra el numerador o denominador
+                        # que sí tenga valor (el que sea None se deja vacio) con su estilo
+                        # normal; solo el resultado se deja vacio y en gris.
                         worksheet.write(fila_excel, col_base,     num if num is not None else "", estilo_base)
                         worksheet.write(fila_excel, col_base + 1, den if den is not None else "", estilo_base)
                         worksheet.write(fila_excel, col_base + 2, "", fmt_gris)
@@ -150,8 +153,8 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                         fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
 
                         if h_res == "" or h_res is None:
-                            worksheet.write(fila_excel, col_base,     h_num if h_num != "" else "", estilo_base)
-                            worksheet.write(fila_excel, col_base + 1, h_den if h_den != "" else "", estilo_base)
+                            worksheet.write(fila_excel, col_base,     h_num if h_num not in (None, "") else "", estilo_base)
+                            worksheet.write(fila_excel, col_base + 1, h_den if h_den not in (None, "") else "", estilo_base)
                             worksheet.write(fila_excel, col_base + 2, "", fmt_gris)
                         else:
                             color_tag  = _calcular_color(h_res, idx_mes, indicadorSemaforo)

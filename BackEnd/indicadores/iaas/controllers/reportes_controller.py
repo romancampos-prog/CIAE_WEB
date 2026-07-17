@@ -16,8 +16,17 @@ from iaas.services.procesar_service import procesar_IAAS as ProcesarIAAS
 from iaas.services.generar_iaas import (
     Excel_IAAS01, Excel_IAAS02, Excel_IAAS03,
     Excel_IAAS04, Excel_IAAS05, Excel_IAAS06,
-    RUTA_BASE_IAAS, UNIDADES_UCI,
+    RUTA_BASE_IAAS, UNIDADES_UCI, _alias_hgsz, _acumular_unidad,
 )
+from iaas.services.extraccion_service import _semaforo_general, _semaforo_IAAS01
+
+# HGS/HGSMF y HGSZ/HGSZMF son la misma unidad — el dato crudo a veces trae el alias.
+# Mismo criterio que ya usa el Excel (_dato_unidad en generar_iaas.py), aquí solo se
+# arma una vez el mapa alias→nombre canónico para no repetir la búsqueda cada vez.
+_ALIAS_A_CANONICO_IAAS = {
+    alias: u for u in UNIDADES_UCI
+    for alias in [_alias_hgsz(u)] if alias
+}
 
 router = APIRouter()
 
@@ -72,19 +81,15 @@ async def IAAS_descargar(
     from iaas.services.generar_iaas import Excel_IAAS_Completo
 
     if indicador and indicador in _EXCEL_POR_IND:
-        num      = indicador.replace("IAAS ", "").zfill(2)
-        stream   = _EXCEL_POR_IND[indicador](anio)
-        nombre   = f"IAAS_{num}_{anio}.xlsx"
+        num       = indicador.replace("IAAS ", "").zfill(2)
+        stream    = _EXCEL_POR_IND[indicador](anio)
+        nombre    = f"IAAS_{num}_{anio}.xlsx"
         contenido = stream.read()
     else:
-        ruta = RUTA_BASE_IAAS / str(anio) / f"IAAS_{anio}.xlsx"
-        if not ruta.exists():
-            stream    = Excel_IAAS_Completo(anio, "0", {})
-            contenido = stream.read()
-        else:
-            with open(ruta, "rb") as f:
-                contenido = f.read()
-        nombre = f"IAAS_{anio}.xlsx"
+        # Siempre se genera al momento, nunca se sirve un archivo guardado de antes.
+        stream    = Excel_IAAS_Completo(anio, "0", {})
+        contenido = stream.read()
+        nombre    = f"IAAS_{anio}.xlsx"
 
     return ApiResponse(success=True, message=nombre, data={
         "archivo_b64":    base64.b64encode(contenido).decode("utf-8"),
@@ -115,25 +120,50 @@ async def IAAS_datos_grafica(
             datos[ind_key] = {}
             continue
 
-        ind_data: dict = {}
+        # all_months: {mes_num: {unidad: {"numerador":, "denominador":}}} -- mismo formato
+        # que usa _acumular_unidad para el Excel, aquí se reutiliza para el acumulado del
+        # front, así el criterio de "cuánto llevamos sumado" es idéntico en los dos lugares.
+        all_months: dict = {}
+        ind_data: dict   = {}
         for mes_nombre, mes_data in data.get("MESES", {}).items():
             mes_str = _NOMBRE_A_NUM_IAAS.get(mes_nombre.upper())
             if not mes_str:
                 continue
+            mes_num = int(mes_str)
             for unidad, vals in mes_data.get("DATOS", {}).items():
+                unidad = _ALIAS_A_CANONICO_IAAS.get(unidad, unidad)
                 n_v   = vals.get("NUMERADOR")
                 d_v   = vals.get("DENOMINADOR")
                 t_v   = vals.get("TASA")
                 color = (vals.get("COLOR") or "Rojo").capitalize()
+                all_months.setdefault(mes_num, {})[unidad] = {"numerador": n_v, "denominador": d_v}
                 if n_v is not None or t_v is not None:
                     meses_set.add(mes_str)
                     ind_data.setdefault(unidad, []).append({
                         "mes":         mes_str,
-                        "tasa":        t_v if t_v is not None else 0,
-                        "numerador":   n_v if n_v is not None else 0,
-                        "denominador": d_v if d_v is not None else 0,
+                        "tasa":        t_v,
+                        "numerador":   n_v,
+                        "denominador": d_v,
                         "color":       color,
                     })
+
+        # Acumulado (Ene→ese mes) por unidad y mes -- calculado aquí, una sola vez, con el
+        # mismo semáforo que ya corregimos (_semaforo_general/_semaforo_IAAS01). El frontend
+        # ya no debe sumar ni decidir colores, solo mostrar lo que manda el backend.
+        for unidad, registros in ind_data.items():
+            for reg in registros:
+                mes_num = int(reg["mes"])
+                acum_num, acum_den, tiene = _acumular_unidad(all_months, unidad, mes_num)
+                if not tiene:
+                    reg.update(numerador_acum=None, denominador_acum=None, tasa_acum=None, color_acum="Gris")
+                    continue
+                raw = {unidad: {"numerador": acum_num, "denominador": acum_den}}
+                calc = (_semaforo_IAAS01(raw) if ind_key == "IAAS 01" else _semaforo_general(raw, ind_key))[unidad]
+                reg.update(
+                    numerador_acum=acum_num, denominador_acum=acum_den,
+                    tasa_acum=calc["tasa"], color_acum=calc["color"],
+                )
+
         datos[ind_key] = ind_data
 
     return ApiResponse(success=True, message="Datos de gráfica IAAS obtenidos", data={

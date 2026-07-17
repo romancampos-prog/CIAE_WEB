@@ -116,9 +116,9 @@ async def ftp_datos_grafica(
                 )
                 datos.setdefault(unidad, []).append({
                     "mes":         mes_str,
-                    "tasa":        float(pct) if pct is not None else 0,
-                    "numerador":   float(num) if num is not None else 0,
-                    "denominador": float(den) if den is not None else 0,
+                    "tasa":        float(pct) if pct is not None else None,
+                    "numerador":   float(num) if num is not None else None,
+                    "denominador": float(den) if den is not None else None,
                     "color":       color,
                 })
                 if unidad not in unidades_set:
@@ -149,9 +149,9 @@ async def ftp_datos_grafica(
                     unidades_set.append(unidad)
                 datos.setdefault(unidad, []).append({
                     "mes":         mes_str,
-                    "tasa":        float(pct) if pct is not None else 0,
-                    "numerador":   float(num) if num is not None else 0,
-                    "denominador": float(den) if den is not None else 0,
+                    "tasa":        float(pct) if pct is not None else None,
+                    "numerador":   float(num) if num is not None else None,
+                    "denominador": float(den) if den is not None else None,
                     "color":       col,
                     "semana":      semana_num,
                 })

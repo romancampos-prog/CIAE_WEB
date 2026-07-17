@@ -8,7 +8,7 @@ from ftp.services.ftp_extraer import ExtraerInformacionPrevia
 from ftp.services.numerador_denominador import ObtenerNumDen
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import ExcelFinalConPlantilla
-from ftp.services.datos_json_service import guardar_datos_en_json, guardar_semana_en_json
+from ftp.services.datos_json_service import guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes
 
 
 def ExcelReporteFinal(indicador, ano, mes, semana):
@@ -55,6 +55,7 @@ def ExcelReporteFinal(indicador, ano, mes, semana):
 
     if not es_semana:
         guardar_datos_en_json(indicador, ano, mes, diccionarioPrevio)
+        borrar_semana_del_mes(indicador, ano, mes)
     else:
         guardar_semana_en_json(indicador, ano, mes, semana, diccionarioPrevio)
 

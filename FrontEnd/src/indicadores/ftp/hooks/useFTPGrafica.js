@@ -128,7 +128,10 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   }, [datos]);
 
   /** Conteo Verde/Amarillo/Rojo/Gris del último mes disponible — para la vista "Por unidad" */
-  const cumplimientoUltimoMes = useMemo(() => contarSemaforo(unidadesStatus), [unidadesStatus]);
+  const cumplimientoUltimoMes = useMemo(
+    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL')),
+    [unidadesStatus]
+  );
 
   const ultimoMesNum = useMemo(
     () => parseInt(datos?.meses_con_datos?.at(-1) ?? '1'),

@@ -8,6 +8,14 @@ import pandas as pd
 from openpyxl.utils import column_index_from_string
 from iaas.config import UNIDADES_HGS_IAAS01, ORDEN_IAAS01, UNIDAD_TIPO_IAAS01
 from iaas.services.info_service import obtener_config_indicador
+from iaas.services.generar_iaas import _alias_hgsz
+
+# UNIDAD_TIPO_IAAS01 solo tiene los nombres canonicos (HGS/HGSMF); el dato crudo a veces
+# trae el alias HGSZ/HGSZMF. Mismo criterio que _dato_unidad en generar_iaas.py.
+_ALIAS_TIPO_IAAS01 = {
+    alias: tipo for nombre, tipo in UNIDAD_TIPO_IAAS01.items()
+    for alias in [_alias_hgsz(nombre)] if alias
+}
 
 
 def _letra(col: str) -> int:
@@ -85,7 +93,9 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
 
         for u in set(nums) | set(dens):
             resultado[u] = {
-                "numerador":   nums.get(u, 0),
+                # nums.get(u) sin default: si la unidad nunca se subio, queda None
+                # (incompleto) en vez de simular un 0 real que nunca se reporto.
+                "numerador":   nums.get(u),
                 "denominador": dens.get(u)
             }
         return _semaforo_IAAS01(resultado)
@@ -96,10 +106,12 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
         dens     = {u: int(v) for u, v in dens_raw.items() if v}
 
         for u in set(nums) | set(dens):
-            if u == "Delegación":
+            if u == "DELEGACION":
                 continue
             resultado[u] = {
-                "numerador":   nums.get(u, 0),
+                # nums.get(u) sin default: si la unidad nunca se subio, queda None
+                # (incompleto) en vez de simular un 0 real que nunca se reporto.
+                "numerador":   nums.get(u),
                 "denominador": dens.get(u)
             }
         return _semaforo_general(resultado, indicador)
@@ -142,7 +154,7 @@ def _get_numerador(lista_exceles: dict, indicador: str) -> dict:
     if errores:
         raise ValueError(json.dumps(errores))
 
-    resultado["Delegación"] = sum(v for v in resultado.values() if v is not None)
+    resultado["DELEGACION"] = sum(v for v in resultado.values() if v is not None)
     return resultado
 
 
@@ -188,7 +200,7 @@ def _get_denominador_IAAS01(excel_bytes: bytes) -> dict:
             if len(df_unidad) > 0 else None
         )
 
-    resultado["Delegación"] = sum(v for v in resultado.values() if v is not None)
+    resultado["DELEGACION"] = sum(v for v in resultado.values() if v is not None)
     return resultado
 
 
@@ -202,18 +214,23 @@ def _semaforo_general(IAAS: dict, indicador: str) -> dict:
     for unidad, data in IAAS.items():
         numerador   = data.get("numerador")
         denominador = data.get("denominador")
-        tasa = round(((numerador or 0) / denominador) * tasa_multiplicar, 2) if denominador else None
 
-        if tasa is None:
-            color = "Rojo"
-        elif tasa > umbral_esperado.get("Menor"):
-            color = "Rojo"
-        elif tasa >= umbral_esperado.get("Mayor"):
-            color = "Verde"
-        elif tasa >= umbral_medio.get("Mayor"):
-            color = "Amarillo"
+        # numerador/denominador faltante = dato incompleto (Gris); numerador o denominador
+        # en 0 con el otro presente = dato sospechoso, se fuerza Rojo sin evaluar el umbral.
+        if numerador is None or denominador is None:
+            tasa, color = None, "Gris"
+        elif numerador == 0 or denominador == 0:
+            tasa, color = 0, "Rojo"
         else:
-            color = "Rojo"
+            tasa = round((numerador / denominador) * tasa_multiplicar, 2)
+            if tasa > umbral_esperado.get("Menor"):
+                color = "Rojo"
+            elif tasa >= umbral_esperado.get("Mayor"):
+                color = "Verde"
+            elif tasa >= umbral_medio.get("Mayor"):
+                color = "Amarillo"
+            else:
+                color = "Rojo"
 
         resultado[unidad] = {
             "numerador":   numerador,
@@ -280,21 +297,25 @@ def _semaforo_IAAS01(IAAS: dict) -> dict:
     for unidad, data in IAAS.items():
         numerador   = data.get("numerador")
         denominador = data.get("denominador")
-        tasa = round(((numerador or 0) / denominador) * tasa_multiplicar, 2) if denominador else None
 
-        tipo     = UNIDAD_TIPO_IAAS01.get(unidad, "OOAD")
-        umbrales = semaforo_json.get(tipo) or semaforo_json.get("OOAD", {})
-        esperado = umbrales.get("Esperado", {})
-        medio    = umbrales.get("Medio", {})
-
-        if tasa is None:
-            color = "Rojo"
-        elif esperado.get("Mayor") <= tasa <= esperado.get("Menor"):
-            color = "Verde"
-        elif medio.get("Mayor") <= tasa < medio.get("Menor"):
-            color = "Amarillo"
+        # numerador/denominador faltante = dato incompleto (Gris); numerador o denominador
+        # en 0 con el otro presente = dato sospechoso, se fuerza Rojo sin evaluar el umbral.
+        if numerador is None or denominador is None:
+            tasa, color = None, "Gris"
+        elif numerador == 0 or denominador == 0:
+            tasa, color = 0, "Rojo"
         else:
-            color = "Rojo"
+            tasa = round((numerador / denominador) * tasa_multiplicar, 2)
+            tipo     = UNIDAD_TIPO_IAAS01.get(unidad) or _ALIAS_TIPO_IAAS01.get(unidad, "OOAD")
+            umbrales = semaforo_json.get(tipo) or semaforo_json.get("OOAD", {})
+            esperado = umbrales.get("Esperado", {})
+            medio    = umbrales.get("Medio", {})
+            if esperado.get("Mayor") <= tasa <= esperado.get("Menor"):
+                color = "Verde"
+            elif medio.get("Mayor") <= tasa < medio.get("Menor"):
+                color = "Amarillo"
+            else:
+                color = "Rojo"
 
         resultado[unidad] = {
             "numerador":   numerador,

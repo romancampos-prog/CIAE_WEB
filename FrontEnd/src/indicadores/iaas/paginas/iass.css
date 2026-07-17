@@ -386,24 +386,35 @@
   font-size: 0.78rem; font-weight: 600; color: #94a3b8;
 }
 .ia-chart-tooltip {
-  background: white; border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 12px; padding: 12px 14px;
+  background: white; border: 1px solid rgba(0,0,0,0.08); border-left-width: 3px;
+  border-radius: 10px; padding: 10px 14px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   min-width: 170px;
 }
 .ia-chart-tooltip-mes {
   font-size: 0.75rem; font-weight: 700; color: #475569;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 .ia-chart-tooltip-row {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.73rem; color: #374151;
-  margin-bottom: 4px;
 }
 .ia-chart-tooltip-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 .ia-chart-tooltip-ind { flex: 1; }
+.ia-chart-tooltip-sindato {
+  font-size: 0.72rem; font-weight: 600; font-style: italic; color: #a4a4a4;
+}
+.ia-chart-tooltip-numden {
+  font-size: 0.7rem; color: #94a3b8;
+  display: flex; gap: 10px;
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px dashed rgba(0,0,0,0.08);
+}
+.ia-chart-tooltip-numden strong {
+  color: #374151; font-variant-numeric: tabular-nums;
+}
 
 /* â”€â”€ Landing hub â”€â”€ */
 .ia-hub-main {

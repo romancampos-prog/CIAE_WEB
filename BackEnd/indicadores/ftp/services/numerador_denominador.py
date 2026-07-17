@@ -72,10 +72,18 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
             else:
                 resultado = 0
 
+            # numerador o denominador en 0 (con el otro presente) es un dato sospechoso, no un
+            # resultado real — se fuerza rojo en vez de dejar que el umbral normal lo evalúe.
+            forzar_rojo = (
+                numerador_final is not None and denominador_final is not None and
+                (numerador_final == 0 or denominador_final == 0)
+            )
+
             resultadosFinales[unidad] = {
                 "numerador":   numerador_final,
                 "denominador": denominador_final,
-                "resultado":   round(resultado, 2) if resultado is not None else None
+                "resultado":   round(resultado, 2) if resultado is not None else None,
+                "forzar_rojo": forzar_rojo,
             }
 
         except Exception as e:
@@ -99,8 +107,11 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
             "numerador":   total_num,
             "denominador": total_den,
             "resultado":   round((total_num / total_den) * 100, 2) if total_den > 0 else 0,
+            "forzar_rojo": total_num == 0 or total_den == 0,
         }
     else:
-        resultadosFinales["TOTAL"] = {"numerador": total_num, "denominador": None, "resultado": None}
+        resultadosFinales["TOTAL"] = {
+            "numerador": total_num, "denominador": None, "resultado": None, "forzar_rojo": False
+        }
 
     return resultadosFinales, errores_calculo
