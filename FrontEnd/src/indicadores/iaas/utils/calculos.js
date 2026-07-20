@@ -10,7 +10,7 @@ const DELEGACION_KEY = 'DELEGACION';
  * Construye el objeto de rangos de semáforo para IAAS 01 a partir de los umbrales de un tipo.
  * @param {Object|undefined} umbrales - Umbrales del tipo (OOAD, HGS, HGZ, HGR) con Esperado y Medio
  * @param {string} label - Etiqueta a mostrar en la UI (ej. 'OOAD', 'HGS')
- * @returns {{_label:string, Verde:string, Amarillo:string, Rojo:string}|null} Rangos formateados o null si no hay datos
+ * @returns {{_label:string, Esperado:string, Medio:string, Bajo:string}|null} Rangos formateados o null si no hay datos
  */
 export function calcularRangos01(umbrales, label) {
   if (!umbrales?.Esperado) return null;
@@ -18,9 +18,9 @@ export function calcularRangos01(umbrales, label) {
   const med = umbrales.Medio ?? {};
   return {
     _label:   label,
-    Verde:    `${esp.Mayor} – ${esp.Menor}`,
-    Amarillo: `> ${med.Mayor ?? '?'} – < ${esp.Mayor}`,
-    Rojo:     `< ${med.Mayor ?? '?'}  ó  > ${esp.Menor}`,
+    Esperado: `${esp.Mayor} – ${esp.Menor}`,
+    Medio:    `> ${med.Mayor ?? '?'} – < ${esp.Mayor}`,
+    Bajo:     `< ${med.Mayor ?? '?'}  ó  > ${esp.Menor}`,
   };
 }
 

@@ -53,14 +53,14 @@ const PanelUnidades = ({
             borderRadius: '3px', padding: '1px 4px', flexShrink: 0,
           }}>HGS</span>
         )}
-        {color === 'Rojo' && (
-          <span className="ig-unit-rojo-badge" title="Umbral rojo en último mes">!</span>
+        {color === 'Bajo' && (
+          <span className="ig-unit-bajo-badge" title="Umbral bajo en último mes">!</span>
         )}
         {color === "Gris" && (
           <span className="ig-unit-gris-badge" title="Sin datos en último mes">?</span>
         )}
-        {color === "Amarillo" && (
-          <span className="ig-unit-amarillo-badge" title="Umbral amarillo en último mes">!</span>
+        {color === "Medio" && (
+          <span className="ig-unit-medio-badge" title="Umbral medio en último mes">!</span>
         )}
       </button>
     );
@@ -97,14 +97,14 @@ const PanelUnidades = ({
               onClick={() => onSelect(totalItem.unidad)}
             >
               <span className="ig-unit-name">TOTAL OOAD</span>
-              {totalItem.color === 'Rojo' && (
-                <span className="ig-unit-rojo-badge" title="Umbral rojo en último mes">!</span>
+              {totalItem.color === 'Bajo' && (
+                <span className="ig-unit-bajo-badge" title="Umbral bajo en último mes">!</span>
               )}
               {totalItem.color === "Gris" && (
                 <span className="ig-unit-gris-badge" title="Sin datos en último mes">?</span>
               )}
-              {totalItem.color === "Amarillo" && (
-                <span className="ig-unit-amarillo-badge" title="Umbral amarillo en último mes">!</span>
+              {totalItem.color === "Medio" && (
+                <span className="ig-unit-medio-badge" title="Umbral medio en último mes">!</span>
               )}
             </button>
           </>

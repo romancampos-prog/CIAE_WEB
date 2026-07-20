@@ -135,9 +135,9 @@ async def IAAS_datos_grafica(
                 n_v   = vals.get("NUMERADOR")
                 d_v   = vals.get("DENOMINADOR")
                 t_v   = vals.get("TASA")
-                color = (vals.get("COLOR") or "Rojo").capitalize()
+                color = (vals.get("COLOR") or "Bajo").capitalize()
                 all_months.setdefault(mes_num, {})[unidad] = {"numerador": n_v, "denominador": d_v}
-                if n_v is not None or t_v is not None:
+                if n_v is not None or t_v is not None or d_v is not None:
                     meses_set.add(mes_str)
                     ind_data.setdefault(unidad, []).append({
                         "mes":         mes_str,

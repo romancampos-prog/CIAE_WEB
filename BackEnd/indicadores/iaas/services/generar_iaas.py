@@ -52,14 +52,14 @@ def _color_tasa_01(tasa, unidad):
     sem      = _CFG["IAAS 01"]["Semaforo"]
     umbrales = sem.get("HGS") if unidad in _UNIDADES_HGS_SET else sem.get("HGZ", sem.get("OOAD"))
     if not umbrales or tasa is None:
-        return "Rojo"
+        return "Bajo"
     esp = umbrales.get("Esperado", {})
     med = umbrales.get("Medio", {})
     if esp.get("Mayor", 0) <= tasa <= esp.get("Menor", 0):
-        return "Verde"
+        return "Esperado"
     elif med.get("Mayor", 0) <= tasa < med.get("Menor", 0):
-        return "Amarillo"
-    return "Rojo"
+        return "Medio"
+    return "Bajo"
 
 
 def _filas_umbrales_iaas01():
@@ -83,9 +83,9 @@ def _filas_umbrales_iaas01():
     for (esp_mayor, esp_menor, med_mayor, med_menor), nombres in grupos.items():
         filas.append({
             "etiqueta": "/".join(nombres),
-            "verde":    f"{esp_mayor} – {esp_menor}",
-            "amarillo": f"> {med_mayor} – < {esp_mayor}",
-            "rojo":     f"< {med_mayor}  ó  > {esp_menor}",
+            "esperado": f"{esp_mayor} – {esp_menor}",
+            "medio":    f"> {med_mayor} – < {esp_mayor}",
+            "bajo":     f"< {med_mayor}  ó  > {esp_menor}",
         })
     return filas
 
@@ -129,16 +129,16 @@ def _layout_iaas01():
 def _color_tasa_uci(tasa, indicador):
     sem = _CFG[indicador].get("Semaforo", {})
     if tasa is None:
-        return "Rojo"
+        return "Bajo"
     esp = sem.get("Esperado", {})
     med = sem.get("Medio", {})
     if tasa > esp.get("Menor", 0):
-        return "Rojo"
+        return "Bajo"
     elif tasa >= esp.get("Mayor", 0):
-        return "Verde"
+        return "Esperado"
     elif tasa >= med.get("Mayor", 0):
-        return "Amarillo"
-    return "Rojo"
+        return "Medio"
+    return "Bajo"
 
 
 _NOMBRE_A_NUM = {
@@ -177,7 +177,7 @@ def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
                     "numerador":   v.get("NUMERADOR"),
                     "denominador": v.get("DENOMINADOR"),
                     "tasa":        v.get("TASA"),
-                    "color":       (v.get("COLOR") or "Rojo").capitalize(),
+                    "color":       (v.get("COLOR") or "Bajo").capitalize(),
                 }
                 for unit, v in mes_data.get("DATOS", {}).items()
             }
@@ -283,9 +283,9 @@ def _escribir_IAAS01(libro, estilos):
                 for i, f in enumerate(filas_umbral):
                     fila = fila_umbral_inicio + i
                     hoja.write(fila, col,     f["etiqueta"], estilos["lista_unidades_txt"])
-                    hoja.write(fila, col + 1, f["verde"],    estilos["Verde_Leyenda"])
-                    hoja.write(fila, col + 2, f["amarillo"], estilos["Amarillo_Leyenda"])
-                    hoja.write(fila, col + 3, f["rojo"],     estilos["Rojo_Leyenda"])
+                    hoja.write(fila, col + 1, f["esperado"], estilos["Esperado_Leyenda"])
+                    hoja.write(fila, col + 2, f["medio"],    estilos["Medio_Leyenda"])
+                    hoja.write(fila, col + 3, f["bajo"],     estilos["Bajo_Leyenda"])
             col += COLS_MES
 
     # Bloque "MENSUAL": los 12 meses normales, uno arriba del otro con el resto de indicadores.
@@ -353,15 +353,15 @@ def Estilos_IAAS01(libro):
         "header_grupo2":        libro.add_format({"font_size": 9, "bg_color": "#808080", "border_color": "#A6A6A6",
                                                    "border": 1, "valign": "vcenter", "align": "left", "bold": True,
                                                    "font_color": "#FFFFFF", "text_wrap": True}),
-        "Verde":    libro.add_format({**_cap, "bg_color": _COLOR_VERDE,  "font_color": "white"}),
-        "Amarillo": libro.add_format({**_cap, "bg_color": _COLOR_DORADO, "font_color": "white"}),
-        "Rojo":     libro.add_format({**_cap, "bg_color": _COLOR_ROJO,   "font_color": "white"}),
+        "Esperado": libro.add_format({**_cap, "bg_color": _COLOR_VERDE,  "font_color": "white"}),
+        "Medio":    libro.add_format({**_cap, "bg_color": _COLOR_DORADO, "font_color": "white"}),
+        "Bajo":     libro.add_format({**_cap, "bg_color": _COLOR_ROJO,   "font_color": "white"}),
         "sin_datos":libro.add_format({**_cap, "bg_color": "#CCCCCC",     "font_color": "black"}),
         # Igual que FTP: fondo gris, texto del color — no fondo sólido de color (esos son
         # para celdas de dato, estos son para el renglón de leyenda del umbral).
-        "Verde_Leyenda":    libro.add_format({**_cap, "bg_color": "#F2F2F2", "font_color": _COLOR_VERDE}),
-        "Amarillo_Leyenda": libro.add_format({**_cap, "bg_color": "#F2F2F2", "font_color": _COLOR_DORADO}),
-        "Rojo_Leyenda":     libro.add_format({**_cap, "bg_color": "#F2F2F2", "font_color": _COLOR_ROJO}),
+        "Esperado_Leyenda": libro.add_format({**_cap, "bg_color": "#F2F2F2", "font_color": _COLOR_VERDE}),
+        "Medio_Leyenda":    libro.add_format({**_cap, "bg_color": "#F2F2F2", "font_color": _COLOR_DORADO}),
+        "Bajo_Leyenda":     libro.add_format({**_cap, "bg_color": "#F2F2F2", "font_color": _COLOR_ROJO}),
     }
 
 
@@ -386,9 +386,9 @@ def _rango_umbral_uci(indicador):
     esp = sem.get("Esperado", {})
     med = sem.get("Medio", {})
     return {
-        "verde":    f"{esp.get('Mayor', '?')} – {esp.get('Menor', '?')}",
-        "amarillo": f"≥ {med.get('Mayor', '?')} – < {esp.get('Mayor', '?')}",
-        "rojo":     f"< {med.get('Mayor', '?')}  ó  > {esp.get('Menor', '?')}",
+        "esperado": f"{esp.get('Mayor', '?')} – {esp.get('Menor', '?')}",
+        "medio":    f"≥ {med.get('Mayor', '?')} – < {esp.get('Mayor', '?')}",
+        "bajo":     f"< {med.get('Mayor', '?')}  ó  > {esp.get('Menor', '?')}",
     }
 
 
@@ -400,7 +400,7 @@ def _layout_iaas_uci():
     """
     N = len(UNIDADES_UCI)
 
-    # "MENSUAL" lleva 3 filas de más (Verde/Amarillo/Rojo) pegadas arriba de sus encabezados,
+    # "MENSUAL" lleva 3 filas de más (Esperado/Medio/Bajo) pegadas arriba de sus encabezados,
     # igual que FTP — por eso +6 en vez de +3. Acumulado y Anual no llevan umbral, se quedan igual.
     fila_inicio_mensual = 1
     fila_hosp1_mensual  = fila_inicio_mensual + 6
@@ -437,7 +437,7 @@ def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg, 
     enero por completo (bloque MENSUAL ACUMULADO) — el bloque se angosta con él.
     con_fila_mes=False quita el renglón del nombre de mes (bloque ANUAL, que no tiene
     mes que mostrar) — sin eso, sobraba un renglón vacío entre el título y los datos.
-    con_umbral=True agrega 3 filas (Verde/Amarillo/Rojo) pegadas arriba de los encabezados
+    con_umbral=True agrega 3 filas (Esperado/Medio/Bajo) pegadas arriba de los encabezados
     de cada mes, igual que hace FTP — solo tiene sentido en el bloque "MENSUAL"."""
     meses         = MESES if meses is None else meses
     COLS_MES      = 3
@@ -453,10 +453,10 @@ def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg, 
         siguiente = fila_seccion + 1
 
     if con_umbral:
-        fila_verde    = siguiente
-        fila_amarillo = fila_verde + 1
-        fila_rojo     = fila_amarillo + 1
-        fila_sub      = fila_rojo + 1
+        fila_esperado = siguiente
+        fila_medio    = fila_esperado + 1
+        fila_bajo     = fila_medio + 1
+        fila_sub      = fila_bajo + 1
     else:
         fila_sub = siguiente
     fila_hosp1 = fila_sub + 1
@@ -476,9 +476,9 @@ def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg, 
         if con_fila_mes:
             hoja.merge_range(fila_mes, col, fila_mes, col + 2, mes, estilos["encabezado_meses"])
         if con_umbral:
-            hoja.merge_range(fila_verde,    col, fila_verde,    col + 2, f"VERDE: {rango['verde']}",       estilos["Verde_Leyenda"])
-            hoja.merge_range(fila_amarillo, col, fila_amarillo, col + 2, f"AMARILLO: {rango['amarillo']}", estilos["Amarillo_Leyenda"])
-            hoja.merge_range(fila_rojo,     col, fila_rojo,     col + 2, f"ROJO: {rango['rojo']}",         estilos["Rojo_Leyenda"])
+            hoja.merge_range(fila_esperado, col, fila_esperado, col + 2, f"ESPERADO: {rango['esperado']}", estilos["Esperado_Leyenda"])
+            hoja.merge_range(fila_medio,    col, fila_medio,    col + 2, f"MEDIO: {rango['medio']}",       estilos["Medio_Leyenda"])
+            hoja.merge_range(fila_bajo,     col, fila_bajo,     col + 2, f"BAJO: {rango['bajo']}",         estilos["Bajo_Leyenda"])
         hoja.write(fila_sub, col,     cfg["sub_col1"], estilos["lista_unidades_txt"])
         hoja.write(fila_sub, col + 1, cfg["sub_col2"], estilos["lista_unidades_txt"])
         hoja.write(fila_sub, col + 2, "Tasa",          estilos["lista_unidades_txt"])

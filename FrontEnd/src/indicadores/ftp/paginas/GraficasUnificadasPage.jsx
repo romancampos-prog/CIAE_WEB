@@ -41,7 +41,6 @@ const GraficasUnificadasPage = () => {
   const { user }                  = useAuth();
   const [indSel, setIndSel]       = useState('');
   const [drawerOpen, setDrawer]   = useState(false);
-  const [catAbierta, setCatAb]    = useState(null);
   const [ftpLista, setFtpLista]   = useState({});
 
   const modulo = indSel.startsWith('IAAS') ? 'iass' : 'ftp';
@@ -83,13 +82,6 @@ const GraficasUnificadasPage = () => {
     const grupo = todosGrupos.find(({cat}) => cat === indCat);
     return grupo?.inds ?? [];
   }, [indCat, todosGrupos]);
-
-  // Auto-abrir la categoría del indicador activo
-  useEffect(() => {
-    for (const { cat, inds } of todosGrupos) {
-      if (inds.includes(indSel)) { setCatAb(cat); break; }
-    }
-  }, [indSel, todosGrupos]);
 
   const seleccionar = (ind) => {
     setIndSel(ind);
@@ -160,37 +152,19 @@ const GraficasUnificadasPage = () => {
 
         <div className="ig-drawer-body">
           {todosGrupos.map(({ cat, color, inds }) => {
-            const abierta = catAbierta === cat;
+            const esActiva = indCat === cat;
             return (
               <div key={cat} className="ig-ind-cat-group">
                 <button
-                  className={`ig-ind-cat-btn${abierta ? ' ig-ind-cat-btn--open' : ''}`}
+                  className={`ig-ind-cat-btn${esActiva ? ' ig-ind-cat-btn--open' : ''}`}
                   style={{ '--ic': color }}
-                  onClick={() => setCatAb(abierta ? null : cat)}
+                  onClick={() => seleccionar(esActiva ? indSel : inds[0])}
                 >
                   <span>{cat}</span>
                   <span className="ig-ind-cat-right">
                     <span className="ig-ind-cat-badge">{inds.length}</span>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ transform: abierta ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', opacity: 0.45 }}>
-                      <polyline points="6 9 12 15 18 9"/>
-                    </svg>
                   </span>
                 </button>
-                {abierta && (
-                  <div className="ig-ind-cat-items" style={{ '--ic': color }}>
-                    {inds.map(ind => (
-                      <button
-                        key={ind}
-                        className={`ig-ind-item${indSel === ind ? ' ig-ind-item--active' : ''}`}
-                        style={{ '--ic': color }}
-                        onClick={() => seleccionar(ind)}
-                      >
-                        {ind}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })}

@@ -60,7 +60,7 @@ export function buildFTPChartDataMes(datos, mesSel) {
  * @param {Object|null} indInfo - Metadatos del indicador (contiene `semaforo`)
  * @param {number} mesParaSem - Número de mes (1–12) para buscar umbrales mensuales
  * @param {string[]} MESES_LARGOS_ARR - Array de nombres de meses en orden (Enero…Diciembre)
- * @returns {{Verde:string, Amarillo:string, Rojo:string, _mes:string}|null}
+ * @returns {{Esperado:string, Medio:string, Bajo:string, _mes:string}|null}
  */
 export function calcularRangosFTP(indInfo, mesParaSem, MESES_LARGOS_ARR) {
   const sem = indInfo?.semaforo;
@@ -72,8 +72,8 @@ export function calcularRangosFTP(indInfo, mesParaSem, MESES_LARGOS_ARR) {
   const tieneAlto = 'Alto' in limites;
   const critico   = tieneAlto ? limites.Alto : limites.Bajo;
   return tieneAlto
-    ? { Verde: `≤ ${esp}`, Amarillo: `> ${esp} – < ${critico}`, Rojo: `≥ ${critico}`, _mes: nombreMes }
-    : { Verde: `≥ ${esp}`, Amarillo: `> ${critico} – < ${esp}`, Rojo: `≤ ${critico}`, _mes: nombreMes };
+    ? { Esperado: `≤ ${esp}`, Medio: `> ${esp} – < ${critico}`, Bajo: `≥ ${critico}`, _mes: nombreMes }
+    : { Esperado: `≥ ${esp}`, Medio: `> ${critico} – < ${esp}`, Bajo: `≤ ${critico}`, _mes: nombreMes };
 }
 
 /**

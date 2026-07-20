@@ -1,5 +1,5 @@
 """
-Aplica semáforo (Verde/Amarillo/Rojo/Gris) a cada unidad según los umbrales del indicador.
+Aplica semáforo (Esperado/Medio/Bajo/Gris) a cada unidad según los umbrales del indicador.
 Usado en: ftp/services/reporte_final.py, reporte_categoria.py
 """
 
@@ -21,26 +21,26 @@ def Semaforizado(diccionarioPrevio, indicadorSemaforo, mes):
             datos["color"] = "Gris"
             continue
 
-        if datos.get("forzar_rojo"):
-            datos["color"] = "Rojo"
+        if datos.get("forzar_bajo"):
+            datos["color"] = "Bajo"
             continue
 
         color = "Gris"
 
         if "Bajo" in metas and "Esperado" in metas:
             if resultado >= metas["Esperado"]:
-                color = "Verde"
+                color = "Esperado"
             elif resultado <= metas["Bajo"]:
-                color = "Rojo"
+                color = "Bajo"
             else:
-                color = "Amarillo"
+                color = "Medio"
         elif "Alto" in metas and "Esperado" in metas:
             if resultado <= metas["Esperado"]:
-                color = "Verde"
+                color = "Esperado"
             elif resultado >= metas["Alto"]:
-                color = "Rojo"
+                color = "Bajo"
             else:
-                color = "Amarillo"
+                color = "Medio"
 
         datos["color"] = color
 

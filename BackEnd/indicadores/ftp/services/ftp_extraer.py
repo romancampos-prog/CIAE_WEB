@@ -65,11 +65,11 @@ def registrar_error(logErrores, id_error, unidad, repo, ruta_afectada):
     bloque = next((x for x in logErrores[id_error]["unidades"][unidad] if x["ruta"] == ruta_afectada), None)
 
     if bloque:
-        if f"[{repo}]" not in bloque["reportes"]:
-            bloque["reportes"].append(f"[{repo}]")
+        if repo not in bloque["reportes"]:
+            bloque["reportes"].append(repo)
     else:
         logErrores[id_error]["unidades"][unidad].append({
-            "reportes": [f"[{repo}]"],
+            "reportes": [repo],
             "ruta": ruta_afectada
         })
 

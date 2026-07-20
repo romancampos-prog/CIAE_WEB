@@ -17,11 +17,13 @@ const TotalTile = ({ total, indColor }) => {
   return (
     <div className="ig-total-tile" style={{ '--ic': indColor, '--status': dotColor }}>
       <p className="ig-total-tile-label">{label}</p>
-      <p className="ig-total-tile-value">{Number(total.tasa ?? 0).toFixed(2)}</p>
-      <span className="ig-total-tile-status">
-        <span className="ig-total-tile-dot" style={{ background: dotColor }} />
-        {total.color ?? 'Sin datos'}
-      </span>
+      <div className="ig-total-tile-mid">
+        <p className="ig-total-tile-value">{Number(total.tasa ?? 0).toFixed(2)}</p>
+        <span className="ig-total-tile-status">
+          <span className="ig-total-tile-dot" style={{ background: dotColor }} />
+          {total.color ?? 'Sin datos'}
+        </span>
+      </div>
       <div className="ig-total-tile-meta">
         <span className="ig-total-tile-meta-row">
           <span>Num</span><strong>{Number(total.numerador ?? 0).toLocaleString('es-MX')}</strong>

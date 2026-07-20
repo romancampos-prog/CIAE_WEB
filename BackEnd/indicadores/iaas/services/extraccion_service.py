@@ -6,7 +6,7 @@ import io
 import json
 import pandas as pd
 from openpyxl.utils import column_index_from_string
-from iaas.config import UNIDADES_HGS_IAAS01, ORDEN_IAAS01, UNIDAD_TIPO_IAAS01
+from iaas.config import UNIDADES_HGS_IAAS01, ORDEN_IAAS01, ORDEN_DEMAS_IAAS, UNIDAD_TIPO_IAAS01
 from iaas.services.info_service import obtener_config_indicador
 from iaas.services.generar_iaas import _alias_hgsz
 
@@ -91,7 +91,10 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
         dens = _get_denominador_IAAS01(denominador)
         nums = _get_numerador(numeradores, indicador)
 
-        for u in set(nums) | set(dens):
+        # Se recorre la lista completa de unidades esperadas (no solo las que trajeron
+        # numerador o denominador) para que ninguna quede fuera del JSON aunque no
+        # tenga ningun dato ese mes -- queda con null en vez de simplemente no existir.
+        for u in set(ORDEN_IAAS01) | set(nums) | set(dens):
             resultado[u] = {
                 # nums.get(u) sin default: si la unidad nunca se subio, queda None
                 # (incompleto) en vez de simular un 0 real que nunca se reporto.
@@ -105,7 +108,10 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
         dens_raw = (denominador or {}).get(indicador, {})
         dens     = {u: int(v) for u, v in dens_raw.items() if v}
 
-        for u in set(nums) | set(dens):
+        # Se recorre la lista completa de unidades esperadas (no solo las que trajeron
+        # numerador o denominador) para que ninguna quede fuera del JSON aunque no
+        # tenga ningun dato ese mes -- queda con null en vez de simplemente no existir.
+        for u in set(ORDEN_DEMAS_IAAS) | set(nums) | set(dens):
             if u == "DELEGACION":
                 continue
             resultado[u] = {
@@ -216,21 +222,21 @@ def _semaforo_general(IAAS: dict, indicador: str) -> dict:
         denominador = data.get("denominador")
 
         # numerador/denominador faltante = dato incompleto (Gris); numerador o denominador
-        # en 0 con el otro presente = dato sospechoso, se fuerza Rojo sin evaluar el umbral.
+        # en 0 con el otro presente = dato sospechoso, se fuerza Bajo sin evaluar el umbral.
         if numerador is None or denominador is None:
             tasa, color = None, "Gris"
         elif numerador == 0 or denominador == 0:
-            tasa, color = 0, "Rojo"
+            tasa, color = 0, "Bajo"
         else:
             tasa = round((numerador / denominador) * tasa_multiplicar, 2)
             if tasa > umbral_esperado.get("Menor"):
-                color = "Rojo"
+                color = "Bajo"
             elif tasa >= umbral_esperado.get("Mayor"):
-                color = "Verde"
+                color = "Esperado"
             elif tasa >= umbral_medio.get("Mayor"):
-                color = "Amarillo"
+                color = "Medio"
             else:
-                color = "Rojo"
+                color = "Bajo"
 
         resultado[unidad] = {
             "numerador":   numerador,
@@ -299,11 +305,11 @@ def _semaforo_IAAS01(IAAS: dict) -> dict:
         denominador = data.get("denominador")
 
         # numerador/denominador faltante = dato incompleto (Gris); numerador o denominador
-        # en 0 con el otro presente = dato sospechoso, se fuerza Rojo sin evaluar el umbral.
+        # en 0 con el otro presente = dato sospechoso, se fuerza Bajo sin evaluar el umbral.
         if numerador is None or denominador is None:
             tasa, color = None, "Gris"
         elif numerador == 0 or denominador == 0:
-            tasa, color = 0, "Rojo"
+            tasa, color = 0, "Bajo"
         else:
             tasa = round((numerador / denominador) * tasa_multiplicar, 2)
             tipo     = UNIDAD_TIPO_IAAS01.get(unidad) or _ALIAS_TIPO_IAAS01.get(unidad, "OOAD")
@@ -311,11 +317,11 @@ def _semaforo_IAAS01(IAAS: dict) -> dict:
             esperado = umbrales.get("Esperado", {})
             medio    = umbrales.get("Medio", {})
             if esperado.get("Mayor") <= tasa <= esperado.get("Menor"):
-                color = "Verde"
+                color = "Esperado"
             elif medio.get("Mayor") <= tasa < medio.get("Menor"):
-                color = "Amarillo"
+                color = "Medio"
             else:
-                color = "Rojo"
+                color = "Bajo"
 
         resultado[unidad] = {
             "numerador":   numerador,

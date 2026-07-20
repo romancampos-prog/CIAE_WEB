@@ -114,26 +114,26 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
         if idx == idx_mes_activo:
             if tiene_alto:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Verde_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Dorado_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {v_critico}",             fmt['Rojo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {v_critico}",             fmt['Bajo_Leyenda'])
             else:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}",             fmt['Verde_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Dorado_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Rojo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}",             fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Bajo_Leyenda'])
         else:
             lim_h  = semaforo.get(MESES_LISTA[idx], semaforo)
             v_h    = lim_h.get("Esperado", 0)
             alt_h  = "Alto" in lim_h
             crit_h = lim_h.get("Alto") if alt_h else lim_h.get("Bajo", 0)
             if alt_h:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",           fmt['Verde_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}", fmt['Dorado_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {crit_h}",            fmt['Rojo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",           fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}", fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {crit_h}",            fmt['Bajo_Leyenda'])
             else:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",           fmt['Verde_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}", fmt['Dorado_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",            fmt['Rojo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",           fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}", fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",            fmt['Bajo_Leyenda'])
 
         ws.write(9, sc,     "NUM", fmt['header_sub'])
         ws.write(9, sc + 1, "DEN", fmt['header_sub'])

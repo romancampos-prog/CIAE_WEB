@@ -21,13 +21,13 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
         v_critico  = limites.get("Alto") if tiene_alto else limites.get("Bajo", 0)
 
         if tiene_alto:
-            if val <= v_esp:      return 'Verde'
-            elif val < v_critico: return 'Amarillo'
-            else:                 return 'Rojo'
+            if val <= v_esp:      return 'Esperado'
+            elif val < v_critico: return 'Medio'
+            else:                 return 'Bajo'
         else:
-            if val >= v_esp:      return 'Verde'
-            elif val > v_critico: return 'Amarillo'
-            else:                 return 'Rojo'
+            if val >= v_esp:      return 'Esperado'
+            elif val > v_critico: return 'Medio'
+            else:                 return 'Bajo'
     except Exception:
         return 'Gris'
 
@@ -73,27 +73,28 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
 
             if index == idx_mes_activo:
                 if tiene_alto:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Verde_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Dorado_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {v_critico}",             fmt['Rojo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {v_critico}",             fmt['Bajo_Leyenda'])
                 else:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}",             fmt['Verde_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Dorado_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Rojo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}",             fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Bajo_Leyenda'])
             else:
                 lim_h  = indicadorSemaforo.get(MESES_LISTA[index], indicadorSemaforo)
                 v_h    = lim_h.get("Esperado", 0)
                 alt_h  = "Alto" in lim_h
                 crit_h = lim_h.get("Alto") if alt_h else lim_h.get("Bajo", 0)
                 if alt_h:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",            fmt['Verde_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}",  fmt['Dorado_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {crit_h}",             fmt['Rojo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",            fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}",  fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {crit_h}",             fmt['Bajo_Leyenda'])
                 else:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",            fmt['Verde_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}",  fmt['Dorado_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",             fmt['Rojo_Leyenda'])
-
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",            fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}",  fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",             fmt['Bajo_Leyenda'])
+            
+          
             worksheet.write(9, sc,     "NUM", fmt['header_sub'])
             worksheet.write(9, sc + 1, "DEN", fmt['header_sub'])
             worksheet.write(9, sc + 2, "%",   fmt['header_sub'])
@@ -220,14 +221,14 @@ def obtener_estilos_excel(workbook):
         'columna_unidad_dato':   workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS}),
         'subtitulo':             workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS, 'font_color': '#444444'}),
         'header_sub':            workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS, 'font_size': 9}),
-        'Verde_Leyenda':         workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_VERDE,  'bold': True}),
-        'Dorado_Leyenda':        workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_DORADO, 'bold': True}),
-        'Rojo_Leyenda':          workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_ROJO,   'bold': True}),
+        'Esperado_Leyenda':      workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_VERDE,  'bold': True}),
+        'Medio_Leyenda':         workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_DORADO, 'bold': True}),
+        'Bajo_Leyenda':          workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_ROJO,   'bold': True}),
         'dato_normal':           workbook.add_format({**base, 'num_format': '#,##0'}),
         'fila_par':              workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0'}),
         'total_gris_80':         workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_TOTAL, 'font_color': 'white', 'num_format': '#,##0'}),
-        'Verde_Capsula':         workbook.add_format({**base, 'bg_color': C_VERDE,   'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
-        'Amarillo_Capsula':      workbook.add_format({**base, 'bg_color': C_DORADO,  'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
-        'Rojo_Capsula':          workbook.add_format({**base, 'bg_color': C_ROJO,    'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
+        'Esperado_Capsula':      workbook.add_format({**base, 'bg_color': C_VERDE,   'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
+        'Medio_Capsula':         workbook.add_format({**base, 'bg_color': C_DORADO,  'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
+        'Bajo_Capsula':          workbook.add_format({**base, 'bg_color': C_ROJO,    'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
         'Gris_Capsula':          workbook.add_format({**base, 'bg_color': '#CCCCCC', 'font_color': 'black', 'bold': True, 'num_format': '0.00'}),
     }

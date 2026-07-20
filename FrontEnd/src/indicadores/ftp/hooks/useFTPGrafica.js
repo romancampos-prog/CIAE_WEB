@@ -10,6 +10,7 @@ import {
   calcularRangosFTP,
 } from '../utils/calculos';
 import { contarSemaforo } from '../../shared/utils/contarSemaforo';
+import { techoEscala } from '../../shared/utils/escala';
 
 /**
  * Hook principal de grÃ¡ficas FTP.
@@ -87,7 +88,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   );
 
   const maxTasa = useMemo(
-    () => Math.max(...chartData.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartData.map(d => d.tasa)),
     [chartData]
   );
 
@@ -109,11 +110,11 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   );
 
   const maxTasaMes = useMemo(
-    () => Math.max(...chartDataMes.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataMes.map(d => d.tasa)),
     [chartDataMes]
   );
 
-  /** Conteo Verde/Amarillo/Rojo/Gris del mes seleccionado — para la vista "Por mes" */
+  /** Conteo Esperado/Medio/Bajo/Gris del mes seleccionado — para la vista "Por mes" */
   const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
 
   /** Color de semÃ¡foro de cada unidad en el Ãºltimo mes disponible */
@@ -127,7 +128,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     });
   }, [datos]);
 
-  /** Conteo Verde/Amarillo/Rojo/Gris del último mes disponible — para la vista "Por unidad" */
+  /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible — para la vista "Por unidad" */
   const cumplimientoUltimoMes = useMemo(
     () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL')),
     [unidadesStatus]

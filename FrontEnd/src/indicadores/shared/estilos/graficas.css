@@ -178,6 +178,45 @@
 .ig-btn-dl--icon {
   padding: 8px; align-self: center;
 }
+.ig-btn-dl--activo {
+  background: #0f172a; box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+}
+
+/* ── Menú de descarga: un solo botón, tarjetita con las opciones al hacer click ── */
+.ig-dl-menu-wrap { position: relative; }
+@keyframes ig-dl-menu-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ig-dl-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 30;
+  min-width: 240px; background: white; border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 16px 40px rgba(15,23,42,0.18), 0 2px 6px rgba(15,23,42,0.06);
+  padding: 10px; display: flex; flex-direction: column; gap: 2px;
+  transform-origin: top right;
+  animation: ig-dl-menu-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ig-dl-menu-titulo {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: #94a3b8; margin: 2px 6px 7px; padding-bottom: 7px;
+  border-bottom: 1px solid rgba(15,23,42,0.06);
+}
+.ig-dl-menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: none; border: none; border-radius: 9px;
+  padding: 8px 8px; font-size: 0.79rem; font-weight: 600; color: #334155;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.ig-dl-menu-item:hover { background: #f1f5f9; color: #0f172a; }
+.ig-dl-menu-icon {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 28px; height: 28px; border-radius: 9px;
+  background: #eef2f7; color: #64748b; border: 1px solid rgba(15,23,42,0.05);
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.ig-dl-menu-item:hover .ig-dl-menu-icon { background: #1e293b; color: white; border-color: #1e293b; }
 
 /* ── Skeleton (barras de gráfica) ── */
 .ig-skeleton {
@@ -227,10 +266,14 @@
   z-index: 0;
 }
 
-/* ── Píldoras de indicadores hermanos (misma categoría) ── */
+/* ── Píldoras de indicadores hermanos (misma categoría) ──
+   Va como hermano de .ig-header (no dentro de .ig-title-block) para que la
+   cantidad de píldoras nunca empuje "Ver detalle": ese ancho ya no depende
+   de esta fila. margin-top negativo la sube para que quede pegada al título. */
 .ig-hermanos-row {
   display: flex; flex-wrap: wrap; gap: 6px;
-  margin-bottom: 14px; position: relative; z-index: 1;
+  margin-top: -14px; margin-bottom: 14px;
+  position: relative; z-index: 1;
 }
 .ig-hermano-btn {
   padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
@@ -255,32 +298,39 @@
 
 /* ── Tarjeta KPI del TOTAL (separada de la escala de las unidades) ── */
 .ig-total-tile {
-  flex-shrink: 0; width: 152px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  padding: 16px 12px; border-radius: 14px;
-  background: color-mix(in srgb, var(--status, #94a3b8) 7%, white);
-  border: 1.5px solid color-mix(in srgb, var(--status, #94a3b8) 35%, transparent);
+  flex-shrink: 0; width: 168px; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 20px 14px; border-radius: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--status, #94a3b8) 10%, white), color-mix(in srgb, var(--status, #94a3b8) 4%, white));
+  border: 1.5px solid color-mix(in srgb, var(--status, #94a3b8) 32%, transparent);
+  box-shadow: 0 2px 14px color-mix(in srgb, var(--status, #94a3b8) 12%, transparent);
   text-align: center;
 }
 .ig-total-tile-label {
-  font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.6px; color: var(--ic, #0b5445); margin: 0;
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--ic, #0b5445); margin: 0;
+}
+.ig-total-tile-mid {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px;
 }
 .ig-total-tile-value {
-  font-size: 1.7rem; font-weight: 800; color: #1e293b; margin: 2px 0;
-  line-height: 1;
+  font-size: 2.3rem; font-weight: 800; color: #1e293b;
+  line-height: 1; font-variant-numeric: tabular-nums;
 }
 .ig-total-tile-status {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 6px;
   font-size: 0.72rem; font-weight: 700; color: #475569;
+  background: white; padding: 4px 10px; border-radius: 100px;
+  border: 1px solid color-mix(in srgb, var(--status, #94a3b8) 25%, transparent);
 }
 .ig-total-tile-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 .ig-total-tile-meta {
-  display: flex; flex-direction: column; gap: 4px;
-  width: 100%; margin-top: 6px; padding-top: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--status, #94a3b8) 20%, transparent);
+  display: flex; flex-direction: column; gap: 6px;
+  width: 100%; padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--status, #94a3b8) 22%, transparent);
 }
 .ig-total-tile-meta-row {
   display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
@@ -290,7 +340,7 @@
   letter-spacing: 0.4px; color: #94a3b8;
 }
 .ig-total-tile-meta-row strong {
-  font-size: 0.72rem; font-weight: 700; color: #475569;
+  font-size: 0.76rem; font-weight: 700; color: #475569;
   font-variant-numeric: tabular-nums;
 }
 
@@ -299,6 +349,7 @@
   display: flex; align-items: stretch; border-radius: 9px; overflow: hidden;
   border: 1px solid rgba(0,0,0,0.08);
   margin-bottom: 12px;
+  perspective: 900px;
 }
 .ig-kpi-titulo {
   display: flex; align-items: center; justify-content: center;
@@ -309,9 +360,21 @@
 }
 .ig-kpi-titulo--clickeable { cursor: pointer; }
 .ig-kpi-titulo--clickeable:hover { background: rgba(0,0,0,0.05); color: #64748b; }
+
+/* La fila completa de tarjetas gira sobre su eje horizontal (arriba/abajo); el
+   contenido (conteo <-> umbral) se intercambia en el punto medio del giro, cuando
+   la fila está de canto y no se ve nada — así nunca hay texto espejeado. */
+.ig-kpi-items {
+  flex: 1; display: flex;
+  transition: transform 0.26s ease-in-out;
+  transform-style: preserve-3d;
+}
+.ig-kpi-items--volteando { transform: rotateX(90deg); }
+
 .ig-kpi-item {
-  flex: 1; min-width: 64px; display: flex; align-items: center; justify-content: center;
-  gap: 5px; padding: 8px 6px;
+  flex: 1; min-width: 64px; min-height: 34px;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 0 6px;
   border-right: 1px solid rgba(0,0,0,0.08);
   background: color-mix(in srgb, var(--status, #94a3b8) 5%, white);
   transition: background 0.15s ease;
@@ -323,12 +386,17 @@
   background: color-mix(in srgb, var(--status, #94a3b8) 20%, white);
   box-shadow: inset 0 -2px 0 var(--status, #94a3b8);
 }
+
 .ig-kpi-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--status, #94a3b8); flex-shrink: 0; }
 .ig-kpi-num {
   font-size: 0.95rem; font-weight: 800; color: #1e293b; line-height: 1;
 }
 .ig-kpi-pct {
   font-size: 0.68rem; font-weight: 700; color: var(--status, #94a3b8);
+}
+.ig-kpi-umbral {
+  font-size: 0.88rem; font-weight: 800; color: var(--status, #94a3b8);
+  line-height: 1.2; white-space: nowrap;
 }
 .ig-semaforo {
   display: flex; align-items: center; gap: 14px;
@@ -409,7 +477,7 @@
   line-height: 1.3; flex: 1;
 }
 .ig-unit-item--active .ig-unit-name { color: inherit; }
-.ig-unit-rojo-badge {
+.ig-unit-bajo-badge {
   flex-shrink: 0;
   width: 16px; height: 16px; border-radius: 50%;
   background: var(--color-tinto-gobierno); color: #fff;
@@ -428,7 +496,7 @@
 }
 
 
-.ig-unit-amarillo-badge {
+.ig-unit-medio-badge {
   flex-shrink: 0;
   width: 16px; height: 16px; border-radius: 50%;
   background: var(--color-oro-institucional); color: #fff;

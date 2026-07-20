@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import ChartTooltip from '../../../ftp/componentes/graficasFTP/ChartTooltip';
 import { COLOR_SEMAFORO } from '../../constantes/semaforo';
+import { ticksEscala } from '../../utils/escala';
 
 /**
  * Gráfica de barras con semáforo de color.
@@ -59,7 +60,12 @@ const GraficaBarras = ({
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
         <XAxis dataKey={xKey} axisLine={false} tickLine={false} {...xTickProps} />
-        <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={40} domain={[0, maxTasa]} />
+        <YAxis
+          tick={{ fontSize: 10, fill: '#94a3b8' }}
+          axisLine={false} tickLine={false} width={40}
+          domain={[0, maxTasa]}
+          ticks={ticksEscala(maxTasa)}
+        />
         <Tooltip content={<ChartTooltip indSel={indSel} />} cursor={{ fill: 'rgba(0,0,0,0.025)' }} />
 
         <Bar

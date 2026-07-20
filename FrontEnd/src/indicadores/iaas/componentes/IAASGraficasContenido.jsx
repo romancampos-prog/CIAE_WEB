@@ -3,10 +3,10 @@ import { useIAASGrafica } from '../hooks/useIAASGrafica';
 import TickMesUnidad  from './graficas/TickMesUnidad';
 import GraficaBarras  from '../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../shared/componentes/graficas/PanelUnidades';
-import SemaforoUmbral from '../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../shared/componentes/graficas/VistaToggle';
 import TotalTile        from '../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../shared/componentes/graficas/CumplimientoTile';
+import MenuDescarga     from '../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../shared/constantes/meses';
 
 const VISTAS_IAAS = [
@@ -14,11 +14,13 @@ const VISTAS_IAAS = [
   { id: 'mes',    label: 'Por mes',    path: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
 ];
 
+const POR_PAGINA = 12;
+
 const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
-  const [umbralAbierto, setUmbralAbierto] = useState(false);
   const [colorFiltro, setColorFiltro] = useState(null);
+  const [pagina, setPagina]           = useState(0);
 
   const {
     anio, datos, indSel,
@@ -34,7 +36,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
     chartDataAcumuladoUnidad, maxTasaAcumuladoUnidad,
     chartDataAcumuladoTotal, maxTasaAcumuladoTotal,
     unidadesStatus, unidadesStatusDisplay, indInfo, hgsSet,
-    rangosSem, rangosSemExtra,
+    rangosSem,
     indColor, sinDatos, hayDatos,
     HGS_COLOR, HGS_BG,
     TOTAL_KEY,
@@ -44,6 +46,8 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
 
   // El filtro de color es una selección de la vista, no del indicador — se limpia al cambiar de indicador.
   useEffect(() => { setColorFiltro(null); }, [indSel]);
+  // Resetear página al cambiar indicador, mes, filtro de color o modo acumulado
+  useEffect(() => { setPagina(0); }, [indSel, mesSel, colorFiltro, acumulado]);
 
   const unidadesParaPanel = colorFiltro
     ? unidadesStatusDisplay.filter(u => u.color === colorFiltro)
@@ -57,6 +61,10 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
     ? chartDataAcumulado.filter(d => d.color === colorFiltro)
     : chartDataAcumulado;
 
+  const datosMesActivo   = acumulado ? chartDataAcumuladoFiltrado : chartDataMesFiltrado;
+  const totalPaginas     = Math.ceil(datosMesActivo.length / POR_PAGINA) || 1;
+  const dataMesPaginada  = datosMesActivo.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
+
   return (
     <main className="ig-main">
 
@@ -64,20 +72,6 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
       <div className="ig-header">
         <div className="ig-title-block">
           <h1 className="ig-title" style={{ color: indColor }}>{indSel}</h1>
-          {indsHermanos.length > 1 && (
-            <div className="ig-hermanos-row">
-              {indsHermanos.map(ind => (
-                <button
-                  key={ind}
-                  className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
-                  style={ind === indSel ? { '--ic': indColor } : {}}
-                  onClick={() => onIndSelChange(ind)}
-                >
-                  {ind}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="ig-header-detail-row">
@@ -104,6 +98,21 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
           )}
         </div>
       </div>
+
+      {indsHermanos.length > 1 && (
+        <div className="ig-hermanos-row">
+          {indsHermanos.map(ind => (
+            <button
+              key={ind}
+              className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
+              style={ind === indSel ? { '--ic': indColor } : {}}
+              onClick={() => onIndSelChange(ind)}
+            >
+              {ind}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Skeleton ── */}
       {cargando && (
@@ -136,6 +145,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
             }
             colorActivo={colorFiltro}
             onSelectColor={setColorFiltro}
+            rangos={rangosSem}
           />
 
           <div className="ig-body">
@@ -213,52 +223,16 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                 </div>
 
                 <div className="ig-controls">
-                  <button
-                    className={`ig-info-toggle${umbralAbierto ? ' ig-info-toggle--active' : ''}`}
-                    onClick={() => setUmbralAbierto(v => !v)}
-                    style={umbralAbierto ? { '--ic': indColor } : {}}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                    </svg>
-                    Umbral
-                  </button>
                   <span className="ig-year-chip">{anio}</span>
-                  <button
-                    className="ig-btn-dl ig-btn-dl--icon"
-                    onClick={() => handleDescargarInd(indSel)}
+                  <MenuDescarga
                     disabled={descargando}
-                    title={`Descargar ${indSel} — ${anio}`}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  </button>
-                  <button
-                    className="ig-btn-dl ig-btn-dl--secondary ig-btn-dl--icon"
-                    onClick={handleDescargar}
-                    disabled={descargando}
-                    title={`Descargar todos los IAAS — ${anio}`}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {umbralAbierto && (
-                <div className="ig-umbral-row">
-                  <SemaforoUmbral
-                    rangos={[rangosSem, rangosSemExtra]}
-                    indColor={indColor}
+                    opciones={[
+                      { label: `Descargar ${indSel}`, onClick: () => handleDescargarInd(indSel) },
+                      { label: 'Descargar todos los IAAS', onClick: handleDescargar, multiple: true },
+                    ]}
                   />
                 </div>
-              )}
+              </div>
 
               {vistaGrafica === 'unidad' && !acumulado && (
                 <GraficaBarras
@@ -296,44 +270,46 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                 />
               )}
 
-              {vistaGrafica === 'mes' && !acumulado && (
+              {vistaGrafica === 'mes' && (
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <GraficaBarras
-                      chartKey={`m-${indSel}-${mesSel}`}
-                      data={chartDataMesFiltrado}
+                      chartKey={`m-${indSel}-${mesSel}-${acumulado ? 'a' : 'n'}-p${pagina}`}
+                      data={dataMesPaginada}
                       xKey="unidad"
-                      maxTasa={maxTasaMes}
+                      maxTasa={acumulado ? maxTasaAcumulado : maxTasaMes}
                       indSel={indSel}
-                      maxBarSize={44}
+                      maxBarSize={48}
                       bottomMargin={64}
                       labelSize="9px"
                       tickEl={<TickMesUnidad hgsSet={hgsSet} indSel={indSel} />}
                     />
+                    {totalPaginas > 1 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          onClick={() => setPagina(p => p - 1)}
+                          disabled={pagina === 0}
+                          style={{ padding: '4px 14px', fontSize: '0.78rem' }}
+                        >
+                          ‹ Anterior
+                        </button>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                          {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, datosMesActivo.length)} de {datosMesActivo.length} unidades
+                        </span>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          onClick={() => setPagina(p => p + 1)}
+                          disabled={pagina >= totalPaginas - 1}
+                          style={{ padding: '4px 14px', fontSize: '0.78rem' }}
+                        >
+                          Siguiente ›
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
-                    <TotalTile total={totalMes} indColor={indColor} />
-                  </div>
-                </div>
-              )}
-
-              {vistaGrafica === 'mes' && acumulado && (
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <GraficaBarras
-                      chartKey={`ma-${indSel}-${mesSel}`}
-                      data={chartDataAcumuladoFiltrado}
-                      xKey="unidad"
-                      maxTasa={maxTasaAcumulado}
-                      indSel={indSel}
-                      maxBarSize={44}
-                      bottomMargin={64}
-                      labelSize="9px"
-                      tickEl={<TickMesUnidad hgsSet={hgsSet} indSel={indSel} />}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
-                    <TotalTile total={totalAcumulado} indColor={indColor} />
+                    <TotalTile total={acumulado ? totalAcumulado : totalMes} indColor={indColor} />
                   </div>
                 </div>
               )}

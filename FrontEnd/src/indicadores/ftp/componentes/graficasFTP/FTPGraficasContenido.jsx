@@ -3,10 +3,10 @@ import { useRol } from '../../../../auth/hooks/useRol';
 import { useFTPGrafica } from '../../hooks/useFTPGrafica';
 import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
-import SemaforoUmbral from '../../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
 import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
+import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 
 const VISTAS_FTP = [
@@ -14,7 +14,7 @@ const VISTAS_FTP = [
   { id: 'mes',    label: 'Por mes',    path: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
 ];
 
-const POR_PAGINA = 20;
+const POR_PAGINA = 12;
 
 const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
   const { puedeGenFTP } = useRol();
@@ -22,7 +22,6 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
   const [infoAbierta, setInfoAbierta] = useState(false);
   const [hoveredMes, setHoveredMes]   = useState(null);
   const [pagina, setPagina]           = useState(0);
-  const [umbralAbierto, setUmbralAbierto] = useState(false);
   const [colorFiltro, setColorFiltro] = useState(null);
 
   const {
@@ -62,20 +61,6 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
       <div className="ig-header">
         <div className="ig-title-block">
           <h1 className="ig-title" style={{ color: indColor }}>{indSel || 'Indicadores FTP'}</h1>
-          {indsHermanos.length > 1 && (
-            <div className="ig-hermanos-row">
-              {indsHermanos.map(ind => (
-                <button
-                  key={ind}
-                  className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
-                  style={ind === indSel ? { '--ic': indColor } : {}}
-                  onClick={() => onIndSelChange(ind)}
-                >
-                  {ind}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="ig-header-detail-row">
@@ -102,6 +87,21 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
           )}
         </div>
       </div>
+
+      {indsHermanos.length > 1 && (
+        <div className="ig-hermanos-row">
+          {indsHermanos.map(ind => (
+            <button
+              key={ind}
+              className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
+              style={ind === indSel ? { '--ic': indColor } : {}}
+              onClick={() => onIndSelChange(ind)}
+            >
+              {ind}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Skeleton (solo primera carga, sin datos previos que mostrar) ── */}
       {cargando && !datos && (
@@ -130,6 +130,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
             conteo={vistaGrafica === 'mes' ? cumplimientoMes : cumplimientoUltimoMes}
             colorActivo={colorFiltro}
             onSelectColor={setColorFiltro}
+            rangos={rangosSemConMes}
           />
 
           <div className="ig-body">
@@ -183,53 +184,25 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                 </div>
 
                 <div className="ig-controls">
-                  <button
-                    className={`ig-info-toggle${umbralAbierto ? ' ig-info-toggle--active' : ''}`}
-                    onClick={() => setUmbralAbierto(v => !v)}
-                    style={umbralAbierto ? { '--ic': indColor } : {}}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                    </svg>
-                    Umbral
-                  </button>
                   <span className="ig-year-chip">{anio}</span>
                   {puedeGenFTP && mesSel && (
-                    <>
-                      <button
-                        className="ig-btn-dl ig-btn-dl--icon"
-                        disabled={descargando}
-                        onClick={() => descargarIndicador(mesSel)}
-                        title={`Descargar ${indSel} — ${MESES_CORTOS[parseInt(mesSel) - 1]} ${anio}`}
-                      >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                          <polyline points="7 10 12 15 17 10"/>
-                          <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                      </button>
-                      <button
-                        className="ig-btn-dl ig-btn-dl--secondary ig-btn-dl--icon"
-                        disabled={descargando}
-                        onClick={() => descargarCategoria(mesSel)}
-                        title={`Descargar todos ${categoria} — ${MESES_CORTOS[parseInt(mesSel) - 1]} ${anio}`}
-                      >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                          <polyline points="7 10 12 15 17 10"/>
-                          <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                      </button>
-                    </>
+                    <MenuDescarga
+                      disabled={descargando}
+                      opciones={[
+                        {
+                          label: `Descargar ${indSel}`,
+                          onClick: () => descargarIndicador(mesSel),
+                        },
+                        {
+                          label: `Descargar todo ${categoria}`,
+                          onClick: () => descargarCategoria(mesSel),
+                          multiple: true,
+                        },
+                      ]}
+                    />
                   )}
                 </div>
               </div>
-
-              {umbralAbierto && (
-                <div className="ig-umbral-row">
-                  <SemaforoUmbral rangos={[rangosSemConMes]} indColor={indColor} />
-                </div>
-              )}
 
               {vistaGrafica === 'unidad' && (
                 <GraficaBarras
@@ -254,7 +227,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       xKey="unidad"
                       maxTasa={maxTasaMes}
                       indSel={indSel}
-                      maxBarSize={32}
+                      maxBarSize={48}
                       barRadius={[6, 6, 0, 0]}
                       bottomMargin={64}
                       labelSize="9px"

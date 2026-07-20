@@ -71,7 +71,7 @@ def _guardar_sesion_json(
                 "NUMERADOR":   vals.get("numerador"),
                 "DENOMINADOR": vals.get("denominador"),
                 "TASA":        vals.get("tasa"),
-                "COLOR":       (vals.get("color") or "Rojo").upper(),
+                "COLOR":       (vals.get("color") or "Bajo").upper(),
             }
             for unit, vals in ind_datos.items()
         }

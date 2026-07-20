@@ -11,6 +11,7 @@ import {
   buildChartDataMes,
 } from '../utils/calculos';
 import { contarSemaforo } from '../../shared/utils/contarSemaforo';
+import { techoEscala } from '../../shared/utils/escala';
 
 // Clave real bajo la que el backend manda el total OOAD/Delegación ya calculado.
 const DELEGACION_KEY = 'DELEGACION';
@@ -97,7 +98,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   );
 
   const maxTasa = useMemo(
-    () => Math.max(...chartData.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartData.map(d => d.tasa)),
     [chartData]
   );
 
@@ -119,7 +120,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   );
 
   const maxTasaMes = useMemo(
-    () => Math.max(...chartDataMes.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataMes.map(d => d.tasa)),
     [chartDataMes]
   );
 
@@ -167,11 +168,11 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   );
 
   const maxTasaAcumulado = useMemo(
-    () => Math.max(...chartDataAcumulado.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataAcumulado.map(d => d.tasa)),
     [chartDataAcumulado]
   );
 
-  /** Conteo Verde/Amarillo/Rojo/Gris acumulado al mes seleccionado — para "Por mes" + Acumulado */
+  /** Conteo Esperado/Medio/Bajo/Gris acumulado al mes seleccionado — para "Por mes" + Acumulado */
   const cumplimientoAcumulado = useMemo(() => contarSemaforo(chartDataAcumulado), [chartDataAcumulado]);
 
   /** Color de semáforo de cada unidad en el último mes disponible (tal cual lo manda el backend) */
@@ -193,10 +194,10 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     ];
   }, [datos, indSel]);
 
-  /** Conteo Verde/Amarillo/Rojo/Gris del mes seleccionado — para la vista "Por mes" */
+  /** Conteo Esperado/Medio/Bajo/Gris del mes seleccionado — para la vista "Por mes" */
   const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
 
-  /** Conteo Verde/Amarillo/Rojo/Gris del último mes disponible (sin TOTAL) — para la vista "Por unidad" */
+  /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible (sin TOTAL) — para la vista "Por unidad" */
   const cumplimientoUltimoMes = useMemo(
     () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== TOTAL_KEY)),
     [unidadesStatus]
@@ -222,7 +223,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   }, [datos, indSel, unidadSel]);
 
   const maxTasaAcumuladoUnidad = useMemo(
-    () => Math.max(...chartDataAcumuladoUnidad.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataAcumuladoUnidad.map(d => d.tasa)),
     [chartDataAcumuladoUnidad]
   );
 
@@ -246,7 +247,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   }, [datos, indSel]);
 
   const maxTasaAcumuladoTotal = useMemo(
-    () => Math.max(...chartDataAcumuladoTotal.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataAcumuladoTotal.map(d => d.tasa)),
     [chartDataAcumuladoTotal]
   );
 
@@ -276,9 +277,9 @@ export function useIAASGrafica(extIndSel, onExtChange) {
       }
     } else if (sem.Esperado) {
       rangosSem = {
-        Verde:    `${sem.Esperado.Mayor} – ${sem.Esperado.Menor}`,
-        Amarillo: `> ${sem.Esperado.Menor} – ≤ ${sem.Medio?.Menor ?? '?'}`,
-        Rojo:     `< ${sem.Esperado.Mayor}  ó  > ${sem.Medio?.Menor ?? '?'}`,
+        Esperado: `${sem.Esperado.Mayor} – ${sem.Esperado.Menor}`,
+        Medio:    `> ${sem.Esperado.Menor} – ≤ ${sem.Medio?.Menor ?? '?'}`,
+        Bajo:     `< ${sem.Esperado.Mayor}  ó  > ${sem.Medio?.Menor ?? '?'}`,
       };
     }
   }

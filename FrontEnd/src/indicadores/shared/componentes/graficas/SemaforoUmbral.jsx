@@ -2,10 +2,10 @@
 import { COLOR_SEMAFORO } from '../../constantes/semaforo';
 
 /**
- * Display de umbrales del semáforo (Verde / Amarillo / Rojo).
+ * Display de umbrales del semáforo (Esperado / Medio / Bajo).
  *
  * Props:
- *   rangos      — array de objetos { Verde, Amarillo, Rojo, _mes?, _label? }
+ *   rangos      — array de objetos { Esperado, Medio, Bajo, _mes?, _label? }
  *                 FTP pasa [ rangosSem ] (uno solo)
  *                 IAAS puede pasar [ rangosSem, rangosSemExtra ] (dos columnas)
  *   indColor    — string — color del indicador (para sub-etiqueta)
