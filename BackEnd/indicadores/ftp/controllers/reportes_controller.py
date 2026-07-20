@@ -24,6 +24,7 @@ from ftp.services.datos_json_service import (
     leer_semana_indicador,
     MESES_NOMBRES as FTP_MESES_NOMBRES,
 )
+from ftp.config import NOMBREUNIDADESARCHIVO
 
 router = APIRouter()
 
@@ -93,7 +94,9 @@ async def ftp_datos_grafica(
 
         datos     = {}
         meses_set = set()
-        unidades_set = []
+        # Lista fija del catalogo, igual que IAAS -- asi las unidades sin ningun dato
+        # real (todo en null) tambien aparecen en el panel y la grafica, en gris.
+        unidades_set = list(NOMBREUNIDADESARCHIVO) + ["TOTAL"]
 
         for mes_nombre, unidades_mes in datos_json.get("MESES", {}).items():
             if mes_nombre not in FTP_MESES_NOMBRES:
@@ -105,7 +108,7 @@ async def ftp_datos_grafica(
                 num = vals.get("numerador")
                 den = vals.get("denominador")
                 pct = vals.get("%")
-                if num is None and pct is None:
+                if num is None and pct is None and den is None:
                     continue
                 meses_set.add(mes_str)
                 color_guardado = vals.get("color")
@@ -116,9 +119,9 @@ async def ftp_datos_grafica(
                 )
                 datos.setdefault(unidad, []).append({
                     "mes":         mes_str,
-                    "tasa":        float(pct) if pct is not None else 0,
-                    "numerador":   float(num) if num is not None else 0,
-                    "denominador": float(den) if den is not None else 0,
+                    "tasa":        float(pct) if pct is not None else None,
+                    "numerador":   float(num) if num is not None else None,
+                    "denominador": float(den) if den is not None else None,
                     "color":       color,
                 })
                 if unidad not in unidades_set:
@@ -149,9 +152,9 @@ async def ftp_datos_grafica(
                     unidades_set.append(unidad)
                 datos.setdefault(unidad, []).append({
                     "mes":         mes_str,
-                    "tasa":        float(pct) if pct is not None else 0,
-                    "numerador":   float(num) if num is not None else 0,
-                    "denominador": float(den) if den is not None else 0,
+                    "tasa":        float(pct) if pct is not None else None,
+                    "numerador":   float(num) if num is not None else None,
+                    "denominador": float(den) if den is not None else None,
                     "color":       col,
                     "semana":      semana_num,
                 })

@@ -6,11 +6,15 @@ import { COLOR_IND, HGS_COLOR, HGS_BG } from '../constantes/colores';
 import { COLOR_SEMAFORO } from '../../shared/constantes/semaforo';
 import {
   TOTAL_KEY,
-  calcularColorIAAS,
   calcularRangos01,
   buildChartDataUnidad,
   buildChartDataMes,
 } from '../utils/calculos';
+import { contarSemaforo } from '../../shared/utils/contarSemaforo';
+import { techoEscala } from '../../shared/utils/escala';
+
+// Clave real bajo la que el backend manda el total OOAD/Delegación ya calculado.
+const DELEGACION_KEY = 'DELEGACION';
 
 export { TOTAL_KEY };
 
@@ -39,6 +43,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   const [descargando, setDescargando]     = useState(false);
   const [infoAllInAass, setInfoIAAS]      = useState({});
   const [vistaGrafica, setVistaGrafica]   = useState('unidad');
+  const [acumulado, setAcumulado]         = useState(false);
   const [mesSel, setMesSel]               = useState('');
 
   useEffect(() => {
@@ -88,155 +93,173 @@ export function useIAASGrafica(extIndSel, onExtChange) {
 
   /** Tendencia mensual de la unidad seleccionada (o TOTAL OOAD) */
   const chartData = useMemo(
-    () => buildChartDataUnidad(datos, unidadSel, indSel, indInfo, sem, unidadTipoMap),
-    [datos, unidadSel, indSel, indInfo, sem, unidadTipoMap]
+    () => buildChartDataUnidad(datos, unidadSel, indSel),
+    [datos, unidadSel, indSel]
   );
 
   const maxTasa = useMemo(
-    () => Math.max(...chartData.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartData.map(d => d.tasa)),
     [chartData]
   );
 
-  /** Todas las unidades en el mes seleccionado + TOTAL OOAD */
+  /** Todas las unidades en el mes seleccionado + TOTAL OOAD por separado */
+  const chartDataMesConTotal = useMemo(
+    () => buildChartDataMes(datos, mesSel, indSel),
+    [datos, indSel, mesSel]
+  );
+
+  /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
+  const totalMes = useMemo(
+    () => chartDataMesConTotal.find(d => d.unidad === TOTAL_KEY) ?? null,
+    [chartDataMesConTotal]
+  );
+
   const chartDataMes = useMemo(
-    () => buildChartDataMes(datos, mesSel, indSel, indInfo, sem, unidadTipoMap),
-    [datos, indSel, mesSel, indInfo, sem, unidadTipoMap]
+    () => chartDataMesConTotal.filter(d => d.unidad !== TOTAL_KEY),
+    [chartDataMesConTotal]
   );
 
   const maxTasaMes = useMemo(
-    () => Math.max(...chartDataMes.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataMes.map(d => d.tasa)),
     [chartDataMes]
   );
 
-  /** Tasa acumulada (Ene→mesSel) por unidad + TOTAL OOAD */
-  const chartDataAcumulado = useMemo(() => {
-    if (!datos?.unidades || !mesSel || !indInfo) return [];
-    const mesNum = parseInt(mesSel);
-    const factor = indInfo?.semaforo?.Tasa ?? 100;
-    let grandNum = 0, grandDen = 0;
+  /** Tasa acumulada (Ene→mesSel) por unidad + TOTAL OOAD por separado — para "Por mes" + Acumulado.
+   *  El acumulado ya viene resuelto del backend (numerador_acum/denominador_acum/tasa_acum/
+   *  color_acum) — el front solo busca el registro del mes y lo muestra. */
+  const chartDataAcumuladoConTotal = useMemo(() => {
+    if (!datos?.unidades || !mesSel) return [];
 
     const porUnidad = datos.unidades.map(u => {
-      const arr     = datos.datos?.[indSel]?.[u] ?? [];
-      const hasta   = arr.filter(r => parseInt(r.mes) <= mesNum);
-      const acumNum = hasta.reduce((s, r) => s + (r.numerador   ?? 0), 0);
-      const acumDen = hasta.reduce((s, r) => s + (r.denominador ?? 0), 0);
-      const acumTasa = acumDen > 0 ? (acumNum / acumDen) * factor : 0;
-      grandNum += acumNum;
-      grandDen += acumDen;
+      const arr = datos.datos?.[indSel]?.[u] ?? [];
+      const reg = arr.find(r => r.mes === mesSel);
       return {
-        unidad: u, tasa: acumTasa,
-        numerador: acumNum, denominador: acumDen,
-        color: calcularColorIAAS(acumTasa, u, sem, indSel, unidadTipoMap),
+        unidad:      u,
+        tasa:        reg?.tasa_acum        ?? 0,
+        numerador:   reg?.numerador_acum   ?? null,
+        denominador: reg?.denominador_acum ?? null,
+        color:       reg?.color_acum       ?? 'Gris',
       };
     });
 
-    const grandTasa = grandDen > 0 ? (grandNum / grandDen) * factor : 0;
+    const arrTotal = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
+    const regTotal = arrTotal.find(r => r.mes === mesSel);
     return [
       ...porUnidad,
       {
-        unidad: TOTAL_KEY, tasa: grandTasa,
-        numerador: grandNum, denominador: grandDen,
-        color: calcularColorIAAS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
+        unidad:      TOTAL_KEY,
+        tasa:        regTotal?.tasa_acum        ?? 0,
+        numerador:   regTotal?.numerador_acum   ?? null,
+        denominador: regTotal?.denominador_acum ?? null,
+        color:       regTotal?.color_acum       ?? 'Gris',
       },
     ];
-  }, [datos, indSel, mesSel, indInfo, sem, unidadTipoMap]);
+  }, [datos, indSel, mesSel]);
+
+  /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
+  const totalAcumulado = useMemo(
+    () => chartDataAcumuladoConTotal.find(d => d.unidad === TOTAL_KEY) ?? null,
+    [chartDataAcumuladoConTotal]
+  );
+
+  const chartDataAcumulado = useMemo(
+    () => chartDataAcumuladoConTotal.filter(d => d.unidad !== TOTAL_KEY),
+    [chartDataAcumuladoConTotal]
+  );
 
   const maxTasaAcumulado = useMemo(
-    () => Math.max(...chartDataAcumulado.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataAcumulado.map(d => d.tasa)),
     [chartDataAcumulado]
   );
 
-  /** Color de semáforo de cada unidad en el último mes disponible */
+  /** Conteo Esperado/Medio/Bajo/Gris acumulado al mes seleccionado — para "Por mes" + Acumulado */
+  const cumplimientoAcumulado = useMemo(() => contarSemaforo(chartDataAcumulado), [chartDataAcumulado]);
+
+  /** Color de semáforo de cada unidad en el último mes disponible (tal cual lo manda el backend) */
   const unidadesStatus = useMemo(() => {
     if (!datos?.unidades) return [];
     const ultimoMes = datos.meses_con_datos?.[datos.meses_con_datos.length - 1];
-    const factor = indInfo?.semaforo?.Tasa ?? 100;
-    let grandNum = 0, grandDen = 0;
 
     const porUnidad = datos.unidades.map(u => {
       const arr = datos.datos?.[indSel]?.[u] ?? [];
       const reg = arr.find(r => r.mes === ultimoMes);
-      grandNum += reg?.numerador   ?? 0;
-      grandDen += reg?.denominador ?? 0;
       return { unidad: u, color: reg?.color ?? 'Gris' };
     });
 
-    const grandTasa = grandDen > 0 ? (grandNum / grandDen) * factor : 0;
+    const arrTotal  = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
+    const regTotal  = arrTotal.find(r => r.mes === ultimoMes);
     return [
       ...porUnidad,
-      { unidad: TOTAL_KEY, color: calcularColorIAAS(grandTasa, TOTAL_KEY, sem, indSel, unidadTipoMap) },
+      { unidad: TOTAL_KEY, color: regTotal?.color ?? 'Gris' },
     ];
-  }, [datos, indSel, indInfo, sem, unidadTipoMap]);
+  }, [datos, indSel]);
 
-  /** Evolución acumulada mes a mes de la unidad seleccionada */
+  /** Conteo Esperado/Medio/Bajo/Gris del mes seleccionado — para la vista "Por mes" */
+  const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
+
+  /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible (sin TOTAL) — para la vista "Por unidad" */
+  const cumplimientoUltimoMes = useMemo(
+    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== TOTAL_KEY)),
+    [unidadesStatus]
+  );
+
+  /** Evolución acumulada mes a mes de la unidad seleccionada — siempre el rango completo disponible.
+   *  Lee directo numerador_acum/denominador_acum/tasa_acum/color_acum que ya manda el backend. */
   const chartDataAcumuladoUnidad = useMemo(() => {
-    if (!datos?.unidades || !mesSel || !indInfo || !unidadSel || unidadSel === TOTAL_KEY) return [];
-    const mesNum = parseInt(mesSel);
-    const factor = indInfo?.semaforo?.Tasa ?? 100;
-    const mesesHasta = datos.meses_con_datos.filter(m => parseInt(m) <= mesNum);
+    if (!datos?.unidades || !unidadSel || unidadSel === TOTAL_KEY) return [];
+    const mesesHasta = datos.meses_con_datos ?? [];
     const arr = datos.datos?.[indSel]?.[unidadSel] ?? [];
 
     return mesesHasta.map(mes => {
-      const mesLim = parseInt(mes);
-      const hasta  = arr.filter(r => parseInt(r.mes) <= mesLim);
-      const cumNum = hasta.reduce((s, r) => s + (r.numerador   ?? 0), 0);
-      const cumDen = hasta.reduce((s, r) => s + (r.denominador ?? 0), 0);
-      const tasa   = cumDen > 0 ? cumNum / cumDen * factor : 0;
+      const reg = arr.find(r => r.mes === mes);
       return {
-        mes: MESES_CORTOS[parseInt(mes) - 1],
-        tasa, numerador: cumNum, denominador: cumDen,
-        color: calcularColorIAAS(tasa, unidadSel, sem, indSel, unidadTipoMap),
+        mes:         MESES_CORTOS[parseInt(mes) - 1],
+        tasa:        reg?.tasa_acum        ?? 0,
+        numerador:   reg?.numerador_acum   ?? null,
+        denominador: reg?.denominador_acum ?? null,
+        color:       reg?.color_acum       ?? 'Gris',
       };
     });
-  }, [datos, indSel, unidadSel, mesSel, indInfo, sem, unidadTipoMap]);
+  }, [datos, indSel, unidadSel]);
 
   const maxTasaAcumuladoUnidad = useMemo(
-    () => Math.max(...chartDataAcumuladoUnidad.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataAcumuladoUnidad.map(d => d.tasa)),
     [chartDataAcumuladoUnidad]
   );
 
-  /** Evolución del TOTAL OOAD acumulado mes a mes */
+  /** Evolución del TOTAL OOAD acumulado mes a mes — siempre el rango completo disponible.
+   *  Usa directamente los registros "DELEGACION" (ya acumulados) que manda el backend. */
   const chartDataAcumuladoTotal = useMemo(() => {
-    if (!datos?.unidades || !mesSel || !indInfo) return [];
-    const mesNum = parseInt(mesSel);
-    const factor = indInfo?.semaforo?.Tasa ?? 100;
-    const mesesHasta = datos.meses_con_datos.filter(m => parseInt(m) <= mesNum);
+    if (!datos?.unidades) return [];
+    const mesesHasta = datos.meses_con_datos ?? [];
+    const arr = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
 
     return mesesHasta.map(mes => {
-      const mesLim = parseInt(mes);
-      let cumNum = 0, cumDen = 0;
-      for (const u of datos.unidades) {
-        const arr = datos.datos?.[indSel]?.[u] ?? [];
-        for (const r of arr) {
-          if (parseInt(r.mes) <= mesLim) {
-            cumNum += r.numerador   ?? 0;
-            cumDen += r.denominador ?? 0;
-          }
-        }
-      }
-      const tasa = cumDen > 0 ? cumNum / cumDen * factor : 0;
+      const reg = arr.find(r => r.mes === mes);
       return {
-        mes: MESES_CORTOS[parseInt(mes) - 1],
-        tasa, numerador: cumNum, denominador: cumDen,
-        color: calcularColorIAAS(tasa, TOTAL_KEY, sem, indSel, unidadTipoMap),
+        mes:         MESES_CORTOS[parseInt(mes) - 1],
+        tasa:        reg?.tasa_acum        ?? 0,
+        numerador:   reg?.numerador_acum   ?? null,
+        denominador: reg?.denominador_acum ?? null,
+        color:       reg?.color_acum       ?? 'Gris',
       };
     });
-  }, [datos, indSel, mesSel, indInfo, sem, unidadTipoMap]);
+  }, [datos, indSel]);
 
   const maxTasaAcumuladoTotal = useMemo(
-    () => Math.max(...chartDataAcumuladoTotal.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataAcumuladoTotal.map(d => d.tasa)),
     [chartDataAcumuladoTotal]
   );
 
   /**
-   * Cuando la vista es acumulado, usa la tasa acumulada para el color del panel lateral.
-   * En las demás vistas usa el color del último mes (unidadesStatus).
+   * En "Por unidad" con el switch de Acumulado activo, usa la tasa acumulada para el color
+   * del panel lateral. En las demás combinaciones usa el color del último mes (unidadesStatus).
    */
   const unidadesStatusDisplay = useMemo(() => {
-    if (vistaGrafica !== 'acumulado' || !chartDataAcumulado.length) return unidadesStatus;
-    const map = Object.fromEntries(chartDataAcumulado.map(d => [d.unidad, d.color]));
+    if (!(vistaGrafica === 'unidad' && acumulado) || !chartDataAcumuladoConTotal.length) return unidadesStatus;
+    const map = Object.fromEntries(chartDataAcumuladoConTotal.map(d => [d.unidad, d.color]));
     return unidadesStatus.map(u => ({ ...u, color: map[u.unidad] ?? u.color }));
-  }, [vistaGrafica, unidadesStatus, chartDataAcumulado]);
+  }, [vistaGrafica, acumulado, unidadesStatus, chartDataAcumuladoConTotal]);
 
   /** Rangos de semáforo formateados para mostrar en la UI según indicador y vista activa */
   let rangosSem      = null;
@@ -254,9 +277,9 @@ export function useIAASGrafica(extIndSel, onExtChange) {
       }
     } else if (sem.Esperado) {
       rangosSem = {
-        Verde:    `${sem.Esperado.Mayor} – ${sem.Esperado.Menor}`,
-        Amarillo: `> ${sem.Esperado.Menor} – ≤ ${sem.Medio?.Menor ?? '?'}`,
-        Rojo:     `< ${sem.Esperado.Mayor}  ó  > ${sem.Medio?.Menor ?? '?'}`,
+        Esperado: `${sem.Esperado.Mayor} – ${sem.Esperado.Menor}`,
+        Medio:    `> ${sem.Esperado.Menor} – ≤ ${sem.Medio?.Menor ?? '?'}`,
+        Bajo:     `< ${sem.Esperado.Mayor}  ó  > ${sem.Medio?.Menor ?? '?'}`,
       };
     }
   }
@@ -270,10 +293,12 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     unidadSel, setUnidadSel,
     cargando, descargando, handleDescargar, handleDescargarInd,
     vistaGrafica, setVistaGrafica,
+    acumulado, setAcumulado,
     mesSel, setMesSel,
     chartData, maxTasa,
-    chartDataMes, maxTasaMes,
-    chartDataAcumulado, maxTasaAcumulado,
+    chartDataMes, maxTasaMes, totalMes,
+    cumplimientoMes, cumplimientoUltimoMes,
+    chartDataAcumulado, maxTasaAcumulado, totalAcumulado, cumplimientoAcumulado,
     chartDataAcumuladoUnidad, maxTasaAcumuladoUnidad,
     chartDataAcumuladoTotal, maxTasaAcumuladoTotal,
     unidadesStatus, unidadesStatusDisplay, indInfo, hgsSet,

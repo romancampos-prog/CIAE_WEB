@@ -114,6 +114,39 @@ def guardar_datos_en_json(indicador: str, ano: str, mes: str, datos: dict) -> No
         json.dump(json_data, f, ensure_ascii=False, indent=2)
 
 
+def borrar_semana_del_mes(indicador: str, ano: str, mes: str) -> None:
+    """
+    Quita del archivo semanal el bloque de un mes que ya tiene reporte definitivo.
+    Una vez que existe el JSON final de ese mes, el dato semanal ya no se lee para nada
+    (reportes_controller solo usa el semanal para meses que aún no están en el definitivo),
+    así que ya no tiene caso conservarlo — evita que el archivo semanal crezca sin fin.
+    """
+    ruta = _ruta_semana_json(indicador, ano)
+    if not ruta.exists():
+        return
+
+    idx = int(mes) - 1
+    if not (0 <= idx < len(MESES_NOMBRES)):
+        return
+    mes_nombre = MESES_NOMBRES[idx]
+
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            json_data = json.load(f)
+    except Exception:
+        return
+
+    if mes_nombre not in json_data.get("MESES", {}):
+        return
+    del json_data["MESES"][mes_nombre]
+
+    if json_data["MESES"]:
+        with open(ruta, "w", encoding="utf-8") as f:
+            json.dump(json_data, f, ensure_ascii=False, indent=2)
+    else:
+        ruta.unlink()  # no quedan meses semanales pendientes, no hace falta el archivo
+
+
 def guardar_semana_en_json(indicador: str, ano: str, mes: str, semana: str, datos: dict) -> None:
     ruta = _ruta_semana_json(indicador, ano)
     ruta.parent.mkdir(parents=True, exist_ok=True)

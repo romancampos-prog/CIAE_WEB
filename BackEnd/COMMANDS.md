@@ -16,6 +16,7 @@ source venv/bin/activate
 
 ```bash
 uvicorn main:app --reload --port 8005
+python -m uvicorn main:app --reload --port 8005
 ```
 
 > API en `http://localhost:8005` · Docs en `http://localhost:8005/docs`

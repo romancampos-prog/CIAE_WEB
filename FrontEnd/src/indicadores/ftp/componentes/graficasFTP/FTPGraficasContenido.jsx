@@ -3,8 +3,10 @@ import { useRol } from '../../../../auth/hooks/useRol';
 import { useFTPGrafica } from '../../hooks/useFTPGrafica';
 import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
-import SemaforoUmbral from '../../../shared/componentes/graficas/SemaforoUmbral';
 import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
+import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
+import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
+import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 
 const VISTAS_FTP = [
@@ -12,14 +14,15 @@ const VISTAS_FTP = [
   { id: 'mes',    label: 'Por mes',    path: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
 ];
 
-const POR_PAGINA = 20;
+const POR_PAGINA = 12;
 
-const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) => {
+const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
   const { puedeGenFTP } = useRol();
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
   const [hoveredMes, setHoveredMes]   = useState(null);
   const [pagina, setPagina]           = useState(0);
+  const [colorFiltro, setColorFiltro] = useState(null);
 
   const {
     anio, indSel, indInfo,
@@ -27,25 +30,39 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel,
     chartData, maxTasa,
-    chartDataMes, maxTasaMes, unidadesStatus,
+    chartDataMes, maxTasaMes, totalMes, unidadesStatus,
+    cumplimientoMes, cumplimientoUltimoMes,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   } = useFTPGrafica(hoveredMes, extIndSel, onIndSelChange);
 
   const rangosSemConMes  = rangosSem && esSemPorMes ? rangosSem : rangosSem ? { ...rangosSem, _mes: undefined } : null;
 
-  // Resetear página al cambiar indicador o mes
-  useEffect(() => { setPagina(0); }, [indSel, mesSel]);
+  // Resetear página al cambiar indicador, mes o filtro de color
+  useEffect(() => { setPagina(0); }, [indSel, mesSel, colorFiltro]);
+  // El filtro de color es una selección de la vista, no del indicador — se limpia al cambiar de indicador.
+  useEffect(() => { setColorFiltro(null); }, [indSel]);
 
-  const totalPaginas = Math.ceil(chartDataMes.length / POR_PAGINA);
-  const dataPaginada = chartDataMes.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
+  const unidadesParaPanel = colorFiltro
+    ? unidadesStatus.filter(u => u.color === colorFiltro)
+    : unidadesStatus;
+
+  const chartDataMesFiltrado = colorFiltro
+    ? chartDataMes.filter(d => d.color === colorFiltro)
+    : chartDataMes;
+
+  const totalPaginas = Math.ceil(chartDataMesFiltrado.length / POR_PAGINA);
+  const dataPaginada = chartDataMesFiltrado.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
 
   return (
     <main className="ig-main">
 
       {/* ── Título + ficha técnica ── */}
       <div className="ig-header">
-        <h1 className="ig-title" style={{ color: indColor }}>{indSel || 'Indicadores FTP'}</h1>
+        <div className="ig-title-block">
+          <h1 className="ig-title" style={{ color: indColor }}>{indSel || 'Indicadores FTP'}</h1>
+        </div>
+
         <div className="ig-header-detail-row">
           {indInfo && (
             <button className="ig-info-toggle" onClick={() => setInfoAbierta(v => !v)}>
@@ -71,8 +88,23 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
         </div>
       </div>
 
-      {/* ── Skeleton ── */}
-      {cargando && (
+      {indsHermanos.length > 1 && (
+        <div className="ig-hermanos-row">
+          {indsHermanos.map(ind => (
+            <button
+              key={ind}
+              className={`ig-hermano-btn${ind === indSel ? ' ig-hermano-btn--active' : ''}`}
+              style={ind === indSel ? { '--ic': indColor } : {}}
+              onClick={() => onIndSelChange(ind)}
+            >
+              {ind}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Skeleton (solo primera carga, sin datos previos que mostrar) ── */}
+      {cargando && !datos && (
         <div className="ig-skeleton">
           {[180, 260, 220, 300, 240, 280, 200, 320, 190, 270].map((h, i) => (
             <div key={i} className="ig-skeleton-bar" style={{ height: `${h}px` }} />
@@ -91,8 +123,15 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
       )}
 
       {/* ── Gráfica ── */}
-      {!cargando && datos?.meses_con_datos?.length > 0 && (
-        <div className="ig-chart-card">
+      {datos?.meses_con_datos?.length > 0 && (
+        <div className="ig-chart-card" style={{ opacity: cargando ? 0.55 : 1, transition: 'opacity 0.15s' }}>
+
+          <CumplimientoTile
+            conteo={vistaGrafica === 'mes' ? cumplimientoMes : cumplimientoUltimoMes}
+            colorActivo={colorFiltro}
+            onSelectColor={setColorFiltro}
+            rangos={rangosSemConMes}
+          />
 
           <div className="ig-body">
             {/* Panel izquierdo */}
@@ -114,7 +153,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
               </div>
             ) : (
               <PanelUnidades
-                unidades={unidadesStatus}
+                unidades={unidadesParaPanel}
                 unidadSel={unidadSel}
                 vistaGrafica={vistaGrafica}
                 indColor={indColor}
@@ -128,70 +167,41 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
             <div className="ig-chart-area" style={{ position: 'relative' }}>
               {iconSrc && <img src={iconSrc} alt="" className="ig-chart-watermark" />}
               <div className="ig-chart-topbar">
-                <VistaToggle vistas={VISTAS_FTP} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
-                <div className="ig-controls">
-                  <div className="ig-control-group">
-                    <label className="ig-control-label">Año</label>
-                    <span className="ig-select" style={{ display: 'inline-flex', alignItems: 'center', fontWeight: 700, color: indColor, cursor: 'default' }}>
-                      {anio}
-                    </span>
-                  </div>
-                  {puedeGenFTP && mesSel && (
-                    <div className="ig-control-group">
-                      <label className="ig-control-label">Descargar excel</label>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          className="ig-btn-dl"
-                          disabled={descargando}
-                          onClick={() => descargarIndicador(mesSel)}
-                          title={`Descargar ${indSel} — ${MESES_CORTOS[parseInt(mesSel) - 1]} ${anio}`}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                          </svg>
-                          {descargando ? '…' : indSel}
-                        </button>
-                        <button
-                          className="ig-btn-dl ig-btn-dl--secondary"
-                          disabled={descargando}
-                          onClick={() => descargarCategoria(mesSel)}
-                          title={`Descargar todos ${categoria} — ${MESES_CORTOS[parseInt(mesSel) - 1]} ${anio}`}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                          </svg>
-                          {descargando ? '…' : `Todos ${categoria}`}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="ig-chart-top">
-                <div className="ig-chart-badges">
-                  {vistaGrafica === 'unidad' && (
-                    <>
+                <div className="ig-chart-topbar-left">
+                  <VistaToggle vistas={VISTAS_FTP} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+                  <div className="ig-chart-badges">
+                    {vistaGrafica === 'unidad' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
                         {unidadSel === 'TOTAL' ? 'TOTAL OOAD' : unidadSel}
                       </span>
-                      <span className="ig-badge ig-badge--neutral">{anio}</span>
-                    </>
-                  )}
-                  {vistaGrafica === 'mes' && (
-                    <>
+                    )}
+                    {vistaGrafica === 'mes' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {MESES_CORTOS[parseInt(mesSel) - 1]} {anio}
+                        {MESES_CORTOS[parseInt(mesSel) - 1]}
                       </span>
-                      <span className="ig-badge ig-badge--neutral">Todas las unidades</span>
-                    </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="ig-controls">
+                  <span className="ig-year-chip">{anio}</span>
+                  {puedeGenFTP && mesSel && (
+                    <MenuDescarga
+                      disabled={descargando}
+                      opciones={[
+                        {
+                          label: `Descargar ${indSel}`,
+                          onClick: () => descargarIndicador(mesSel),
+                        },
+                        {
+                          label: `Descargar todo ${categoria}`,
+                          onClick: () => descargarCategoria(mesSel),
+                          multiple: true,
+                        },
+                      ]}
+                    />
                   )}
                 </div>
-                <SemaforoUmbral rangos={[rangosSemConMes]} indColor={indColor} />
               </div>
 
               {vistaGrafica === 'unidad' && (
@@ -209,42 +219,47 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc }) =>
               )}
 
               {vistaGrafica === 'mes' && (
-                <>
-                  <GraficaBarras
-                    chartKey={`m-${indSel}-${mesSel}-p${pagina}`}
-                    data={dataPaginada}
-                    xKey="unidad"
-                    maxTasa={maxTasaMes}
-                    indSel={indSel}
-                    maxBarSize={32}
-                    barRadius={[6, 6, 0, 0]}
-                    bottomMargin={64}
-                    labelSize="9px"
-                  />
-                  {totalPaginas > 1 && (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
-                      <button
-                        className="ig-btn-dl ig-btn-dl--secondary"
-                        onClick={() => setPagina(p => p - 1)}
-                        disabled={pagina === 0}
-                        style={{ padding: '4px 14px', fontSize: '0.78rem' }}
-                      >
-                        ‹ Anterior
-                      </button>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
-                        {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, chartDataMes.length)} de {chartDataMes.length} unidades
-                      </span>
-                      <button
-                        className="ig-btn-dl ig-btn-dl--secondary"
-                        onClick={() => setPagina(p => p + 1)}
-                        disabled={pagina >= totalPaginas - 1}
-                        style={{ padding: '4px 14px', fontSize: '0.78rem' }}
-                      >
-                        Siguiente ›
-                      </button>
-                    </div>
-                  )}
-                </>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <GraficaBarras
+                      chartKey={`m-${indSel}-${mesSel}-p${pagina}`}
+                      data={dataPaginada}
+                      xKey="unidad"
+                      maxTasa={maxTasaMes}
+                      indSel={indSel}
+                      maxBarSize={48}
+                      barRadius={[6, 6, 0, 0]}
+                      bottomMargin={64}
+                      labelSize="9px"
+                    />
+                    {totalPaginas > 1 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          onClick={() => setPagina(p => p - 1)}
+                          disabled={pagina === 0}
+                          style={{ padding: '4px 14px', fontSize: '0.78rem' }}
+                        >
+                          ‹ Anterior
+                        </button>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                          {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, chartDataMesFiltrado.length)} de {chartDataMesFiltrado.length} unidades
+                        </span>
+                        <button
+                          className="ig-btn-dl ig-btn-dl--secondary"
+                          onClick={() => setPagina(p => p + 1)}
+                          disabled={pagina >= totalPaginas - 1}
+                          style={{ padding: '4px 14px', fontSize: '0.78rem' }}
+                        >
+                          Siguiente ›
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
+                    <TotalTile total={totalMes} indColor={indColor} />
+                  </div>
+                </div>
               )}
             </div>
           </div>

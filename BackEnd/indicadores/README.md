@@ -139,7 +139,7 @@ Los JSONs de mapeo son la fuente de verdad de la configuración. No hardcodear e
 {
   "titulo": "...",
   "formula": "...",
-  "semaforo": { "Verde": {...}, "Amarillo": {...} }
+  "semaforo": { "Esperado": {...}, "Medio": {...}, "Bajo": {...} }
 }
 ```
 

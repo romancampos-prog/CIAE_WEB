@@ -35,7 +35,7 @@ def _calcular_indicadores_pendientes(datos: dict, numerador: dict) -> tuple[list
 
     for ind_key in ["IAAS 02", "IAAS 03", "IAAS 04", "IAAS 05", "IAAS 06"]:
         for unidad, vals in datos.get(ind_key, {}).items():
-            if unidad in ("DELEGACION", "Delegación"):
+            if unidad == "DELEGACION":
                 continue
             if vals.get("denominador") is None:
                 if unidad not in pendientes_ind:
@@ -71,7 +71,7 @@ def _guardar_sesion_json(
                 "NUMERADOR":   vals.get("numerador"),
                 "DENOMINADOR": vals.get("denominador"),
                 "TASA":        vals.get("tasa"),
-                "COLOR":       (vals.get("color") or "Rojo").upper(),
+                "COLOR":       (vals.get("color") or "Bajo").upper(),
             }
             for unit, vals in ind_datos.items()
         }
@@ -156,12 +156,12 @@ def _recalcular_delegacion(datos_ind: dict, ind: str) -> dict:
     total_num = sum(
         (v.get("numerador") or 0)
         for u, v in datos_ind.items()
-        if u not in ("DELEGACION", "Delegación") and isinstance(v, dict)
+        if u != "DELEGACION" and isinstance(v, dict)
     )
     total_den = sum(
         (v.get("denominador") or 0)
         for u, v in datos_ind.items()
-        if u not in ("DELEGACION", "Delegación") and isinstance(v, dict)
+        if u != "DELEGACION" and isinstance(v, dict)
     )
     raw = {"DELEGACION": {"numerador": total_num, "denominador": total_den or None}}
     result = _semaforo_IAAS01(raw) if ind == "IAAS 01" else _semaforo_general(raw, ind)

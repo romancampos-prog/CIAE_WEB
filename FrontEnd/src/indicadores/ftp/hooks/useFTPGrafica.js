@@ -9,6 +9,8 @@ import {
   buildFTPChartDataMes,
   calcularRangosFTP,
 } from '../utils/calculos';
+import { contarSemaforo } from '../../shared/utils/contarSemaforo';
+import { techoEscala } from '../../shared/utils/escala';
 
 /**
  * Hook principal de grÃ¡ficas FTP.
@@ -51,22 +53,22 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     }).catch(() => {});
   }, []);
 
-  /** Recarga datos histÃ³ricos y ficha tÃ©cnica cuando cambia el indicador o el aÃ±o */
+  /**
+   * Recarga datos históricos y ficha técnica cuando cambia el indicador o el año.
+   * No limpia `datos` de inmediato: mientras llega la respuesta se sigue mostrando
+   * lo del indicador anterior, para que el cambio no haga parpadear todo el panel.
+   */
   useEffect(() => {
     if (!indSel) return;
     setCargando(true);
-    setDatos(null);
-    setIndInfo(null);
-    setUnidadSel('');
     Promise.all([
       getFTPDatosGrafica(indSel, anio),
       getIndicador(indSel).catch(() => ({ data: null })),
     ]).then(([d, infoRes]) => {
       setDatos(d);
       setIndInfo(infoRes?.data ?? null);
-      if (d.unidades?.length > 0) setUnidadSel(d.unidades[0]);
-      if (d.meses_con_datos?.length > 0)
-        setMesSel(d.meses_con_datos[d.meses_con_datos.length - 1]);
+      setUnidadSel(d.unidades?.[0] ?? '');
+      setMesSel(d.meses_con_datos?.length > 0 ? d.meses_con_datos[d.meses_con_datos.length - 1] : '');
     }).finally(() => setCargando(false));
   }, [indSel, anio]);
 
@@ -86,20 +88,34 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   );
 
   const maxTasa = useMemo(
-    () => Math.max(...chartData.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartData.map(d => d.tasa)),
     [chartData]
   );
 
-  /** Todas las unidades en el mes seleccionado (TOTAL al final) */
-  const chartDataMes = useMemo(
+  /** Todas las unidades en el mes seleccionado + TOTAL por separado */
+  const chartDataMesConTotal = useMemo(
     () => buildFTPChartDataMes(datos, mesSel),
     [datos, mesSel]
   );
 
+  /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
+  const totalMes = useMemo(
+    () => chartDataMesConTotal.find(d => d.unidad === 'TOTAL') ?? null,
+    [chartDataMesConTotal]
+  );
+
+  const chartDataMes = useMemo(
+    () => chartDataMesConTotal.filter(d => d.unidad !== 'TOTAL'),
+    [chartDataMesConTotal]
+  );
+
   const maxTasaMes = useMemo(
-    () => Math.max(...chartDataMes.map(d => d.tasa ?? 0), 1) * 1.25,
+    () => techoEscala(chartDataMes.map(d => d.tasa)),
     [chartDataMes]
   );
+
+  /** Conteo Esperado/Medio/Bajo/Gris del mes seleccionado — para la vista "Por mes" */
+  const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
 
   /** Color de semÃ¡foro de cada unidad en el Ãºltimo mes disponible */
   const unidadesStatus = useMemo(() => {
@@ -111,6 +127,12 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
       return { unidad: u, color: reg?.color ?? 'Gris' };
     });
   }, [datos]);
+
+  /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible — para la vista "Por unidad" */
+  const cumplimientoUltimoMes = useMemo(
+    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL')),
+    [unidadesStatus]
+  );
 
   const ultimoMesNum = useMemo(
     () => parseInt(datos?.meses_con_datos?.at(-1) ?? '1'),
@@ -171,7 +193,8 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     mesSel, setMesSel,
     listaIndicadores,
     todosLosIndicadores, chartData, maxTasa,
-    chartDataMes, maxTasaMes, unidadesStatus,
+    chartDataMes, maxTasaMes, totalMes, unidadesStatus,
+    cumplimientoMes, cumplimientoUltimoMes,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   };
