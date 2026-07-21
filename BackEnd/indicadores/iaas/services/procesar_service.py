@@ -3,7 +3,6 @@ Orquesta el procesamiento de todos los IAAS y genera el Excel final.
 Persiste los datos en JSON por indicador (sesion/{anio}/IAAS_0N.json).
 Usado en: iass/controllers/iaas_controller.py, iass/controllers/reportes_controller.py
 """
-import json
 import base64
 import datetime
 from pathlib import Path
@@ -11,6 +10,7 @@ from pathlib import Path
 from iaas.config import RUTA_DATA_IAAS
 from iaas.config import ORDEN_DEMAS_IAAS
 from iaas.services.extraccion_service import calcular_IAAS
+from iaas.services.datos_json_service import leer_indicador_anio, escribir_indicador_anio
 
 MESES_NOMBRE = {
     "01": "ENERO",  "02": "FEBRERO",   "03": "MARZO",    "04": "ABRIL",
@@ -52,19 +52,11 @@ def _guardar_sesion_json(
     indicadores_pendientes: dict | None = None,
 ) -> None:
     mes_nombre = MESES_NOMBRE.get(mes, mes)
-    ruta       = _ruta_sesion(anio)
-    ruta.mkdir(parents=True, exist_ok=True)
     generado   = datetime.datetime.now().isoformat(timespec="seconds")
 
     for ind_key, ind_datos in datos.items():
-        ind_file  = ind_key.replace(" ", "_") + ".json"
-        ruta_json = ruta / ind_file
-
-        if ruta_json.exists():
-            with open(ruta_json, encoding="utf-8") as f:
-                json_data = json.load(f)
-        else:
-            json_data = {"INDICADOR": ind_key, "ANIO": anio, "MESES": {}}
+        ind_n     = int(ind_key[-2:])
+        json_data = leer_indicador_anio(anio, ind_n) or {"INDICADOR": ind_key, "ANIO": anio, "MESES": {}}
 
         datos_mes = {
             unit: {
@@ -83,27 +75,23 @@ def _guardar_sesion_json(
             "DATOS":                 datos_mes,
         }
 
-        with open(ruta_json, "w", encoding="utf-8") as f:
-            json.dump(json_data, f, ensure_ascii=False, indent=2)
+        escribir_indicador_anio(anio, ind_n, json_data)
 
 
 def _leer_sesion_mes(anio: str, mes_nombre: str) -> dict:
-    ruta  = _ruta_sesion(anio)
     datos = {}
     for ind_n in range(1, 7):
-        ind_key   = f"IAAS 0{ind_n}"
-        ruta_json = ruta / f"IAAS_0{ind_n}.json"
-        if not ruta_json.exists():
+        ind_key = f"IAAS 0{ind_n}"
+        d       = leer_indicador_anio(anio, ind_n)
+        if not d:
             continue
-        with open(ruta_json, encoding="utf-8") as f:
-            d = json.load(f)
         mes_data = d.get("MESES", {}).get(mes_nombre.upper(), {}).get("DATOS", {})
         datos[ind_key] = {
             unit: {
                 "numerador":   v.get("NUMERADOR"),
                 "denominador": v.get("DENOMINADOR"),
                 "tasa":        v.get("TASA"),
-                "color":       (v.get("COLOR") or "ROJO").capitalize(),
+                "color":       (v.get("COLOR") or "Bajo").capitalize(),
             }
             for unit, v in mes_data.items()
         }
@@ -116,23 +104,11 @@ def _get_pendientes(anio: str, mes_nombre: str) -> list:
 
 
 def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
-    ruta = _ruta_sesion(anio)
-
     datos_por_ind: dict[str, dict] = {}
     for ind_n in range(1, 7):
-        ind_key   = f"IAAS 0{ind_n}"
-        ruta_json = ruta / f"IAAS_0{ind_n}.json"
-        if not ruta_json.exists():
-            datos_por_ind[ind_key] = {}
-            continue
-        try:
-            with open(ruta_json, encoding="utf-8") as f:
-                d = json.load(f)
-            datos_por_ind[ind_key] = (
-                d.get("MESES", {}).get(mes_nombre.upper(), {}).get("DATOS", {})
-            )
-        except Exception:
-            datos_por_ind[ind_key] = {}
+        ind_key = f"IAAS 0{ind_n}"
+        d       = leer_indicador_anio(anio, ind_n)
+        datos_por_ind[ind_key] = d.get("MESES", {}).get(mes_nombre.upper(), {}).get("DATOS", {})
 
     if not any(datos_por_ind.values()):
         return [], {}

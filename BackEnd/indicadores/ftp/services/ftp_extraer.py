@@ -1,6 +1,6 @@
 ﻿"""
 Descarga archivos Excel del FTP y extrae datos por indicador y unidad médica.
-Usado en: ftp/services/ftp_extraer_cache.py, reporte_final.py, reporte_categoria.py
+Usado en: ftp/services/reporte_final.py, reporte_categoria.py
 """
 import io
 import json

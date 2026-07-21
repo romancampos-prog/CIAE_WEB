@@ -1,18 +1,15 @@
-﻿import json
-from iaas.config import RUTA_IAAS_JSON
-from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01, UNIDAD_TIPO_IAAS01
+﻿from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01, UNIDAD_TIPO_IAAS01
+from iaas.services.datos_json_service import leer_config_iaas
 
 
 def obtener_config_indicador(indicador: str) -> dict:
-    with open(RUTA_IAAS_JSON, "r", encoding="utf-8") as f:
-        datos = json.load(f)
+    datos = leer_config_iaas()
     return datos.get(indicador, {})
 
 
 def infoAllIAAS() -> dict:
     resultado = {}
-    with open(RUTA_IAAS_JSON, "r", encoding="utf-8") as f:
-        datos = json.load(f)
+    datos = leer_config_iaas()
 
     for indicador, info in datos.items():
         if not info.get("mostrar", True):
@@ -36,6 +33,5 @@ def obtenerUnidadesIAAS() -> list:
 
 
 def obtenerIndicadoresIAAS() -> list:
-    with open(RUTA_IAAS_JSON, "r", encoding="utf-8") as f:
-        datos = json.load(f)
+    datos = leer_config_iaas()
     return [{"id": key, **val} for key, val in datos.items() if val.get("mostrar", True)]

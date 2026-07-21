@@ -17,14 +17,9 @@ from auth.services.jwt_utils import solo_roles
 from ftp.services.ftp_service import obtenerInformacionIndicador, consultarTodosIndicadores
 from ftp.services.reporte_final import ExcelReporteFinal
 from ftp.services.reporte_categoria import preparar_datos_indicador, escribir_hoja_indicador
-from ftp.services.generar_excel import obtener_estilos_excel, _calcular_color
-from ftp.services.datos_json_service import (
-    meses_con_datos as ftp_meses_con_datos,
-    leer_datos_indicador,
-    leer_semana_indicador,
-    MESES_NOMBRES as FTP_MESES_NOMBRES,
-)
-from ftp.config import NOMBREUNIDADESARCHIVO
+from ftp.services.generar_excel import obtener_estilos_excel
+from ftp.services.datos_json_service import meses_con_datos as ftp_meses_con_datos
+from ftp.services.grafica_service import calcular_datos_grafica_ftp
 
 router = APIRouter()
 
@@ -85,87 +80,10 @@ async def ftp_datos_grafica(
     payload:   dict = Depends(solo_roles(*ROLES_FTP_GRAF))
 ):
     try:
-        info     = obtenerInformacionIndicador(indicador)
-        semaforo = info.get("semaforo", {})
-        datos_json = leer_datos_indicador(indicador, anio)
-
-        if not datos_json:
-            return ApiResponse(success=True, message="Sin historial", data={"unidades": [], "meses_con_datos": [], "datos": {}})
-
-        datos     = {}
-        meses_set = set()
-        # Lista fija del catalogo, igual que IAAS -- asi las unidades sin ningun dato
-        # real (todo en null) tambien aparecen en el panel y la grafica, en gris.
-        unidades_set = list(NOMBREUNIDADESARCHIVO) + ["TOTAL"]
-
-        for mes_nombre, unidades_mes in datos_json.get("MESES", {}).items():
-            if mes_nombre not in FTP_MESES_NOMBRES:
-                continue
-            idx_mes = FTP_MESES_NOMBRES.index(mes_nombre)
-            mes_str = str(idx_mes + 1).zfill(2)
-
-            for unidad, vals in unidades_mes.items():
-                num = vals.get("numerador")
-                den = vals.get("denominador")
-                pct = vals.get("%")
-                if num is None and pct is None and den is None:
-                    continue
-                meses_set.add(mes_str)
-                color_guardado = vals.get("color")
-                color = (
-                    _calcular_color(pct, idx_mes, semaforo)
-                    if not color_guardado or color_guardado == "Gris"
-                    else color_guardado
-                )
-                datos.setdefault(unidad, []).append({
-                    "mes":         mes_str,
-                    "tasa":        float(pct) if pct is not None else None,
-                    "numerador":   float(num) if num is not None else None,
-                    "denominador": float(den) if den is not None else None,
-                    "color":       color,
-                })
-                if unidad not in unidades_set:
-                    unidades_set.append(unidad)
-
-        for unidad in datos:
-            datos[unidad].sort(key=lambda x: x["mes"])
-
-        meses_definitivos = set(meses_set)
-        semanal_json      = leer_semana_indicador(indicador, anio)
-        for mes_nombre, mes_data in semanal_json.get("MESES", {}).items():
-            if mes_nombre not in FTP_MESES_NOMBRES:
-                continue
-            idx_mes = FTP_MESES_NOMBRES.index(mes_nombre)
-            mes_str = str(idx_mes + 1).zfill(2)
-            if mes_str in meses_definitivos:
-                continue
-            semana_num = mes_data.get("semana", 1)
-            meses_set.add(mes_str)
-            for unidad, vals in mes_data.items():
-                if unidad == "semana" or not isinstance(vals, dict):
-                    continue
-                pct = vals.get("%")
-                num = vals.get("numerador")
-                den = vals.get("denominador")
-                col = vals.get("color", "Gris")
-                if unidad not in unidades_set:
-                    unidades_set.append(unidad)
-                datos.setdefault(unidad, []).append({
-                    "mes":         mes_str,
-                    "tasa":        float(pct) if pct is not None else None,
-                    "numerador":   float(num) if num is not None else None,
-                    "denominador": float(den) if den is not None else None,
-                    "color":       col,
-                    "semana":      semana_num,
-                })
-        for unidad in datos:
-            datos[unidad].sort(key=lambda x: x["mes"])
-
-        return ApiResponse(success=True, message="Datos de gráfica obtenidos", data={
-            "unidades":        unidades_set,
-            "meses_con_datos": sorted(meses_set),
-            "datos":           datos,
-        })
+        return ApiResponse(
+            success=True, message="Datos de gráfica obtenidos",
+            data=calcular_datos_grafica_ftp(indicador, anio),
+        )
     except Exception as e:
         print(f"[FTP datos-grafica] {indicador}: {e}")
         return ApiResponse(success=False, message=str(e), data={"unidades": [], "meses_con_datos": [], "datos": {}})

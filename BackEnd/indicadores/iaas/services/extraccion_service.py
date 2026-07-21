@@ -8,7 +8,8 @@ import pandas as pd
 from openpyxl.utils import column_index_from_string
 from iaas.config import UNIDADES_HGS_IAAS01, ORDEN_IAAS01, ORDEN_DEMAS_IAAS, UNIDAD_TIPO_IAAS01
 from iaas.services.info_service import obtener_config_indicador
-from iaas.services.generar_iaas import _alias_hgsz
+from iaas.services.calculos_iaas import _alias_hgsz
+from shared.color_service import resolver_color
 
 # UNIDAD_TIPO_IAAS01 solo tiene los nombres canonicos (HGS/HGSMF); el dato crudo a veces
 # trae el alias HGSZ/HGSZMF. Mismo criterio que _dato_unidad en generar_iaas.py.
@@ -217,26 +218,22 @@ def _semaforo_general(IAAS: dict, indicador: str) -> dict:
     tasa_multiplicar = umbrales.get("Tasa")
     resultado        = {}
 
+    def calcular_tasa(numerador, denominador):
+        return round((numerador / denominador) * tasa_multiplicar, 2)
+
+    def evaluar_umbral(tasa):
+        if tasa > umbral_esperado.get("Menor"):
+            return "Bajo"
+        if tasa >= umbral_esperado.get("Mayor"):
+            return "Esperado"
+        if tasa >= umbral_medio.get("Mayor"):
+            return "Medio"
+        return "Bajo"
+
     for unidad, data in IAAS.items():
         numerador   = data.get("numerador")
         denominador = data.get("denominador")
-
-        # numerador/denominador faltante = dato incompleto (Gris); numerador o denominador
-        # en 0 con el otro presente = dato sospechoso, se fuerza Bajo sin evaluar el umbral.
-        if numerador is None or denominador is None:
-            tasa, color = None, "Gris"
-        elif numerador == 0 or denominador == 0:
-            tasa, color = 0, "Bajo"
-        else:
-            tasa = round((numerador / denominador) * tasa_multiplicar, 2)
-            if tasa > umbral_esperado.get("Menor"):
-                color = "Bajo"
-            elif tasa >= umbral_esperado.get("Mayor"):
-                color = "Esperado"
-            elif tasa >= umbral_medio.get("Mayor"):
-                color = "Medio"
-            else:
-                color = "Bajo"
+        tasa, color = resolver_color(numerador, denominador, calcular_tasa, evaluar_umbral)
 
         resultado[unidad] = {
             "numerador":   numerador,
@@ -300,28 +297,28 @@ def _semaforo_IAAS01(IAAS: dict) -> dict:
     tasa_multiplicar = semaforo_json.get("Tasa")
     resultado        = {}
 
+    def calcular_tasa(numerador, denominador):
+        return round((numerador / denominador) * tasa_multiplicar, 2)
+
+    def evaluar_umbral(tasa, unidad):
+        tipo     = UNIDAD_TIPO_IAAS01.get(unidad) or _ALIAS_TIPO_IAAS01.get(unidad, "OOAD")
+        umbrales = semaforo_json.get(tipo) or semaforo_json.get("OOAD", {})
+        esperado = umbrales.get("Esperado", {})
+        medio    = umbrales.get("Medio", {})
+        if esperado.get("Mayor") <= tasa <= esperado.get("Menor"):
+            return "Esperado"
+        if medio.get("Mayor") <= tasa < medio.get("Menor"):
+            return "Medio"
+        return "Bajo"
+
     for unidad, data in IAAS.items():
         numerador   = data.get("numerador")
         denominador = data.get("denominador")
-
-        # numerador/denominador faltante = dato incompleto (Gris); numerador o denominador
-        # en 0 con el otro presente = dato sospechoso, se fuerza Bajo sin evaluar el umbral.
-        if numerador is None or denominador is None:
-            tasa, color = None, "Gris"
-        elif numerador == 0 or denominador == 0:
-            tasa, color = 0, "Bajo"
-        else:
-            tasa = round((numerador / denominador) * tasa_multiplicar, 2)
-            tipo     = UNIDAD_TIPO_IAAS01.get(unidad) or _ALIAS_TIPO_IAAS01.get(unidad, "OOAD")
-            umbrales = semaforo_json.get(tipo) or semaforo_json.get("OOAD", {})
-            esperado = umbrales.get("Esperado", {})
-            medio    = umbrales.get("Medio", {})
-            if esperado.get("Mayor") <= tasa <= esperado.get("Menor"):
-                color = "Esperado"
-            elif medio.get("Mayor") <= tasa < medio.get("Menor"):
-                color = "Medio"
-            else:
-                color = "Bajo"
+        tasa, color = resolver_color(
+            numerador, denominador,
+            calcular_tasa,
+            lambda t, u=unidad: evaluar_umbral(t, u),
+        )
 
         resultado[unidad] = {
             "numerador":   numerador,

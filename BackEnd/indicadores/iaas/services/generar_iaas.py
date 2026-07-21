@@ -1,93 +1,22 @@
-﻿"""
+"""
 Genera el Excel completo IAAS (01-06) con históricos, semáforo y acumulados.
+El cálculo (semáforo, acumulados, valores por celda) vive en calculos_iaas.py —
+este archivo solo decide en qué fila/columna va cada valor y con qué estilo.
 Usado en: iass/services/procesar_service.py, iass/controllers/reportes_controller.py
 """
-import json
 import io
 import xlsxwriter
 import openpyxl
-from iaas.config import MESES, ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01
-from iaas.config import RUTA_IAAS_JSON, RUTA_DATA_IAAS
-
-with open(RUTA_IAAS_JSON, encoding="utf-8") as _f:
-    _CFG = json.load(_f)
+from iaas.config import MESES, RUTA_DATA_IAAS
+from iaas.services.calculos_iaas import (
+    _CFG, UNIDADES_IAAS, UNIDADES_UCI,
+    _filas_umbrales_iaas01, _rango_umbral_uci,
+    _leer_historicos_IAAS,
+    calcular_fila_iaas01, calcular_acumulado_iaas01, calcular_anual_iaas01,
+    calcular_fila_iaas_uci, calcular_acumulado_iaas_uci, calcular_anual_iaas_uci,
+)
 
 RUTA_BASE_IAAS = RUTA_DATA_IAAS
-
-# Mismo orden y mismas 11 unidades que usan IAAS 02-06 (ORDEN_DEMAS_IAAS) — solo cambia que
-# IAAS 01 le agrega el renglón de OOAD al final de su propia lista de unidades.
-UNIDADES_IAAS     = ORDEN_DEMAS_IAAS + ["DELEGACION"]
-UNIDADES_UCI      = ORDEN_DEMAS_IAAS
-_UNIDADES_HGS_SET = set(UNIDADES_HGS_IAAS01)
-
-
-def _alias_hgsz(nombre):
-    """
-    En el dato crudo, algunas unidades HGS/HGSMF vienen guardadas como HGSZ/HGSZMF —
-    es la misma unidad, solo cambia el prefijo. Devuelve el nombre alterno a probar,
-    o None si el nombre no tiene ese prefijo.
-    """
-    if nombre.startswith("HGSMF "):
-        return "HGSZMF " + nombre[len("HGSMF "):]
-    if nombre.startswith("HGS "):
-        return "HGSZ " + nombre[len("HGS "):]
-    return None
-
-
-def _dato_unidad(datos, unidad):
-    """Busca los datos de una unidad por su nombre canónico, y si no aparece,
-    prueba con el alias HGS(MF)/HGSZ(MF) antes de darla por sin datos."""
-    v = datos.get(unidad)
-    if isinstance(v, dict):
-        return v
-    alias = _alias_hgsz(unidad)
-    if alias:
-        v = datos.get(alias)
-        if isinstance(v, dict):
-            return v
-    return None
-
-
-def _color_tasa_01(tasa, unidad):
-    sem      = _CFG["IAAS 01"]["Semaforo"]
-    umbrales = sem.get("HGS") if unidad in _UNIDADES_HGS_SET else sem.get("HGZ", sem.get("OOAD"))
-    if not umbrales or tasa is None:
-        return "Bajo"
-    esp = umbrales.get("Esperado", {})
-    med = umbrales.get("Medio", {})
-    if esp.get("Mayor", 0) <= tasa <= esp.get("Menor", 0):
-        return "Esperado"
-    elif med.get("Mayor", 0) <= tasa < med.get("Menor", 0):
-        return "Medio"
-    return "Bajo"
-
-
-def _filas_umbrales_iaas01():
-    """
-    Agrupa los tipos de unidad de IAAS 01 (HGS/HGZ/HGR/HGO/HGP/OOAD) por umbral idéntico.
-    Dinámico: si dos tipos comparten los mismos valores de Esperado/Medio quedan en una sola
-    fila; si algún tipo cambia sus valores en el JSON, se separa solo automáticamente.
-    """
-    sem    = _CFG["IAAS 01"]["Semaforo"]
-    grupos = {}
-    for nombre in ("HGS", "HGZ", "HGR", "HGO", "HGP", "OOAD"):
-        umbral = sem.get(nombre)
-        if not umbral:
-            continue
-        esp   = umbral.get("Esperado", {})
-        med   = umbral.get("Medio", {})
-        clave = (esp.get("Mayor"), esp.get("Menor"), med.get("Mayor"), med.get("Menor"))
-        grupos.setdefault(clave, []).append(nombre)
-
-    filas = []
-    for (esp_mayor, esp_menor, med_mayor, med_menor), nombres in grupos.items():
-        filas.append({
-            "etiqueta": "/".join(nombres),
-            "esperado": f"{esp_mayor} – {esp_menor}",
-            "medio":    f"> {med_mayor} – < {esp_mayor}",
-            "bajo":     f"< {med_mayor}  ó  > {esp_menor}",
-        })
-    return filas
 
 
 def _layout_iaas01():
@@ -124,70 +53,6 @@ def _layout_iaas01():
         "fila_seccion_anual":     fila_seccion_anual,
         "fila_inicio_anual":      fila_inicio_anual,
     }
-
-
-def _color_tasa_uci(tasa, indicador):
-    sem = _CFG[indicador].get("Semaforo", {})
-    if tasa is None:
-        return "Bajo"
-    esp = sem.get("Esperado", {})
-    med = sem.get("Medio", {})
-    if tasa > esp.get("Menor", 0):
-        return "Bajo"
-    elif tasa >= esp.get("Mayor", 0):
-        return "Esperado"
-    elif tasa >= med.get("Mayor", 0):
-        return "Medio"
-    return "Bajo"
-
-
-_NOMBRE_A_NUM = {
-    "ENERO": 1, "FEBRERO": 2, "MARZO": 3, "ABRIL": 4,
-    "MAYO": 5, "JUNIO": 6, "JULIO": 7, "AGOSTO": 8,
-    "SEPTIEMBRE": 9, "OCTUBRE": 10, "NOVIEMBRE": 11, "DICIEMBRE": 12,
-}
-
-
-def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
-    ruta_sesion = RUTA_DATA_IAAS / str(anio)
-    historicos  = {}
-
-    for ind_n in range(1, 7):
-        ind_key   = f"IAAS 0{ind_n}"
-        ruta_json = ruta_sesion / f"IAAS_0{ind_n}.json"
-        if not ruta_json.exists():
-            historicos[ind_key] = {}
-            continue
-
-        try:
-            with open(ruta_json, encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception as e:
-            print(f"[IAAS JSON] Error leyendo {ruta_json}: {e}")
-            historicos[ind_key] = {}
-            continue
-
-        h_ind = {}
-        for mes_nombre, mes_data in data.get("MESES", {}).items():
-            m = _NOMBRE_A_NUM.get(mes_nombre.upper())
-            if m is None or m == mes_num:
-                continue
-            datos_mes = {
-                unit: {
-                    "numerador":   v.get("NUMERADOR"),
-                    "denominador": v.get("DENOMINADOR"),
-                    "tasa":        v.get("TASA"),
-                    "color":       (v.get("COLOR") or "Bajo").capitalize(),
-                }
-                for unit, v in mes_data.get("DATOS", {}).items()
-            }
-            if datos_mes:
-                h_ind[m] = datos_mes
-        historicos[ind_key] = h_ind
-
-    total = sum(len(v) for v in historicos.values())
-    print(f"[IAAS JSON] {total} meses de datos cargados")
-    return historicos
 
 
 def _escribir_unidades(hoja, estilos, fila_inicio, columna):
@@ -379,19 +244,6 @@ _IAAS_UCI_CONFIG = {
 }
 
 
-def _rango_umbral_uci(indicador):
-    """Umbral fijo de un indicador IAAS 02-06 (uno solo, no varía por unidad ni por mes) —
-    mismo criterio de comparación que usa _color_tasa_uci, en formato de texto."""
-    sem = _CFG[indicador].get("Semaforo", {})
-    esp = sem.get("Esperado", {})
-    med = sem.get("Medio", {})
-    return {
-        "esperado": f"{esp.get('Mayor', '?')} – {esp.get('Menor', '?')}",
-        "medio":    f"≥ {med.get('Mayor', '?')} – < {esp.get('Mayor', '?')}",
-        "bajo":     f"< {med.get('Mayor', '?')}  ó  > {esp.get('Menor', '?')}",
-    }
-
-
 def _layout_iaas_uci():
     """
     Filas clave compartidas por _escribir_IAAS_UCI, _escribir_datos_IAAS_uci y
@@ -560,294 +412,161 @@ def _estilo_tasa(estilos, color):
     return estilos.get(color, estilos["sin_datos"])
 
 
-def _acumular_unidad(all_months, unidad, hasta_mes):
-    """Suma numerador/denominador de una unidad desde enero hasta hasta_mes (inclusive).
-    Reutilizado por el acumulado mensual y por el bloque Anual (que es lo mismo, solo que
-    siempre hasta el último mes que haya)."""
-    num, den, tiene = 0, 0, False
-    for m in range(1, hasta_mes + 1):
-        v = _dato_unidad(all_months.get(m, {}), unidad)
-        if v:
-            num  += v.get("numerador") or 0
-            den  += v.get("denominador") or 0
-            tiene = True
-    return num, den, tiene
-
-
 def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
     N = len(UNIDADES_IAAS)
     # Bloque "MENSUAL ACUMULADO": la fila se calcula del layout compartido, no es un número fijo.
     # Enero no tiene columna en este bloque (acumulado de enero = enero, no aporta nada nuevo) —
     # febrero es la primera columna, por eso el -2 en vez de -1.
     fila_inicio = _layout_iaas01()["fila_inicio_acumulado"]
+    calculado   = calcular_acumulado_iaas01(all_months)
 
-    for mes_target in range(2, 13):
-        if mes_target not in all_months:
-            continue
-
+    for mes_target, fila_mes in calculado.items():
         col_base = 1 + (mes_target - 2) * 4
-
-        sum_del_n = 0
-        sum_del_d = 0
 
         for i, unidad in enumerate(UNIDADES_IAAS):
             if unidad == "DELEGACION":
                 continue
-
-            acum_num, acum_den, tiene = _acumular_unidad(all_months, unidad, mes_target)
-
-            if not tiene:
+            val = fila_mes[unidad]
+            if val is None:
                 continue
-
             fila   = fila_inicio + i
             estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-            tasa   = round((acum_num / acum_den) * 1000, 2) if acum_den else 0
-            color  = _color_tasa_01(tasa, unidad)
+            hoja.write(fila, col_base + 1, val["numerador"],   estilo)
+            hoja.write(fila, col_base + 2, val["denominador"], estilo)
+            hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
-            hoja.write(fila, col_base + 1, acum_num, estilo)
-            hoja.write(fila, col_base + 2, acum_den, estilo)
-            hoja.write(fila, col_base + 3, tasa, _estilo_tasa(estilos, color))
-
-            sum_del_n += acum_num
-            sum_del_d += acum_den
-
-        fila_del  = fila_inicio + N - 1
-        tasa_del  = round((sum_del_n / sum_del_d) * 1000, 2) if sum_del_d else 0
-        color_del = _color_tasa_01(tasa_del, "DELEGACION")
-        est_del   = estilos["delegacion_txt"]
-        hoja.write(fila_del, col_base + 1, sum_del_n, est_del)
-        hoja.write(fila_del, col_base + 2, sum_del_d, est_del)
-        hoja.write(fila_del, col_base + 3, tasa_del,  _estilo_tasa(estilos, color_del))
+        fila_del = fila_inicio + N - 1
+        val_del  = fila_mes["DELEGACION"]
+        est_del  = estilos["delegacion_txt"]
+        hoja.write(fila_del, col_base + 1, val_del["numerador"],   est_del)
+        hoja.write(fila_del, col_base + 2, val_del["denominador"], est_del)
+        hoja.write(fila_del, col_base + 3, val_del["tasa"],        _estilo_tasa(estilos, val_del["color_tasa"]))
 
 
 def _escribir_anual_IAAS01(hoja, estilos, all_months):
     """Bloque 'ANUAL': el acumulado Ene→último mes registrado, la misma cuenta que ya
     hace _escribir_acumulado_IAAS01 para su última columna, pero puesta aparte para
     verse de un vistazo sin tener que ir hasta el final del bloque mensual acumulado."""
-    if not all_months:
+    calculado = calcular_anual_iaas01(all_months)
+    if calculado is None:
         return
     N           = len(UNIDADES_IAAS)
     fila_inicio = _layout_iaas01()["fila_inicio_anual"]
-    hasta_mes   = max(all_months.keys())
     col_base    = 1
 
-    sum_n, sum_d = 0, 0
     for i, unidad in enumerate(UNIDADES_IAAS):
         if unidad == "DELEGACION":
             continue
-
-        num, den, tiene = _acumular_unidad(all_months, unidad, hasta_mes)
-        if not tiene:
+        val = calculado[unidad]
+        if val is None:
             continue
-
         fila   = fila_inicio + i
         estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        tasa   = round((num / den) * 1000, 2) if den else 0
-        color  = _color_tasa_01(tasa, unidad)
+        hoja.write(fila, col_base + 1, val["numerador"],   estilo)
+        hoja.write(fila, col_base + 2, val["denominador"], estilo)
+        hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
-        hoja.write(fila, col_base + 1, num,  estilo)
-        hoja.write(fila, col_base + 2, den,  estilo)
-        hoja.write(fila, col_base + 3, tasa, _estilo_tasa(estilos, color))
-
-        sum_n += num
-        sum_d += den
-
-    fila_del  = fila_inicio + N - 1
-    tasa_del  = round((sum_n / sum_d) * 1000, 2) if sum_d else 0
-    color_del = _color_tasa_01(tasa_del, "DELEGACION")
-    est_del   = estilos["delegacion_txt"]
-    hoja.write(fila_del, col_base + 1, sum_n,    est_del)
-    hoja.write(fila_del, col_base + 2, sum_d,    est_del)
-    hoja.write(fila_del, col_base + 3, tasa_del, _estilo_tasa(estilos, color_del))
+    fila_del = fila_inicio + N - 1
+    val_del  = calculado["DELEGACION"]
+    est_del  = estilos["delegacion_txt"]
+    hoja.write(fila_del, col_base + 1, val_del["numerador"],   est_del)
+    hoja.write(fila_del, col_base + 2, val_del["denominador"], est_del)
+    hoja.write(fila_del, col_base + 3, val_del["tasa"],        _estilo_tasa(estilos, val_del["color_tasa"]))
 
 
 def _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, indicador):
-    layout   = _layout_iaas_uci()
-    fila_ini = layout["fila_hosp1_acumulado"]
-    fila_del = layout["fila_delega_acumulado"]
+    layout    = _layout_iaas_uci()
+    fila_ini  = layout["fila_hosp1_acumulado"]
+    fila_del  = layout["fila_delega_acumulado"]
+    calculado = calcular_acumulado_iaas_uci(all_months, indicador)
 
-    sem       = _CFG[indicador].get("Semaforo", {})
-    tasa_mult = sem.get("Tasa", 1000)
-
-    # Enero no tiene columna en este bloque (acumulado de enero = enero, no aporta nada nuevo) —
-    # febrero es la primera columna, por eso el -2 en vez de -1. Mismo criterio que IAAS 01.
-    for mes_target in range(2, 13):
-        if mes_target not in all_months:
-            continue
-
-        col_base  = 1 + (mes_target - 2) * 3
-        sum_del_n = 0
-        sum_del_d = 0
+    for mes_target, fila_mes in calculado.items():
+        col_base = 1 + (mes_target - 2) * 3
 
         for i, unidad in enumerate(UNIDADES_UCI):
-            acum_num = 0
-            acum_den = 0
-            tiene    = False
-            for m in range(1, mes_target + 1):
-                v = _dato_unidad(all_months.get(m, {}), unidad)
-                if v:
-                    acum_num += v.get("numerador") or 0
-                    acum_den += v.get("denominador") or 0
-                    tiene = True
-
-            if not tiene:
+            val = fila_mes[unidad]
+            if val is None:
                 continue
-
             fila   = fila_ini + i
             estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-            tasa   = round((acum_num / acum_den) * tasa_mult, 2) if acum_den else 0
-            color  = _color_tasa_uci(tasa, indicador)
+            hoja.write(fila, col_base,     val["numerador"],   estilo)
+            hoja.write(fila, col_base + 1, val["denominador"], estilo)
+            hoja.write(fila, col_base + 2, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
-            hoja.write(fila, col_base,     acum_num, estilo)
-            hoja.write(fila, col_base + 1, acum_den, estilo)
-            hoja.write(fila, col_base + 2, tasa,     _estilo_tasa(estilos, color))
-
-            sum_del_n += acum_num
-            sum_del_d += acum_den
-
-        tasa_del  = round((sum_del_n / sum_del_d) * tasa_mult, 2) if sum_del_d else 0
-        color_del = _color_tasa_uci(tasa_del, indicador)
-        est_del   = estilos["delegacion_txt"]
-        hoja.write(fila_del, col_base,     sum_del_n, est_del)
-        hoja.write(fila_del, col_base + 1, sum_del_d, est_del)
-        hoja.write(fila_del, col_base + 2, tasa_del,  _estilo_tasa(estilos, color_del))
+        val_ooad = fila_mes["OOAD"]
+        est_del  = estilos["delegacion_txt"]
+        hoja.write(fila_del, col_base,     val_ooad["numerador"],   est_del)
+        hoja.write(fila_del, col_base + 1, val_ooad["denominador"], est_del)
+        hoja.write(fila_del, col_base + 2, val_ooad["tasa"],        _estilo_tasa(estilos, val_ooad["color_tasa"]))
 
 
 def _escribir_anual_IAAS_uci(hoja, estilos, all_months, indicador):
     """Bloque 'ANUAL': acumulado Ene→último mes registrado, mismo criterio que
     _escribir_anual_IAAS01 pero para IAAS 02-06 (OOAD es fila aparte, no de la lista)."""
-    if not all_months:
+    calculado = calcular_anual_iaas_uci(all_months, indicador)
+    if calculado is None:
         return
-    layout    = _layout_iaas_uci()
-    fila_ini  = layout["fila_hosp1_anual"]
-    fila_del  = layout["fila_delega_anual"]
-    hasta_mes = max(all_months.keys())
-    col_base  = 1
+    layout   = _layout_iaas_uci()
+    fila_ini = layout["fila_hosp1_anual"]
+    fila_del = layout["fila_delega_anual"]
+    col_base = 1
 
-    sem       = _CFG[indicador].get("Semaforo", {})
-    tasa_mult = sem.get("Tasa", 1000)
-
-    sum_n, sum_d = 0, 0
     for i, unidad in enumerate(UNIDADES_UCI):
-        num, den, tiene = _acumular_unidad(all_months, unidad, hasta_mes)
-        if not tiene:
+        val = calculado[unidad]
+        if val is None:
             continue
-
         fila   = fila_ini + i
         estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        tasa   = round((num / den) * tasa_mult, 2) if den else 0
-        color  = _color_tasa_uci(tasa, indicador)
+        hoja.write(fila, col_base,     val["numerador"],   estilo)
+        hoja.write(fila, col_base + 1, val["denominador"], estilo)
+        hoja.write(fila, col_base + 2, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
-        hoja.write(fila, col_base,     num,  estilo)
-        hoja.write(fila, col_base + 1, den,  estilo)
-        hoja.write(fila, col_base + 2, tasa, _estilo_tasa(estilos, color))
-
-        sum_n += num
-        sum_d += den
-
-    tasa_del  = round((sum_n / sum_d) * tasa_mult, 2) if sum_d else 0
-    color_del = _color_tasa_uci(tasa_del, indicador)
-    est_del   = estilos["delegacion_txt"]
-    hoja.write(fila_del, col_base,     sum_n,    est_del)
-    hoja.write(fila_del, col_base + 1, sum_d,    est_del)
-    hoja.write(fila_del, col_base + 2, tasa_del, _estilo_tasa(estilos, color_del))
+    val_ooad = calculado["OOAD"]
+    est_del  = estilos["delegacion_txt"]
+    hoja.write(fila_del, col_base,     val_ooad["numerador"],   est_del)
+    hoja.write(fila_del, col_base + 1, val_ooad["denominador"], est_del)
+    hoja.write(fila_del, col_base + 2, val_ooad["tasa"],        _estilo_tasa(estilos, val_ooad["color_tasa"]))
 
 
 def _escribir_datos_IAAS_uci(hoja, estilos, mes_num, datos, indicador):
-    layout    = _layout_iaas_uci()
-    col_base  = 1 + (mes_num - 1) * 3
-    sem       = _CFG[indicador].get("Semaforo", {})
-    tasa_mult = sem.get("Tasa", 1000)
-    sum_n, sum_d = 0, 0
+    layout   = _layout_iaas_uci()
+    col_base = 1 + (mes_num - 1) * 3
+    valores  = calcular_fila_iaas_uci(datos, indicador)
 
     for i, unidad in enumerate(UNIDADES_UCI):
-        v      = _dato_unidad(datos, unidad)
+        val    = valores[unidad]
         fila   = layout["fila_hosp1_mensual"] + i
         estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        color  = (v.get("color") if v else None) or "Gris"
-
-        if color == "Gris":
-            # dato incompleto -- se muestra el numerador o denominador que sí tenga valor
-            # (el que sea None se deja vacio) con su estilo normal; solo la tasa se deja
-            # vacia y en gris. No se cuenta en el total de OOAD.
-            num  = v.get("numerador") if v else None
-            den  = v.get("denominador") if v else None
-            hoja.write(fila, col_base,     num if num is not None else "", estilo)
-            hoja.write(fila, col_base + 1, den if den is not None else "", estilo)
-            hoja.write(fila, col_base + 2, "", _estilo_tasa(estilos, "Gris"))
-            continue
-
-        num  = v.get("numerador")
-        den  = v.get("denominador")
-        tasa = v.get("tasa")
-        hoja.write(fila, col_base,     num,  estilo)
-        hoja.write(fila, col_base + 1, den,  estilo)
-        hoja.write(fila, col_base + 2, tasa, _estilo_tasa(estilos, color))
-        sum_n += num or 0
-        sum_d += den or 0
+        hoja.write(fila, col_base,     val["numerador"],   estilo)
+        hoja.write(fila, col_base + 1, val["denominador"], estilo)
+        hoja.write(fila, col_base + 2, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
     # Fila OOAD del bloque MENSUAL — antes no se calculaba (solo existía en el acumulado).
-    fila_ooad  = layout["fila_delega_mensual"]
-    tasa_ooad  = round((sum_n / sum_d) * tasa_mult, 2) if sum_d else 0
-    color_ooad = _color_tasa_uci(tasa_ooad, indicador)
-    est_ooad   = estilos["delegacion_txt"]
-    hoja.write(fila_ooad, col_base,     sum_n,     est_ooad)
-    hoja.write(fila_ooad, col_base + 1, sum_d,     est_ooad)
-    hoja.write(fila_ooad, col_base + 2, tasa_ooad, _estilo_tasa(estilos, color_ooad))
+    val_ooad  = valores["OOAD"]
+    fila_ooad = layout["fila_delega_mensual"]
+    est_ooad  = estilos["delegacion_txt"]
+    hoja.write(fila_ooad, col_base,     val_ooad["numerador"],   est_ooad)
+    hoja.write(fila_ooad, col_base + 1, val_ooad["denominador"], est_ooad)
+    hoja.write(fila_ooad, col_base + 2, val_ooad["tasa"],        _estilo_tasa(estilos, val_ooad["color_tasa"]))
 
 
 def _escribir_datos_IAAS01(hoja, estilos, mes_num, datos):
-    N = len(UNIDADES_IAAS)
     # Bloque "MENSUAL": la fila se calcula del layout compartido, no es un número fijo.
     fila_inicio = _layout_iaas01()["fila_inicio_mensual"]
     col_base    = 1 + (mes_num - 1) * 4
-
-    # El OOAD suma exactamente las mismas unidades que se muestran como fila —ni una más—,
-    # buscando con alias HGS/HGSZ por si el dato crudo trae el prefijo distinto.
-    sum_num = 0
-    sum_den = 0
-    for unidad in UNIDADES_IAAS:
-        if unidad == "DELEGACION":
-            continue
-        v = _dato_unidad(datos, unidad)
-        if v and (v.get("color") or "Gris") != "Gris":
-            sum_num += v.get("numerador") or 0
-            sum_den += v.get("denominador") or 0
-    tasa_deleg = round((sum_num / sum_den) * 1000, 2) if sum_den else 0
+    valores     = calcular_fila_iaas01(datos)
 
     for i, unidad in enumerate(UNIDADES_IAAS):
         fila = fila_inicio + i
-
-        if unidad == "DELEGACION":
-            est         = estilos["delegacion_txt"]
-            color_deleg = datos.get("DELEGACION", {}).get("color") if isinstance(datos.get("DELEGACION"), dict) else _color_tasa_01(tasa_deleg, "DELEGACION")
-            hoja.write(fila, col_base + 1, sum_num,    est)
-            hoja.write(fila, col_base + 2, sum_den,    est)
-            hoja.write(fila, col_base + 3, tasa_deleg, _estilo_tasa(estilos, color_deleg))
+        val  = valores.get(unidad)
+        if val is None:
             continue
-
-        v = _dato_unidad(datos, unidad)
-        if not v:
-            continue
-        estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        color  = v.get("color") or "Gris"
-        if color == "Gris":
-            # dato incompleto -- se muestra el numerador o denominador que sí tenga valor
-            # (el que sea None se deja vacio) con su estilo normal; solo la tasa se deja
-            # vacia y en gris.
-            num  = v.get("numerador")
-            den  = v.get("denominador")
-            hoja.write(fila, col_base + 1, num if num is not None else "", estilo)
-            hoja.write(fila, col_base + 2, den if den is not None else "", estilo)
-            hoja.write(fila, col_base + 3, "", _estilo_tasa(estilos, "Gris"))
-            continue
-
-        num  = v.get("numerador")
-        den  = v.get("denominador")
-        tasa = v.get("tasa")
-        hoja.write(fila, col_base + 1, num,  estilo)
-        hoja.write(fila, col_base + 2, den,  estilo)
-        hoja.write(fila, col_base + 3, tasa, _estilo_tasa(estilos, color))
+        estilo = estilos["delegacion_txt"] if unidad == "DELEGACION" else (
+            estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
+        )
+        hoja.write(fila, col_base + 1, val["numerador"],   estilo)
+        hoja.write(fila, col_base + 2, val["denominador"], estilo)
+        hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
 
 def Excel_IAAS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:

@@ -179,7 +179,7 @@ const IndicadoresPage = () => {
                 />
 
                 {/* ── 3. ALERTAS ── */}
-                {mesesFaltantes.length > 0 && tipo === 'final' && (
+                {mesesFaltantes.length > 0 && (
                   <div
                     className="cfg-warning"
                     style={confirmandoFaltantes ? {
