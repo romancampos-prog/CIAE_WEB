@@ -5,6 +5,8 @@ Usado en: ftp/services/reporte_final.py, reporte_categoria.py
 import math
 import re
 
+from shared.color_service import es_gris, es_bajo_forzado
+
 
 def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
     umbral_sube = float(inidicadorDecimal.get('sube', 0.60))
@@ -63,7 +65,7 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
                 denominador_raw   = eval(indicadorOperacion['denominador'], {"__builtins__": None}, contexto_unidad)
                 denominador_final = redondeo_personalizado(denominador_raw)
 
-            if numerador_final is None or denominador_final is None:
+            if es_gris(numerador_final, denominador_final):
                 resultado = None
             elif denominador_final != 0:
                 contexto_unidad['numerador']   = numerador_final
@@ -74,10 +76,7 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
 
             # numerador o denominador en 0 (con el otro presente) es un dato sospechoso, no un
             # resultado real — se fuerza Bajo en vez de dejar que el umbral normal lo evalúe.
-            forzar_bajo = (
-                numerador_final is not None and denominador_final is not None and
-                (numerador_final == 0 or denominador_final == 0)
-            )
+            forzar_bajo = es_bajo_forzado(numerador_final, denominador_final)
 
             resultadosFinales[unidad] = {
                 "numerador":   numerador_final,
@@ -107,7 +106,7 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
             "numerador":   total_num,
             "denominador": total_den,
             "resultado":   round((total_num / total_den) * 100, 2) if total_den > 0 else 0,
-            "forzar_bajo": total_num == 0 or total_den == 0,
+            "forzar_bajo": es_bajo_forzado(total_num, total_den),
         }
     else:
         resultadosFinales["TOTAL"] = {

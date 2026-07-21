@@ -39,6 +39,11 @@ export function useIndicadores(user) {
   const [cargandoBatch, setCargandoBatch]   = useState(false);
   const [resultadoBatch, setResultadoBatch] = useState(null);
   const [modalPoblacion, setModalPoblacion] = useState(false);
+  const [mesesGeneradosList, setMesesGeneradosList] = useState([]);
+  const [mesesCerradosCategoria, setMesesCerradosCategoria] = useState([]);
+
+  const catData     = allIndicadores[categoria];
+  const indicadores = catData?.indicadores ?? [];
 
   /** Carga inicial de todos los indicadores agrupados por categorÃ­a */
   useEffect(() => {
@@ -66,26 +71,58 @@ export function useIndicadores(user) {
     getIndicador(indicadorSel).then(res => setInfoIndicador(res.data)).catch(console.error);
   }, [indicadorSel]);
 
-  /** Detecta meses previos sin reporte generado cuando el tipo es "final" */
+  /** Trae qué meses ya tienen reporte "final" generado para el indicador/año activos */
+  useEffect(() => {
+    if (!indicadorSel) { setMesesGeneradosList([]); return; }
+    getMesesGenerados(indicadorSel, datos.ano).then(setMesesGeneradosList);
+  }, [indicadorSel, datos.ano]);
+
+  /**
+   * Modo batch (sin indicador elegido, "Generar todos" de la categoría): un mes
+   * solo se oculta si TODOS los indicadores de la categoría ya lo cerraron —
+   * si alguno sigue abierto, ese indicador sí necesita su semanal ese mes.
+   */
+  useEffect(() => {
+    if (indicadorSel || indicadores.length === 0) { setMesesCerradosCategoria([]); return; }
+    Promise.all(indicadores.map(ind => getMesesGenerados(ind, datos.ano)))
+      .then(listas => {
+        const interseccion = listas.reduce((acc, lista) => acc.filter(m => lista.includes(m)));
+        setMesesCerradosCategoria(interseccion);
+      });
+  }, [indicadorSel, indicadores.join(','), datos.ano]);
+
+  /**
+   * Detecta meses sin reporte "final" generado antes del mes/tipo seleccionado.
+   * En "final" revisa toda la cadena desde enero (el histórico debe quedar completo).
+   * En "previo" (semanal) solo le interesa el mes inmediato anterior — un semanal
+   * no necesita que todo el año esté cerrado, solo que el mes pasado ya se cerró.
+   */
   useEffect(() => {
     setConfirmandoFaltantes(false);
-    if (!datos.mes || !indicadorSel || tipo !== 'final') { setMesesFaltantes([]); return; }
-    getMesesGenerados(indicadorSel, datos.ano).then(generados => {
-      const mesNum    = parseInt(datos.mes);
-      const faltantes = [];
-      for (let i = 1; i < mesNum; i++) {
-        const k = String(i).padStart(2, '0');
-        if (!generados.includes(k)) faltantes.push(MESES_LARGOS[k]);
-      }
-      setMesesFaltantes(faltantes);
-    });
-  }, [datos.mes, datos.ano, indicadorSel, tipo]);
+    if (!datos.mes || !indicadorSel) { setMesesFaltantes([]); return; }
+    const mesNum    = parseInt(datos.mes);
+    const desde     = tipo === 'previo' ? mesNum - 1 : 1;
+    const faltantes = [];
+    for (let i = Math.max(desde, 1); i < mesNum; i++) {
+      const k = String(i).padStart(2, '0');
+      if (!mesesGeneradosList.includes(k)) faltantes.push(MESES_LARGOS[k]);
+    }
+    setMesesFaltantes(faltantes);
+  }, [datos.mes, indicadorSel, tipo, mesesGeneradosList]);
 
-  /** Meses disponibles para selecciÃ³n segÃºn rol, tipo de reporte y fecha actual */
+  /**
+   * Meses disponibles para selección según rol, tipo de reporte y fecha actual.
+   * En "previo" (semanal) además se excluyen los meses ya cerrados — con un
+   * indicador elegido, los suyos propios; en batch (categoría completa), solo
+   * los que TODOS sus indicadores ya cerraron.
+   */
   const mesesDisponibles = useMemo(() => {
-    const todos = Object.entries(MESES_LARGOS);
-    return calcularMesesDisponibles(todos, datos.ano, { anioActual, esVisor, diaActual, mesActualNum, tipo });
-  }, [datos.ano, anioActual, mesActualNum, diaActual, esVisor, tipo]);
+    const todos       = Object.entries(MESES_LARGOS);
+    const disponibles = calcularMesesDisponibles(todos, datos.ano, { anioActual, esVisor, diaActual, mesActualNum, tipo });
+    if (tipo !== 'previo') return disponibles;
+    const cerrados = indicadorSel ? mesesGeneradosList : mesesCerradosCategoria;
+    return disponibles.filter(([k]) => !cerrados.includes(k));
+  }, [datos.ano, anioActual, mesActualNum, diaActual, esVisor, tipo, indicadorSel, mesesGeneradosList, mesesCerradosCategoria]);
 
   /** Textos de semÃ¡foro del indicador seleccionado para el mes activo */
   const semData = useMemo(
@@ -93,8 +130,6 @@ export function useIndicadores(user) {
     [infoIndicador, datos.mes]
   );
 
-  const catData     = allIndicadores[categoria];
-  const indicadores = catData?.indicadores ?? [];
   const catColor    = COLORS[categoria] ?? '#0b5445';
   const canGenerar  = !!indicadorSel && !!datos.mes && !cargando && !cargandoBatch;
   const canBatch    = !!datos.mes && !cargando && !cargandoBatch && indicadores.length > 0;

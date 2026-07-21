@@ -19,6 +19,7 @@ from iaas.services.procesar_service import (
     MESES_NOMBRE,
     _ruta_sesion,
 )
+from iaas.services.datos_json_service import leer_indicador_anio
 from configs.response import ApiResponse
 
 router = APIRouter()
@@ -62,12 +63,8 @@ async def get_sesion(
     denominadores_guardados: dict = {}
     for ind_n in range(1, 7):
         ind_key   = f"IAAS 0{ind_n}"
-        ruta_json = ruta / f"IAAS_0{ind_n}.json"
-        if not ruta_json.exists():
-            continue
-        with open(ruta_json, encoding="utf-8") as f:
-            d = json.load(f)
-        mes_data = d.get("MESES", {}).get(mes_nombre.upper(), {})
+        d         = leer_indicador_anio(anio, ind_n)
+        mes_data  = d.get("MESES", {}).get(mes_nombre.upper(), {})
         if not mes_data:
             continue
         for unidad, vals in mes_data.get("DATOS", {}).items():

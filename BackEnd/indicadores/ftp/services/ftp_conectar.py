@@ -1,6 +1,6 @@
 """
 Establece y cierra la conexión al servidor FTP del IMSS.
-Usado en: ftp/services/ftp_extraer.py, ftp_extraer_cache.py
+Usado en: ftp/services/ftp_extraer.py
 """
 from ftplib import FTP
 from configs.settings import FTP_SERVER, FTP_USER, FTP_PASS
