@@ -100,12 +100,12 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
   const totalMes = useMemo(
-    () => chartDataMesConTotal.find(d => d.unidad === 'TOTAL') ?? null,
+    () => chartDataMesConTotal.find(d => d.unidad === 'TOTAL_OOAD') ?? null,
     [chartDataMesConTotal]
   );
 
   const chartDataMes = useMemo(
-    () => chartDataMesConTotal.filter(d => d.unidad !== 'TOTAL'),
+    () => chartDataMesConTotal.filter(d => d.unidad !== 'TOTAL_OOAD'),
     [chartDataMesConTotal]
   );
 
@@ -130,7 +130,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible — para la vista "Por unidad" */
   const cumplimientoUltimoMes = useMemo(
-    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL')),
+    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL_OOAD')),
     [unidadesStatus]
   );
 

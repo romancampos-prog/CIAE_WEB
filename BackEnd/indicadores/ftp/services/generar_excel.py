@@ -106,7 +106,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
 
         for idx_fila, unidad_id_ftp in enumerate(diccionarioPrevio.keys()):
             fila_excel = idx_fila + 10
-            es_total   = (unidad_id_ftp == "TOTAL")
+            es_total   = (unidad_id_ftp == "TOTAL_OOAD")
 
             estilo_celda_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']
             estilo_base         = fmt['total_gris_80'] if es_total else (fmt['fila_par'] if idx_fila % 2 == 0 else fmt['dato_normal'])

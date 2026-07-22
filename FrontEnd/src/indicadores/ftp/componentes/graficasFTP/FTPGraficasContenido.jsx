@@ -172,7 +172,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                   <div className="ig-chart-badges">
                     {vistaGrafica === 'unidad' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {unidadSel === 'TOTAL' ? 'TOTAL OOAD' : unidadSel}
+                        {unidadSel === 'TOTAL_OOAD' ? 'TOTAL OOAD' : unidadSel}
                       </span>
                     )}
                     {vistaGrafica === 'mes' && (

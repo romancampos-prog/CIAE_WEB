@@ -47,8 +47,8 @@ export function buildFTPChartDataMes(datos, mesSel) {
       color:       reg?.color       ?? 'Gris',
     };
   });
-  const sinTotal = rows.filter(r => r.unidad !== 'TOTAL');
-  const total    = rows.find(r => r.unidad === 'TOTAL');
+  const sinTotal = rows.filter(r => r.unidad !== 'TOTAL_OOAD');
+  const total    = rows.find(r => r.unidad === 'TOTAL_OOAD');
   return total ? [...sinTotal, total] : sinTotal;
 }
 

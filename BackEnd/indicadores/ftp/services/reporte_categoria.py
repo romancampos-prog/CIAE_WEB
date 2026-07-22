@@ -145,7 +145,7 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
     for idx_fila, unidad_id in enumerate(diccionarioPrevio.keys()):
         fila_excel = idx_fila + 10
-        es_total   = (unidad_id == "TOTAL")
+        es_total   = (unidad_id == "TOTAL_OOAD")
 
         fmt_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']
         fmt_base   = fmt['total_gris_80'] if es_total else (

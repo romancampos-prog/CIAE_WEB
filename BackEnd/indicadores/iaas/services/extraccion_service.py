@@ -113,7 +113,7 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
         # numerador o denominador) para que ninguna quede fuera del JSON aunque no
         # tenga ningun dato ese mes -- queda con null en vez de simplemente no existir.
         for u in set(ORDEN_DEMAS_IAAS) | set(nums) | set(dens):
-            if u == "DELEGACION":
+            if u == "TOTAL_OOAD":
                 continue
             resultado[u] = {
                 # nums.get(u) sin default: si la unidad nunca se subio, queda None
@@ -152,16 +152,20 @@ def _get_numerador(lista_exceles: dict, indicador: str) -> dict:
             else:
                 df = df[df.iloc[:, _letra(col)].str.upper().str.strip() == val.upper().strip()]
 
+        # Si la unidad sí subió su Excel pero el filtro no encuentra ninguna fila que
+        # coincida (ej. cero casos de esa categoría), es un cero real, no un dato
+        # faltante -- la unidad de plano sin Excel se queda fuera de este diccionario
+        # y ese caso sigue siendo None/incompleto más adelante (calcular_IAAS).
         resultado[unidad] = (
             len(df) if tomar == "conteo"
             else int(df.iloc[:, _letra(tomar)].values[0]) if len(df) > 0
-            else None
+            else 0
         )
 
     if errores:
         raise ValueError(json.dumps(errores))
 
-    resultado["DELEGACION"] = sum(v for v in resultado.values() if v is not None)
+    resultado["TOTAL_OOAD"] = sum(v for v in resultado.values() if v is not None)
     return resultado
 
 
@@ -202,12 +206,14 @@ def _get_denominador_IAAS01(excel_bytes: bytes) -> dict:
             df.iloc[:, _letra(col_unidad)].str.contains(rf'\b{numero}\b', na=False) &
             (df.iloc[:, _letra(col_filtro)] == val_filtro)
         ]
+        # El Excel global de denominador sí se subió -- si una unidad no aparece en
+        # él, es un cero real (no reportó casos), no un dato faltante.
         resultado[unidad] = (
             int(df_unidad.iloc[:, _letra(tomar)].values[0])
-            if len(df_unidad) > 0 else None
+            if len(df_unidad) > 0 else 0
         )
 
-    resultado["DELEGACION"] = sum(v for v in resultado.values() if v is not None)
+    resultado["TOTAL_OOAD"] = sum(v for v in resultado.values() if v is not None)
     return resultado
 
 

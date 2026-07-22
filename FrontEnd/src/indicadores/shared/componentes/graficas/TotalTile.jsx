@@ -12,7 +12,7 @@ import { COLOR_SEMAFORO } from '../../constantes/semaforo';
 const TotalTile = ({ total, indColor }) => {
   if (!total) return null;
   const dotColor = COLOR_SEMAFORO[total.color] ?? '#94a3b8';
-  const label = total.unidad === 'TOTAL' ? 'TOTAL OOAD' : total.unidad;
+  const label = total.unidad === 'TOTAL_OOAD' ? 'TOTAL OOAD' : total.unidad;
 
   return (
     <div className="ig-total-tile" style={{ '--ic': indColor, '--status': dotColor }}>

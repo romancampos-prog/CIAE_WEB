@@ -1,5 +1,5 @@
 """
-Evalúa las expresiones de numerador/denominador/resultado de cada indicador y agrega el TOTAL.
+Evalúa las expresiones de numerador/denominador/resultado de cada indicador y agrega el TOTAL_OOAD.
 Usado en: ftp/services/reporte_final.py, reporte_categoria.py
 """
 import math
@@ -90,26 +90,50 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
             resultadosFinales[unidad] = {"numerador": None, "denominador": None, "resultado": None}
             errores_calculo[unidad] = str(e)
 
-    total_num = 0
-    total_den = 0
-    hay_den   = False
+    # Total OOAD: suma numerador/denominador de las unidades, con las mismas 3 reglas
+    # que IAAS -- unidad incompleta (Gris) no cuenta; numerador>0 con denominador=0 es
+    # una inconsistencia (se notifica, no se suma); numerador y denominador ambos 0 es
+    # un cero real, sí cuenta (no afecta el total, aporta 0/0).
+    total_num  = 0
+    total_den  = 0
+    hay_alguna = False
 
-    for res in resultadosFinales.values():
-        if res["numerador"] is not None:
-            total_num += res["numerador"]
-        if res["denominador"] is not None:
-            total_den += res["denominador"]
-            hay_den = True
+    for unidad, res in resultadosFinales.items():
+        num = res["numerador"]
+        den = res["denominador"]
+        if num is None or den is None:
+            continue
+        if den == 0 and num > 0:
+            print(f"[FTP] Inconsistencia en {unidad}: numerador={num} con denominador=0 -- no se incluye en el TOTAL_OOAD.")
+            continue
+        total_num += num
+        total_den += den
+        hay_alguna = True
 
-    if hay_den:
-        resultadosFinales["TOTAL"] = {
+    if hay_alguna:
+        # La tasa del total usa la MISMA fórmula del mapeo que ya usa cada unidad
+        # (indicadorOperacion['resultado']) -- nunca un ×100 fijo, porque no todos
+        # los indicadores multiplican por 100 en su fórmula.
+        if total_den != 0:
+            ctx_total = contexto_base.copy()
+            ctx_total['numerador']   = total_num
+            ctx_total['denominador'] = total_den
+            try:
+                resultado_total = round(eval(indicadorOperacion['resultado'], {"__builtins__": None}, ctx_total), 2)
+            except Exception as e:
+                print(f"[FTP] Error evaluando resultado del TOTAL_OOAD: {e}")
+                resultado_total = None
+        else:
+            resultado_total = 0
+
+        resultadosFinales["TOTAL_OOAD"] = {
             "numerador":   total_num,
             "denominador": total_den,
-            "resultado":   round((total_num / total_den) * 100, 2) if total_den > 0 else 0,
+            "resultado":   resultado_total,
             "forzar_bajo": es_bajo_forzado(total_num, total_den),
         }
     else:
-        resultadosFinales["TOTAL"] = {
+        resultadosFinales["TOTAL_OOAD"] = {
             "numerador": total_num, "denominador": None, "resultado": None, "forzar_bajo": False
         }
 

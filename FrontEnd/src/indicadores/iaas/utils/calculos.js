@@ -2,9 +2,9 @@ import { MESES_CORTOS } from '../../shared/constantes/meses';
 
 export const TOTAL_KEY = 'TOTAL OOAD';
 
-// Clave real bajo la que el backend manda el total OOAD/Delegación ya calculado
+// Clave real bajo la que el backend manda el total OOAD ya calculado
 // (numerador, denominador, tasa y color) — el front solo lo muestra, no lo recalcula.
-const DELEGACION_KEY = 'DELEGACION';
+const TOTAL_OOAD_KEY = 'TOTAL_OOAD';
 
 /**
  * Construye el objeto de rangos de semáforo para IAAS 01 a partir de los umbrales de un tipo.
@@ -60,7 +60,7 @@ export function calcularFaltantes(numeradores, unidades, archivosUnidad, denomin
 
 /**
  * Devuelve los puntos de la gráfica de tendencia mensual para una unidad específica (o TOTAL OOAD).
- * TOTAL OOAD usa directamente el registro "DELEGACION" que ya manda el backend calculado —
+ * TOTAL OOAD usa directamente el registro "TOTAL_OOAD" que ya manda el backend calculado —
  * el front nunca suma ni decide el color, solo lo muestra.
  * @param {Object} datos - Datos crudos de la API
  * @param {string} unidadSel - Unidad seleccionada o TOTAL_KEY
@@ -70,7 +70,7 @@ export function calcularFaltantes(numeradores, unidades, archivosUnidad, denomin
 export function buildChartDataUnidad(datos, unidadSel, indSel) {
   if (!datos || !unidadSel || !datos.meses_con_datos?.length) return [];
 
-  const clave = unidadSel === TOTAL_KEY ? DELEGACION_KEY : unidadSel;
+  const clave = unidadSel === TOTAL_KEY ? TOTAL_OOAD_KEY : unidadSel;
   const arr = datos.datos?.[indSel]?.[clave] ?? [];
   return datos.meses_con_datos.map(mes => {
     const reg = arr.find(r => r.mes === mes);
@@ -88,7 +88,7 @@ export function buildChartDataUnidad(datos, unidadSel, indSel) {
 
 /**
  * Devuelve los puntos de la gráfica de todas las unidades en un mes específico + TOTAL OOAD.
- * TOTAL OOAD usa directamente el registro "DELEGACION" del backend, sin sumar por unidad.
+ * TOTAL OOAD usa directamente el registro "TOTAL_OOAD" del backend, sin sumar por unidad.
  * @param {Object} datos - Datos crudos de la API
  * @param {string} mesSel - Mes seleccionado en formato "MM"
  * @param {string} indSel - Indicador seleccionado
@@ -109,7 +109,7 @@ export function buildChartDataMes(datos, mesSel, indSel) {
     };
   });
 
-  const arrTotal = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
+  const arrTotal = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
   const regTotal = arrTotal.find(r => r.mes === mesSel);
   return [
     ...porUnidad,

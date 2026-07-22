@@ -68,7 +68,7 @@ async def get_sesion(
         if not mes_data:
             continue
         for unidad, vals in mes_data.get("DATOS", {}).items():
-            if unidad == "DELEGACION":
+            if unidad == "TOTAL_OOAD":
                 continue
             numeradores_guardados.setdefault(unidad, {})[ind_key]  = vals.get("NUMERADOR")
             if ind_n >= 2:

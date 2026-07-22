@@ -13,8 +13,8 @@ import {
 import { contarSemaforo } from '../../shared/utils/contarSemaforo';
 import { techoEscala } from '../../shared/utils/escala';
 
-// Clave real bajo la que el backend manda el total OOAD/Delegación ya calculado.
-const DELEGACION_KEY = 'DELEGACION';
+// Clave real bajo la que el backend manda el total OOAD ya calculado.
+const TOTAL_OOAD_KEY = 'TOTAL_OOAD';
 
 export { TOTAL_KEY };
 
@@ -142,7 +142,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
       };
     });
 
-    const arrTotal = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
+    const arrTotal = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
     const regTotal = arrTotal.find(r => r.mes === mesSel);
     return [
       ...porUnidad,
@@ -186,7 +186,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
       return { unidad: u, color: reg?.color ?? 'Gris' };
     });
 
-    const arrTotal  = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
+    const arrTotal  = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
     const regTotal  = arrTotal.find(r => r.mes === ultimoMes);
     return [
       ...porUnidad,
@@ -228,11 +228,11 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   );
 
   /** Evolución del TOTAL OOAD acumulado mes a mes — siempre el rango completo disponible.
-   *  Usa directamente los registros "DELEGACION" (ya acumulados) que manda el backend. */
+   *  Usa directamente los registros "TOTAL_OOAD" (ya acumulados) que manda el backend. */
   const chartDataAcumuladoTotal = useMemo(() => {
     if (!datos?.unidades) return [];
     const mesesHasta = datos.meses_con_datos ?? [];
-    const arr = datos.datos?.[indSel]?.[DELEGACION_KEY] ?? [];
+    const arr = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
 
     return mesesHasta.map(mes => {
       const reg = arr.find(r => r.mes === mes);

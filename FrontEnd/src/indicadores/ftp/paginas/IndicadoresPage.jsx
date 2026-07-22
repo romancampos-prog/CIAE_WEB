@@ -9,6 +9,7 @@ import ModalPoblacion from '../componentes/modalPoblacion/ModalPoblacion';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalRestricciones from '../../shared/componentes/modal/ModalRestricciones';
 import { useIndicadores } from '../hooks/useIndicadores';
+import { getArchivoPoblacionActual } from '../api/poblacion';
 import InformacionIndicador from '../../reportes_grafica/componentes/InformacionIndicador/InformacionIndicador';
 import { useEffect, useState } from 'react';
 import SidebarCategorias from '../componentes/SidebarCategorias';
@@ -83,6 +84,13 @@ const IndicadoresPage = () => {
   useEffect(() => { setFichaAbierta(false) }, [indicadorSel])
   useEffect(() => { document.title = 'Indicadores FTP | CIAE'; }, []);
 
+  const [archivoPoblacion, setArchivoPoblacion] = useState(null);
+  useEffect(() => {
+    getArchivoPoblacionActual()
+      .then(res => setArchivoPoblacion(res?.data?.nombre_sin_ext ?? null))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="ind-root">
       <div className="ind-bg" aria-hidden>
@@ -103,6 +111,9 @@ const IndicadoresPage = () => {
           </button>
         </div>
         <div className="ind-nav-right">
+          {!esVisor && archivoPoblacion && (
+            <span className="ind-pob-archivo" title={archivoPoblacion}>{archivoPoblacion}</span>
+          )}
           {!esVisor && (
             <button className="ind-btn-pob" onClick={() => setModalPoblacion(true)}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -119,7 +130,12 @@ const IndicadoresPage = () => {
         </div>
       </header>
 
-      {modalPoblacion && <ModalPoblacion onClose={() => setModalPoblacion(false)} />}
+      {modalPoblacion && (
+        <ModalPoblacion
+          onClose={() => setModalPoblacion(false)}
+          onSubido={setArchivoPoblacion}
+        />
+      )}
 
       <main className="ind-hub-main">
 

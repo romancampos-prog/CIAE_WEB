@@ -57,7 +57,7 @@ def _layout_iaas01():
 
 def _escribir_unidades(hoja, estilos, fila_inicio, columna):
     for unidad in UNIDADES_IAAS:
-        es_total = unidad == "DELEGACION"
+        es_total = unidad == "TOTAL_OOAD"
         texto    = "OOAD" if es_total else unidad
         estilo   = estilos["delegacion_txt"] if es_total else estilos["lista_unidades_txt"]
         hoja.write(fila_inicio, columna, texto, estilo)
@@ -424,7 +424,7 @@ def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
         col_base = 1 + (mes_target - 2) * 4
 
         for i, unidad in enumerate(UNIDADES_IAAS):
-            if unidad == "DELEGACION":
+            if unidad == "TOTAL_OOAD":
                 continue
             val = fila_mes[unidad]
             if val is None:
@@ -436,7 +436,7 @@ def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
             hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
         fila_del = fila_inicio + N - 1
-        val_del  = fila_mes["DELEGACION"]
+        val_del  = fila_mes["TOTAL_OOAD"]
         est_del  = estilos["delegacion_txt"]
         hoja.write(fila_del, col_base + 1, val_del["numerador"],   est_del)
         hoja.write(fila_del, col_base + 2, val_del["denominador"], est_del)
@@ -455,7 +455,7 @@ def _escribir_anual_IAAS01(hoja, estilos, all_months):
     col_base    = 1
 
     for i, unidad in enumerate(UNIDADES_IAAS):
-        if unidad == "DELEGACION":
+        if unidad == "TOTAL_OOAD":
             continue
         val = calculado[unidad]
         if val is None:
@@ -467,7 +467,7 @@ def _escribir_anual_IAAS01(hoja, estilos, all_months):
         hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
     fila_del = fila_inicio + N - 1
-    val_del  = calculado["DELEGACION"]
+    val_del  = calculado["TOTAL_OOAD"]
     est_del  = estilos["delegacion_txt"]
     hoja.write(fila_del, col_base + 1, val_del["numerador"],   est_del)
     hoja.write(fila_del, col_base + 2, val_del["denominador"], est_del)
@@ -561,7 +561,7 @@ def _escribir_datos_IAAS01(hoja, estilos, mes_num, datos):
         val  = valores.get(unidad)
         if val is None:
             continue
-        estilo = estilos["delegacion_txt"] if unidad == "DELEGACION" else (
+        estilo = estilos["delegacion_txt"] if unidad == "TOTAL_OOAD" else (
             estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
         )
         hoja.write(fila, col_base + 1, val["numerador"],   estilo)

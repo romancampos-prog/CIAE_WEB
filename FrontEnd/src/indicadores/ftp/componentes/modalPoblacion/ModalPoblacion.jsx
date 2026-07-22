@@ -4,7 +4,7 @@ import { subirArchivoPoblacion, recalcularPoblacion } from '../../api/poblacion'
 
 const ANO_ACTIVO = '2026';
 
-const ModalPoblacion = ({ onClose }) => {
+const ModalPoblacion = ({ onClose, onSubido }) => {
     const [archivo,        setArchivo]        = useState(null);
     const [dragOver,       setDragOver]       = useState(false);
     const [cargando,       setCargando]       = useState(false);
@@ -40,6 +40,8 @@ const ModalPoblacion = ({ onClose }) => {
             const ex   = data?.data?.extras ?? [];
             const ed   = data?.data?.errores_datos ?? [];
             const as_  = data?.data?.alias_sugeridos ?? {};
+
+            onSubido?.(data?.data?.nombre_sin_ext ?? null);
 
             const celdasVacias = {};
             ed.forEach(({ unidad, grupo, columna }) => {

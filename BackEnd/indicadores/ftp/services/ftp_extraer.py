@@ -216,7 +216,7 @@ def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionari
 def ExtraerPBDesdeJSON(repo, infoReporte, diccionarioGlobal, logErrores=None):
     try:
         with open(RUTA_POBLACION, encoding='utf-8') as f:
-            poblacion = json.load(f)
+            poblacion = json.load(f).get("POBLACION", {})
     except FileNotFoundError:
         for unidad in diccionarioGlobal:
             diccionarioGlobal[unidad][repo] = None

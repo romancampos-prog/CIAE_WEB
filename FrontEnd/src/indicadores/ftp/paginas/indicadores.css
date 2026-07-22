@@ -60,6 +60,11 @@
 }
 .ind-btn-pob:hover { background: #0e6655; box-shadow: 0 6px 18px rgba(11,84,69,0.32); transform: translateY(-1px); }
 
+.ind-pob-archivo {
+  font-size: 0.75rem; font-weight: 600; color: #64748b;
+  max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 .ind-user-chip {
   display: flex; align-items: center; gap: 7px;
   background: #f0faf6; border: 1px solid rgba(11,84,69,0.15);

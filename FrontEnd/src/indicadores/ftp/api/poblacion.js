@@ -21,3 +21,12 @@ export const recalcularPoblacion = async (ano = '2026') => {
     const respuesta = await api.post('/reportes/recalcular-poblacion', { ano });
     return respuesta.data;
 };
+
+/**
+ * Consulta el nombre (sin extensión) del último Excel de población subido.
+ * @returns {Promise<Object>}
+ */
+export const getArchivoPoblacionActual = async () => {
+    const respuesta = await api.get('/ftp/poblacion/archivo-actual');
+    return respuesta.data;
+};
