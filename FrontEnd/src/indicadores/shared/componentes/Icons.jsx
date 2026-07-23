@@ -1,8 +1,8 @@
 export const UploadIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-    <polyline points="17 8 12 3 7 8"/>
-    <line x1="12" y1="3" x2="12" y2="15"/>
+    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+    <polyline points="8 17 12 13 16 17"/>
+    <line x1="12" y1="13" x2="12" y2="22"/>
   </svg>
 );
 
@@ -24,3 +24,4 @@ export const FileIcon = () => (
     <polyline points="14 2 14 8 20 8"/>
   </svg>
 );
+

@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
 import logo_imss from '../../../assets/logo_imms.png';
-import { getUnidadesIAAS, getIndicadoresIAAS, generarIAAS, getSesionIAAS } from '../api/IAAS';
+import { getUnidadesIAAS, getIndicadoresIAAS, generarIAAS, getSesionIAAS, getIAASMesesGuardados } from '../api/IAAS';
 import { descargarB64 } from '../../shared/utils/download';
 import { mesDisponible, calcularFaltantes } from '../utils/calculos';
-import { UploadIcon, CheckIcon, XIcon, FileIcon } from '../../shared/componentes/Icons';
+import { UploadIcon, CheckIcon, XIcon } from '../../shared/componentes/Icons';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalUnidadTardia from '../componentes/modalUnidadTardia/ModalUnidadTardia';
 import IAASErrorToast from './IAASErrorToast';
 import IAASValidacionPanel from './IAASValidacionPanel';
 import './iass.css';
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
 const IAASPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -33,6 +36,22 @@ const IAASPage = () => {
 
   const [anio, setAnio] = useState(String(anioDefault));
   const [mes,  setMes]  = useState(String(mesDefault).padStart(2, '0'));
+  const mesNombre = MESES[parseInt(mes, 10) - 1] || '';
+
+  // Mientras enero del año actual no tenga reporte generado, el año anterior
+  // sigue disponible en el selector (para cerrar pendientes de diciembre/tardías).
+  // En cuanto enero del año actual ya se generó, el año anterior deja de ofrecerse.
+  const [eneroActualGenerado, setEneroActualGenerado] = useState(true);
+  useEffect(() => {
+    getIAASMesesGuardados(String(anioActual)).then(meses => {
+      setEneroActualGenerado(meses.includes('01'));
+    });
+  }, [anioActual]);
+
+  const aniosDisponibles = [
+    ...(!eneroActualGenerado ? [anioActual - 1] : []),
+    ...(mesMaxActual >= 1 ? [anioActual] : []),
+  ];
 
   const [numeradores, setNumeradores]       = useState(null);
   const [dragOver, setDragOver]             = useState(false);
@@ -161,82 +180,57 @@ const IAASPage = () => {
 
         <main className="ia-main">
           <div className="ia-hero">
-            <div className="ia-hero-eyebrow">
-              <span className="ia-hero-dot" />
-              Infecciones Asociadas a Servicios de Salud
+            <div className="ia-hero-title-row" title="Infecciones Asociadas a la Atención de la Salud">
+              <span className="ia-hero-badge">IAAS</span>
+              <h1 className="ia-hero-title-main">Nuevo reporte</h1>
+              <span className="ia-hero-mes-pill">{mesNombre} {anio}</span>
             </div>
-            <h1 className="ia-hero-title">Nuevo reporte</h1>
-            <p className="ia-hero-sub">
-              Carga los archivos de cada unidad y captura los denominadores para generar los 6 reportes
-            </p>
+            <div className="ia-hero-bottom">
+              <p className="ia-hero-sub">
+                Carga los archivos de cada unidad y captura los denominadores para generar los 6 reportes
+              </p>
+              <div className="ia-periodo-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <select className="ia-select" value={anio} onChange={e => {
+                  const nuevoAnio = e.target.value;
+                  setAnio(nuevoAnio);
+                  if (nuevoAnio === String(anioActual)) {
+                    if (mesMaxActual < 1) {
+                      setAnio(String(anioActual - 1));
+                    } else if (parseInt(mes) > mesMaxActual) {
+                      setMes(String(mesMaxActual).padStart(2, '0'));
+                    }
+                  }
+                }}>
+                  {aniosDisponibles.map(a => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </select>
+                <select className="ia-select" value={mes} onChange={e => setMes(e.target.value)}>
+                  {MESES.map((m, i) => {
+                    const mesNum = i + 1;
+                    if (!mesDisponible(mesNum, anio, { anioActual, mesHoy, diaHoy })) return null;
+                    return <option key={i} value={String(mesNum).padStart(2, '0')}>{m}</option>;
+                  })}
+                </select>
+              </div>
+            </div>
           </div>
 
-          {/* Card principal — período integrado en el header */}
-          <div className="ia-step-card ia-step-card--green">
-            <div className="ia-step-head">
-              <span className="ia-step-num ia-step-num--green">1</span>
-              <div>
-                <p className="ia-step-title">Datos por Unidad — IAAS 01–06</p>
-                <p className="ia-step-desc">Excel del numerador (compartido) + denominadores manuales para 02–06</p>
-              </div>
-              <div className="ia-step-head-right">
-                <div className="ia-periodo-inline">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                  <select className="ia-select" value={anio} onChange={e => {
-                    const nuevoAnio = e.target.value;
-                    setAnio(nuevoAnio);
-                    if (nuevoAnio === String(anioActual)) {
-                      if (mesMaxActual < 1) {
-                        setAnio(String(anioActual - 1));
-                      } else if (parseInt(mes) > mesMaxActual) {
-                        setMes(String(mesMaxActual).padStart(2, '0'));
-                      }
-                    }
-                  }}>
-                    {[anioActual - 1, ...(mesMaxActual >= 1 ? [anioActual] : [])].map(a => (
-                      <option key={a} value={a}>{a}</option>
-                    ))}
-                  </select>
-                  <select className="ia-select" value={mes} onChange={e => setMes(e.target.value)}>
-                    {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-                      .map((m, i) => {
-                        const mesNum = i + 1;
-                        if (!mesDisponible(mesNum, anio, { anioActual, mesHoy, diaHoy })) return null;
-                        return <option key={i} value={String(mesNum).padStart(2, '0')}>{m}</option>;
-                      })}
-                  </select>
-                </div>
-                {!cargando && (
-                  <span className={`ia-step-progress ${completos === unidades.length && unidades.length > 0 ? 'ia-step-progress--done' : ''}`}>
-                    {completos}/{unidades.length} unidades
-                  </span>
-                )}
-              </div>
-            </div>
+          <div className="ia-steps">
 
-            <div
-              className={`ia-global-inline ${dragOver ? 'ia-global-inline--over' : ''} ${numeradores ? 'ia-global-inline--done' : ''}`}
-              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={e => { e.preventDefault(); setDragOver(false); setGlobal(e.dataTransfer.files[0]); }}
-            >
-              <span className="ia-global-badge">IAAS 01</span>
-              <span className="ia-global-label">Excel para calcular el denominador</span>
-              {numeradores ? (
-                <div className="ia-file-chip">
-                  <FileIcon />
-                  <span className="ia-file-chip-name">{numeradores.name.replace('.xlsx', '')}</span>
-                  <button className="ia-chip-x" onClick={e => { e.stopPropagation(); setNumeradores(null); }}><XIcon /></button>
-                </div>
-              ) : (
-                <label className="ia-upload-btn ia-upload-btn--sm">
-                  <input type="file" accept=".xlsx" hidden onChange={e => setGlobal(e.target.files[0])} />
-                  <UploadIcon /> Subir o arrastrar
-                </label>
+          {/* Tabla única: unidades × (Excel numerador | Excel global IAAS 01 | denominadores IAAS 02–06) */}
+          <div className="ia-tabla-card">
+            <div className="ia-tabla-head">
+              <p className="ia-step-title">Captura por unidad</p>
+              {!cargando && (
+                <span className={`ia-step-progress ${completos === unidades.length && unidades.length > 0 ? 'ia-step-progress--done' : ''}`}>
+                  {completos}/{unidades.length} completas
+                </span>
               )}
             </div>
 
@@ -249,12 +243,16 @@ const IAASPage = () => {
                 <table className="ia-table">
                   <thead>
                     <tr>
-                      <th className="ia-col-unidad">Unidad</th>
-                      <th className="ia-col-excel">
-                        <div className="ia-th-inner"><FileIcon /><span>Excel unidad</span></div>
-                        <small>Numerador IAAS 01 – 06</small>
+                      <th rowSpan={2} className="ia-col-unidad">Unidad</th>
+                      <th rowSpan={2} className="ia-col-num">
+                        Excel numerador
+                        <small>IAAS 01 – 06</small>
                       </th>
-                      {indicadores.map(d => (
+                      <th colSpan={indicadores.length + 1} className="ia-col-grupo">Denominadores</th>
+                    </tr>
+                    <tr>
+                      <th className="ia-col-denom ia-col-denom--global">IAAS 01</th>
+                      {indicadores.map((d) => (
                         <th key={d.id} className="ia-col-denom">
                           <span className="ia-th-ind">{d.id}</span>
                           <small>{d.subT2}</small>
@@ -264,45 +262,82 @@ const IAASPage = () => {
                   </thead>
                   <tbody>
                     {unidades.map((u, i) => {
-                      const ok = rowOk(u);
+                      const okDenom = indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
+                      const okNum   = !!archivosUnidad[u];
                       return (
-                        <tr key={u} className={`ia-tr ${ok ? 'ia-tr--ok' : ''}`} style={{ animationDelay: `${i * 0.04}s` }}>
+                        <tr key={u} className={`ia-tr ${okDenom && okNum ? 'ia-tr--ok' : ''}`} style={{ animationDelay: `${i * 0.02}s` }}>
                           <td className="ia-td-unidad">
-                            <span className={`ia-row-status ${ok ? 'ia-row-status--ok' : ''}`}>
-                              {ok ? <CheckIcon size={10} /> : <span>{i + 1}</span>}
+                            <span className={`ia-row-status ${okNum ? 'ia-row-status--ok' : ''}`}>
+                              {okNum ? <CheckIcon size={10} /> : <span>{i + 1}</span>}
                             </span>
                             <span className="ia-unit-name">{u}</span>
                           </td>
+
                           <td
-                            className={`ia-td-excel ${dragOverUnidad === u ? 'ia-td-excel--over' : ''}`}
+                            className={`ia-td-num ${dragOverUnidad === u ? 'ia-td-num--over' : ''}`}
                             onDragOver={e => { e.preventDefault(); setDragOverUnidad(u); }}
                             onDragLeave={() => setDragOverUnidad(null)}
                             onDrop={e => { e.preventDefault(); setDragOverUnidad(null); setUnidadFile(u, e.dataTransfer.files[0]); }}
                           >
-                            {archivosUnidad[u] ? (
-                              <div className="ia-file-chip">
-                                <FileIcon />
-                                <span className="ia-file-chip-name" title={archivosUnidad[u].name}>
-                                  {archivosUnidad[u].name.replace('.xlsx', '')}
-                                </span>
-                                <button className="ia-chip-x"
-                                  onClick={() => setArchivosUnidad(p => { const n = {...p}; delete n[u]; return n; })}>
+                            {okNum ? (
+                              <div className="ia-mini-archivo">
+                                <span title={archivosUnidad[u].name}>{archivosUnidad[u].name.replace('.xlsx', '')}</span>
+                                <button title="Quitar archivo" onClick={() => setArchivosUnidad(p => { const n = {...p}; delete n[u]; return n; })}>
                                   <XIcon />
                                 </button>
                               </div>
                             ) : (
-                              <label className={`ia-upload-btn ${dragOverUnidad === u ? 'ia-upload-btn--over' : ''}`}>
+                              <label className="ia-mini-subir">
                                 <input type="file" accept=".xlsx" hidden onChange={e => setUnidadFile(u, e.target.files[0])} />
-                                <UploadIcon /><span>Subir o arrastrar</span>
+                                <UploadIcon /><span>Subir</span>
                               </label>
                             )}
                           </td>
+
+                          {i === 0 && (
+                            <td
+                              rowSpan={unidades.length}
+                              className={`ia-td-global ${dragOver ? 'ia-td-global--over' : ''} ${numeradores ? 'ia-td-global--done' : ''}`}
+                              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                              onDragLeave={() => setDragOver(false)}
+                              onDrop={e => { e.preventDefault(); setDragOver(false); setGlobal(e.dataTransfer.files[0]); }}
+                            >
+                              <div className="ia-td-global-inner">
+                                <span className="ia-td-global-nota">Un solo archivo para las {unidades.length} unidades</span>
+                                {numeradores ? (
+                                  <div className="ia-td-global-listo">
+                                    <span className="ia-td-global-check"><CheckIcon size={16} /></span>
+                                    <span className="ia-td-global-archivo" title={numeradores.name}>
+                                      {numeradores.name.replace('.xlsx', '')}
+                                    </span>
+                                    <div className="ia-td-global-acciones">
+                                      <label className="ia-td-global-cambiar">
+                                        <input type="file" accept=".xlsx" hidden onChange={e => setGlobal(e.target.files[0])} />
+                                        Cambiar archivo
+                                      </label>
+                                      <button className="ia-td-global-quitar" title="Quitar archivo" onClick={() => setNumeradores(null)}>
+                                        <XIcon />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <label className="ia-td-global-dropzone">
+                                    <input type="file" accept=".xlsx" hidden onChange={e => setGlobal(e.target.files[0])} />
+                                    <UploadIcon />
+                                    <strong>Arrastra tu Excel aquí</strong>
+                                    <span>o haz clic para buscar</span>
+                                  </label>
+                                )}
+                              </div>
+                            </td>
+                          )}
+
                           {indicadores.map((d, j) => (
                             <td key={d.id} className="ia-td-denom">
                               <input
                                 type="number"
-                                className="ia-num"
-                                placeholder="0"
+                                className={`ia-num ${(denominadores[u]?.[d.id] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
+                                placeholder="—"
                                 min="0"
                                 value={denominadores[u]?.[d.id] ?? ''}
                                 onChange={e => setDenom(u, d.id, e.target.value)}
@@ -325,8 +360,11 @@ const IAASPage = () => {
                 </table>
               )}
             </div>
+          </div>
 
-            {/* Advertencias — dentro del card, arriba del footer */}
+          {/* Resumen — advertencias + acción de generar */}
+          {(advertencias || puedeGenIAAS) && (
+          <div className="ia-step-card ia-resumen-card">
             {advertencias && (
               <div className="ia-warn-box">
                 <div className="ia-warn-title">
@@ -342,7 +380,6 @@ const IAASPage = () => {
               </div>
             )}
 
-            {/* Footer del card — action bar integrada */}
             {puedeGenIAAS && (
               <div className="ia-action-bar">
                 <div className="ia-progress-pills">
@@ -375,6 +412,9 @@ const IAASPage = () => {
                 </button>
               </div>
             )}
+          </div>
+          )}
+
           </div>
         </main>
       </div>
