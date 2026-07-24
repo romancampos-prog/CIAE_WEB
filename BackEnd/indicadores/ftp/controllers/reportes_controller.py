@@ -14,6 +14,7 @@ from fastapi import APIRouter, Query, Depends, HTTPException, Request
 
 from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
+from auth.services.auth_service import verificar_credenciales
 from ftp.services.ftp_service import obtenerInformacionIndicador, consultarTodosIndicadores
 from ftp.services.reporte_final import ExcelReporteFinal
 from ftp.services.reporte_categoria import preparar_datos_indicador, escribir_hoja_indicador
@@ -60,6 +61,45 @@ async def reporte(
         archivo_buffer = resultado["stream"]
         excel_b64      = base64.b64encode(archivo_buffer.getvalue()).decode("utf-8")
         return ApiResponse(success=True, message=resultado.get("mensaje", "Reporte generado"), data={
+            "archivo_b64":    excel_b64,
+            "nombre_archivo": resultado["nombre_archivo"],
+            "datos_grafica":  resultado.get("graficar", {}),
+            "restricciones":  resultado.get("restricciones", {}),
+        })
+    else:
+        return ApiResponse(success=False, message=resultado.get("mensaje", "Error desconocido"), data={
+            "restricciones": resultado.get("restricciones"),
+        })
+
+
+# ─── /Indicadores/regenerar ────────────────────────────────────────────────────
+# Regenera un mes DEFINITIVO que ya tiene reporte guardado. A diferencia del GET
+# normal (primera generación), esto sobrescribe datos existentes, así que exige
+# la contraseña del usuario autenticado (mismo mecanismo que IAAS/completar-unidad).
+
+@router.post("/Indicadores/regenerar")
+async def regenerar_reporte(request: Request, payload: dict = Depends(solo_roles(*ROLES_FTP_FULL))):
+    body      = await request.json()
+    indicador = (body.get("indicador") or "").strip()
+    ano       = (body.get("ano") or "").strip()
+    mes       = (body.get("mes") or "").strip()
+    password  = body.get("password") or ""
+
+    if not all([indicador, ano, mes]):
+        raise HTTPException(status_code=400, detail="Faltan parámetros: indicador, ano, mes")
+    if not password:
+        raise HTTPException(status_code=400, detail="Ingresa tu contraseña.")
+
+    usuario = payload.get("sub")
+    if not verificar_credenciales(usuario, password):
+        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+
+    resultado = ExcelReporteFinal(indicador, ano, mes, None)
+
+    if resultado["status"] == "success":
+        archivo_buffer = resultado["stream"]
+        excel_b64      = base64.b64encode(archivo_buffer.getvalue()).decode("utf-8")
+        return ApiResponse(success=True, message=resultado.get("mensaje", "Reporte regenerado"), data={
             "archivo_b64":    excel_b64,
             "nombre_archivo": resultado["nombre_archivo"],
             "datos_grafica":  resultado.get("graficar", {}),
@@ -132,17 +172,10 @@ async def recalcular_poblacion(request: Request, payload: dict = Depends(solo_ro
 
 # ─── /generar-categoria ───────────────────────────────────────────────────────
 
-@router.post("/generar-categoria")
-async def generar_categoria(request: Request, payload: dict = Depends(solo_roles(*ROLES_FTP_FULL))):
-    body      = await request.json()
-    categoria = body.get("categoria", "").strip()
-    ano       = body.get("ano", "").strip()
-    mes       = body.get("mes", "").strip()
-    semana    = body.get("semana")
-
-    if not all([categoria, ano, mes]):
-        raise HTTPException(status_code=400, detail="Faltan parámetros: categoria, ano, mes")
-
+async def _generar_categoria_excel(categoria: str, ano: str, mes: str, semana):
+    """Arma el Excel con una pestaña por indicador de la categoría. Compartido
+    por /generar-categoria (primera generación) y /generar-categoria/regenerar
+    (mes definitivo ya generado, requiere contraseña)."""
     todos    = consultarTodosIndicadores()
     cat_data = todos.get(categoria)
     if not cat_data:
@@ -214,3 +247,41 @@ async def generar_categoria(request: Request, payload: dict = Depends(solo_roles
         "errores":        errores,
         "restricciones":  restricciones,
     })
+
+
+@router.post("/generar-categoria")
+async def generar_categoria(request: Request, payload: dict = Depends(solo_roles(*ROLES_FTP_FULL))):
+    body      = await request.json()
+    categoria = body.get("categoria", "").strip()
+    ano       = body.get("ano", "").strip()
+    mes       = body.get("mes", "").strip()
+    semana    = body.get("semana")
+
+    if not all([categoria, ano, mes]):
+        raise HTTPException(status_code=400, detail="Faltan parámetros: categoria, ano, mes")
+
+    return await _generar_categoria_excel(categoria, ano, mes, semana)
+
+
+# ─── /generar-categoria/regenerar ──────────────────────────────────────────────
+# Igual que /generar-categoria pero para un mes DEFINITIVO que la categoría
+# completa ya tiene generado — exige contraseña porque sobrescribe datos.
+
+@router.post("/generar-categoria/regenerar")
+async def regenerar_categoria(request: Request, payload: dict = Depends(solo_roles(*ROLES_FTP_FULL))):
+    body      = await request.json()
+    categoria = (body.get("categoria") or "").strip()
+    ano       = (body.get("ano") or "").strip()
+    mes       = (body.get("mes") or "").strip()
+    password  = body.get("password") or ""
+
+    if not all([categoria, ano, mes]):
+        raise HTTPException(status_code=400, detail="Faltan parámetros: categoria, ano, mes")
+    if not password:
+        raise HTTPException(status_code=400, detail="Ingresa tu contraseña.")
+
+    usuario = payload.get("sub")
+    if not verificar_credenciales(usuario, password):
+        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+
+    return await _generar_categoria_excel(categoria, ano, mes, None)

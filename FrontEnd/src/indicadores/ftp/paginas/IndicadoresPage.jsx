@@ -8,6 +8,7 @@ import logo_imss from '../../../assets/logo_imms.png';
 import ModalPoblacion from '../componentes/modalPoblacion/ModalPoblacion';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalRestricciones from '../../shared/componentes/modal/ModalRestricciones';
+import ModalConfirmarPassword from '../../../shared/componentes/modal/ModalConfirmarPassword';
 import { useIndicadores } from '../hooks/useIndicadores';
 import { getArchivoPoblacionActual } from '../api/poblacion';
 import InformacionIndicador from '../../reportes_grafica/componentes/InformacionIndicador/InformacionIndicador';
@@ -58,6 +59,8 @@ const IndicadoresPage = () => {
     mesesDisponibles, semData, indicadores, catColor,
     canGenerar, canBatch, esVisor,
     generarReporte, generarTodos, MESES_LARGOS,
+    mostrarConfirmarRegenerar, setMostrarConfirmarRegenerar,
+    regenerarModo, regenerando, errorRegenerar, confirmarRegenerar,
   } = useIndicadores(user);
 
   const catIcon = CAT_ICON[categoria];
@@ -385,6 +388,32 @@ const IndicadoresPage = () => {
         isOpen={mostrarRestricciones}
         restricciones={restriccionesData}
         onClose={() => setMostrarRestricciones(false)}
+      />
+      <ModalConfirmarPassword
+        isOpen={mostrarConfirmarRegenerar}
+        onClose={() => !regenerando && setMostrarConfirmarRegenerar(false)}
+        onConfirm={confirmarRegenerar}
+        enviando={regenerando}
+        error={errorRegenerar}
+        color={catColor}
+        titulo="Regenerar mes definitivo"
+        subtitulo={
+          regenerarModo === 'batch'
+            ? 'Este mes ya tiene reporte generado para todos los indicadores de la categoría. Ingresa tu contraseña para sobrescribirlos.'
+            : 'Este mes ya tiene un reporte generado. Ingresa tu contraseña para sobrescribirlo.'
+        }
+        confirmLabel={regenerando ? 'Regenerando…' : 'Regenerar'}
+        infoRows={
+          regenerarModo === 'batch'
+            ? [
+                { label: 'Categoría', value: `${categoria} (${indicadores.length} indicadores)` },
+                { label: 'Mes', value: `${MESES_LARGOS[datos.mes]} ${datos.ano}` },
+              ]
+            : [
+                { label: 'Indicador', value: indicadorSel },
+                { label: 'Mes', value: `${MESES_LARGOS[datos.mes]} ${datos.ano}` },
+              ]
+        }
       />
     </div>
   );

@@ -22,6 +22,7 @@ const IAASPage = () => {
 
   const [unidades, setUnidades]       = useState([]);
   const [indicadores, setIndicadores] = useState([]);
+  const [infoIaas01, setInfoIaas01]   = useState(null);
   const [cargando, setCargando]       = useState(true);
   const [generando, setGenerando]     = useState(false);
 
@@ -72,6 +73,7 @@ const IAASPage = () => {
     Promise.all([getUnidadesIAAS(), getIndicadoresIAAS()]).then(([unids, inds]) => {
       const denoms = inds.filter(i => i.id !== 'IAAS 01');
       setIndicadores(denoms);
+      setInfoIaas01(inds.find(i => i.id === 'IAAS 01') ?? null);
       setUnidades(unids);
       const d = {};
       unids.forEach(u => {
@@ -181,43 +183,9 @@ const IAASPage = () => {
         <main className="ia-main">
           <div className="ia-hero">
             <div className="ia-hero-title-row" title="Infecciones Asociadas a la Atención de la Salud">
-              <span className="ia-hero-badge">IAAS</span>
+              <span className="ia-hero-label">IAAS</span>
+              <span className="ia-hero-sep">·</span>
               <h1 className="ia-hero-title-main">Nuevo reporte</h1>
-              <span className="ia-hero-mes-pill">{mesNombre} {anio}</span>
-            </div>
-            <div className="ia-hero-bottom">
-              <p className="ia-hero-sub">
-                Carga los archivos de cada unidad y captura los denominadores para generar los 6 reportes
-              </p>
-              <div className="ia-periodo-pill">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <select className="ia-select" value={anio} onChange={e => {
-                  const nuevoAnio = e.target.value;
-                  setAnio(nuevoAnio);
-                  if (nuevoAnio === String(anioActual)) {
-                    if (mesMaxActual < 1) {
-                      setAnio(String(anioActual - 1));
-                    } else if (parseInt(mes) > mesMaxActual) {
-                      setMes(String(mesMaxActual).padStart(2, '0'));
-                    }
-                  }
-                }}>
-                  {aniosDisponibles.map(a => (
-                    <option key={a} value={a}>{a}</option>
-                  ))}
-                </select>
-                <select className="ia-select" value={mes} onChange={e => setMes(e.target.value)}>
-                  {MESES.map((m, i) => {
-                    const mesNum = i + 1;
-                    if (!mesDisponible(mesNum, anio, { anioActual, mesHoy, diaHoy })) return null;
-                    return <option key={i} value={String(mesNum).padStart(2, '0')}>{m}</option>;
-                  })}
-                </select>
-              </div>
             </div>
           </div>
 
@@ -226,12 +194,40 @@ const IAASPage = () => {
           {/* Tabla única: unidades × (Excel numerador | Excel global IAAS 01 | denominadores IAAS 02–06) */}
           <div className="ia-tabla-card">
             <div className="ia-tabla-head">
-              <p className="ia-step-title">Captura por unidad</p>
-              {!cargando && (
-                <span className={`ia-step-progress ${completos === unidades.length && unidades.length > 0 ? 'ia-step-progress--done' : ''}`}>
-                  {completos}/{unidades.length} completas
-                </span>
-              )}
+              <p className="ia-hero-sub">
+                Carga los archivos de cada unidad y captura los denominadores para generar los 6 reportes
+              </p>
+              <div className="ia-tabla-head-right">
+                <div className="ia-periodo-pill">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <select className="ia-select" value={anio} onChange={e => {
+                    const nuevoAnio = e.target.value;
+                    setAnio(nuevoAnio);
+                    if (nuevoAnio === String(anioActual)) {
+                      if (mesMaxActual < 1) {
+                        setAnio(String(anioActual - 1));
+                      } else if (parseInt(mes) > mesMaxActual) {
+                        setMes(String(mesMaxActual).padStart(2, '0'));
+                      }
+                    }
+                  }}>
+                    {aniosDisponibles.map(a => (
+                      <option key={a} value={a}>{a}</option>
+                    ))}
+                  </select>
+                  <select className="ia-select" value={mes} onChange={e => setMes(e.target.value)}>
+                    {MESES.map((m, i) => {
+                      const mesNum = i + 1;
+                      if (!mesDisponible(mesNum, anio, { anioActual, mesHoy, diaHoy })) return null;
+                      return <option key={i} value={String(mesNum).padStart(2, '0')}>{m}</option>;
+                    })}
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div className="ia-table-wrap">
@@ -251,7 +247,10 @@ const IAASPage = () => {
                       <th colSpan={indicadores.length + 1} className="ia-col-grupo">Denominadores</th>
                     </tr>
                     <tr>
-                      <th className="ia-col-denom ia-col-denom--global">IAAS 01</th>
+                      <th className="ia-col-denom ia-col-denom--global">
+                        <span className="ia-th-ind">IAAS 01</span>
+                        <small>{infoIaas01?.subT3}</small>
+                      </th>
                       {indicadores.map((d) => (
                         <th key={d.id} className="ia-col-denom">
                           <span className="ia-th-ind">{d.id}</span>
@@ -267,10 +266,12 @@ const IAASPage = () => {
                       return (
                         <tr key={u} className={`ia-tr ${okDenom && okNum ? 'ia-tr--ok' : ''}`} style={{ animationDelay: `${i * 0.02}s` }}>
                           <td className="ia-td-unidad">
-                            <span className={`ia-row-status ${okNum ? 'ia-row-status--ok' : ''}`}>
-                              {okNum ? <CheckIcon size={10} /> : <span>{i + 1}</span>}
-                            </span>
-                            <span className="ia-unit-name">{u}</span>
+                            <div className="ia-td-unidad-inner">
+                              <span className={`ia-row-status ${okNum ? 'ia-row-status--ok' : ''}`}>
+                                {okNum ? <CheckIcon size={10} /> : <span className="ia-row-dot" />}
+                              </span>
+                              <span className="ia-unit-name">{u}</span>
+                            </div>
                           </td>
 
                           <td
@@ -303,9 +304,9 @@ const IAASPage = () => {
                               onDrop={e => { e.preventDefault(); setDragOver(false); setGlobal(e.dataTransfer.files[0]); }}
                             >
                               <div className="ia-td-global-inner">
-                                <span className="ia-td-global-nota">Un solo archivo para las {unidades.length} unidades</span>
                                 {numeradores ? (
                                   <div className="ia-td-global-listo">
+                                    <span className="ia-td-global-nota">Un solo archivo para las {unidades.length} unidades</span>
                                     <span className="ia-td-global-check"><CheckIcon size={16} /></span>
                                     <span className="ia-td-global-archivo" title={numeradores.name}>
                                       {numeradores.name.replace('.xlsx', '')}
@@ -323,6 +324,7 @@ const IAASPage = () => {
                                 ) : (
                                   <label className="ia-td-global-dropzone">
                                     <input type="file" accept=".xlsx" hidden onChange={e => setGlobal(e.target.files[0])} />
+                                    <span className="ia-td-global-nota">Un solo archivo para las {unidades.length} unidades</span>
                                     <UploadIcon />
                                     <strong>Arrastra tu Excel aquí</strong>
                                     <span>o haz clic para buscar</span>

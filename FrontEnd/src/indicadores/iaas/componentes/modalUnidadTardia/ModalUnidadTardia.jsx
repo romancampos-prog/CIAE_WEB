@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { completarUnidadTardia } from '../../api/IAAS';
 import { UploadIcon, XIcon, FileIcon } from '../../../shared/componentes/Icons';
+import ModalConfirmarPassword from '../../../../shared/componentes/modal/ModalConfirmarPassword';
 import './ModalUnidadTardia.css';
 
 const TODOS_IND = ['IAAS 01', 'IAAS 02', 'IAAS 03', 'IAAS 04', 'IAAS 05', 'IAAS 06'];
@@ -18,10 +19,8 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
   const [enviando,     setEnviando]     = useState(false);
   const [error,        setError]        = useState('');
   const [showConfirm,  setShowConfirm]  = useState(false);
-  const [password,     setPassword]     = useState('');
   const [passError,    setPassError]    = useState('');
   const fileRef    = useRef();
-  const passRef    = useRef();
 
   const denomsParaUnidad = (u) => {
     const guardados = denominadoresGuardados[u] || {};
@@ -39,15 +38,10 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     setSelInd(new Set());
     setDenoms(primerU ? denomsParaUnidad(primerU) : {});
     setExcelFile(null);
-    setPassword('');
     setPassError('');
     setShowConfirm(false);
     setError('');
   }, [isOpen]);
-
-  useEffect(() => {
-    if (showConfirm) setTimeout(() => passRef.current?.focus(), 50);
-  }, [showConfirm]);
 
   if (!isOpen) return null;
 
@@ -81,12 +75,11 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
   const handleConfirmar = () => {
     if (!validarFormulario()) return;
     setError('');
-    setPassword('');
     setPassError('');
     setShowConfirm(true);
   };
 
-  const handleEnviar = async () => {
+  const handleEnviar = async (password) => {
     if (!password) { setPassError('Ingresa tu contraseña.'); return; }
     setEnviando(true);
     setPassError('');
@@ -282,52 +275,19 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
         </div>
       </div>
 
-      {/* Mini-modal de confirmación con contraseña */}
-      {showConfirm && (
-        <div className="mut-confirm-overlay" onClick={e => e.target === e.currentTarget && !enviando && setShowConfirm(false)}>
-          <div className="mut-confirm-box">
-            <div className="mut-confirm-hero">
-              <div className="mut-confirm-icon-wrap">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </div>
-              <p className="mut-confirm-title">Confirmar acción</p>
-            </div>
-            <div className="mut-confirm-body">
-              <div className="mut-confirm-info-row">
-                <span className="mut-confirm-info-label">Unidad</span>
-                <span className="mut-confirm-info-val">{unidad}</span>
-              </div>
-              <div className="mut-confirm-info-row">
-                <span className="mut-confirm-info-label">Indicadores</span>
-                <span className="mut-confirm-info-val">{[...selInd].join(', ')}</span>
-              </div>
-              <div className="mut-confirm-divider" />
-              <p className="mut-confirm-sub">Ingresa tu contraseña para continuar.</p>
-              <input
-                ref={passRef}
-                type="password" className="mut-confirm-pass" placeholder="Contraseña"
-                value={password} onChange={e => setPassword(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleEnviar()}
-                disabled={enviando}
-              />
-              {passError && <p className="mut-confirm-error">{passError}</p>}
-            </div>
-            <div className="mut-confirm-footer">
-              <button className="mut-btn-cancel--dark" onClick={() => setShowConfirm(false)} disabled={enviando}>Cancelar</button>
-              <button className="mut-btn-confirm" onClick={handleEnviar} disabled={enviando}>
-                {enviando ? 'Actualizando…' : 'Confirmar'}
-                {!enviando && (
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ModalConfirmarPassword
+        isOpen={showConfirm}
+        onClose={() => !enviando && setShowConfirm(false)}
+        onConfirm={handleEnviar}
+        enviando={enviando}
+        error={passError}
+        color="var(--color-tinto-gobierno)"
+        confirmLabel={enviando ? 'Actualizando…' : 'Confirmar'}
+        infoRows={[
+          { label: 'Unidad', value: unidad },
+          { label: 'Indicadores', value: [...selInd].join(', ') },
+        ]}
+      />
     </div>
   );
 }

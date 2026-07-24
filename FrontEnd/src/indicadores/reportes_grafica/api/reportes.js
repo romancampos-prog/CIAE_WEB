@@ -42,3 +42,25 @@ export const getReporte = async (indicador, datos) => {
         throw error;
     }
 };
+
+/** Regenera un mes definitivo que ya tiene reporte guardado (requiere contraseña). */
+export const regenerarReporteFinal = async (indicador, datos, password) => {
+    const respuesta = await api.post('/reportes/Indicadores/regenerar', {
+        indicador,
+        ano: datos.ano,
+        mes: datos.mes,
+        password,
+    });
+    return respuesta.data;
+};
+
+/** Regenera toda una categoría cuyo mes definitivo ya fue generado (requiere contraseña). */
+export const regenerarCategoria = async (categoria, datos, password) => {
+    const respuesta = await api.post('/reportes/generar-categoria/regenerar', {
+        categoria,
+        ano: datos.ano,
+        mes: datos.mes,
+        password,
+    });
+    return respuesta.data;
+};

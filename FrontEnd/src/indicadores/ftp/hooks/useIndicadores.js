@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getIndicador } from '../api/indicadores';
-import { getReporte, getMesesGenerados, generarCategoria } from '../../reportes_grafica/api/reportes';
+import { getReporte, getMesesGenerados, generarCategoria, regenerarReporteFinal, regenerarCategoria } from '../../reportes_grafica/api/reportes';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
 import { COLORS } from '../constantes/colores';
@@ -41,6 +41,10 @@ export function useIndicadores(user) {
   const [modalPoblacion, setModalPoblacion] = useState(false);
   const [mesesGeneradosList, setMesesGeneradosList] = useState([]);
   const [mesesCerradosCategoria, setMesesCerradosCategoria] = useState([]);
+  const [mostrarConfirmarRegenerar, setMostrarConfirmarRegenerar] = useState(false);
+  const [regenerarModo, setRegenerarModo] = useState('individual'); // 'individual' | 'batch'
+  const [regenerando, setRegenerando] = useState(false);
+  const [errorRegenerar, setErrorRegenerar] = useState('');
 
   const catData     = allIndicadores[categoria];
   const indicadores = catData?.indicadores ?? [];
@@ -141,6 +145,12 @@ export function useIndicadores(user) {
    */
   async function generarReporte() {
     if (!canGenerar) return;
+    if (tipo === 'final' && mesesGeneradosList.includes(datos.mes)) {
+      setErrorRegenerar('');
+      setRegenerarModo('individual');
+      setMostrarConfirmarRegenerar(true);
+      return;
+    }
     if (mesesFaltantes.length > 0 && !confirmandoFaltantes) {
       setConfirmandoFaltantes(true);
       return;
@@ -164,11 +174,53 @@ export function useIndicadores(user) {
   }
 
   /**
+   * Regenera un mes definitivo que ya tiene reporte guardado (individual o
+   * la categoría completa, según regenerarModo), previa confirmación con
+   * contraseña (ver mostrarConfirmarRegenerar).
+   */
+  async function confirmarRegenerar(password) {
+    setRegenerando(true);
+    setErrorRegenerar('');
+    try {
+      const res = regenerarModo === 'batch'
+        ? await regenerarCategoria(categoria, datos, password)
+        : await regenerarReporteFinal(indicadorSel, datos, password);
+      if (res.success) {
+        descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
+        setMostrarConfirmarRegenerar(false);
+        if (regenerarModo === 'batch') {
+          setResultadoBatch({ completados: res.data.completados, errores: res.data.errores });
+        }
+        const restr = res.data.restricciones;
+        if (restr && Object.keys(restr).length > 0) {
+          setRestriccionesData(restr);
+          setMostrarRestricciones(true);
+        }
+      } else {
+        setErrorRegenerar(res.message || 'Error al regenerar el reporte.');
+      }
+    } catch (e) {
+      const detail = e?.response?.data?.detail;
+      setErrorRegenerar(typeof detail === 'string' ? detail : 'Error al regenerar el reporte.');
+    } finally {
+      setRegenerando(false);
+    }
+  }
+
+  /**
    * Genera todos los indicadores de la categorÃ­a activa en un Ãºnico Excel.
+   * Si el mes definitivo ya fue generado por completo para la categorÃ­a,
+   * pide confirmaciÃ³n con contraseÃ±a antes de sobrescribir.
    * Muestra el modal de restricciones si el backend lo reporta.
    */
   async function generarTodos() {
     if (!canBatch) return;
+    if (tipo === 'final' && mesesCerradosCategoria.includes(datos.mes)) {
+      setErrorRegenerar('');
+      setRegenerarModo('batch');
+      setMostrarConfirmarRegenerar(true);
+      return;
+    }
     setCargandoBatch(true);
     setResultadoBatch(null);
     try {
@@ -205,6 +257,8 @@ export function useIndicadores(user) {
     canGenerar, canBatch,
     esVisor,
     generarReporte, generarTodos,
+    mostrarConfirmarRegenerar, setMostrarConfirmarRegenerar,
+    regenerarModo, regenerando, errorRegenerar, confirmarRegenerar,
     MESES_LARGOS,
   };
 }
