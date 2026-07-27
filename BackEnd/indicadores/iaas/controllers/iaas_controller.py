@@ -71,8 +71,7 @@ async def get_sesion(
             if unidad == "TOTAL_OOAD":
                 continue
             numeradores_guardados.setdefault(unidad, {})[ind_key]  = vals.get("NUMERADOR")
-            if ind_n >= 2:
-                denominadores_guardados.setdefault(unidad, {})[ind_key] = vals.get("DENOMINADOR")
+            denominadores_guardados.setdefault(unidad, {})[ind_key] = vals.get("DENOMINADOR")
 
     if not numeradores_guardados and not pendientes:
         return ApiResponse(success=True, message="Sin sesión para este período", data=None)
@@ -101,6 +100,7 @@ async def completar_unidad(
     denominadores: str      = Form(...),
     password:    str        = Form(...),
     excel_unidad: Optional[UploadFile] = File(None),
+    excel_denominador_iaas01: Optional[UploadFile] = File(None),
     payload: dict           = Depends(solo_roles("admin", "trabajador_IAAS")),
 ):
     usuario = payload.get("sub")
@@ -110,6 +110,7 @@ async def completar_unidad(
     indicadores_list   = json.loads(indicadores)
     denominadores_dict = json.loads(denominadores)
     excel_bytes        = await excel_unidad.read() if excel_unidad else None
+    excel_den01_bytes  = await excel_denominador_iaas01.read() if excel_denominador_iaas01 else None
 
     try:
         resultado = completar_unidad_tardia(
@@ -117,6 +118,7 @@ async def completar_unidad(
             indicadores_list,
             denominadores_dict,
             excel_bytes,
+            excel_den01_bytes,
         )
     except ValueError as e:
         msg = str(e)

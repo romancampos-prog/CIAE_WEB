@@ -14,13 +14,16 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
   const [unidad,       setUnidad]       = useState('');
   const [selInd,       setSelInd]       = useState(new Set(TODOS_IND));
   const [excelFile,    setExcelFile]    = useState(null);
+  const [excelDenIAAS01, setExcelDenIAAS01] = useState(null);
   const [denoms,       setDenoms]       = useState({});
   const [dragOver,     setDragOver]     = useState(false);
+  const [dragOverDen,  setDragOverDen]  = useState(false);
   const [enviando,     setEnviando]     = useState(false);
   const [error,        setError]        = useState('');
   const [showConfirm,  setShowConfirm]  = useState(false);
   const [passError,    setPassError]    = useState('');
   const fileRef    = useRef();
+  const fileDenRef = useRef();
 
   const denomsParaUnidad = (u) => {
     const guardados = denominadoresGuardados[u] || {};
@@ -38,6 +41,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     setSelInd(new Set());
     setDenoms(primerU ? denomsParaUnidad(primerU) : {});
     setExcelFile(null);
+    setExcelDenIAAS01(null);
     setPassError('');
     setShowConfirm(false);
     setError('');
@@ -51,12 +55,17 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     return s;
   });
 
-  const setFile = (f) => { if (f?.name.endsWith('.xlsx')) setExcelFile(f); };
+  const setFile    = (f) => { if (f?.name.endsWith('.xlsx')) setExcelFile(f); };
+  const setFileDen = (f) => { if (f?.name.endsWith('.xlsx')) setExcelDenIAAS01(f); };
 
   const indsSinNum = unidad
     ? [...selInd].filter(i => (numeradoresGuardados[unidad]?.[i]) == null)
     : [];
   const excelRequerido = indsSinNum.length > 0;
+
+  const iaas01Sel        = selInd.has('IAAS 01');
+  const iaas01SinDen     = unidad && iaas01Sel && (denominadoresGuardados[unidad]?.['IAAS 01']) == null;
+  const excelDenRequerido = iaas01SinDen;
 
   const validarFormulario = () => {
     if (!unidad)           { setError('Selecciona una unidad.'); return false; }
@@ -64,6 +73,10 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     if (excelRequerido && !excelFile) {
       const faltanNom = indsSinNum.join(', ');
       setError(`Sube el Excel — falta numerador para: ${faltanNom}`);
+      return false;
+    }
+    if (excelDenRequerido && !excelDenIAAS01) {
+      setError('Sube el Excel del denominador de IAAS 01 para esta unidad.');
       return false;
     }
     const ind_02_06_sel = [...selInd].filter(i => i !== 'IAAS 01');
@@ -87,7 +100,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
       const ind_02_06_sel = [...selInd].filter(i => i !== 'IAAS 01');
       const denomsEnviar  = {};
       ind_02_06_sel.forEach(i => { denomsEnviar[i] = denoms[i]; });
-      const res = await completarUnidadTardia(anio, mes, unidad, [...selInd], denomsEnviar, excelFile, password);
+      const res = await completarUnidadTardia(anio, mes, unidad, [...selInd], denomsEnviar, excelFile, password, excelDenIAAS01);
       if (res.success) { onSuccess?.(res.data); onClose(); }
       else setPassError(res.message || 'Error al actualizar.');
     } catch (e) {
@@ -146,6 +159,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                       setSelInd(new Set());
                       setDenoms(denomsParaUnidad(u));
                       setExcelFile(null);
+                      setExcelDenIAAS01(null);
                       setError('');
                     }} />
                     <span className="mut-unidad-name">{u}</span>
@@ -167,6 +181,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                         setSelInd(new Set());
                         setDenoms(denomsParaUnidad(u));
                         setExcelFile(null);
+                        setExcelDenIAAS01(null);
                         setError('');
                       }} />
                       <span className="mut-unidad-name">{u}</span>
@@ -195,16 +210,23 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
             <div className="mut-field">
               <label className="mut-label">Datos actuales</label>
               <div className="mut-det-table">
+                <div className="mut-det-row mut-det-row--head">
+                  <span className="mut-det-ind">Indicador</span>
+                  <span className="mut-ind-num">Numerador (Excel)</span>
+                  <span className="mut-den-head">Denominador</span>
+                </div>
                 {[...selInd].map(ind => {
                   const numGuardado = unidad ? numeradoresGuardados[unidad]?.[ind] : undefined;
                   const tieneNum    = numGuardado != null;
                   const esIAAS01    = ind === 'IAAS 01';
                   const info        = indicadoresInfo.find(i => i.id === ind);
+                  const denGuardado = esIAAS01 && unidad ? denominadoresGuardados[unidad]?.[ind] : undefined;
+                  const tieneDen    = denGuardado != null;
                   return (
                     <div key={ind} className="mut-det-row">
                       <span className="mut-det-ind">{ind}</span>
-                      <span className={`mut-ind-num ${tieneNum ? 'mut-ind-num--ok' : 'mut-ind-num--miss'}`}>
-                        Num: {tieneNum ? numGuardado : 'falta'}
+                      <span className={`mut-ind-num ${tieneNum ? '' : 'mut-ind-num--miss'}`}>
+                        {tieneNum ? numGuardado : 'falta'}
                       </span>
                       {!esIAAS01 ? (
                         <input
@@ -213,8 +235,19 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                           value={denoms[ind] ?? ''}
                           onChange={e => setDenoms(p => ({ ...p, [ind]: e.target.value }))}
                         />
+                      ) : excelDenIAAS01 ? (
+                        <span className="mut-ind-den-auto" title="Se recalculará con el Excel de denominador que subiste abajo.">
+                          se recalcula ({excelDenIAAS01.name.replace('.xlsx', '')})
+                        </span>
                       ) : (
-                        <span className="mut-ind-den-auto">den. en Excel</span>
+                        <span className="mut-ind-den-auto-wrap" title="Se autocalcula con el Excel del denominador, no se edita a mano.">
+                          <span className="mut-ind-den-box">
+                            {tieneDen ? denGuardado : '—'}
+                          </span>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                          </svg>
+                        </span>
                       )}
                     </div>
                   );
@@ -224,29 +257,59 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
           )}
 
           {/* Excel */}
-          <div className="mut-field">
-            <label className="mut-label">
-              Excel de la unidad
-              {unidad && !excelRequerido && <span className="mut-label-opt"> — opcional</span>}
-            </label>
-            <div
-              className={`mut-drop ${dragOver ? 'mut-drop--over' : ''} ${excelFile ? 'mut-drop--done' : ''}`}
-              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={e => { e.preventDefault(); setDragOver(false); setFile(e.dataTransfer.files[0]); }}
-              onClick={() => !excelFile && fileRef.current?.click()}
-            >
-              <input ref={fileRef} type="file" accept=".xlsx" hidden onChange={e => setFile(e.target.files[0])} />
-              {excelFile ? (
-                <div className="mut-file-chip">
-                  <FileIcon />
-                  <span>{excelFile.name.replace('.xlsx', '')}</span>
-                  <button className="mut-chip-x" onClick={e => { e.stopPropagation(); setExcelFile(null); }}><XIcon /></button>
-                </div>
-              ) : (
-                <span className="mut-drop-label"><UploadIcon /> Subir o arrastrar .xlsx</span>
-              )}
+          <div className="mut-excel-row">
+            <div className="mut-field">
+              <label className="mut-label">
+                Excel Numerador
+                {unidad && !excelRequerido && <span className="mut-label-opt"> — opcional</span>}
+              </label>
+              <div
+                className={`mut-drop ${dragOver ? 'mut-drop--over' : ''} ${excelFile ? 'mut-drop--done' : ''}`}
+                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => { e.preventDefault(); setDragOver(false); setFile(e.dataTransfer.files[0]); }}
+                onClick={() => !excelFile && fileRef.current?.click()}
+              >
+                <input ref={fileRef} type="file" accept=".xlsx" hidden onChange={e => setFile(e.target.files[0])} />
+                {excelFile ? (
+                  <div className="mut-file-chip">
+                    <FileIcon />
+                    <span>{excelFile.name.replace('.xlsx', '')}</span>
+                    <button className="mut-chip-x" onClick={e => { e.stopPropagation(); setExcelFile(null); }}><XIcon /></button>
+                  </div>
+                ) : (
+                  <span className="mut-drop-label"><UploadIcon /> Subir o arrastrar .xlsx</span>
+                )}
+              </div>
             </div>
+
+            {/* Excel del denominador — solo para IAAS 01 */}
+            {iaas01Sel && (
+              <div className="mut-field">
+                <label className="mut-label">
+                  Excel Denominador (IAAS 01)
+                  {!excelDenRequerido && <span className="mut-label-opt"> — opcional</span>}
+                </label>
+                <div
+                  className={`mut-drop ${dragOverDen ? 'mut-drop--over' : ''} ${excelDenIAAS01 ? 'mut-drop--done' : ''}`}
+                  onDragOver={e => { e.preventDefault(); setDragOverDen(true); }}
+                  onDragLeave={() => setDragOverDen(false)}
+                  onDrop={e => { e.preventDefault(); setDragOverDen(false); setFileDen(e.dataTransfer.files[0]); }}
+                  onClick={() => !excelDenIAAS01 && fileDenRef.current?.click()}
+                >
+                  <input ref={fileDenRef} type="file" accept=".xlsx" hidden onChange={e => setFileDen(e.target.files[0])} />
+                  {excelDenIAAS01 ? (
+                    <div className="mut-file-chip">
+                      <FileIcon />
+                      <span>{excelDenIAAS01.name.replace('.xlsx', '')}</span>
+                      <button className="mut-chip-x" onClick={e => { e.stopPropagation(); setExcelDenIAAS01(null); }}><XIcon /></button>
+                    </div>
+                  ) : (
+                    <span className="mut-drop-label"><UploadIcon /> Subir o arrastrar .xlsx</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Warning */}

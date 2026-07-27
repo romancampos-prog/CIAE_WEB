@@ -153,18 +153,29 @@ def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
     return historicos
 
 
+
+
 def _acumular_unidad(all_months, unidad, hasta_mes):
     """Suma numerador/denominador de una unidad desde enero hasta hasta_mes (inclusive).
     Reutilizado por el acumulado mensual y por el bloque Anual (que es lo mismo, solo que
-    siempre hasta el último mes que haya)."""
+    siempre hasta el último mes que haya).
+    Un mes con numerador o denominador en None es incompleto -- se salta, no se cuenta
+    como 0 (mismo criterio que _recalcular_total_ooad). Si nunca hay un mes completo,
+    tiene=False y el llamador debe reportar la unidad como None (gris), no 0/0."""
     num, den, tiene = 0, 0, False
     for m in range(1, hasta_mes + 1):
         v = _dato_unidad(all_months.get(m, {}), unidad)
-        if v:
-            num  += v.get("numerador") or 0
-            den  += v.get("denominador") or 0
-            tiene = True
+        if not v:
+            continue
+        n, d = v.get("numerador"), v.get("denominador")
+        if n is None or d is None:
+            continue
+        num  += n
+        den  += d
+        tiene = True
     return num, den, tiene
+
+
 
 
 def calcular_fila_iaas01(datos: dict) -> dict:

@@ -13,6 +13,7 @@ const SEVERIDAD = {
   VALOR_NULO:             'advertencia',
   DESCARGA_FALLIDA:       'advertencia',
   PB_JSON_ERROR:          'advertencia',
+  SERVICIO_NO_APLICA:     'advertencia',
 };
 
 const LABEL_RUTA = {
@@ -22,6 +23,7 @@ const LABEL_RUTA = {
   ARCHIVO_VACIO:          'Detalle',
   HOJA_NO_ENCONTRADA:     'Detalle',
   DESCARGA_FALLIDA:       'Detalle',
+  SERVICIO_NO_APLICA:     'Detalle',
 };
 
 const IcoCritico = () => (

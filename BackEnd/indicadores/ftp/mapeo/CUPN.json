@@ -217,6 +217,29 @@
                 "columna_dato": [
                     "E",
                     "C"
+                ],
+                "unidades_sin_servicio": [
+                    "UMF 46 GUANAJUATO",
+                    "UMF 45 IRAPUATO",
+                    "UMF 44 IRAPUATO",
+                    "UMF 16 S.CRUZ JUVENTINO",
+                    "UMF 05 COMONFORT",
+                    "UMF 59 CELAYA",
+                    "UMF 27 PURISIMA",
+                    "UMF 17 SORIA",
+                    "UMF 26 OCAMPO",
+                    "UMF 30 S.FELIPE",
+                    "UMF 41 TARIMORO",
+                    "UMF 28 ROMITA",
+                    "UMF 25 JARAL BERRIO",
+                    "UMF 29",
+                    "UMF 18 APASEO EL ALTO",
+                    "UMF 24 MANUEL DOBLADO",
+                    "UMF 36 YURIRIA",
+                    "UMF 35 PUEBLO NUEVO",
+                    "UMF 32 CUERAMARO",
+                    "UMF 22 ABASOLO",
+                    "UMF 34 JARAL PROGRESO"
                 ]
             }
         },

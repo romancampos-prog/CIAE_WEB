@@ -12,7 +12,7 @@ from ftp.services.ftp_extraer import ExtraerInformacionPrevia
 from ftp.services.numerador_denominador import ObtenerNumDen
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import (
-    obtener_estilos_excel, _leer_historicos, _calcular_color
+    obtener_estilos_excel, _leer_historicos, _calcular_color, _estilo_valor
 )
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
 from ftp.services.datos_json_service import guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes
@@ -148,9 +148,10 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
         es_total   = (unidad_id == "TOTAL_OOAD")
 
         fmt_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']
-        fmt_base   = fmt['total_gris_80'] if es_total else (
-            fmt['fila_par'] if idx_fila % 2 == 0 else fmt['dato_normal']
+        clave_base = 'total_gris_80' if es_total else (
+            'fila_par' if idx_fila % 2 == 0 else 'dato_normal'
         )
+        fmt_base   = fmt[clave_base]
 
         if es_total:
             nombre_oficial = "TOTAL"
@@ -175,10 +176,11 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
                 if res is None:
                     # Gris = dato incompleto -- se muestra el numerador o denominador que
-                    # sí tenga valor (el que sea None se deja vacio) con su estilo normal;
-                    # solo el resultado se deja vacio y en gris.
-                    ws.write(fila_excel, col,     num if num is not None else "", fmt_base)
-                    ws.write(fila_excel, col + 1, den if den is not None else "", fmt_base)
+                    # sí tenga valor (el que sea None se deja vacio), en gris RGB(191,191,191)
+                    # bold para marcar que no se contó en el total; solo el resultado se deja
+                    # vacio y en gris.
+                    ws.write(fila_excel, col,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))
+                    ws.write(fila_excel, col + 1, den if den is not None else "", _estilo_valor(fmt, clave_base, den))
                     ws.write(fila_excel, col + 2, "", fmt_gris)
                 else:
                     fmt_pct = fmt.get(f"{reg.get('color','Gris')}_Capsula", fmt['dato_normal'])
@@ -194,8 +196,8 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                     fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
 
                     if h_res == "" or h_res is None:
-                        ws.write(fila_excel, col,     h_num if h_num not in (None, "") else "", fmt_base)
-                        ws.write(fila_excel, col + 1, h_den if h_den not in (None, "") else "", fmt_base)
+                        ws.write(fila_excel, col,     h_num if h_num not in (None, "") else "", _estilo_valor(fmt, clave_base, h_num if h_num not in (None, "") else None))
+                        ws.write(fila_excel, col + 1, h_den if h_den not in (None, "") else "", _estilo_valor(fmt, clave_base, h_den if h_den not in (None, "") else None))
                         ws.write(fila_excel, col + 2, "", fmt_gris)
                     else:
                         fmt_pct = fmt.get(f"{_calcular_color(h_res, idx_mes, semaforo)}_Capsula", fmt['dato_normal'])

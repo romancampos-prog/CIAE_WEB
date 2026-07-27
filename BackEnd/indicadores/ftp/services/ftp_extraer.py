@@ -24,6 +24,7 @@ def ExtraerInformacionPrevia(informacionReportes, ano, mes, semana, meses_mapeo=
         "ARCHIVO_DUPLICADO":       {"nombreError": "Archivo duplicado",               "descripcionError": "Se encontró más de un archivo con el mismo prefijo. Se usó el primero encontrado.", "unidades": {}},
         "HOJA_NO_ENCONTRADA":      {"nombreError": "Pestaña faltante",                "descripcionError": "El archivo existe pero no contiene la hoja especificada.", "unidades": {}},
         "ETIQUETA_NO_ENCONTRADA":  {"nombreError": "Etiqueta no encontrada en Excel", "descripcionError": "El texto que se buscaba como etiqueta de fila no existe en esa columna de la hoja indicada.", "unidades": {}},
+        "SERVICIO_NO_APLICA":      {"nombreError": "No se encontró tal servicio", "descripcionError": "Esta unidad no ha registrado este servicio en los meses anteriores.", "unidades": {}},
         "ARCHIVO_VACIO":           {"nombreError": "Archivo sin datos numéricos",     "descripcionError": "El archivo existe y la hoja fue leída, pero las celdas de datos están vacías o no son numéricas.", "unidades": {}},
         "VALOR_NULO":              {"nombreError": "Celda sin dato",                  "descripcionError": "El archivo tiene datos pero alguna celda específica está vacía o no es numérica. Se usó 0 en su lugar.", "unidades": {}},
         "DESCARGA_FALLIDA":        {"nombreError": "Error al descargar archivo",      "descripcionError": "El archivo existe en el FTP pero no pudo descargarse (error de red, permisos o archivo corrupto).", "unidades": {}},
@@ -203,6 +204,11 @@ def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionari
                 datos, id_falla, detalle_falla = ExtraerDatosDelExcel(buf, infoReporte, mes, meses_mapeo)
                 diccionarioGlobal[nombre_final][repo] = datos
                 if id_falla:
+                    # Si la unidad está en la lista de "no maneja este servicio" del
+                    # indicador, la etiqueta faltante es esperada, no un error real.
+                    unidades_sin_servicio = infoReporte.get('unidades_sin_servicio') or []
+                    if id_falla == "ETIQUETA_NO_ENCONTRADA" and nombre_final in unidades_sin_servicio:
+                        id_falla = "SERVICIO_NO_APLICA"
                     ruta_log = detalle_falla if detalle_falla else carpeta_remota
                     registrar_error(logErrores, id_falla, nombre_final, repo, ruta_log)
             else:

@@ -212,6 +212,15 @@ def Estilos_IAAS01(libro):
         "color_celda2":         libro.add_format({"font_size": 9, "bg_color": "#FFFFFF", "border_color": "#A6A6A6",
                                                    "border": 1, "valign": "vcenter", "align": "center",
                                                    "text_wrap": True, "bold": True, "font_color": "#000000"}),
+        # Idénticos a color_celda1/2 (mismo fondo, borde, negrita) — solo cambia
+        # font_color a gris RGB(191,191,191): un numerador o denominador que sí
+        # existe en una fila Gris, pero que no se contó en el total OOAD.
+        "color_celda1_incompleto": libro.add_format({"font_size": 9, "bg_color": "#f9f9f9", "border_color": "#A6A6A6",
+                                                      "border": 1, "valign": "vcenter", "align": "center",
+                                                      "text_wrap": True, "bold": True, "font_color": "#BFBFBF"}),
+        "color_celda2_incompleto": libro.add_format({"font_size": 9, "bg_color": "#FFFFFF", "border_color": "#A6A6A6",
+                                                      "border": 1, "valign": "vcenter", "align": "center",
+                                                      "text_wrap": True, "bold": True, "font_color": "#BFBFBF"}),
         "titulo_iass06":        libro.add_format({"font_size": 11, "bold": True, "align": "center", "valign": "vcenter",
                                                    "border": 1, "border_color": "#A6A6A6",
                                                    "bg_color": "#F2F2F2", "font_color": "#3D3D3D"}),
@@ -412,6 +421,16 @@ def _estilo_tasa(estilos, color):
     return estilos.get(color, estilos["sin_datos"])
 
 
+def _estilo_valor(estilos, clave_base, valor, color_tasa):
+    """Formato de una celda de numerador/denominador. Si la fila es Gris pero
+    este valor específico sí existe (no ""/None), usa la variante en gris
+    RGB(191,191,191) del mismo formato base -- mismo fondo/borde/negrita,
+    solo marca que no se contó en el total OOAD."""
+    if color_tasa == "Gris" and valor not in (None, ""):
+        return estilos.get(f"{clave_base}_incompleto", estilos[clave_base])
+    return estilos[clave_base]
+
+
 def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
     N = len(UNIDADES_IAAS)
     # Bloque "MENSUAL ACUMULADO": la fila se calcula del layout compartido, no es un número fijo.
@@ -429,10 +448,10 @@ def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
             val = fila_mes[unidad]
             if val is None:
                 continue
-            fila   = fila_inicio + i
-            estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-            hoja.write(fila, col_base + 1, val["numerador"],   estilo)
-            hoja.write(fila, col_base + 2, val["denominador"], estilo)
+            fila       = fila_inicio + i
+            clave_base = "color_celda1" if i % 2 == 0 else "color_celda2"
+            hoja.write(fila, col_base + 1, val["numerador"],   _estilo_valor(estilos, clave_base, val["numerador"],   val["color_tasa"]))
+            hoja.write(fila, col_base + 2, val["denominador"], _estilo_valor(estilos, clave_base, val["denominador"], val["color_tasa"]))
             hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
         fila_del = fila_inicio + N - 1
@@ -460,10 +479,10 @@ def _escribir_anual_IAAS01(hoja, estilos, all_months):
         val = calculado[unidad]
         if val is None:
             continue
-        fila   = fila_inicio + i
-        estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        hoja.write(fila, col_base + 1, val["numerador"],   estilo)
-        hoja.write(fila, col_base + 2, val["denominador"], estilo)
+        fila       = fila_inicio + i
+        clave_base = "color_celda1" if i % 2 == 0 else "color_celda2"
+        hoja.write(fila, col_base + 1, val["numerador"],   _estilo_valor(estilos, clave_base, val["numerador"],   val["color_tasa"]))
+        hoja.write(fila, col_base + 2, val["denominador"], _estilo_valor(estilos, clave_base, val["denominador"], val["color_tasa"]))
         hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
     fila_del = fila_inicio + N - 1
@@ -487,10 +506,10 @@ def _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, indicador):
             val = fila_mes[unidad]
             if val is None:
                 continue
-            fila   = fila_ini + i
-            estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-            hoja.write(fila, col_base,     val["numerador"],   estilo)
-            hoja.write(fila, col_base + 1, val["denominador"], estilo)
+            fila       = fila_ini + i
+            clave_base = "color_celda1" if i % 2 == 0 else "color_celda2"
+            hoja.write(fila, col_base,     val["numerador"],   _estilo_valor(estilos, clave_base, val["numerador"],   val["color_tasa"]))
+            hoja.write(fila, col_base + 1, val["denominador"], _estilo_valor(estilos, clave_base, val["denominador"], val["color_tasa"]))
             hoja.write(fila, col_base + 2, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
         val_ooad = fila_mes["OOAD"]
@@ -515,10 +534,10 @@ def _escribir_anual_IAAS_uci(hoja, estilos, all_months, indicador):
         val = calculado[unidad]
         if val is None:
             continue
-        fila   = fila_ini + i
-        estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        hoja.write(fila, col_base,     val["numerador"],   estilo)
-        hoja.write(fila, col_base + 1, val["denominador"], estilo)
+        fila       = fila_ini + i
+        clave_base = "color_celda1" if i % 2 == 0 else "color_celda2"
+        hoja.write(fila, col_base,     val["numerador"],   _estilo_valor(estilos, clave_base, val["numerador"],   val["color_tasa"]))
+        hoja.write(fila, col_base + 1, val["denominador"], _estilo_valor(estilos, clave_base, val["denominador"], val["color_tasa"]))
         hoja.write(fila, col_base + 2, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
     val_ooad = calculado["OOAD"]
@@ -534,11 +553,11 @@ def _escribir_datos_IAAS_uci(hoja, estilos, mes_num, datos, indicador):
     valores  = calcular_fila_iaas_uci(datos, indicador)
 
     for i, unidad in enumerate(UNIDADES_UCI):
-        val    = valores[unidad]
-        fila   = layout["fila_hosp1_mensual"] + i
-        estilo = estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
-        hoja.write(fila, col_base,     val["numerador"],   estilo)
-        hoja.write(fila, col_base + 1, val["denominador"], estilo)
+        val        = valores[unidad]
+        fila       = layout["fila_hosp1_mensual"] + i
+        clave_base = "color_celda1" if i % 2 == 0 else "color_celda2"
+        hoja.write(fila, col_base,     val["numerador"],   _estilo_valor(estilos, clave_base, val["numerador"],   val["color_tasa"]))
+        hoja.write(fila, col_base + 1, val["denominador"], _estilo_valor(estilos, clave_base, val["denominador"], val["color_tasa"]))
         hoja.write(fila, col_base + 2, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
     # Fila OOAD del bloque MENSUAL — antes no se calculaba (solo existía en el acumulado).
@@ -561,11 +580,11 @@ def _escribir_datos_IAAS01(hoja, estilos, mes_num, datos):
         val  = valores.get(unidad)
         if val is None:
             continue
-        estilo = estilos["delegacion_txt"] if unidad == "TOTAL_OOAD" else (
-            estilos["color_celda1"] if i % 2 == 0 else estilos["color_celda2"]
+        clave_base = "delegacion_txt" if unidad == "TOTAL_OOAD" else (
+            "color_celda1" if i % 2 == 0 else "color_celda2"
         )
-        hoja.write(fila, col_base + 1, val["numerador"],   estilo)
-        hoja.write(fila, col_base + 2, val["denominador"], estilo)
+        hoja.write(fila, col_base + 1, val["numerador"],   _estilo_valor(estilos, clave_base, val["numerador"],   val["color_tasa"]))
+        hoja.write(fila, col_base + 2, val["denominador"], _estilo_valor(estilos, clave_base, val["denominador"], val["color_tasa"]))
         hoja.write(fila, col_base + 3, val["tasa"],        _estilo_tasa(estilos, val["color_tasa"]))
 
 

@@ -44,7 +44,7 @@ def generar_token(usuario: str, rol: str) -> str :
     payload = {
         "sub" : usuario,
         "rol" : rol,
-        "exp" : datetime.now(timezone.utc) + timedelta(hours=1)
+        "exp" : datetime.now(timezone.utc) + timedelta(hours=4)
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")

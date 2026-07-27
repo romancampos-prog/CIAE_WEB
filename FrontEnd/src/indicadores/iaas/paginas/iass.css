@@ -88,8 +88,20 @@
 .ia-hero-title-main {
   margin: 0; line-height: 1.1;
   font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 900;
-  color: var(--color-tinto-gobierno);
   letter-spacing: -1px;
+  background: linear-gradient(100deg,
+    var(--color-tinto-gobierno) 0%, var(--color-tinto-gobierno) 45%,
+    #ffffff 50%,
+    var(--color-tinto-gobierno) 55%, var(--color-tinto-gobierno) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ia-title-shimmer 7s ease-in-out infinite;
+}
+@keyframes ia-title-shimmer {
+  0%   { background-position: 150% 0; }
+  50%  { background-position: -50% 0; }
+  100% { background-position: -50% 0; }
 }
 .ia-hero-sub { font-size: 0.8rem; color: #64748b; margin: 0; max-width: 520px; line-height: 1.5; }
 
@@ -267,7 +279,7 @@
 }
 .ia-table th small {
   display: block; font-size: 0.63rem; font-weight: 500;
-  text-transform: none; letter-spacing: 0; color: #b0b8c8; margin: 2px auto 0;
+  text-transform: none; letter-spacing: 0; color: #7c8493; margin: 2px auto 0;
   white-space: normal; max-width: 105px;
 }
 .ia-th-ind { color: var(--color-oro-institucional); }
@@ -413,7 +425,7 @@
   font-size: 0.78rem; font-weight: 700; color: #1e293b;
   max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.ia-td-global-acciones { display: flex; align-items: center; gap: 10px; }
+.ia-td-global-acciones { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .ia-td-global-cambiar {
   font-size: 0.68rem; font-weight: 700; color: var(--color-imss-primario);
   text-decoration: underline; text-underline-offset: 2px; cursor: pointer;

@@ -32,6 +32,16 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
         return 'Gris'
 
 
+def _estilo_valor(fmt, clave_base, valor):
+    """Formato de una celda de numerador/denominador dentro de una fila Gris.
+    Si el valor sí existe (no None/""), usa la variante gris RGB(191,191,191)
+    bold del mismo formato base -- mismo fondo/borde, solo marca que no se
+    contó en el total."""
+    if valor not in (None, ""):
+        return fmt.get(f"{clave_base}_incompleto", fmt[clave_base])
+    return fmt[clave_base]
+
+
 def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadordesDen,
                 indicadoresArch, ano, mes, semana, indicadorSemaforo,
                 es_semana=False, historicos={}, leyendas={}, indicador=''):
@@ -109,7 +119,8 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
             es_total   = (unidad_id_ftp == "TOTAL_OOAD")
 
             estilo_celda_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']
-            estilo_base         = fmt['total_gris_80'] if es_total else (fmt['fila_par'] if idx_fila % 2 == 0 else fmt['dato_normal'])
+            clave_base          = 'total_gris_80' if es_total else ('fila_par' if idx_fila % 2 == 0 else 'dato_normal')
+            estilo_base         = fmt[clave_base]
 
             if es_total:
                 nombre_oficial = "TOTAL"
@@ -134,10 +145,11 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
 
                     if res is None:
                         # Gris = dato incompleto -- se muestra el numerador o denominador
-                        # que sí tenga valor (el que sea None se deja vacio) con su estilo
-                        # normal; solo el resultado se deja vacio y en gris.
-                        worksheet.write(fila_excel, col_base,     num if num is not None else "", estilo_base)
-                        worksheet.write(fila_excel, col_base + 1, den if den is not None else "", estilo_base)
+                        # que sí tenga valor (el que sea None se deja vacio), en gris
+                        # RGB(191,191,191) bold para marcar que no se contó en el total;
+                        # solo el resultado se deja vacio y en gris.
+                        worksheet.write(fila_excel, col_base,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))
+                        worksheet.write(fila_excel, col_base + 1, den if den is not None else "", _estilo_valor(fmt, clave_base, den))
                         worksheet.write(fila_excel, col_base + 2, "", fmt_gris)
                     else:
                         color_tag  = reg.get('color', 'Gris')
@@ -154,8 +166,8 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                         fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
 
                         if h_res == "" or h_res is None:
-                            worksheet.write(fila_excel, col_base,     h_num if h_num not in (None, "") else "", estilo_base)
-                            worksheet.write(fila_excel, col_base + 1, h_den if h_den not in (None, "") else "", estilo_base)
+                            worksheet.write(fila_excel, col_base,     h_num if h_num not in (None, "") else "", _estilo_valor(fmt, clave_base, h_num if h_num not in (None, "") else None))
+                            worksheet.write(fila_excel, col_base + 1, h_den if h_den not in (None, "") else "", _estilo_valor(fmt, clave_base, h_den if h_den not in (None, "") else None))
                             worksheet.write(fila_excel, col_base + 2, "", fmt_gris)
                         else:
                             color_tag  = _calcular_color(h_res, idx_mes, indicadorSemaforo)
@@ -226,6 +238,11 @@ def obtener_estilos_excel(workbook):
         'Bajo_Leyenda':          workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_ROJO,   'bold': True}),
         'dato_normal':           workbook.add_format({**base, 'num_format': '#,##0'}),
         'fila_par':              workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0'}),
+        # Idénticos a dato_normal/fila_par -- solo cambia font_color a gris
+        # RGB(191,191,191) bold: un numerador o denominador que sí existe en una
+        # fila Gris, pero que no se contó en el total (mismo criterio que IAAS).
+        'dato_normal_incompleto': workbook.add_format({**base, 'num_format': '#,##0', 'font_color': '#BFBFBF', 'bold': True}),
+        'fila_par_incompleto':    workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0', 'font_color': '#BFBFBF', 'bold': True}),
         'total_gris_80':         workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_TOTAL, 'font_color': 'white', 'num_format': '#,##0'}),
         'Esperado_Capsula':      workbook.add_format({**base, 'bg_color': C_VERDE,   'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
         'Medio_Capsula':         workbook.add_format({**base, 'bg_color': C_DORADO,  'font_color': 'white', 'bold': True, 'num_format': '0.00'}),

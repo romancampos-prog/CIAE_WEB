@@ -200,7 +200,8 @@ def procesar_IAAS(anio: str, mes: str, numerador: dict, denominador: dict,
 def completar_unidad_tardia(anio: str, mes: str, unidad: str,
                              indicadores_seleccionados: list,
                              denominadores_02_06: dict,
-                             excel_bytes: bytes) -> dict:
+                             excel_bytes: bytes,
+                             excel_denominador_iaas01: bytes | None = None) -> dict:
     mes_nombre = MESES_NOMBRE.get(mes, mes)
     datos_completos = _leer_sesion_mes(anio, mes_nombre)
 
@@ -212,7 +213,7 @@ def completar_unidad_tardia(anio: str, mes: str, unidad: str,
 
     from iaas.services.extraccion_service import calcular_unidad_tardia as _calc
     nuevos = _calc(unidad, excel_bytes, indicadores_seleccionados,
-                   denominadores_02_06, datos_completos)
+                   denominadores_02_06, datos_completos, excel_denominador_iaas01)
 
     for ind, result in nuevos.items():
         datos_completos.setdefault(ind, {}).update(result)

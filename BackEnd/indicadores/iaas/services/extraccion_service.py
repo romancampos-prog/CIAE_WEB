@@ -217,6 +217,39 @@ def _get_denominador_IAAS01(excel_bytes: bytes) -> dict:
     return resultado
 
 
+def _get_denominador_IAAS01_unidad(excel_bytes: bytes, unidad: str):
+    """
+    Denominador de IAAS 01 para UNA sola unidad tardía (no el Excel global de
+    las 11). A diferencia de _get_denominador_IAAS01: aquí no hay garantía de
+    que el archivo traiga todas las unidades, así que si la fila de esta unidad
+    no aparece es un dato faltante (None), no un cero real.
+    """
+    config     = obtener_config_indicador("IAAS 01")
+    den        = config.get("Denominador", {})
+    hoja       = den.get("hoja")
+    filtros    = den.get("filtros", {})
+    col_unidad = den.get("col_unidad")
+    tomar      = den.get("tomar")
+
+    col_filtro, val_filtro = next(iter(filtros.items()))
+
+    try:
+        df = pd.read_excel(io.BytesIO(excel_bytes), sheet_name=hoja)
+    except ValueError:
+        raise ValueError(json.dumps([f"[{unidad}] El Excel no contiene la hoja '{hoja}' para el denominador de IAAS 01."]))
+
+    numero    = unidad.split()[1]
+    df_unidad = df[
+        df.iloc[:, _letra(col_unidad)].astype(str).str.contains(rf'\b{numero}\b', na=False) &
+        (df.iloc[:, _letra(col_filtro)] == val_filtro)
+    ]
+
+    if len(df_unidad) == 0:
+        return None
+
+    return int(df_unidad.iloc[:, _letra(tomar)].values[0])
+
+
 def _semaforo_general(IAAS: dict, indicador: str) -> dict:
     umbrales         = obtener_config_indicador(indicador).get("Semaforo", {})
     umbral_esperado  = umbrales.get("Esperado")
@@ -256,6 +289,7 @@ def calcular_unidad_tardia(
     indicadores_seleccionados: list,
     denominadores_02_06: dict,
     datos_sesion: dict,
+    excel_denominador_iaas01: bytes | None = None,
 ) -> dict:
     """
     Recalcula los indicadores seleccionados para una única unidad tardía.
@@ -277,11 +311,15 @@ def calcular_unidad_tardia(
             if unidad not in ORDEN_IAAS01:
                 continue
             num = (
-                _get_numerador(nums_unidad, "IAAS 01").get(unidad, 0)
+                _get_numerador(nums_unidad, "IAAS 01").get(unidad)
                 if nums_unidad is not None
                 else (datos_sesion.get("IAAS 01", {}).get(unidad) or {}).get("numerador")
             )
-            den = (datos_sesion.get("IAAS 01", {}).get(unidad) or {}).get("denominador")
+            den = (
+                _get_denominador_IAAS01_unidad(excel_denominador_iaas01, unidad)
+                if excel_denominador_iaas01 is not None
+                else (datos_sesion.get("IAAS 01", {}).get(unidad) or {}).get("denominador")
+            )
             raw = {unidad: {"numerador": num, "denominador": den}}
             resultado["IAAS 01"] = _semaforo_IAAS01(raw)
         else:
