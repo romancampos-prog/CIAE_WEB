@@ -172,7 +172,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                   <div className="ig-chart-badges">
                     {vistaGrafica === 'unidad' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {unidadSel === 'TOTAL' ? 'TOTAL OOAD' : unidadSel}
+                        {unidadSel === 'TOTAL_OOAD' ? 'TOTAL OOAD' : unidadSel}
                       </span>
                     )}
                     {vistaGrafica === 'mes' && (
@@ -266,6 +266,9 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
         </div>
       )}
 
+      <p className="ig-legal-footer">
+        La información contenida en los archivos generados desde esta plataforma se proporciona únicamente con fines de consulta y análisis interno. Una vez descargado el archivo, el uso, resguardo y tratamiento posterior de estos datos es responsabilidad exclusiva de quien los descarga.
+      </p>
 
     </main>
   );

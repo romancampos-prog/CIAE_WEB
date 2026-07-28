@@ -22,13 +22,18 @@ const IconoTodos = () => (
  * elegir una opción o al hacer click fuera de la tarjetita.
  *
  * Props:
- *   disabled — bool
+ *   disabled — bool (deshabilita el botón; si no se pasa `cargando`, también se usa
+ *              para decidir si se muestra el spinner)
+ *   cargando — bool opcional. Mientras es true, el ícono se cambia por un spinner
+ *              para que quede claro que el archivo se está generando (algunos tardan
+ *              varios segundos) y no parezca que el botón no respondió.
  *   opciones — [{ label: string, onClick: fn, multiple?: bool }]
  *              multiple=true usa el ícono de "varios" en vez del de descarga simple.
  */
-const MenuDescarga = ({ disabled, opciones }) => {
+const MenuDescarga = ({ disabled, cargando, opciones }) => {
   const [abierto, setAbierto] = useState(false);
   const ref = useRef(null);
+  const mostrandoSpinner = cargando ?? disabled;
 
   useEffect(() => {
     if (!abierto) return;
@@ -45,8 +50,9 @@ const MenuDescarga = ({ disabled, opciones }) => {
         className={`ig-btn-dl ig-btn-dl--icon${abierto ? ' ig-btn-dl--activo' : ''}`}
         onClick={() => setAbierto(v => !v)}
         disabled={disabled}
+        title={mostrandoSpinner ? 'Generando archivo…' : 'Descargar'}
       >
-        <IconoUno />
+        {mostrandoSpinner ? <span className="ig-btn-dl-spinner" /> : <IconoUno />}
       </button>
       {abierto && (
         <div className="ig-dl-menu">

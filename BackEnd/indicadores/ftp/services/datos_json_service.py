@@ -61,6 +61,47 @@ def leer_semana_indicador(indicador: str, ano: str) -> dict:
         return {}
 
 
+def _normalizar_para_leer(datos: dict) -> dict:
+    # Inverso de _normalizar_para_guardar: "%" -> "resultado", para que Excel_final
+    # lo lea correctamente (mismo criterio que leer_historicos_para_excel).
+    out = {}
+    for unidad, vals in datos.items():
+        if not isinstance(vals, dict):
+            continue
+        v = dict(vals)
+        if "%" in v and "resultado" not in v:
+            v["resultado"] = v.pop("%")
+        out[unidad] = v
+    return out
+
+
+def leer_mes_guardado(indicador: str, ano: str, mes: str):
+    """
+    Busca los datos YA guardados de un mes -- primero en el definitivo, si no
+    existe ahí, en el semanal. Nunca extrae de FTP ni calcula nada nuevo: es la
+    versión de solo lectura para descargar desde gráficas (ver ExcelReporteGuardado).
+    Devuelve (diccionarioPrevio, es_semana, semana) o (None, False, None) si ese
+    mes no tiene ningún dato guardado todavía.
+    """
+    idx = int(mes) - 1
+    if not (0 <= idx < len(MESES_NOMBRES)):
+        return None, False, None
+    mes_nombre = MESES_NOMBRES[idx]
+
+    definitivo = leer_datos_indicador(indicador, ano)
+    if mes_nombre in definitivo.get("MESES", {}):
+        return _normalizar_para_leer(definitivo["MESES"][mes_nombre]), False, None
+
+    semanal     = leer_semana_indicador(indicador, ano)
+    mes_semanal = semanal.get("MESES", {}).get(mes_nombre)
+    if mes_semanal:
+        semana_num = mes_semanal.get("semana")
+        unidades   = {k: v for k, v in mes_semanal.items() if k != "semana"}
+        return _normalizar_para_leer(unidades), True, semana_num
+
+    return None, False, None
+
+
 def _normalizar_para_guardar(datos: dict) -> dict:
     # Convierte "resultado" → "%" para mantener formato uniforme en disco
     out = {}

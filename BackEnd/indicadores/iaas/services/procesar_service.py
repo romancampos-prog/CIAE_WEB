@@ -35,7 +35,7 @@ def _calcular_indicadores_pendientes(datos: dict, numerador: dict) -> tuple[list
 
     for ind_key in ["IAAS 02", "IAAS 03", "IAAS 04", "IAAS 05", "IAAS 06"]:
         for unidad, vals in datos.get(ind_key, {}).items():
-            if unidad == "DELEGACION":
+            if unidad == "TOTAL_OOAD":
                 continue
             if vals.get("denominador") is None:
                 if unidad not in pendientes_ind:
@@ -46,11 +46,7 @@ def _calcular_indicadores_pendientes(datos: dict, numerador: dict) -> tuple[list
     return list(pendientes_ind.keys()), pendientes_ind
 
 
-def _guardar_sesion_json(
-    anio: str, mes: str, datos: dict,
-    unidades_pendientes: list,
-    indicadores_pendientes: dict | None = None,
-) -> None:
+def _guardar_sesion_json(anio: str, mes: str, datos: dict) -> None:
     mes_nombre = MESES_NOMBRE.get(mes, mes)
     generado   = datetime.datetime.now().isoformat(timespec="seconds")
 
@@ -69,10 +65,8 @@ def _guardar_sesion_json(
         }
 
         json_data["MESES"][mes_nombre] = {
-            "GENERADO":              generado,
-            "UNIDADES_PENDIENTES":   unidades_pendientes,
-            "INDICADORES_PENDIENTES": indicadores_pendientes or {},
-            "DATOS":                 datos_mes,
+            "GENERADO": generado,
+            "DATOS":    datos_mes,
         }
 
         escribir_indicador_anio(anio, ind_n, json_data)
@@ -127,21 +121,40 @@ def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
     return list(pendientes_ind.keys()), pendientes_ind
 
 
-def _recalcular_delegacion(datos_ind: dict, ind: str) -> dict:
+def _recalcular_total_ooad(datos_ind: dict, ind: str) -> dict:
+    """
+    Suma numerador/denominador de todas las unidades para el total OOAD, con 3 reglas:
+    - Unidad incompleta (numerador o denominador None) -- Gris, no se cuenta.
+    - Unidad con denominador 0 y numerador > 0 -- inconsistencia (no se puede tener
+      casos sin el universo que los mida), se notifica y no se suma al total.
+    - Unidad con numerador y denominador ambos 0 -- cero real, se cuenta normal
+      (no afecta el total, aporta 0/0).
+    """
     from iaas.services.extraccion_service import _semaforo_IAAS01, _semaforo_general
-    total_num = sum(
-        (v.get("numerador") or 0)
-        for u, v in datos_ind.items()
-        if u != "DELEGACION" and isinstance(v, dict)
-    )
-    total_den = sum(
-        (v.get("denominador") or 0)
-        for u, v in datos_ind.items()
-        if u != "DELEGACION" and isinstance(v, dict)
-    )
-    raw = {"DELEGACION": {"numerador": total_num, "denominador": total_den or None}}
+
+    total_num  = 0
+    total_den  = 0
+    hay_alguna = False
+    for u, v in datos_ind.items():
+        if u == "TOTAL_OOAD" or not isinstance(v, dict):
+            continue
+        num = v.get("numerador")
+        den = v.get("denominador")
+        if num is None or den is None:
+            continue
+        if den == 0 and num > 0:
+            print(f"[IAAS] Inconsistencia en {ind}, unidad {u}: numerador={num} con denominador=0 -- no se incluye en el total OOAD.")
+            continue
+        total_num += num
+        total_den += den
+        hay_alguna = True
+
+    # total_den puede ser legítimamente 0 (todas las unidades contadas dieron 0/0,
+    # un cero real) -- eso es distinto de no haber contado ninguna unidad (Gris de
+    # verdad). "total_den or None" convertiría un 0 real en None por error.
+    raw = {"TOTAL_OOAD": {"numerador": total_num, "denominador": total_den if hay_alguna else None}}
     result = _semaforo_IAAS01(raw) if ind == "IAAS 01" else _semaforo_general(raw, ind)
-    datos_ind["DELEGACION"] = result.get("DELEGACION", {})
+    datos_ind["TOTAL_OOAD"] = result.get("TOTAL_OOAD", {})
     return datos_ind
 
 
@@ -156,8 +169,15 @@ def procesar_IAAS(anio: str, mes: str, numerador: dict, denominador: dict,
         "IAAS 06": calcular_IAAS("IAAS 06", numerador, denominador),
     }
 
-    unidades_pendientes, indicadores_pendientes = _calcular_indicadores_pendientes(datos, numerador)
-    _guardar_sesion_json(anio, mes, datos, unidades_pendientes, indicadores_pendientes)
+    # El total (TOTAL_OOAD) se calcula siempre aquí, en la generación normal --
+    # antes solo se calculaba si alguien completaba una unidad tardía después (ver
+    # completar_unidad_tardia más abajo), dejando el total sin existir hasta entonces.
+    for ind_key, ind_datos in datos.items():
+        if ind_datos:
+            datos[ind_key] = _recalcular_total_ooad(ind_datos, ind_key)
+
+    unidades_pendientes, _ = _calcular_indicadores_pendientes(datos, numerador)
+    _guardar_sesion_json(anio, mes, datos)
 
     from iaas.services.generar_iaas import Excel_IAAS_Completo
     stream      = Excel_IAAS_Completo(anio, mes, datos)
@@ -174,7 +194,8 @@ def procesar_IAAS(anio: str, mes: str, numerador: dict, denominador: dict,
 def completar_unidad_tardia(anio: str, mes: str, unidad: str,
                              indicadores_seleccionados: list,
                              denominadores_02_06: dict,
-                             excel_bytes: bytes) -> dict:
+                             excel_bytes: bytes,
+                             excel_denominador_iaas01: bytes | None = None) -> dict:
     mes_nombre = MESES_NOMBRE.get(mes, mes)
     datos_completos = _leer_sesion_mes(anio, mes_nombre)
 
@@ -186,11 +207,11 @@ def completar_unidad_tardia(anio: str, mes: str, unidad: str,
 
     from iaas.services.extraccion_service import calcular_unidad_tardia as _calc
     nuevos = _calc(unidad, excel_bytes, indicadores_seleccionados,
-                   denominadores_02_06, datos_completos)
+                   denominadores_02_06, datos_completos, excel_denominador_iaas01)
 
     for ind, result in nuevos.items():
         datos_completos.setdefault(ind, {}).update(result)
-        datos_completos[ind] = _recalcular_delegacion(datos_completos[ind], ind)
+        datos_completos[ind] = _recalcular_total_ooad(datos_completos[ind], ind)
 
     pendientes, ind_pend = _get_pendientes_info(anio, mes_nombre)
 
@@ -203,7 +224,7 @@ def completar_unidad_tardia(anio: str, mes: str, unidad: str,
 
     pendientes = [u for u in ind_pend.keys()]
 
-    _guardar_sesion_json(anio, mes, datos_completos, pendientes, ind_pend)
+    _guardar_sesion_json(anio, mes, datos_completos)
 
     from iaas.services.generar_iaas import Excel_IAAS_Completo
     stream      = Excel_IAAS_Completo(anio, mes, datos_completos)

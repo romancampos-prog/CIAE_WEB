@@ -18,6 +18,11 @@
                 "columna_dato": [
                     "L",
                     "K"
+                ],
+                "unidades_sin_servicio": [
+                    "UMF 59 CELAYA",
+                    "UMF 56 LAS MANDARINAS",
+                    "UMF 60 LEON"
                 ]
             }
         },
@@ -51,6 +56,37 @@
                 "columna_dato": [
                     "M",
                     "K"
+                ],
+                "unidades_sin_servicio": [
+                    "UMF 46 GUANAJUATO",
+                    "UMFH 12 DOLORES HIDALGO",
+                    "UMF 14 SILAO",
+                    "UMF 45 IRAPUATO",
+                    "UMF 44 IRAPUATO",
+                    "UMF 16 S.CRUZ JUVENTINO",
+                    "UMF 05 COMONFORT",
+                    "HGSMF 13 ACAMBARO",
+                    "HGSMF 15 MOROLEON",
+                    "UMFH 08 SALVATIERRA",
+                    "UMFH 09 PENJAMO",
+                    "UMF 27 PURISIMA",
+                    "UMF 17 SORIA",
+                    "UMF 26 OCAMPO",
+                    "UMF 19 V.SANTIAGO",
+                    "HGSMF 20 S.LUIS PAZ",
+                    "UMF 30 S.FELIPE",
+                    "UMF 41 TARIMORO",
+                    "UMF 28 ROMITA",
+                    "UMF 25 JARAL BERRIO",
+                    "UMF 29",
+                    "UMF 18 APASEO EL ALTO",
+                    "UMF 24 MANUEL DOBLADO",
+                    "UMF 36 YURIRIA",
+                    "UMF 35 PUEBLO NUEVO",
+                    "UMF 32 CUERAMARO",
+                    "UMF 22 ABASOLO",
+                    "UMF 23 APASEO GRANDE",
+                    "UMF 34 JARAL PROGRESO"
                 ]
             }
         },

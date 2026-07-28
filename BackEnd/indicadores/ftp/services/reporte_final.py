@@ -8,7 +8,9 @@ from ftp.services.ftp_extraer import ExtraerInformacionPrevia
 from ftp.services.numerador_denominador import ObtenerNumDen
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import ExcelFinalConPlantilla
-from ftp.services.datos_json_service import guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes
+from ftp.services.datos_json_service import (
+    guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes, leer_mes_guardado,
+)
 
 
 def ExcelReporteFinal(indicador, ano, mes, semana):
@@ -95,3 +97,56 @@ def ExcelReporteFinal(indicador, ano, mes, semana):
             "mensaje":  "No se pudo generar el archivo Excel",
             "errores":  diccionarioErrores
         }
+
+
+def ExcelReporteGuardado(indicador, ano, mes):
+    """
+    Variante de solo lectura de ExcelReporteFinal -- usada al descargar desde
+    gráficas. A diferencia de ExcelReporteFinal, NUNCA extrae de FTP ni calcula
+    nada: solo toma lo que ya está guardado (definitivo o semanal, ver
+    leer_mes_guardado) y lo vuelca al Excel. Si ese mes no tiene ningún dato
+    guardado, no genera nada nuevo -- devuelve error. Así "ver/descargar" desde
+    gráficas nunca puede cerrar un mes ni pisar el respaldo semanal.
+    """
+    informacionIndicador = obtenerInformacionIndicador(indicador)
+    indicadorSemaforo  = informacionIndicador.get("semaforo", {})
+    indicadorTitulo    = informacionIndicador.get("titulo")
+    indicadordesNum    = informacionIndicador.get("descripcionNumerador")
+    indicadordesDen    = informacionIndicador.get("descripcionDenominador")
+    indicadoresArch    = informacionIndicador.get("nombreArchivoFinal")
+
+    diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes)
+    if diccionarioPrevio is None:
+        return {
+            "status":  "error",
+            "mensaje": f"{indicador} no tiene ningún dato guardado para ese mes todavía.",
+        }
+
+    archivo_descargable = ExcelFinalConPlantilla(
+        diccionarioPrevio,
+        indicadorTitulo,
+        indicadordesNum,
+        indicadordesDen,
+        indicadoresArch,
+        ano,
+        mes,
+        semana,
+        indicadorSemaforo,
+        indicador,
+        es_semana=es_semana
+    )
+
+    if not archivo_descargable:
+        return {"status": "error", "mensaje": "No se pudo generar el archivo Excel"}
+
+    semana_str   = str(semana) if semana is not None else ""
+    nombre_final = (
+        f"{indicadoresArch}_{ano}_{mes}_S{semana_str}.xlsx"
+        if semana_str else f"{indicadoresArch}_{ano}_{mes}.xlsx"
+    )
+    return {
+        "status":         "success",
+        "mensaje":        f"Reporte {indicador} obtenido correctamente",
+        "stream":         archivo_descargable,
+        "nombre_archivo": nombre_final,
+    }

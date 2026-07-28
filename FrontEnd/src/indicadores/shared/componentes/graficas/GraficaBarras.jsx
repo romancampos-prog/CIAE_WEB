@@ -47,7 +47,7 @@ const GraficaBarras = ({
           tick: { fontSize: 10, fill: '#64748b', fontWeight: 600 },
           angle: -38,
           textAnchor: 'end',
-          tickFormatter: v => { const s = v === 'TOTAL' ? 'TOTAL OOAD' : v; return s.length > 15 ? s.slice(0, 14) + '…' : s; },
+          tickFormatter: v => { const s = v === 'TOTAL_OOAD' ? 'TOTAL OOAD' : v; return s.length > 15 ? s.slice(0, 14) + '…' : s; },
           interval: 0,
         };
 

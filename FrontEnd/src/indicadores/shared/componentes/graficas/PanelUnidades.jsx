@@ -15,7 +15,7 @@
  *   HGS_COLOR     — string
  *   HGS_BG        — string
  */
-const isTotalItem = (u) => u === 'TOTAL' || u === 'TOTAL OOAD';
+const isTotalItem = (u) => u === 'TOTAL_OOAD' || u === 'TOTAL OOAD';
 
 const PanelUnidades = ({
   unidades = [],

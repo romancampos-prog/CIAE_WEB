@@ -8,7 +8,9 @@ import logo_imss from '../../../assets/logo_imms.png';
 import ModalPoblacion from '../componentes/modalPoblacion/ModalPoblacion';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalRestricciones from '../../shared/componentes/modal/ModalRestricciones';
+import ModalConfirmarPassword from '../../../shared/componentes/modal/ModalConfirmarPassword';
 import { useIndicadores } from '../hooks/useIndicadores';
+import { getArchivoPoblacionActual } from '../api/poblacion';
 import InformacionIndicador from '../../reportes_grafica/componentes/InformacionIndicador/InformacionIndicador';
 import { useEffect, useState } from 'react';
 import SidebarCategorias from '../componentes/SidebarCategorias';
@@ -57,6 +59,8 @@ const IndicadoresPage = () => {
     mesesDisponibles, semData, indicadores, catColor,
     canGenerar, canBatch, esVisor,
     generarReporte, generarTodos, MESES_LARGOS,
+    mostrarConfirmarRegenerar, setMostrarConfirmarRegenerar,
+    regenerarModo, regenerando, errorRegenerar, confirmarRegenerar,
   } = useIndicadores(user);
 
   const catIcon = CAT_ICON[categoria];
@@ -83,6 +87,13 @@ const IndicadoresPage = () => {
   useEffect(() => { setFichaAbierta(false) }, [indicadorSel])
   useEffect(() => { document.title = 'Indicadores FTP | CIAE'; }, []);
 
+  const [archivoPoblacion, setArchivoPoblacion] = useState(null);
+  useEffect(() => {
+    getArchivoPoblacionActual()
+      .then(res => setArchivoPoblacion(res?.data?.nombre_sin_ext ?? null))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="ind-root">
       <div className="ind-bg" aria-hidden>
@@ -103,6 +114,9 @@ const IndicadoresPage = () => {
           </button>
         </div>
         <div className="ind-nav-right">
+          {!esVisor && archivoPoblacion && (
+            <span className="ind-pob-archivo" title={archivoPoblacion}>{archivoPoblacion}</span>
+          )}
           {!esVisor && (
             <button className="ind-btn-pob" onClick={() => setModalPoblacion(true)}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -112,6 +126,11 @@ const IndicadoresPage = () => {
               Actualizar Población
             </button>
           )}
+          <span className="ind-legal-note" title="Este sistema solo consulta la información de los archivos FTP originales para generar los reportes — no los modifica, edita ni elimina en ningún momento.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
           <div className="ind-user-chip">
             <span className="ind-user-dot" />
             {user?.user || 'Invitado'}
@@ -119,7 +138,12 @@ const IndicadoresPage = () => {
         </div>
       </header>
 
-      {modalPoblacion && <ModalPoblacion onClose={() => setModalPoblacion(false)} />}
+      {modalPoblacion && (
+        <ModalPoblacion
+          onClose={() => setModalPoblacion(false)}
+          onSubido={setArchivoPoblacion}
+        />
+      )}
 
       <main className="ind-hub-main">
 
@@ -364,11 +388,40 @@ const IndicadoresPage = () => {
         </>
       )}
 
-      <ModalLoading isOpen={cargando || cargandoBatch} />
+      <ModalLoading
+        isOpen={cargando || cargandoBatch}
+        nota={<>Este proceso <strong>solo consulta</strong> la información de los archivos FTP originales — <strong>no los modifica, edita ni elimina</strong> en ningún momento.</>}
+      />
       <ModalRestricciones
         isOpen={mostrarRestricciones}
         restricciones={restriccionesData}
         onClose={() => setMostrarRestricciones(false)}
+      />
+      <ModalConfirmarPassword
+        isOpen={mostrarConfirmarRegenerar}
+        onClose={() => !regenerando && setMostrarConfirmarRegenerar(false)}
+        onConfirm={confirmarRegenerar}
+        enviando={regenerando}
+        error={errorRegenerar}
+        color={catColor}
+        titulo="Regenerar mes definitivo"
+        subtitulo={
+          regenerarModo === 'batch'
+            ? 'Este mes ya tiene reporte generado para todos los indicadores de la categoría. Ingresa tu contraseña para sobrescribirlos.'
+            : 'Este mes ya tiene un reporte generado. Ingresa tu contraseña para sobrescribirlo.'
+        }
+        confirmLabel={regenerando ? 'Regenerando…' : 'Regenerar'}
+        infoRows={
+          regenerarModo === 'batch'
+            ? [
+                { label: 'Categoría', value: `${categoria} (${indicadores.length} indicadores)` },
+                { label: 'Mes', value: `${MESES_LARGOS[datos.mes]} ${datos.ano}` },
+              ]
+            : [
+                { label: 'Indicador', value: indicadorSel },
+                { label: 'Mes', value: `${MESES_LARGOS[datos.mes]} ${datos.ano}` },
+              ]
+        }
       />
     </div>
   );

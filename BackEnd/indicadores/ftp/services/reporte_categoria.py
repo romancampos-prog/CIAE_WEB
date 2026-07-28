@@ -12,10 +12,12 @@ from ftp.services.ftp_extraer import ExtraerInformacionPrevia
 from ftp.services.numerador_denominador import ObtenerNumDen
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import (
-    obtener_estilos_excel, _leer_historicos, _calcular_color
+    obtener_estilos_excel, _leer_historicos, _calcular_color, _estilo_valor
 )
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
-from ftp.services.datos_json_service import guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes
+from ftp.services.datos_json_service import (
+    guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes, leer_mes_guardado,
+)
 
 MESES_LISTA = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -72,6 +74,40 @@ def preparar_datos_indicador(indicador: str, ano: str, mes: str, semana) -> dict
         return {"status": "error", "mensaje": str(exc)}
 
 
+def preparar_datos_guardados(indicador: str, ano: str, mes: str) -> dict:
+    """
+    Variante de solo lectura de preparar_datos_indicador -- usada al descargar
+    "todos" desde gráficas. Nunca extrae de FTP ni guarda nada: solo toma lo que
+    ya está guardado (definitivo o semanal, ver leer_mes_guardado). Si ese mes
+    no tiene ningún dato guardado, status=error -- nunca se genera nada nuevo.
+    """
+    try:
+        info = obtenerInformacionIndicador(indicador)
+        metadata = {
+            "titulo":    info.get("titulo"),
+            "desNum":    info.get("descripcionNumerador"),
+            "desDen":    info.get("descripcionDenominador"),
+            "arch":      info.get("nombreArchivoFinal"),
+            "semaforo":  info.get("semaforo", {}),
+            "decimales": info.get("decimales"),
+        }
+
+        diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes)
+        if diccionarioPrevio is None:
+            return {"status": "error", "mensaje": f"{indicador} no tiene ningún dato guardado para ese mes."}
+
+        return {
+            "status":            "success",
+            "diccionarioPrevio": diccionarioPrevio,
+            "errores":           {},
+            "metadata":          metadata,
+            "es_semana":         es_semana,
+            "semana":            semana,
+        }
+    except Exception as exc:
+        return {"status": "error", "mensaje": str(exc)}
+
+
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
@@ -97,10 +133,12 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     v_critico  = limites.get("Alto") if tiene_alto else limites.get("Bajo", 0)
 
     ws = wb.add_worksheet(indicador[:31])
+    ws.hide_gridlines(2)
     ws.set_column(0, 0, 50)
     ws.set_column(1, ultima_col, 14)
     ws.set_default_row(20)
 
+    ws.merge_range(0, 0, 0, ultima_col, "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS", fmt['nota_completas'])
     ws.merge_range(1, 0, 1, ultima_col, titulo.upper(), fmt['titulo_izq'])
     ws.write(3, 0, "  NUMERADOR",   fmt['etiqueta_bold'])
     ws.merge_range(3, 1, 3, ultima_col, f"  {desNum.upper()}", fmt['descripcion'])
@@ -145,12 +183,13 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
     for idx_fila, unidad_id in enumerate(diccionarioPrevio.keys()):
         fila_excel = idx_fila + 10
-        es_total   = (unidad_id == "TOTAL")
+        es_total   = (unidad_id == "TOTAL_OOAD")
 
         fmt_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']
-        fmt_base   = fmt['total_gris_80'] if es_total else (
-            fmt['fila_par'] if idx_fila % 2 == 0 else fmt['dato_normal']
+        clave_base = 'total_gris_80' if es_total else (
+            'fila_par' if idx_fila % 2 == 0 else 'dato_normal'
         )
+        fmt_base   = fmt[clave_base]
 
         if es_total:
             nombre_oficial = "TOTAL"
@@ -175,10 +214,11 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
                 if res is None:
                     # Gris = dato incompleto -- se muestra el numerador o denominador que
-                    # sí tenga valor (el que sea None se deja vacio) con su estilo normal;
-                    # solo el resultado se deja vacio y en gris.
-                    ws.write(fila_excel, col,     num if num is not None else "", fmt_base)
-                    ws.write(fila_excel, col + 1, den if den is not None else "", fmt_base)
+                    # sí tenga valor (el que sea None se deja vacio), en gris RGB(49,134,155)
+                    # bold para marcar que no se contó en el total; solo el resultado se deja
+                    # vacio y en gris.
+                    ws.write(fila_excel, col,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))
+                    ws.write(fila_excel, col + 1, den if den is not None else "", _estilo_valor(fmt, clave_base, den))
                     ws.write(fila_excel, col + 2, "", fmt_gris)
                 else:
                     fmt_pct = fmt.get(f"{reg.get('color','Gris')}_Capsula", fmt['dato_normal'])
@@ -194,8 +234,8 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                     fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
 
                     if h_res == "" or h_res is None:
-                        ws.write(fila_excel, col,     h_num if h_num not in (None, "") else "", fmt_base)
-                        ws.write(fila_excel, col + 1, h_den if h_den not in (None, "") else "", fmt_base)
+                        ws.write(fila_excel, col,     h_num if h_num not in (None, "") else "", _estilo_valor(fmt, clave_base, h_num if h_num not in (None, "") else None))
+                        ws.write(fila_excel, col + 1, h_den if h_den not in (None, "") else "", _estilo_valor(fmt, clave_base, h_den if h_den not in (None, "") else None))
                         ws.write(fila_excel, col + 2, "", fmt_gris)
                     else:
                         fmt_pct = fmt.get(f"{_calcular_color(h_res, idx_mes, semaforo)}_Capsula", fmt['dato_normal'])

@@ -16,7 +16,6 @@ from iaas.services.procesar_service import procesar_IAAS as ProcesarIAAS
 from iaas.services.generar_iaas import (
     Excel_IAAS01, Excel_IAAS02, Excel_IAAS03,
     Excel_IAAS04, Excel_IAAS05, Excel_IAAS06,
-    RUTA_BASE_IAAS,
 )
 from iaas.services.datos_json_service import leer_indicador_anio
 from iaas.services.grafica_service import (

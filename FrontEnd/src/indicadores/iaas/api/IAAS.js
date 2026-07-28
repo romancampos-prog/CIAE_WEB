@@ -114,11 +114,12 @@ export const getSesionIAAS = async (anio, mes) => {
  * @param {string} unidad - Clave de la unidad tardía
  * @param {string[]} indicadores - IDs de indicadores pendientes
  * @param {Object} denominadores - Denominadores capturados
- * @param {File|null} excelFile - Archivo Excel de la unidad
+ * @param {File|null} excelFile - Archivo Excel de la unidad (numerador)
  * @param {string} password - Contraseña de autorización
+ * @param {File|null} excelDenominadorIAAS01 - Excel con el denominador de IAAS 01 para esta unidad
  * @returns {Promise<Object>} Resultado con archivo_b64 si se generó correctamente
  */
-export const completarUnidadTardia = async (anio, mes, unidad, indicadores, denominadores, excelFile, password) => {
+export const completarUnidadTardia = async (anio, mes, unidad, indicadores, denominadores, excelFile, password, excelDenominadorIAAS01) => {
     const form = new FormData();
     form.append('anio', anio);
     form.append('mes', mes);
@@ -127,6 +128,7 @@ export const completarUnidadTardia = async (anio, mes, unidad, indicadores, deno
     form.append('denominadores', JSON.stringify(denominadores));
     form.append('password', password);
     if (excelFile) form.append('excel_unidad', excelFile);
+    if (excelDenominadorIAAS01) form.append('excel_denominador_iaas01', excelDenominadorIAAS01);
     const { data } = await api.post('/iass/completar-unidad', form);
     return data;
 };

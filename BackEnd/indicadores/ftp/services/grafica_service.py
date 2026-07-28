@@ -38,7 +38,7 @@ def _calcular_datos_grafica_ftp(indicador: str, anio: str) -> dict:
     meses_set = set()
     # Lista fija del catalogo, igual que IAAS -- asi las unidades sin ningun dato
     # real (todo en null) tambien aparecen en el panel y la grafica, en gris.
-    unidades_set = list(NOMBREUNIDADESARCHIVO) + ["TOTAL"]
+    unidades_set = list(NOMBREUNIDADESARCHIVO) + ["TOTAL_OOAD"]
 
     for mes_nombre, unidades_mes in datos_json.get("MESES", {}).items():
         if mes_nombre not in FTP_MESES_NOMBRES:

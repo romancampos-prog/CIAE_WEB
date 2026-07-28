@@ -14,7 +14,7 @@ with open(RUTA_IAAS_JSON, encoding="utf-8") as _f:
 
 # Mismo orden y mismas 11 unidades que usan IAAS 02-06 (ORDEN_DEMAS_IAAS) — solo cambia que
 # IAAS 01 le agrega el renglón de OOAD al final de su propia lista de unidades.
-UNIDADES_IAAS     = ORDEN_DEMAS_IAAS + ["DELEGACION"]
+UNIDADES_IAAS     = ORDEN_DEMAS_IAAS + ["TOTAL_OOAD"]
 UNIDADES_UCI      = ORDEN_DEMAS_IAAS
 _UNIDADES_HGS_SET = set(UNIDADES_HGS_IAAS01)
 
@@ -153,23 +153,43 @@ def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
     return historicos
 
 
+
+
 def _acumular_unidad(all_months, unidad, hasta_mes):
     """Suma numerador/denominador de una unidad desde enero hasta hasta_mes (inclusive).
     Reutilizado por el acumulado mensual y por el bloque Anual (que es lo mismo, solo que
-    siempre hasta el último mes que haya)."""
-    num, den, tiene = 0, 0, False
+    siempre hasta el último mes que haya).
+    El denominador (días/casos expuestos) se acumula en TODOS los meses donde exista,
+    aunque a ese mismo mes le falte el numerador -- es un dato real que sí ocurrió. El
+    numerador solo suma los meses donde de verdad existe.
+    "completo" indica si CADA mes con algún dato trajo numerador Y denominador a la vez;
+    si a la unidad le falta el numerador en cualquier mes del rango, queda incompleta:
+    el llamador debe reportarla Gris (sin tasa real, fuera del total OOAD) mostrando
+    nada más los acumulados que sí existan (numerador y/o denominador)."""
+    num, den = 0, 0
+    tiene_num, tiene_den = False, False
+    completo = True
     for m in range(1, hasta_mes + 1):
         v = _dato_unidad(all_months.get(m, {}), unidad)
-        if v:
-            num  += v.get("numerador") or 0
-            den  += v.get("denominador") or 0
-            tiene = True
-    return num, den, tiene
+        if not v:
+            continue
+        n, d = v.get("numerador"), v.get("denominador")
+        if n is not None:
+            num += n
+            tiene_num = True
+        if d is not None:
+            den += d
+            tiene_den = True
+        if n is None or d is None:
+            completo = False
+    return num, den, tiene_num, tiene_den, completo
+
+
 
 
 def calcular_fila_iaas01(datos: dict) -> dict:
     """
-    Bloque MENSUAL de IAAS 01: por unidad (+ 'DELEGACION'), los valores listos
+    Bloque MENSUAL de IAAS 01: por unidad (+ 'TOTAL_OOAD'), los valores listos
     para escribir (numerador/denominador con "" en vez de None cuando el dato
     es Gris, tasa vacía si es Gris) y el color para el estilo de la celda de
     tasa. None si la unidad no tiene registro ese mes (no se escribe la fila).
@@ -177,7 +197,7 @@ def calcular_fila_iaas01(datos: dict) -> dict:
     sum_num = 0
     sum_den = 0
     for unidad in UNIDADES_IAAS:
-        if unidad == "DELEGACION":
+        if unidad == "TOTAL_OOAD":
             continue
         v = _dato_unidad(datos, unidad)
         if v and (v.get("color") or "Gris") != "Gris":
@@ -187,13 +207,13 @@ def calcular_fila_iaas01(datos: dict) -> dict:
 
     resultado = {}
     for unidad in UNIDADES_IAAS:
-        if unidad == "DELEGACION":
+        if unidad == "TOTAL_OOAD":
             color_deleg = (
-                datos.get("DELEGACION", {}).get("color")
-                if isinstance(datos.get("DELEGACION"), dict)
-                else _color_tasa_01(tasa_deleg, "DELEGACION")
+                datos.get("TOTAL_OOAD", {}).get("color")
+                if isinstance(datos.get("TOTAL_OOAD"), dict)
+                else _color_tasa_01(tasa_deleg, "TOTAL_OOAD")
             )
-            resultado["DELEGACION"] = {
+            resultado["TOTAL_OOAD"] = {
                 "numerador": sum_num, "denominador": sum_den,
                 "tasa": tasa_deleg, "color_tasa": color_deleg,
             }
@@ -237,11 +257,18 @@ def calcular_acumulado_iaas01(all_months: dict) -> dict:
         sum_del_n = 0
         sum_del_d = 0
         for unidad in UNIDADES_IAAS:
-            if unidad == "DELEGACION":
+            if unidad == "TOTAL_OOAD":
                 continue
-            acum_num, acum_den, tiene = _acumular_unidad(all_months, unidad, mes_target)
-            if not tiene:
+            acum_num, acum_den, tiene_num, tiene_den, completo = _acumular_unidad(all_months, unidad, mes_target)
+            if not tiene_num and not tiene_den:
                 fila_mes[unidad] = None
+                continue
+            if not completo:
+                fila_mes[unidad] = {
+                    "numerador":   acum_num if tiene_num else "",
+                    "denominador": acum_den if tiene_den else "",
+                    "tasa": "", "color_tasa": "Gris",
+                }
                 continue
             tasa  = round((acum_num / acum_den) * 1000, 2) if acum_den else 0
             color = _color_tasa_01(tasa, unidad)
@@ -250,9 +277,9 @@ def calcular_acumulado_iaas01(all_months: dict) -> dict:
             sum_del_d += acum_den
 
         tasa_del = round((sum_del_n / sum_del_d) * 1000, 2) if sum_del_d else 0
-        fila_mes["DELEGACION"] = {
+        fila_mes["TOTAL_OOAD"] = {
             "numerador": sum_del_n, "denominador": sum_del_d,
-            "tasa": tasa_del, "color_tasa": _color_tasa_01(tasa_del, "DELEGACION"),
+            "tasa": tasa_del, "color_tasa": _color_tasa_01(tasa_del, "TOTAL_OOAD"),
         }
         resultado[mes_target] = fila_mes
     return resultado
@@ -266,11 +293,18 @@ def calcular_anual_iaas01(all_months: dict):
     resultado = {}
     sum_n, sum_d = 0, 0
     for unidad in UNIDADES_IAAS:
-        if unidad == "DELEGACION":
+        if unidad == "TOTAL_OOAD":
             continue
-        num, den, tiene = _acumular_unidad(all_months, unidad, hasta_mes)
-        if not tiene:
+        num, den, tiene_num, tiene_den, completo = _acumular_unidad(all_months, unidad, hasta_mes)
+        if not tiene_num and not tiene_den:
             resultado[unidad] = None
+            continue
+        if not completo:
+            resultado[unidad] = {
+                "numerador":   num if tiene_num else "",
+                "denominador": den if tiene_den else "",
+                "tasa": "", "color_tasa": "Gris",
+            }
             continue
         tasa  = round((num / den) * 1000, 2) if den else 0
         color = _color_tasa_01(tasa, unidad)
@@ -279,9 +313,9 @@ def calcular_anual_iaas01(all_months: dict):
         sum_d += den
 
     tasa_del = round((sum_n / sum_d) * 1000, 2) if sum_d else 0
-    resultado["DELEGACION"] = {
+    resultado["TOTAL_OOAD"] = {
         "numerador": sum_n, "denominador": sum_d,
-        "tasa": tasa_del, "color_tasa": _color_tasa_01(tasa_del, "DELEGACION"),
+        "tasa": tasa_del, "color_tasa": _color_tasa_01(tasa_del, "TOTAL_OOAD"),
     }
     return resultado
 
@@ -339,9 +373,16 @@ def calcular_acumulado_iaas_uci(all_months: dict, indicador: str) -> dict:
         sum_del_n = 0
         sum_del_d = 0
         for unidad in UNIDADES_UCI:
-            acum_num, acum_den, tiene = _acumular_unidad(all_months, unidad, mes_target)
-            if not tiene:
+            acum_num, acum_den, tiene_num, tiene_den, completo = _acumular_unidad(all_months, unidad, mes_target)
+            if not tiene_num and not tiene_den:
                 fila_mes[unidad] = None
+                continue
+            if not completo:
+                fila_mes[unidad] = {
+                    "numerador":   acum_num if tiene_num else "",
+                    "denominador": acum_den if tiene_den else "",
+                    "tasa": "", "color_tasa": "Gris",
+                }
                 continue
             tasa  = round((acum_num / acum_den) * tasa_mult, 2) if acum_den else 0
             color = _color_tasa_uci(tasa, indicador)
@@ -369,9 +410,16 @@ def calcular_anual_iaas_uci(all_months: dict, indicador: str):
     sum_n, sum_d = 0, 0
 
     for unidad in UNIDADES_UCI:
-        num, den, tiene = _acumular_unidad(all_months, unidad, hasta_mes)
-        if not tiene:
+        num, den, tiene_num, tiene_den, completo = _acumular_unidad(all_months, unidad, hasta_mes)
+        if not tiene_num and not tiene_den:
             resultado[unidad] = None
+            continue
+        if not completo:
+            resultado[unidad] = {
+                "numerador":   num if tiene_num else "",
+                "denominador": den if tiene_den else "",
+                "tasa": "", "color_tasa": "Gris",
+            }
             continue
         tasa  = round((num / den) * tasa_mult, 2) if den else 0
         color = _color_tasa_uci(tasa, indicador)

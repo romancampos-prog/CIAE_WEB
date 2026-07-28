@@ -12,6 +12,16 @@
   animation: ia-in 0.5s cubic-bezier(0.16,1,0.3,1) both;
 }
 
+/* Aviso legal, fuera de la tarjeta de la gráfica -- deslinde formal sobre el uso
+   posterior del archivo descargado, no una advertencia visual llamativa. */
+.ig-legal-footer {
+  margin: 18px 2px 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15,23,42,0.08);
+  font-size: 0.72rem; line-height: 1.55; color: #94a3b8;
+  text-align: left;
+}
+
 /* ── Tabs ── */
 .ig-tabs {
   display: flex; gap: 3px;
@@ -178,6 +188,12 @@
 .ig-btn-dl--icon {
   padding: 8px; align-self: center;
 }
+.ig-btn-dl-spinner {
+  display: block; width: 13px; height: 13px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+  border-radius: 50%; animation: ig-btn-dl-spin 0.7s linear infinite;
+}
+@keyframes ig-btn-dl-spin { to { transform: rotate(360deg); } }
 .ig-btn-dl--activo {
   background: #0f172a; box-shadow: 0 4px 16px rgba(0,0,0,0.22);
 }

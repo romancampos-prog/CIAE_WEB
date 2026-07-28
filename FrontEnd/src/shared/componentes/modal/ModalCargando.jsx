@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './modalCargando.css';
 import dogGif from "../../../assets/corgi.gif"
 
-const ModalLoading = ({ isOpen }) => {
+const ModalLoading = ({ isOpen, nota }) => {
   const [mensajeIdx, setMensajeIdx] = useState(0);
   const mensajes = [
     "Generando su reporte...",
@@ -46,6 +46,15 @@ const ModalLoading = ({ isOpen }) => {
         <div className="loading-bar-container">
           <div className="loading-bar-fill"></div>
         </div>
+
+        {nota && (
+          <p className="mcl-nota">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            {nota}
+          </p>
+        )}
       </div>
     </div>
   );

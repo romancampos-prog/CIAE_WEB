@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { getAllIndicadores, getFTPDatosGrafica, getIndicador } from '../api/indicadores';
-import { getReporte, generarCategoria } from '../../reportes_grafica/api/reportes';
+import { getReporteGuardado, generarCategoriaGuardada } from '../../reportes_grafica/api/reportes';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 import { CAT_COLOR } from '../constantes/colores';
@@ -100,12 +100,12 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
   const totalMes = useMemo(
-    () => chartDataMesConTotal.find(d => d.unidad === 'TOTAL') ?? null,
+    () => chartDataMesConTotal.find(d => d.unidad === 'TOTAL_OOAD') ?? null,
     [chartDataMesConTotal]
   );
 
   const chartDataMes = useMemo(
-    () => chartDataMesConTotal.filter(d => d.unidad !== 'TOTAL'),
+    () => chartDataMesConTotal.filter(d => d.unidad !== 'TOTAL_OOAD'),
     [chartDataMesConTotal]
   );
 
@@ -130,7 +130,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible — para la vista "Por unidad" */
   const cumplimientoUltimoMes = useMemo(
-    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL')),
+    () => contarSemaforo(unidadesStatus.filter(u => u.unidad !== 'TOTAL_OOAD')),
     [unidadesStatus]
   );
 
@@ -159,14 +159,16 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const categoria = indSel?.split(' ')[0] ?? '';
 
   /**
-   * Descarga el Excel de un indicador especÃ­fico para un mes dado.
+   * Descarga el Excel de un indicador especÃ­fico para un mes dado. Solo lectura:
+   * toma lo que ya está guardado (definitivo o semanal) -- nunca genera ni cierra
+   * un mes desde gráficas.
    * @param {string} mes - Mes en formato "MM"
    */
   const descargarIndicador = async (mes) => {
     if (!indSel || !mes || descargando) return;
     setDescargando(true);
     try {
-      const res = await getReporte(indSel, { ano: anio, mes });
+      const res = await getReporteGuardado(indSel, { ano: anio, mes });
       if (res.success) descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
     } catch { /* silencioso */ }
     finally { setDescargando(false); }
@@ -174,13 +176,14 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /**
    * Descarga el Excel de todos los indicadores de una categorÃ­a para un mes dado.
+   * Solo lectura, mismo criterio que descargarIndicador.
    * @param {string} mes - Mes en formato "MM"
    */
   const descargarCategoria = async (mes) => {
     if (!categoria || !mes || descargando) return;
     setDescargando(true);
     try {
-      const res = await generarCategoria(categoria, { ano: anio, mes });
+      const res = await generarCategoriaGuardada(categoria, { ano: anio, mes });
       if (res.success) descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
     } catch { /* silencioso */ }
     finally { setDescargando(false); }
