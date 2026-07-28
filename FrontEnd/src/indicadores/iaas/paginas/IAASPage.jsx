@@ -174,6 +174,11 @@ const IAASPage = () => {
               Generar
             </button>
           </div>
+          <span className="ia-legal-note" title="Este sistema solo extrae los valores de los Excel que subes para generar el reporte — no modifica ni altera los archivos originales en ningún momento.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
           <div className="ia-user-pill">
             <span className="ia-user-led" />
             {user?.user || 'Invitado'}
@@ -439,7 +444,10 @@ const IAASPage = () => {
         </button>
       )}
 
-      <ModalLoading isOpen={generando} />
+      <ModalLoading
+        isOpen={generando}
+        nota={<>Este proceso <strong>solo extrae</strong> los valores del Excel que subes para generar el reporte — <strong>no modifica ni altera</strong> el archivo original.</>}
+      />
       <IAASErrorToast mensaje={errorMensaje} trigger={errorTrigger} />
       <IAASValidacionPanel errores={errorLista} trigger={errorListaTrigger} />
 

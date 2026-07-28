@@ -109,6 +109,9 @@ const Login = () => {
 
         <div className="cl-left-footer">
           <span className="cl-status-dot" />
+          <p className="cl-legal-footer">
+            Este sitio web fue desarrollado de forma interna para apoyar el trabajo del área CIAE (Coordinación de Información y Análisis Estratégico), de acuerdo con sus necesidades operativas. La información aquí generada se utiliza como apoyo para la elaboración de reportes; su interpretación y uso posterior quedan a criterio de quien la consulta.
+          </p>
         </div>
       </div>
 

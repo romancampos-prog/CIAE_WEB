@@ -7,7 +7,7 @@ Usado en: iass/services/procesar_service.py, iass/controllers/reportes_controlle
 import io
 import xlsxwriter
 import openpyxl
-from iaas.config import MESES, RUTA_DATA_IAAS
+from iaas.config import MESES
 from iaas.services.calculos_iaas import (
     _CFG, UNIDADES_IAAS, UNIDADES_UCI,
     _filas_umbrales_iaas01, _rango_umbral_uci,
@@ -15,9 +15,6 @@ from iaas.services.calculos_iaas import (
     calcular_fila_iaas01, calcular_acumulado_iaas01, calcular_anual_iaas01,
     calcular_fila_iaas_uci, calcular_acumulado_iaas_uci, calcular_anual_iaas_uci,
 )
-
-RUTA_BASE_IAAS = RUTA_DATA_IAAS
-
 
 def _layout_iaas01():
     """
@@ -31,9 +28,10 @@ def _layout_iaas01():
 
     fila_nota = 3
 
-    # "MENSUAL" lleva el umbral (una fila por grupo) anclado bajo enero, metido entre el
-    # renglón del nombre de mes y el encabezado — por eso +3+n_filas_umbral en vez de +3.
-    fila_seccion_mensual = fila_nota + 1
+    # Un renglón en blanco entre la nota y "MENSUAL" para que respire un poco (igual que
+    # IAAS 02-06). "MENSUAL" lleva el umbral (una fila por grupo) anclado bajo enero, metido
+    # entre el renglón del nombre de mes y el encabezado — por eso +3+n_filas_umbral en vez de +3.
+    fila_seccion_mensual = fila_nota + 2
     fila_inicio_mensual  = fila_seccion_mensual + 3 + n_filas_umbral
     fila_fin_mensual     = fila_inicio_mensual - 1 + N
 
@@ -68,7 +66,7 @@ def _escribir_bloque_mesIAAS_01(hoja, estilos, fila_titulo_mes, fila_subencabeza
     if con_fila_mes:
         hoja.merge_range(fila_titulo_mes, col_inicio, fila_titulo_mes, col_inicio + 3, nombre_mes, estilos["encabezado_meses"])
     hoja.set_row(fila_subencabezado, 28)
-    hoja.set_column(col_inicio,     col_inicio,     24)
+    hoja.set_column(col_inicio,     col_inicio,     21)
     hoja.set_column(col_inicio + 1, col_inicio + 1, 12)
     hoja.set_column(col_inicio + 2, col_inicio + 2, 11)
     hoja.set_column(col_inicio + 3, col_inicio + 3, 11)
@@ -99,17 +97,28 @@ def _escribir_IAAS01(libro, estilos):
     fila_nota    = 3
 
     hoja = libro.add_worksheet("IAAS 01")
+    hoja.hide_gridlines(2)
     hoja.set_column(0, 0, 27)
     hoja.set_default_row(20)
     hoja.freeze_panes(0, 1)
     libro.formats[0].set_font_name("Calibri")
 
-    hoja.merge_range(fila_titulo1, 1, fila_titulo1, TOTAL_COLS - 1, "INFORMES DE INFECCIONES NOSOCOMIALES", estilos["titulo"])
-    hoja.merge_range(fila_titulo2, 1, fila_titulo2, TOTAL_COLS - 1, "DELEGACIÓN GUANAJUATO",                estilos["titulo"])
-    hoja.merge_range(fila_titulo3, 1, fila_titulo3, TOTAL_COLS - 1, "INFORMES DE INFECCIONES NOSOCOMIALES", estilos["titulo"])
-    hoja.merge_range(fila_nota,    1, fila_nota,    TOTAL_COLS - 1,
-        "NOTA:LA SUMATORIA INCLUYE UNICAMENTE LAS 8 UNIDADES QUE ENTRAN A EVALUACIÓN QUE SON LA 2, 3, 4, 10, 13, 21, 54, 58",
-        estilos["titulo_tabla"])
+
+
+    # Título, subtítulo y nota se repiten en dos mitades (Enero-Junio / Julio-Diciembre) --
+    # igual que MENSUAL/MENSUAL ACUMULADO, si no se pierden de vista al hacer scroll a la
+    # segunda mitad del año.
+    mitad_cols = 1 + 6 * COLS_MES
+    for fila, texto, estilo in (
+        (fila_titulo1, "INFORMES DE INFECCIONES NOSOCOMIALES",              estilos["titulo_indicador"]),
+        (fila_titulo2, "DELEGACIÓN GUANAJUATO",                             estilos["titulo_indicador"]),
+        (fila_titulo3, "INFORMES DE INFECCIONES NOSOCOMIALES",              estilos["titulo_indicador"]),
+        (fila_nota,    "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS", estilos["titulo_tabla"]),
+    ):
+        hoja.merge_range(fila, 1,          fila, mitad_cols - 1, texto, estilo)
+        hoja.merge_range(fila, mitad_cols, fila, TOTAL_COLS - 1, texto, estilo)
+        
+        
 
     def _bloque(fila_seccion, etiqueta, meses, con_fila_mes=True, filas_umbral=None):
         """Escribe la etiqueta de sección (igual que IAAS 02-06) + UNIDADES + los meses dados.
@@ -134,7 +143,14 @@ def _escribir_IAAS01(libro, estilos):
 
         ancho_bloque = 1 + len(meses) * COLS_MES
         hoja.write(fila_seccion, 0, "", estilos["titulo_iass06"])
-        hoja.merge_range(fila_seccion, 1, fila_seccion, ancho_bloque - 1, etiqueta, estilos["titulo_iass06"])
+        # Igual que IAAS 02-06: si el bloque cruza Julio, la barra se repite en dos mitades
+        # para que no se pierda de vista al hacer scroll a la segunda mitad del año.
+        if "JULIO" in meses:
+            corte = 1 + meses.index("JULIO") * COLS_MES
+            hoja.merge_range(fila_seccion, 1,     fila_seccion, corte - 1,       etiqueta, estilos["titulo_iass06"])
+            hoja.merge_range(fila_seccion, corte, fila_seccion, ancho_bloque - 1, etiqueta, estilos["titulo_iass06"])
+        else:
+            hoja.merge_range(fila_seccion, 1, fila_seccion, ancho_bloque - 1, etiqueta, estilos["titulo_iass06"])
         if con_fila_mes:
             hoja.merge_range(fila_encab, 0, fila_sub, 0, "UNIDADES", estilos["unidades_txt"])
         else:
@@ -165,6 +181,8 @@ def _escribir_IAAS01(libro, estilos):
     _bloque(layout["fila_seccion_anual"], "ANUAL", [""], con_fila_mes=False)
 
 
+
+
 def Excel_IAAS01(anio: str = None):
     salida  = io.BytesIO()
     libro   = xlsxwriter.Workbook(salida)
@@ -190,12 +208,15 @@ _COLOR_DORADO = "#9A7026"
 _COLOR_ROJO   = "#7E0808"
 
 
+
+
 def Estilos_IAAS01(libro):
     _cap = {"font_size": 9, "align": "center", "valign": "vcenter",
             "bold": True, "border": 1, "border_color": "#A6A6A6", "num_format": "0.00"}
     return {
         "titulo":               libro.add_format({"font_size": 9, "align": "center"}),
-        "titulo_tabla":         libro.add_format({"font_size": 16, "align": "center", "bold": True}),
+        "titulo_tabla":         libro.add_format({"font_size": 12, "align": "center", "bold": True, "font_color": _COLOR_DORADO}),
+        "titulo_indicador":     libro.add_format({"font_size": 16, "align": "center", "bold": True, "font_color": _COLOR_VERDE}),
         "unidades_txt":         libro.add_format({"font_size": 11, "align": "center", "bold": True, "valign": "vcenter",
                                                    "bg_color": "#F2F2F2", "border_color": "#A6A6A6", "border": 1}),
         "lista_unidades_txt":   libro.add_format({"font_size": 9, "bg_color": "#F2F2F2", "border_color": "#A6A6A6",
@@ -213,16 +234,19 @@ def Estilos_IAAS01(libro):
                                                    "border": 1, "valign": "vcenter", "align": "center",
                                                    "text_wrap": True, "bold": True, "font_color": "#000000"}),
         # Idénticos a color_celda1/2 (mismo fondo, borde, negrita) — solo cambia
-        # font_color a gris RGB(191,191,191): un numerador o denominador que sí
+        # font_color a gris RGB(49,134,155): un numerador o denominador que sí
         # existe en una fila Gris, pero que no se contó en el total OOAD.
         "color_celda1_incompleto": libro.add_format({"font_size": 9, "bg_color": "#f9f9f9", "border_color": "#A6A6A6",
                                                       "border": 1, "valign": "vcenter", "align": "center",
-                                                      "text_wrap": True, "bold": True, "font_color": "#BFBFBF"}),
+                                                      "text_wrap": True, "bold": True, "font_color": "#31869B"}),
         "color_celda2_incompleto": libro.add_format({"font_size": 9, "bg_color": "#FFFFFF", "border_color": "#A6A6A6",
                                                       "border": 1, "valign": "vcenter", "align": "center",
-                                                      "text_wrap": True, "bold": True, "font_color": "#BFBFBF"}),
+                                                      "text_wrap": True, "bold": True, "font_color": "#31869B"}),
+        # Solo borde superior -- un borde completo (los 4 lados) dejaba una línea vertical
+        # justo en el corte de las dos mitades (Ene-Jun / Jul-Dic), como si fueran dos cajas
+        # separadas. El borde de arriba sí se conserva, porque no cae en ese corte.
         "titulo_iass06":        libro.add_format({"font_size": 11, "bold": True, "align": "center", "valign": "vcenter",
-                                                   "border": 1, "border_color": "#A6A6A6",
+                                                   "top": 1, "top_color": "#A6A6A6",
                                                    "bg_color": "#F2F2F2", "font_color": "#3D3D3D"}),
         "header_grupo2":        libro.add_format({"font_size": 9, "bg_color": "#808080", "border_color": "#A6A6A6",
                                                    "border": 1, "valign": "vcenter", "align": "left", "bold": True,
@@ -253,6 +277,8 @@ _IAAS_UCI_CONFIG = {
 }
 
 
+
+
 def _layout_iaas_uci():
     """
     Filas clave compartidas por _escribir_IAAS_UCI, _escribir_datos_IAAS_uci y
@@ -261,9 +287,12 @@ def _layout_iaas_uci():
     """
     N = len(UNIDADES_UCI)
 
+    fila_nota = 1
+
+    # Un renglón en blanco entre la nota y "MENSUAL" para que respire un poco.
     # "MENSUAL" lleva 3 filas de más (Esperado/Medio/Bajo) pegadas arriba de sus encabezados,
     # igual que FTP — por eso +6 en vez de +3. Acumulado y Anual no llevan umbral, se quedan igual.
-    fila_inicio_mensual = 1
+    fila_inicio_mensual = fila_nota + 2
     fila_hosp1_mensual  = fila_inicio_mensual + 6
     fila_fin_mensual     = fila_inicio_mensual + N + 5
     fila_delega_mensual  = fila_fin_mensual + 1
@@ -281,6 +310,7 @@ def _layout_iaas_uci():
     fila_delega_anual  = fila_fin_anual + 1
 
     return {
+        "fila_nota":             fila_nota,
         "fila_inicio_mensual":   fila_inicio_mensual,
         "fila_hosp1_mensual":    fila_hosp1_mensual,
         "fila_delega_mensual":   fila_delega_mensual,
@@ -291,6 +321,8 @@ def _layout_iaas_uci():
         "fila_hosp1_anual":      fila_hosp1_anual,
         "fila_delega_anual":     fila_delega_anual,
     }
+
+
 
 
 def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg, meses=None, con_fila_mes=True, con_umbral=False):
@@ -323,7 +355,15 @@ def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg, 
     fila_hosp1 = fila_sub + 1
 
     hoja.write(fila_seccion, 0, "", estilos["titulo_iass06"])
-    hoja.merge_range(fila_seccion, 1, fila_seccion, ancho_bloque - 1, etiqueta_seccion, estilos["titulo_iass06"])
+    # Si el bloque cruza Julio (MENSUAL: Ene-Dic; MENSUAL ACUMULADO: Feb-Dic), la barra del
+    # título se repite en dos mitades -- si no, se pierde de vista al hacer scroll a la
+    # segunda mitad del año. ANUAL (meses=[""]) nunca cruza Julio, se queda en una sola.
+    if "JULIO" in meses:
+        corte = 1 + meses.index("JULIO") * COLS_MES
+        hoja.merge_range(fila_seccion, 1,     fila_seccion, corte - 1,       etiqueta_seccion, estilos["titulo_iass06"])
+        hoja.merge_range(fila_seccion, corte, fila_seccion, ancho_bloque - 1, etiqueta_seccion, estilos["titulo_iass06"])
+    else:
+        hoja.merge_range(fila_seccion, 1, fila_seccion, ancho_bloque - 1, etiqueta_seccion, estilos["titulo_iass06"])
     if con_fila_mes:
         hoja.merge_range(fila_mes, 0, fila_sub, 0, "UNIDADES", estilos["unidades_txt"])
     else:
@@ -355,6 +395,8 @@ def _escribir_tabla_iass_uci(hoja, estilos, fila_inicio, etiqueta_seccion, cfg, 
     return fila_hosp1 + cant_unidades - 1
 
 
+
+
 def _escribir_IAAS_UCI(libro, estilos, numero: str):
     cfg        = _IAAS_UCI_CONFIG[numero]
     COLS_MES   = 3
@@ -362,6 +404,7 @@ def _escribir_IAAS_UCI(libro, estilos, numero: str):
     layout     = _layout_iaas_uci()
 
     hoja = libro.add_worksheet(cfg["hoja"])
+    hoja.hide_gridlines(2)
     hoja.set_column(0, 0, 32)
     hoja.freeze_panes(0, 1)
     hoja.set_column(1, TOTAL_COLS - 1, 9)
@@ -370,7 +413,17 @@ def _escribir_IAAS_UCI(libro, estilos, numero: str):
     hoja.set_default_row(20)
     libro.formats[0].set_font_name("Calibri")
 
-    hoja.merge_range(0, 0, 0, TOTAL_COLS - 1, cfg["titulo"], estilos["titulo_iass06"])
+    # Título y nota se repiten en dos mitades (Enero-Junio / Julio-Diciembre) -- si no, al
+    # hacer scroll hacia la segunda mitad del año se pierden de vista por completo.
+    mitad_cols = 1 + 6 * COLS_MES
+    fila_titulo = 0
+    fila_nota   = layout["fila_nota"]
+    nota_txt    = "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS"
+
+    hoja.merge_range(fila_titulo, 0,          fila_titulo, mitad_cols - 1, cfg["titulo"], estilos["titulo_indicador"])
+    hoja.merge_range(fila_titulo, mitad_cols, fila_titulo, TOTAL_COLS - 1, cfg["titulo"], estilos["titulo_indicador"])
+    hoja.merge_range(fila_nota,   0,          fila_nota,   mitad_cols - 1, nota_txt,      estilos["titulo_tabla"])
+    hoja.merge_range(fila_nota,   mitad_cols, fila_nota,   TOTAL_COLS - 1, nota_txt,      estilos["titulo_tabla"])
 
     def _fila_ooad(fila, ancho):
         hoja.write(fila, 0, "OOAD", estilos["delegacion_txt"])
@@ -387,6 +440,8 @@ def _escribir_IAAS_UCI(libro, estilos, numero: str):
     # "ANUAL": sin renglón de mes (no tiene mes que mostrar) — directo del título a los datos.
     _escribir_tabla_iass_uci(hoja, estilos, layout["fila_inicio_anual"], "ANUAL", cfg, meses=[""], con_fila_mes=False)
     _fila_ooad(layout["fila_delega_anual"], 1 + COLS_MES)
+
+
 
 
 def _Excel_IAAS_UCI(numero: str, anio: str = None) -> io.BytesIO:
@@ -417,18 +472,24 @@ def Excel_IAAS05(anio: str = None): return _Excel_IAAS_UCI("05", anio)
 def Excel_IAAS06(anio: str = None): return _Excel_IAAS_UCI("06", anio)
 
 
+
+
 def _estilo_tasa(estilos, color):
     return estilos.get(color, estilos["sin_datos"])
+
+
 
 
 def _estilo_valor(estilos, clave_base, valor, color_tasa):
     """Formato de una celda de numerador/denominador. Si la fila es Gris pero
     este valor específico sí existe (no ""/None), usa la variante en gris
-    RGB(191,191,191) del mismo formato base -- mismo fondo/borde/negrita,
+    RGB(49,134,155) del mismo formato base -- mismo fondo/borde/negrita,
     solo marca que no se contó en el total OOAD."""
     if color_tasa == "Gris" and valor not in (None, ""):
         return estilos.get(f"{clave_base}_incompleto", estilos[clave_base])
     return estilos[clave_base]
+
+
 
 
 def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
@@ -462,6 +523,8 @@ def _escribir_acumulado_IAAS01(hoja, estilos, all_months):
         hoja.write(fila_del, col_base + 3, val_del["tasa"],        _estilo_tasa(estilos, val_del["color_tasa"]))
 
 
+
+
 def _escribir_anual_IAAS01(hoja, estilos, all_months):
     """Bloque 'ANUAL': el acumulado Ene→último mes registrado, la misma cuenta que ya
     hace _escribir_acumulado_IAAS01 para su última columna, pero puesta aparte para
@@ -493,6 +556,8 @@ def _escribir_anual_IAAS01(hoja, estilos, all_months):
     hoja.write(fila_del, col_base + 3, val_del["tasa"],        _estilo_tasa(estilos, val_del["color_tasa"]))
 
 
+
+
 def _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, indicador):
     layout    = _layout_iaas_uci()
     fila_ini  = layout["fila_hosp1_acumulado"]
@@ -517,6 +582,8 @@ def _escribir_acumulado_IAAS_uci(hoja, estilos, all_months, indicador):
         hoja.write(fila_del, col_base,     val_ooad["numerador"],   est_del)
         hoja.write(fila_del, col_base + 1, val_ooad["denominador"], est_del)
         hoja.write(fila_del, col_base + 2, val_ooad["tasa"],        _estilo_tasa(estilos, val_ooad["color_tasa"]))
+
+
 
 
 def _escribir_anual_IAAS_uci(hoja, estilos, all_months, indicador):
@@ -590,7 +657,6 @@ def _escribir_datos_IAAS01(hoja, estilos, mes_num, datos):
 
 def Excel_IAAS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:
     mes_num      = int(mes)
-    ruta_archivo = RUTA_BASE_IAAS / str(anio) / f"IAAS_{anio}.xlsx"
     historicos   = _leer_historicos_IAAS(anio, mes_num)
 
     salida  = io.BytesIO()
@@ -631,15 +697,4 @@ def Excel_IAAS_Completo(anio: str, mes: str, datos: dict) -> io.BytesIO:
 
     libro.close()
     salida.seek(0)
-
-    ruta_archivo.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with open(ruta_archivo, "wb") as f:
-            f.write(salida.read())
-        salida.seek(0)
-        print(f"[IAAS] Guardado: {ruta_archivo}")
-    except PermissionError:
-        salida.seek(0)
-        raise PermissionError(f"El archivo IAAS_{anio}.xlsx está abierto en Excel. Ciérralo e intenta de nuevo.")
-
     return salida

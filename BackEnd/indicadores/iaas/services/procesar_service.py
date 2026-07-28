@@ -46,11 +46,7 @@ def _calcular_indicadores_pendientes(datos: dict, numerador: dict) -> tuple[list
     return list(pendientes_ind.keys()), pendientes_ind
 
 
-def _guardar_sesion_json(
-    anio: str, mes: str, datos: dict,
-    unidades_pendientes: list,
-    indicadores_pendientes: dict | None = None,
-) -> None:
+def _guardar_sesion_json(anio: str, mes: str, datos: dict) -> None:
     mes_nombre = MESES_NOMBRE.get(mes, mes)
     generado   = datetime.datetime.now().isoformat(timespec="seconds")
 
@@ -69,10 +65,8 @@ def _guardar_sesion_json(
         }
 
         json_data["MESES"][mes_nombre] = {
-            "GENERADO":              generado,
-            "UNIDADES_PENDIENTES":   unidades_pendientes,
-            "INDICADORES_PENDIENTES": indicadores_pendientes or {},
-            "DATOS":                 datos_mes,
+            "GENERADO": generado,
+            "DATOS":    datos_mes,
         }
 
         escribir_indicador_anio(anio, ind_n, json_data)
@@ -182,8 +176,8 @@ def procesar_IAAS(anio: str, mes: str, numerador: dict, denominador: dict,
         if ind_datos:
             datos[ind_key] = _recalcular_total_ooad(ind_datos, ind_key)
 
-    unidades_pendientes, indicadores_pendientes = _calcular_indicadores_pendientes(datos, numerador)
-    _guardar_sesion_json(anio, mes, datos, unidades_pendientes, indicadores_pendientes)
+    unidades_pendientes, _ = _calcular_indicadores_pendientes(datos, numerador)
+    _guardar_sesion_json(anio, mes, datos)
 
     from iaas.services.generar_iaas import Excel_IAAS_Completo
     stream      = Excel_IAAS_Completo(anio, mes, datos)
@@ -230,7 +224,7 @@ def completar_unidad_tardia(anio: str, mes: str, unidad: str,
 
     pendientes = [u for u in ind_pend.keys()]
 
-    _guardar_sesion_json(anio, mes, datos_completos, pendientes, ind_pend)
+    _guardar_sesion_json(anio, mes, datos_completos)
 
     from iaas.services.generar_iaas import Excel_IAAS_Completo
     stream      = Excel_IAAS_Completo(anio, mes, datos_completos)

@@ -34,7 +34,7 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
 
 def _estilo_valor(fmt, clave_base, valor):
     """Formato de una celda de numerador/denominador dentro de una fila Gris.
-    Si el valor sí existe (no None/""), usa la variante gris RGB(191,191,191)
+    Si el valor sí existe (no None/""), usa la variante gris RGB(49,134,155)
     bold del mismo formato base -- mismo fondo/borde, solo marca que no se
     contó en el total."""
     if valor not in (None, ""):
@@ -51,6 +51,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         workbook  = xlsxwriter.Workbook(output)
         workbook.set_properties({'author': 'Web CIAE'})
         worksheet = workbook.add_worksheet(indicador or "Base SIAIS")
+        worksheet.hide_gridlines(2)
         fmt       = obtener_estilos_excel(workbook)
 
         MESES_LISTA    = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -70,6 +71,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         worksheet.set_column(1, ultima_col, 14)
         worksheet.set_default_row(20)
 
+        worksheet.merge_range(0, 0, 0, ultima_col, "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS", fmt['nota_completas'])
         worksheet.merge_range(1, 0, 1, ultima_col, indicadorTitulo.upper(), fmt['titulo_izq'])
         worksheet.write(3, 0, "  NUMERADOR",   fmt['etiqueta_bold'])
         worksheet.merge_range(3, 1, 3, ultima_col, f"  {indicadordesNum.upper()}", fmt['descripcion'])
@@ -146,7 +148,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                     if res is None:
                         # Gris = dato incompleto -- se muestra el numerador o denominador
                         # que sí tenga valor (el que sea None se deja vacio), en gris
-                        # RGB(191,191,191) bold para marcar que no se contó en el total;
+                        # RGB(49,134,155) bold para marcar que no se contó en el total;
                         # solo el resultado se deja vacio y en gris.
                         worksheet.write(fila_excel, col_base,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))
                         worksheet.write(fila_excel, col_base + 1, den if den is not None else "", _estilo_valor(fmt, clave_base, den))
@@ -227,6 +229,7 @@ def obtener_estilos_excel(workbook):
 
     return {
         'titulo_izq':            workbook.add_format({**base, 'bold': True, 'font_size': 16, 'font_color': C_VERDE, 'border': 0, 'align': 'left'}),
+        'nota_completas':        workbook.add_format({'font_name': 'Calibri', 'font_size': 14, 'bold': True, 'align': 'center'}),
         'etiqueta_bold':         workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS, 'align': 'left'}),
         'descripcion':           workbook.add_format({**base, 'text_wrap': True, 'font_color': '#444444', 'align': 'left'}),
         'columna_unidad_header': workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS}),
@@ -239,10 +242,10 @@ def obtener_estilos_excel(workbook):
         'dato_normal':           workbook.add_format({**base, 'num_format': '#,##0'}),
         'fila_par':              workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0'}),
         # Idénticos a dato_normal/fila_par -- solo cambia font_color a gris
-        # RGB(191,191,191) bold: un numerador o denominador que sí existe en una
+        # RGB(49,134,155) bold: un numerador o denominador que sí existe en una
         # fila Gris, pero que no se contó en el total (mismo criterio que IAAS).
-        'dato_normal_incompleto': workbook.add_format({**base, 'num_format': '#,##0', 'font_color': '#BFBFBF', 'bold': True}),
-        'fila_par_incompleto':    workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0', 'font_color': '#BFBFBF', 'bold': True}),
+        'dato_normal_incompleto': workbook.add_format({**base, 'num_format': '#,##0', 'font_color': '#31869B', 'bold': True}),
+        'fila_par_incompleto':    workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0', 'font_color': '#31869B', 'bold': True}),
         'total_gris_80':         workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_TOTAL, 'font_color': 'white', 'num_format': '#,##0'}),
         'Esperado_Capsula':      workbook.add_format({**base, 'bg_color': C_VERDE,   'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
         'Medio_Capsula':         workbook.add_format({**base, 'bg_color': C_DORADO,  'font_color': 'white', 'bold': True, 'num_format': '0.00'}),

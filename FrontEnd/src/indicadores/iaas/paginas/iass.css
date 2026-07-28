@@ -45,6 +45,16 @@
 }
 .ia-btn-back:hover { background: #0b5445; color: white; border-color: #0b5445; transform: translateX(-2px); }
 
+/* Leyenda de solo-lectura (ícono en el header, texto en tooltip nativo) */
+.ia-legal-note {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  color: #64748b;
+  cursor: help;
+}
+.ia-legal-note:hover { background: rgba(100,116,139,0.12); color: #334155; }
+
 .ia-user-pill {
   display: flex; align-items: center; gap: 7px;
   background: rgba(11,84,69,0.06); border: 1px solid rgba(11,84,69,0.12);

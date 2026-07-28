@@ -16,8 +16,10 @@ from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
 from auth.services.auth_service import verificar_credenciales
 from ftp.services.ftp_service import obtenerInformacionIndicador, consultarTodosIndicadores
-from ftp.services.reporte_final import ExcelReporteFinal
-from ftp.services.reporte_categoria import preparar_datos_indicador, escribir_hoja_indicador
+from ftp.services.reporte_final import ExcelReporteFinal, ExcelReporteGuardado
+from ftp.services.reporte_categoria import (
+    preparar_datos_indicador, preparar_datos_guardados, escribir_hoja_indicador,
+)
 from ftp.services.generar_excel import obtener_estilos_excel
 from ftp.services.datos_json_service import meses_con_datos as ftp_meses_con_datos
 from ftp.services.grafica_service import calcular_datos_grafica_ftp
@@ -70,6 +72,31 @@ async def reporte(
         return ApiResponse(success=False, message=resultado.get("mensaje", "Error desconocido"), data={
             "restricciones": resultado.get("restricciones"),
         })
+
+
+# ─── /Indicadores/guardado ────────────────────────────────────────────────────
+# Variante de solo lectura de /Indicadores -- para descargar desde gráficas.
+# Nunca extrae de FTP ni guarda nada (nunca cierra un mes ni pisa el semanal),
+# solo vuelca al Excel lo que ya está guardado. Por eso usa ROLES_FTP_GRAF
+# (mismo acceso que /FTP/datos-grafica), no ROLES_FTP_FULL.
+
+@router.get("/Indicadores/guardado")
+async def reporte_guardado(
+    indicador: str = Query(...),
+    ano:       str = Query(...),
+    mes:       str = Query(...),
+    payload:   dict = Depends(solo_roles(*ROLES_FTP_GRAF))
+):
+    resultado = ExcelReporteGuardado(indicador, ano, mes)
+
+    if resultado["status"] == "success":
+        excel_b64 = base64.b64encode(resultado["stream"].getvalue()).decode("utf-8")
+        return ApiResponse(success=True, message=resultado.get("mensaje", "Reporte obtenido"), data={
+            "archivo_b64":    excel_b64,
+            "nombre_archivo": resultado["nombre_archivo"],
+        })
+    else:
+        return ApiResponse(success=False, message=resultado.get("mensaje", "Error desconocido"))
 
 
 # ─── /Indicadores/regenerar ────────────────────────────────────────────────────
@@ -261,6 +288,75 @@ async def generar_categoria(request: Request, payload: dict = Depends(solo_roles
         raise HTTPException(status_code=400, detail="Faltan parámetros: categoria, ano, mes")
 
     return await _generar_categoria_excel(categoria, ano, mes, semana)
+
+
+# ─── /generar-categoria/guardado ───────────────────────────────────────────────
+# Variante de solo lectura de /generar-categoria -- para "descargar todos" desde
+# gráficas. Nunca extrae de FTP ni guarda nada, solo vuelca al Excel lo que cada
+# indicador ya tenga guardado (definitivo o semanal). Usa ROLES_FTP_GRAF, igual
+# que /Indicadores/guardado.
+
+@router.get("/generar-categoria/guardado")
+async def generar_categoria_guardado(
+    categoria: str = Query(...),
+    ano:       str = Query(...),
+    mes:       str = Query(...),
+    payload:   dict = Depends(solo_roles(*ROLES_FTP_GRAF))
+):
+    todos    = consultarTodosIndicadores()
+    cat_data = todos.get(categoria)
+    if not cat_data:
+        raise HTTPException(status_code=404, detail=f"Categoría '{categoria}' no encontrada")
+
+    indicadores = cat_data.get("indicadores", [])
+    if not indicadores:
+        raise HTTPException(status_code=404, detail="No hay indicadores habilitados en esta categoría")
+
+    loop  = asyncio.get_running_loop()
+    pares = []
+    for ind in indicadores:
+        resultado = await loop.run_in_executor(None, preparar_datos_guardados, ind, ano, mes)
+        pares.append((ind, resultado))
+
+    output = io.BytesIO()
+    wb     = xlsxwriter.Workbook(output)
+    wb.set_properties({'author': 'Web CIAE'})
+    fmt    = obtener_estilos_excel(wb)
+
+    completados = []
+    errores     = {}
+
+    for indicador, resultado in pares:
+        if resultado["status"] != "success":
+            errores[indicador] = resultado.get("mensaje", "Error desconocido")
+            continue
+        try:
+            escribir_hoja_indicador(
+                wb, fmt, indicador,
+                resultado["diccionarioPrevio"],
+                resultado["metadata"],
+                ano, mes, resultado["semana"], resultado["es_semana"]
+            )
+            completados.append(indicador)
+        except Exception as exc:
+            errores[indicador] = str(exc)
+
+    wb.close()
+
+    if not completados:
+        return ApiResponse(success=False, message="Ningún indicador tiene datos guardados para ese mes", data={"errores": errores})
+
+    output.seek(0)
+    excel_b64 = base64.b64encode(output.getvalue()).decode("utf-8")
+    mes_fmt   = str(mes).zfill(2)
+    nombre    = f"{categoria}_{ano}_{mes_fmt}.xlsx"
+
+    return ApiResponse(success=True, message="Categoría obtenida", data={
+        "archivo_b64":    excel_b64,
+        "nombre_archivo": nombre,
+        "completados":    completados,
+        "errores":        errores,
+    })
 
 
 # ─── /generar-categoria/regenerar ──────────────────────────────────────────────

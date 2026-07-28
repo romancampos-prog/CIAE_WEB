@@ -19,7 +19,7 @@
   background: white;
   padding: 40px 48px 36px;
   border-radius: 20px; text-align: center;
-  width: 95%; max-width: 420px;
+  width: 95%; max-width: 500px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.25);
   animation: mcl-popIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
   position: relative; overflow: hidden;
@@ -71,3 +71,14 @@
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(320%); }
 }
+
+/* Nota de solo-lectura (opcional, ej. FTP) -- texto normal, sin caja, se envuelve como
+   párrafo; el ícono queda inline con la primera línea. */
+.mcl-nota {
+  margin: 18px 0 0; text-align: center;
+  font-size: 0.76rem; font-weight: 500; line-height: 1.45; color: #9a7026;
+}
+.mcl-nota svg {
+  display: inline-block; vertical-align: -2px; margin-right: 5px;
+}
+.mcl-nota strong { font-weight: 700; }

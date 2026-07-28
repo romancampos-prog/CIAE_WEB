@@ -126,6 +126,11 @@ const IndicadoresPage = () => {
               Actualizar Población
             </button>
           )}
+          <span className="ind-legal-note" title="Este sistema solo consulta la información de los archivos FTP originales para generar los reportes — no los modifica, edita ni elimina en ningún momento.">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
           <div className="ind-user-chip">
             <span className="ind-user-dot" />
             {user?.user || 'Invitado'}
@@ -383,7 +388,10 @@ const IndicadoresPage = () => {
         </>
       )}
 
-      <ModalLoading isOpen={cargando || cargandoBatch} />
+      <ModalLoading
+        isOpen={cargando || cargandoBatch}
+        nota={<>Este proceso <strong>solo consulta</strong> la información de los archivos FTP originales — <strong>no los modifica, edita ni elimina</strong> en ningún momento.</>}
+      />
       <ModalRestricciones
         isOpen={mostrarRestricciones}
         restricciones={restriccionesData}

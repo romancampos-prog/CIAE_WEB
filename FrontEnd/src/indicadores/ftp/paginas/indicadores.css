@@ -481,6 +481,16 @@
   font-size: 0.68rem; color: #94a3b8; text-align: center; margin: 0;
 }
 
+/* ── Leyenda de solo-lectura (ícono en el header, texto en tooltip nativo) ── */
+.ind-legal-note {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  color: #64748b;
+  cursor: help;
+}
+.ind-legal-note:hover { background: rgba(100,116,139,0.12); color: #334155; }
+
 /* ── Card del indicador seleccionado ── */
 .ind-sel-card {
   position: relative;

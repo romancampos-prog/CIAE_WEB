@@ -70,9 +70,16 @@ def _calcular_indicador_iaas(anio: str, ind_n: int) -> dict:
     for unidad, registros in ind_data.items():
         for reg in registros:
             mes_num = int(reg["mes"])
-            acum_num, acum_den, tiene = _acumular_unidad(all_months, unidad, mes_num)
-            if not tiene:
+            acum_num, acum_den, tiene_num, tiene_den, completo = _acumular_unidad(all_months, unidad, mes_num)
+            if not tiene_num and not tiene_den:
                 reg.update(numerador_acum=None, denominador_acum=None, tasa_acum=None, color_acum="Gris")
+                continue
+            if not completo:
+                reg.update(
+                    numerador_acum=acum_num if tiene_num else None,
+                    denominador_acum=acum_den if tiene_den else None,
+                    tasa_acum=None, color_acum="Gris",
+                )
                 continue
             raw = {unidad: {"numerador": acum_num, "denominador": acum_den}}
             calc = (_semaforo_IAAS01(raw) if ind_key == "IAAS 01" else _semaforo_general(raw, ind_key))[unidad]

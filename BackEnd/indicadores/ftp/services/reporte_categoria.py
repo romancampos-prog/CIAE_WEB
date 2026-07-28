@@ -15,7 +15,9 @@ from ftp.services.generar_excel import (
     obtener_estilos_excel, _leer_historicos, _calcular_color, _estilo_valor
 )
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
-from ftp.services.datos_json_service import guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes
+from ftp.services.datos_json_service import (
+    guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes, leer_mes_guardado,
+)
 
 MESES_LISTA = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -72,6 +74,40 @@ def preparar_datos_indicador(indicador: str, ano: str, mes: str, semana) -> dict
         return {"status": "error", "mensaje": str(exc)}
 
 
+def preparar_datos_guardados(indicador: str, ano: str, mes: str) -> dict:
+    """
+    Variante de solo lectura de preparar_datos_indicador -- usada al descargar
+    "todos" desde gráficas. Nunca extrae de FTP ni guarda nada: solo toma lo que
+    ya está guardado (definitivo o semanal, ver leer_mes_guardado). Si ese mes
+    no tiene ningún dato guardado, status=error -- nunca se genera nada nuevo.
+    """
+    try:
+        info = obtenerInformacionIndicador(indicador)
+        metadata = {
+            "titulo":    info.get("titulo"),
+            "desNum":    info.get("descripcionNumerador"),
+            "desDen":    info.get("descripcionDenominador"),
+            "arch":      info.get("nombreArchivoFinal"),
+            "semaforo":  info.get("semaforo", {}),
+            "decimales": info.get("decimales"),
+        }
+
+        diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes)
+        if diccionarioPrevio is None:
+            return {"status": "error", "mensaje": f"{indicador} no tiene ningún dato guardado para ese mes."}
+
+        return {
+            "status":            "success",
+            "diccionarioPrevio": diccionarioPrevio,
+            "errores":           {},
+            "metadata":          metadata,
+            "es_semana":         es_semana,
+            "semana":            semana,
+        }
+    except Exception as exc:
+        return {"status": "error", "mensaje": str(exc)}
+
+
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
@@ -97,10 +133,12 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     v_critico  = limites.get("Alto") if tiene_alto else limites.get("Bajo", 0)
 
     ws = wb.add_worksheet(indicador[:31])
+    ws.hide_gridlines(2)
     ws.set_column(0, 0, 50)
     ws.set_column(1, ultima_col, 14)
     ws.set_default_row(20)
 
+    ws.merge_range(0, 0, 0, ultima_col, "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS", fmt['nota_completas'])
     ws.merge_range(1, 0, 1, ultima_col, titulo.upper(), fmt['titulo_izq'])
     ws.write(3, 0, "  NUMERADOR",   fmt['etiqueta_bold'])
     ws.merge_range(3, 1, 3, ultima_col, f"  {desNum.upper()}", fmt['descripcion'])
@@ -176,7 +214,7 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
                 if res is None:
                     # Gris = dato incompleto -- se muestra el numerador o denominador que
-                    # sí tenga valor (el que sea None se deja vacio), en gris RGB(191,191,191)
+                    # sí tenga valor (el que sea None se deja vacio), en gris RGB(49,134,155)
                     # bold para marcar que no se contó en el total; solo el resultado se deja
                     # vacio y en gris.
                     ws.write(fila_excel, col,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))

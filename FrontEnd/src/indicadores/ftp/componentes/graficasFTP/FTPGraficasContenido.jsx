@@ -266,6 +266,9 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
         </div>
       )}
 
+      <p className="ig-legal-footer">
+        La información contenida en los archivos generados desde esta plataforma se proporciona únicamente con fines de consulta y análisis interno. Una vez descargado el archivo, el uso, resguardo y tratamiento posterior de estos datos es responsabilidad exclusiva de quien los descarga.
+      </p>
 
     </main>
   );
