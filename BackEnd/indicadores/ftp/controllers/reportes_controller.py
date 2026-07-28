@@ -53,10 +53,8 @@ async def reporte(
     semana:    Optional[str] = Query(None),
     payload:   dict = Depends(solo_roles(*ROLES_FTP_FULL))
 ):
-    from fastapi import status
-    if semana and payload.get("rol") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin acceso a reportes semanales")
-
+    # ROLES_FTP_FULL = ("admin", "trabajador_ftp") -- ambos pueden generar previos
+    # y definitivos por igual, no solo admin.
     resultado = ExcelReporteFinal(indicador, ano, mes, semana)
 
     if resultado["status"] == "success":
