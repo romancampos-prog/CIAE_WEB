@@ -1,10 +1,9 @@
 ﻿import './ftp.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo_imss from '../../../assets/logo_imms.png';
-import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
 import NavCard from '../../../shared/componentes/NavCard';
+import TopBar from '../../../shared/componentes/TopBar';
 import { getGreeting } from '../utils/horario';
 
 const IconDay = () => (
@@ -35,7 +34,6 @@ const IconNight = () => (
  */
 const FTPPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { icono } = getGreeting();
   const { esVisitante, puedeGenFTP, puedeGenIAAS } = useRol();
 
@@ -63,24 +61,7 @@ const FTPPage = () => {
         <div className="ciae-grid" />
       </div>
 
-      <header className="ftp-top-bar">
-        <div className="ftp-nav-left">
-          <img src={logo_imss} alt="IMSS" className="ftp-logo-top" />
-          <div className="ftp-nav-divider" />
-          <button className="ftp-btn-back" onClick={() => navigate('/CIAE/Inicio')}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Inicio
-          </button>
-        </div>
-        <div className="ftp-nav-right">
-          <div className="ftp-user-chip">
-            <span className="ftp-user-dot" />
-            {user?.user || 'Invitado'}
-          </div>
-        </div>
-      </header>
+      <TopBar backTo="/CIAE/Inicio" />
 
       <main className="ftp-main-content ftp-hub-main">
 

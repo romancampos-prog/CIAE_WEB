@@ -2,11 +2,11 @@
    INICIO — CIAE Hub
    ═══════════════════════════════════════════════ */
 .home-root {
-  width: 100%; height: 100%;
+  width: 100%; min-height: 100%;
   display: flex; flex-direction: column;
   background: #f0f4f2;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden; overflow-y: auto;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -28,50 +28,8 @@
   background-size: 44px 44px;
 }
 
-/* ── Nav ── */
-.home-nav {
-  position: relative; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px; height: 64px;
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(11,84,69,0.07);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-  animation: home-navIn 0.5s ease both;
-}
-@keyframes home-navIn {
-  from { opacity: 0; transform: translateY(-12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.home-nav-left  { display: flex; align-items: center; gap: 14px; }
-.home-nav-right { display: flex; align-items: center; gap: 12px; }
-.home-logo { height: 40px; width: auto; }
-.home-nav-divider { width: 1px; height: 26px; background: rgba(11,84,69,0.15); }
-.home-nav-label { font-size: 0.73rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; }
-
-.home-user-chip {
-  display: flex; align-items: center; gap: 7px;
-  background: #f0faf6; border: 1px solid rgba(11,84,69,0.15);
-  border-radius: 100px; padding: 5px 14px;
-  font-size: 0.78rem; font-weight: 600; color: #0b5445;
-}
-.home-user-dot {
-  width: 7px; height: 7px; background: #4ade80; border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
-  animation: home-pulse 2.2s ease infinite;
-}
-@keyframes home-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.65); }
-  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
-  100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
-}
-.home-logout-btn {
-  display: flex; align-items: center; gap: 7px;
-  background: white; border: 1.5px solid #e2e8f0; border-radius: 100px;
-  padding: 6px 16px; font-size: 0.78rem; font-weight: 700; color: #475569;
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-}
-.home-logout-btn:hover { border-color: #7e0808; color: #7e0808; box-shadow: 0 2px 10px rgba(126,8,8,0.1); }
+/* ── Nav: el header ahora es el componente compartido TopBar
+   (src/shared/componentes/TopBar.jsx + topbar.css) ── */
 
 /* ── Main ── */
 .home-main {
@@ -254,14 +212,20 @@
   box-shadow: 0 6px 16px rgba(11,84,69,0.3);
 }
 
-@media (max-width: 1120px) {
-  .home-cards { gap: 24px; }
-  .home-card  { width: 420px; }
+@media (max-width: 70rem) {
+  .home-cards { gap: 1.5rem; }
+  .home-card  { width: 26.25rem; }
 }
-@media (max-width: 900px) {
-  .home-nav { padding: 0 18px; }
-  .home-nav-label { display: none; }
-  .home-card  { width: 100%; max-width: 500px; }
-  .home-cards { gap: 16px; }
-  .home-hero-title { font-size: 1.9rem; }
+
+/* Tablets (mismo corte que auth.css: 48rem) */
+@media (max-width: 48rem) {
+  .home-card      { width: 100%; max-width: 31.25rem; }
+  .home-cards     { gap: 1rem; }
+}
+
+/* Celulares (mismo corte que auth.css: 30rem) */
+@media (max-width: 30rem) {
+  .home-main         { padding: 1rem 1rem 1.25rem; gap: 1.25rem; }
+  .home-hero-name-big { font-size: clamp(1.6rem, 8vw, 2.2rem); }
+  .home-hero-sub     { font-size: 0.78rem; }
 }

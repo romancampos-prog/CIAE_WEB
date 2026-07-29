@@ -1,41 +1,17 @@
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../../../auth/contexto/AuthContext'
+import TopBar from '../../../../shared/componentes/TopBar'
 
 /**
  * Barra superior del módulo Epidemiología.
- * Muestra la marca "Epidemiología · Dengue", el nombre del usuario y el botón para volver a Inicio.
+ * Usa el header compartido TopBar (logo, chip de usuario y botón volver);
+ * el label "Epidemiología · Dengue" va como contenido extra junto al logo.
  */
 export default function DengueHeader() {
-  const navigate = useNavigate()
-  const { user } = useAuth()
-
   return (
-    <header className="epi-topbar">
-      <div className="epi-topbar-left">
-        <div className="epi-brand-icon">🦟</div>
-        <div className="epi-nav-divider" />
-        <div>
-          <div className="epi-nav-label">Epidemiología · Dengue</div>
-          <div className="epi-nav-sublabel">IMSS OOAD Guanajuato</div>
-        </div>
+    <TopBar backTo="/CIAE/Epidemiologia">
+      <div>
+        <div className="epi-nav-label">Epidemiología · Dengue</div>
+        <div className="epi-nav-sublabel">IMSS OOAD Guanajuato</div>
       </div>
-
-      <div className="epi-topbar-right">
-        {user && (
-          <div className="epi-user-chip">
-            <span className="epi-user-dot" />
-            <span>{user.user || 'Usuario'}</span>
-          </div>
-        )}
-        <button className="epi-btn-back" onClick={() => navigate('/CIAE/Epidemiologia')}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/>
-            <polyline points="12 19 5 12 12 5"/>
-          </svg>
-          Epidemiología
-        </button>
-      </div>
-    </header>
+    </TopBar>
   )
 }

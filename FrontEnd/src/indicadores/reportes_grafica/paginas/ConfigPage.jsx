@@ -6,7 +6,7 @@ import { getReporte, getMesesGenerados } from '../api/reportes';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalExito from '../componentes/modal/ModalExito';
 import ToastWarning from '../componentes/avisos/ToastWarning';
-import logo_imss from '../../../assets/logo_imms.png';
+import TopBar from '../../../shared/componentes/TopBar';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
@@ -132,25 +132,10 @@ const ConfiguracionReporte = () => {
       </div>
 
       {/* Nav */}
-      <header className="cfg-nav">
-        <div className="cfg-nav-left">
-          <img src={logo_imss} alt="IMSS" className="cfg-logo" />
-          <div className="cfg-nav-sep" />
-          <button className="cfg-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/FTP/Generar')}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Indicadores
-          </button>
-        </div>
-        <div className="cfg-nav-right">
-          {indicadorSel && <span className="cfg-ind-badge">{indicadorSel}</span>}
-          <div className="cfg-user-chip">
-            <span className="cfg-user-dot" />
-            {user?.user || 'Invitado'}
-          </div>
-        </div>
-      </header>
+      <TopBar
+        backTo="/CIAE/IndicadoresMedicos/FTP/Generar"
+        rightExtra={indicadorSel && <span className="cfg-ind-badge">{indicadorSel}</span>}
+      />
 
       {/* Main */}
       <main className="cfg-main">

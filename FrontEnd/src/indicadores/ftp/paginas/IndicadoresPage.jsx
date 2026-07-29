@@ -1,10 +1,9 @@
 import './ftp.css';
 import './indicadores.css';
 import './config.css';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
-import logo_imss from '../../../assets/logo_imms.png';
+import TopBar from '../../../shared/componentes/TopBar';
 import ModalPoblacion from '../componentes/modalPoblacion/ModalPoblacion';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalRestricciones from '../../shared/componentes/modal/ModalRestricciones';
@@ -45,7 +44,6 @@ const IcoAll = () => (
 );
 
 const IndicadoresPage = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { puedeGenFTP } = useRol();
   const {
@@ -64,6 +62,13 @@ const IndicadoresPage = () => {
   } = useIndicadores(user);
 
   const catIcon = CAT_ICON[categoria];
+
+  /* Colapsado por default en pantallas angostas para no robarle ancho al
+     contenido; el usuario lo expande con el botón toggle si lo necesita
+     (mismo patrón que el sidebar de Epidemiología, en cualquier tamaño). */
+  const [sidebarColapsado, setSidebarColapsado] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= 768
+  );
 
   const [abiertas, setAbiertas] = useState(() => new Set([categoria]))
 
@@ -102,46 +107,36 @@ const IndicadoresPage = () => {
         <div className="ind-grid" />
       </div>
 
-      <header className="ind-nav">
-        <div className="ind-nav-left">
-          <img src={logo_imss} alt="IMSS" className="ind-logo" />
-          <div className="ind-nav-div" />
-          <button className="ind-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/Generar')}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Generar
-          </button>
-        </div>
-        <div className="ind-nav-right">
-          {!esVisor && archivoPoblacion && (
-            <span className="ind-pob-archivo" title={archivoPoblacion}>{archivoPoblacion}</span>
-          )}
-          {!esVisor && (
-            <button className="ind-btn-pob" onClick={() => setModalPoblacion(true)}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+      <TopBar
+        backTo="/CIAE/IndicadoresMedicos/Generar"
+        rightExtra={
+          <>
+            {!esVisor && archivoPoblacion && (
+              <span className="ind-pob-archivo" title={archivoPoblacion}>{archivoPoblacion}</span>
+            )}
+            {!esVisor && (
+              <button className="ind-btn-pob" onClick={() => setModalPoblacion(true)}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span className="ind-btn-pob-label">Actualizar Población</span>
+              </button>
+            )}
+            <span className="ind-legal-note" title="Este sistema solo consulta la información de los archivos FTP originales para generar los reportes — no los modifica, edita ni elimina en ningún momento.">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
-              Actualizar Población
-            </button>
-          )}
-          <span className="ind-legal-note" title="Este sistema solo consulta la información de los archivos FTP originales para generar los reportes — no los modifica, edita ni elimina en ningún momento.">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </span>
-          <div className="ind-user-chip">
-            <span className="ind-user-dot" />
-            {user?.user || 'Invitado'}
-          </div>
-        </div>
-      </header>
+            </span>
+          </>
+        }
+      />
 
       {modalPoblacion && (
         <ModalPoblacion
           onClose={() => setModalPoblacion(false)}
           onSubido={setArchivoPoblacion}
+          archivoActual={archivoPoblacion}
         />
       )}
 
@@ -158,6 +153,8 @@ const IndicadoresPage = () => {
             setCategoria(cat)
             setIndicadorSel(ind === indicadorSel ? null : ind)
           }}
+          collapsed={sidebarColapsado}
+          onToggleCollapse={() => setSidebarColapsado(c => !c)}
         />
 
         <section className="ind-config-panel">

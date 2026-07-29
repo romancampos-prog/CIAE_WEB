@@ -142,6 +142,17 @@
     justify-content: flex-end;
 }
 
+.mpob-archivo-actual {
+    margin: 10px 0 0;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    text-align: center;
+}
+.mpob-archivo-actual strong {
+    color: #475569;
+    font-weight: 700;
+}
+
 .mpob-btn-cancel {
     background: #f1f5f9;
     border: none;

@@ -69,6 +69,20 @@ const Login = () => {
   return (
     <div className="cl-root">
 
+      {/* Fondo animado a pantalla completa — solo se muestra en mobile,
+          para que todo (logo, marca y formulario) quede sobre un mismo
+          panel verde continuo, sin corte visible entre secciones */}
+      <div className="cl-mobile-bg" aria-hidden="true">
+        <div className="cl-blob cl-blob-a" />
+        <div className="cl-blob cl-blob-b" />
+        <div className="cl-blob cl-blob-c" />
+        <div className="cl-dots" />
+        <div className="cl-ring cl-ring-1" />
+        <div className="cl-ring cl-ring-2" />
+        <div className="cl-ring cl-ring-3" />
+        <div className="cl-sweep" />
+      </div>
+
       {/* ══════════════ PANEL IZQUIERDO ══════════════ */}
       <div className="cl-left">
 
@@ -206,9 +220,16 @@ const Login = () => {
 
           </form>
 
-          {/* Pie */}
-
         </div>
+
+        {/* Pie legal — visible solo en mobile, anclado al fondo (ver .cl-legal-mobile en auth.css) */}
+        <div className="cl-legal-mobile">
+          <span className="cl-status-dot" />
+          <p>
+            Este sitio web fue desarrollado de forma interna para apoyar el trabajo del área CIAE (Coordinación de Información y Análisis Estratégico), de acuerdo con sus necesidades operativas. La información aquí generada se utiliza como apoyo para la elaboración de reportes; su interpretación y uso posterior quedan a criterio de quien la consulta.
+          </p>
+        </div>
+
       </div>
 
     </div>

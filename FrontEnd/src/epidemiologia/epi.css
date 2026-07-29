@@ -38,36 +38,9 @@
   pointer-events: none; z-index: 0;
 }
 
-/* ── Top bar ── */
-.epi-topbar {
-  position: relative; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 36px; height: 64px;
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(11,84,69,0.07);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-  flex-shrink: 0;
-  animation: epi-navIn 0.5s ease both;
-}
-@keyframes epi-navIn {
-  from { opacity: 0; transform: translateY(-12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.epi-topbar-left  { display: flex; align-items: center; gap: 14px; }
-.epi-topbar-right { display: flex; align-items: center; gap: 10px; }
-
-.epi-brand-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: linear-gradient(135deg, #5a0606, #7e0808);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(126,8,8,0.25);
-}
-.epi-nav-divider {
-  width: 1px; height: 26px;
-  background: rgba(11,84,69,0.15);
-}
+/* ── Top bar: ahora es el componente compartido TopBar
+   (src/shared/componentes/TopBar.jsx + topbar.css). Estas clases
+   son para el label "Epidemiología · Dengue" que se inyecta junto al logo. ── */
 .epi-nav-label {
   font-size: 0.72rem; font-weight: 700;
   color: #64748b; text-transform: uppercase; letter-spacing: 0.8px;
@@ -75,36 +48,6 @@
 .epi-nav-sublabel {
   font-size: 0.65rem; font-weight: 500;
   color: #94a3b8; margin-top: 1px;
-}
-
-.epi-user-chip {
-  display: flex; align-items: center; gap: 7px;
-  background: #f0faf6; border: 1px solid rgba(11,84,69,0.15);
-  border-radius: 100px; padding: 5px 14px;
-  font-size: 0.78rem; font-weight: 600; color: #0b5445;
-}
-.epi-user-dot {
-  width: 7px; height: 7px; background: #4ade80;
-  border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
-  animation: epi-pulse 2.2s ease infinite;
-}
-@keyframes epi-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.65); }
-  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
-  100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
-}
-
-.epi-btn-back {
-  display: flex; align-items: center; gap: 7px;
-  background: none; border: 1.5px solid rgba(11,84,69,0.18);
-  border-radius: 100px; padding: 6px 16px;
-  font-size: 0.8rem; font-weight: 700; color: #0b5445;
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-}
-.epi-btn-back:hover {
-  background: #0b5445; color: white; border-color: #0b5445;
-  transform: translateX(-2px);
 }
 
 /* ── Body (sidebar + main) ── */
