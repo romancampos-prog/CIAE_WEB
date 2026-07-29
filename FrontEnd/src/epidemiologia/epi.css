@@ -44,10 +44,12 @@
 .epi-nav-label {
   font-size: 0.72rem; font-weight: 700;
   color: #64748b; text-transform: uppercase; letter-spacing: 0.8px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .epi-nav-sublabel {
   font-size: 0.65rem; font-weight: 500;
   color: #94a3b8; margin-top: 1px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 /* ── Body (sidebar + main) ── */
@@ -55,6 +57,11 @@
   display: flex; flex: 1; overflow: hidden;
   position: relative; z-index: 5;
 }
+
+/* Botón flotante para abrir el sidebar y backdrop del overlay — sin efecto
+   fuera de mobile (ver media query más abajo) */
+.epi-sidebar-fab { display: none; }
+.epi-sidebar-backdrop { display: none; }
 
 /* ── Sidebar ── */
 .epi-sidebar {
@@ -212,3 +219,39 @@
 .epi-badge--verde  { background: rgba(11,84,69,0.1);  color: #0b5445; border: 1px solid rgba(11,84,69,0.2); }
 .epi-badge--tinto  { background: rgba(126,8,8,0.08);  color: #7e0808; border: 1px solid rgba(126,8,8,0.18); }
 .epi-badge--dorado { background: rgba(154,112,38,0.1); color: #9a7026; border: 1px solid rgba(154,112,38,0.22); }
+
+/* ── Responsive: el sidebar deja de reservar ancho de forma permanente.
+   Colapsado queda oculto del todo (no un riel angosto) y aparece un botón
+   flotante para abrirlo; abierto se despliega como overlay sobre el
+   contenido, con backdrop, en vez de apachurrarlo. Desktop no cambia. ── */
+@media (max-width: 48rem) {
+  .epi-sidebar-fab {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; left: 1rem; bottom: 1.25rem; z-index: 250;
+    width: 3rem; height: 3rem; border-radius: 50%;
+    background: #0b5445; color: #fff; border: none;
+    box-shadow: 0 6px 20px rgba(11,84,69,0.35);
+    cursor: pointer;
+  }
+
+  .epi-sidebar-backdrop {
+    display: block;
+    position: fixed; inset: 0; top: 4rem; z-index: 149;
+    background: rgba(0,0,0,0.32);
+  }
+
+  .epi-sidebar--collapsed { display: none; }
+  .epi-sidebar:not(.epi-sidebar--collapsed) {
+    position: fixed; left: 0; top: 4rem; bottom: 0; z-index: 150;
+    width: 16rem; max-width: 80vw;
+    box-shadow: 6px 0 40px rgba(0,0,0,0.18);
+  }
+
+  .epi-main, .epi-main--expanded { padding: 1.25rem 1rem; }
+}
+
+@media (max-width: 30rem) {
+  /* TopBar baja a 3.5rem de alto en este breakpoint (ver topbar.css) */
+  .epi-sidebar-backdrop,
+  .epi-sidebar:not(.epi-sidebar--collapsed) { top: 3.5rem; }
+}
