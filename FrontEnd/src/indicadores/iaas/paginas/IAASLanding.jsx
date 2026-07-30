@@ -1,15 +1,13 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
-import logo_imss from '../../../assets/logo_imms.png';
+import TopBar from '../../../shared/componentes/TopBar';
 import { getIAASMesesGuardados } from '../api/IAAS';
 import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 import './iass.css';
 
 const IAASLanding = () => {
   const navigate   = useNavigate();
-  const { user }   = useAuth();
   const { puedeGenIAAS } = useRol();
   const anioActual = String(new Date().getFullYear());
   const [mesesGuardados, setMesesGuardados] = useState(null);
@@ -33,22 +31,7 @@ const IAASLanding = () => {
         <div className="ciae-grid" />
       </div>
 
-      <header className="ia-nav">
-        <div className="ia-nav-left">
-          <img src={logo_imss} alt="IMSS" className="ia-logo" />
-          <div className="ia-nav-sep" />
-          <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos')}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Indicadores
-          </button>
-        </div>
-        <div className="ia-user-pill">
-          <span className="ia-user-led" />
-          {user?.user || 'Invitado'}
-        </div>
-      </header>
+      <TopBar backTo="/CIAE/IndicadoresMedicos" />
 
       <main className="ia-hub-main">
         <div className="ia-hub-hero">

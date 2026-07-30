@@ -47,7 +47,7 @@ export default function SeccionDuplicados({ registros }) {
         style={{
           width: '100%', background: 'none', border: 'none',
           padding: '14px 18px', cursor: vacio ? 'default' : 'pointer',
-          display: 'flex', alignItems: 'center', gap: 14,
+          display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
           fontFamily: 'inherit', textAlign: 'left',
         }}
       >
@@ -61,7 +61,7 @@ export default function SeccionDuplicados({ registros }) {
         }}>⧉</div>
 
         {/* Título */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: '1 1 12rem', minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: vacio ? '#94a3b8' : '#1e293b' }}>
             Duplicados detectados
           </div>
@@ -71,7 +71,7 @@ export default function SeccionDuplicados({ registros }) {
         </div>
 
         {/* Badges de métodos + count */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {!vacio && Object.entries(metodos).map(([met, n]) => (
             <div key={met} style={{
               padding: '3px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700,

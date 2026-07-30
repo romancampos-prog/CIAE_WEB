@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '../../auth/contexto/AuthContext';
-import logo_imss from '../../assets/logo_imms.png';
 import NavCard from '../../shared/componentes/NavCard';
+import TopBar from '../../shared/componentes/TopBar';
 import "./inicio.css";
 
 const getGreeting = () => {
@@ -58,27 +58,7 @@ const SeleccionPage = () => {
         <div className="home-grid" />
       </div>
 
-      <nav className="home-nav">
-        <div className="home-nav-left">
-          <img src={logo_imss} alt="IMSS" className="home-logo" />
-          <div className="home-nav-divider" />
-          <span className="home-nav-label">Panel de Control</span>
-        </div>
-        <div className="home-nav-right">
-          <div className="home-user-chip">
-            <span className="home-user-dot" />
-            <span>{user?.user || 'Invitado'}</span>
-          </div>
-          <button className="home-logout-btn" onClick={handleLogout}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Salir
-          </button>
-        </div>
-      </nav>
+      <TopBar onLogout={handleLogout} />
 
       <main className="home-main">
 

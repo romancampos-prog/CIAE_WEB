@@ -19,6 +19,7 @@
   letter-spacing: 0.8px; text-transform: uppercase;
   padding: 11px 18px;
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
 }
 .dengue-card-header--verde {
   background: linear-gradient(135deg, #0b5445, #1a7a62);
@@ -47,6 +48,13 @@
 .dengue-tabla {
   width: 100%; border-collapse: collapse;
   font-size: 0.82rem;
+}
+@media (max-width: 48rem) {
+  /* Varias tablas de Dengue se usan directo, sin un div contenedor con
+     scroll — se vuelven scrolleables horizontalmente ellas mismas (truco
+     estándar: display:block en la tabla, las filas/celdas mantienen su
+     layout de tabla por default) en vez de cortarse o apachurrar columnas. */
+  .dengue-tabla { display: block; overflow-x: auto; white-space: nowrap; }
 }
 .dengue-tabla thead th {
   background: #fffbf0;

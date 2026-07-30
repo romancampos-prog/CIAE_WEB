@@ -4,7 +4,7 @@ import { subirArchivoPoblacion, recalcularPoblacion } from '../../api/poblacion'
 
 const ANO_ACTIVO = '2026';
 
-const ModalPoblacion = ({ onClose, onSubido }) => {
+const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
     const [archivo,        setArchivo]        = useState(null);
     const [dragOver,       setDragOver]       = useState(false);
     const [cargando,       setCargando]       = useState(false);
@@ -99,7 +99,7 @@ const ModalPoblacion = ({ onClose, onSubido }) => {
                             <span>
                                 El archivo debe descargarse de:{' '}
                                 <a
-                                    href="http://infosalud.imss.gob.mx/PAGINAS/poblacion2026.html"
+                                    href="http://infosalud.imss.gob.mx:8080/PAGINAS/poblacion2026.html"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="mpob-source-link"
@@ -144,6 +144,12 @@ const ModalPoblacion = ({ onClose, onSubido }) => {
                                 {cargando ? <><div className="mpob-spinner" /> Subiendo…</> : 'Subir archivo'}
                             </button>
                         </div>
+
+                        {archivoActual && (
+                            <p className="mpob-archivo-actual">
+                                Archivo actual: <strong>{archivoActual}</strong>
+                            </p>
+                        )}
                     </>
                 )}
 

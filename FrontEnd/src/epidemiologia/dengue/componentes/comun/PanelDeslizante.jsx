@@ -75,7 +75,7 @@ export default function PanelDeslizante({ titulo, badge, children, labelBoton, o
               color: '#fff',
               padding: '16px 20px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              flexShrink: 0,
+              flexShrink: 0, flexWrap: 'wrap', gap: 8,
             }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>{titulo}</h3>
               <button onClick={toggle} style={{

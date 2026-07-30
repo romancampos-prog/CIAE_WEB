@@ -133,9 +133,9 @@ export default function CargaPage() {
       {corriendo && <CorgiOverlay paso={estado?.paso} />}
 
       {/* ── Hero header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-        <div>
-          <div style={{
+      <div className="epi-carga-hero" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div className="epi-carga-titleblock">
+          <div className="epi-carga-badge" style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
             background: 'rgba(105,28,50,0.08)',
             border: '1px solid rgba(105,28,50,0.15)',
@@ -153,7 +153,7 @@ export default function CargaPage() {
             }} />
             Sistema de Vigilancia del Dengue
           </div>
-          <h1 style={{
+          <h1 className="epi-carga-titulo" style={{
             fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 800,
             color: '#1e293b', letterSpacing: '-1px', margin: '0 0 6px',
             lineHeight: 1.1,
@@ -165,14 +165,14 @@ export default function CargaPage() {
               backgroundClip: 'text',
             }}>bases de datos</span>
           </h1>
-          <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>
+          <p className="epi-carga-sub" style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>
             Sube los archivos Excel para ejecutar el análisis epidemiológico
           </p>
         </div>
 
         {/* Último reporte */}
         {estado?.ultimo_reporte && (
-          <div style={{
+          <div className="epi-carga-reporte" style={{
             flexShrink: 0,
             background: 'white',
             border: '1px solid rgba(167,128,45,0.2)',
@@ -180,10 +180,10 @@ export default function CargaPage() {
             boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
             textAlign: 'right',
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#a4a4a4', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>
+            <div className="epi-carga-reporte-label" style={{ fontSize: 10, fontWeight: 700, color: '#a4a4a4', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>
               Último reporte
             </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#a7802d' }}>
+            <div className="epi-carga-reporte-valor" style={{ fontSize: 13, fontWeight: 700, color: '#a7802d' }}>
               {estado.ultimo_reporte}
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function CargaPage() {
       </div>
 
       {/* ── Progreso ── */}
-      <div style={{
+      <div className="epi-progreso-bar" style={{
         display: 'flex', alignItems: 'center',
         background: 'white', borderRadius: 16,
         padding: '14px 22px',
@@ -204,9 +204,9 @@ export default function CargaPage() {
           { n: 2, label: 'Base SisCep',    done: listos.siscep,    color: '#245c4f' },
           { n: 3, label: 'Ejecutar',        done: completado,       color: '#a7802d' },
         ].map(({ n, label, done, color }, i) => (
-          <div key={n} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
+          <div key={n} className="epi-progreso-item" style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+            <div className="epi-progreso-inner" style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div className="epi-progreso-circle" style={{
                 width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, fontWeight: 800,
@@ -218,14 +218,14 @@ export default function CargaPage() {
               }}>
                 {done ? '✓' : n}
               </div>
-              <span style={{
+              <span className="epi-progreso-label" style={{
                 fontSize: 12, fontWeight: done ? 700 : 500,
                 color: done ? color : n <= cuenta + 1 ? color : '#94a3b8',
                 whiteSpace: 'nowrap', transition: 'color 0.3s',
               }}>{label}</span>
             </div>
             {i < 2 && (
-              <div style={{
+              <div className="epi-progreso-sep" style={{
                 flex: 1, height: 2, margin: '0 12px',
                 background: done ? `linear-gradient(90deg, ${color}, ${['#245c4f','#a7802d'][i]})` : '#f1f5f9',
                 borderRadius: 2, transition: 'background 0.4s',
@@ -236,7 +236,7 @@ export default function CargaPage() {
       </div>
 
       {/* ── Cards de subida ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(11rem, 1fr))', gap: 16 }}>
         <UploadCard
           paso={1} tema="tinto"
           titulo="Base Operativa (SINAVE)"
@@ -299,6 +299,14 @@ export default function CargaPage() {
               ? 'Sube ambos archivos para continuar'
               : listos.operativa ? '· Falta la Base SisCep'
               : '· Falta la Base Operativa'}
+          </p>
+        )}
+
+        {/* Último reporte — en mobile va acá abajo en vez de en el hero
+            (ver .epi-carga-reporte-mobile / .epi-carga-reporte en epi.css) */}
+        {estado?.ultimo_reporte && (
+          <p className="epi-carga-reporte-mobile">
+            Último reporte: {estado.ultimo_reporte}
           </p>
         )}
       </div>

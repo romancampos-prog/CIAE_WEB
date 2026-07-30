@@ -1,7 +1,5 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import logo_imss from '../../../assets/logo_imms.png';
-import { useAuth } from '../../../auth/contexto/AuthContext';
+import TopBar from '../../../shared/componentes/TopBar';
 import { getAllIndicadores } from '../api/indicadores';
 import { CAT_COLOR } from '../constantes/colores';
 import { INDICADORES as IAAS_INDS } from '../../iaas/constantes/colores';
@@ -37,8 +35,6 @@ const MenuIcon = () => (
 );
 
 const GraficasUnificadasPage = () => {
-  const navigate                  = useNavigate();
-  const { user }                  = useAuth();
   const [indSel, setIndSel]       = useState('');
   const [drawerOpen, setDrawer]   = useState(false);
   const [ftpLista, setFtpLista]   = useState({});
@@ -97,23 +93,7 @@ const GraficasUnificadasPage = () => {
         <div className="ciae-grid" />
       </div>
 
-      <header className="ia-nav">
-        <div className="ia-nav-left">
-          <img src={logo_imss} alt="IMSS" className="ia-logo" />
-          <div className="ia-nav-sep" />
-          <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos')}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Indicadores Médicos
-          </button>
-
-        </div>
-        <div className="ia-user-pill">
-          <span className="ia-user-led" />
-          {user?.user || 'Invitado'}
-        </div>
-      </header>
+      <TopBar backTo="/CIAE/IndicadoresMedicos" />
 
       {/* ── Botón flotante para abrir drawer ── */}
       {!drawerOpen && (

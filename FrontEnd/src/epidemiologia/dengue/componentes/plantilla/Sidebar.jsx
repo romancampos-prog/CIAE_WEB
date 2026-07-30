@@ -20,6 +20,11 @@ export default function DengueSidebar({ collapsed, onToggle }) {
   const { estado } = usePipeline()
   const corriendo  = !!estado?.corriendo
 
+  // En mobile el sidebar es un overlay: se cierra solo al elegir un módulo
+  const cerrarSiMobile = () => {
+    if (!collapsed && typeof window !== 'undefined' && window.innerWidth <= 768) onToggle()
+  }
+
   return (
     <nav className={`epi-sidebar${collapsed ? ' epi-sidebar--collapsed' : ''}`}>
 
@@ -68,6 +73,7 @@ export default function DengueSidebar({ collapsed, onToggle }) {
               end={to === '/CIAE/Epidemiologia/dengue'}
               className={({ isActive }) => `epi-nav-link${isActive ? ' active' : ''}`}
               title={collapsed ? label : ''}
+              onClick={cerrarSiMobile}
             >
               <span className="epi-nav-icon">{icono}</span>
               {!collapsed && <span className="epi-nav-text">{label}</span>}

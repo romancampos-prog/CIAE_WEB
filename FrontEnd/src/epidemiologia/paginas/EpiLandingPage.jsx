@@ -1,9 +1,8 @@
 // react
 import { useNavigate } from 'react-router-dom'
 // propios
-import { useAuth } from '../../auth/contexto/AuthContext'
 import NavCard from '../../shared/componentes/NavCard'
-import logo from '../../assets/logo_imms.png'
+import TopBar from '../../shared/componentes/TopBar'
 import '../../paginas/inicio/inicio.css'
 import '../epi.css'
 
@@ -31,7 +30,6 @@ const IconMosquito = () => (
 
 export default function EpiLandingPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
 
   return (
     <div className="epi-root">
@@ -40,29 +38,7 @@ export default function EpiLandingPage() {
       <div className="epi-blob epi-blob-3" aria-hidden="true" />
       <div className="epi-grid"            aria-hidden="true" />
 
-      <header className="epi-topbar">
-        <div className="epi-topbar-left">
-          <img src={logo} alt="IMSS" style={{ height: 38 }} />
-          <div className="epi-nav-divider" />
-          <span className="epi-nav-label">Vigilancia Epidemiológica</span>
-        </div>
-        <div className="epi-topbar-right">
-          {user && (
-            <div className="epi-user-chip">
-              <span className="epi-user-dot" />
-              <span>{user.user || 'Usuario'}</span>
-            </div>
-          )}
-          <button className="epi-btn-back" onClick={() => navigate('/CIAE/Inicio')}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/>
-              <polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Inicio
-          </button>
-        </div>
-      </header>
+      <TopBar backTo="/CIAE/Inicio" />
 
       <main style={{
         flex: 1,

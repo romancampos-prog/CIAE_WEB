@@ -7,9 +7,10 @@
 
 .cl-root {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: inherit;
 }
 
@@ -605,20 +606,102 @@
   font-weight: 700 !important;
 }
 
+/* Fondo animado a pantalla completa — solo se usa en mobile (ver media query) */
+.cl-mobile-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Pie legal — solo visible en mobile, anclado al fondo real de la pantalla (ver media query) */
+.cl-legal-mobile {
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid #f1f3f5;
+}
+.cl-legal-mobile .cl-status-dot { margin-top: 4px; }
+.cl-legal-mobile p {
+  font-size: 0.66rem;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+
 /* ════════════════════════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════════════════════════ */
-@media (max-width: 820px) {
-  .cl-root      { flex-direction: column; }
-  .cl-left      { width: 100%; min-height: 200px; flex: 0 0 auto; }
-  .cl-left-body { padding: 28px 28px 0; flex-direction: row; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: center; text-align: center; }
-  .cl-logo      { width: 90px; margin-bottom: 0; }
-  .cl-brand     { font-size: 2.6rem; }
-  .cl-brand-sub { font-size: 0.76rem; }
-  .cl-divider   { display: none; }
-  .cl-pills     { justify-content: center; margin-top: 10px; }
-  .cl-badge-platform { margin-top: 10px; }
-  .cl-left-footer { padding: 12px 28px; }
-  .cl-right     { flex: 1; }
-  .cl-form-wrap { max-width: 100%; padding: 0 28px; }
+/* Tablets (incluye PC en ventanas angostas/cuadradas): apila los paneles.
+   El panel izquierdo pasa a ser un banner compacto (logo + marca) — el
+   subtítulo y el texto legal se ocultan aquí y reaparecen como pie de
+   página debajo del formulario (.cl-legal-mobile), para no generar un
+   hueco vacío por el centrado vertical del panel derecho. */
+@media (max-width: 48rem) {
+  /* El verde se extiende a toda la pantalla — ya no hay panel blanco separado */
+  .cl-root      { flex-direction: column; background: #0b5445; }
+  .cl-mobile-bg { display: block; }
+  .cl-left      { width: 100%; flex: 0 0 auto; background: transparent; overflow: visible; }
+  .cl-left-bg   { display: none; }
+  .cl-left-body {
+    padding: 1.75rem 1.25rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .cl-logo      { width: 3.75rem; margin-bottom: 0.25rem; }
+  .cl-eyebrow   { margin-bottom: 0; }
+  .cl-brand-sub,
+  .cl-divider,
+  .cl-pills,
+  .cl-badge-platform { display: none; }
+  /* CIAE crece de forma fluida según el ancho de pantalla (mín 2.1rem, máx 3.4rem) */
+  .cl-brand     { font-size: clamp(2.1rem, 9vw, 3.4rem); letter-spacing: -1px; }
+  .cl-left-footer { display: none; }
+
+  .cl-right     { flex: 1; flex-direction: column; align-items: stretch; background: transparent; }
+  .cl-form-wrap { max-width: 100%; padding: 2rem 1.75rem 1rem; }
+
+  /* barra tricolor: baja al final de la pantalla en vez de ir arriba */
+  .cl-topbar    { top: auto; bottom: 0; }
+
+  /* textos del formulario en claro, para leerse sobre el verde */
+  .cl-form-title { color: #ffffff; }
+  .cl-form-hint  { color: rgba(255,255,255,0.72); }
+  .cl-label      { color: rgba(255,255,255,0.85); }
+
+  /* evita el zoom automático de iOS Safari al enfocar un input con fuente < 16px (1rem) */
+  .cl-input     { font-size: 1rem; }
+
+  /* más aire entre Usuario/Contraseña y antes del botón, para que no se vea apretado */
+  .cl-field     { margin-bottom: 1.5rem; }
+  .cl-btn       { margin-top: 1rem; }
+
+  /* botón: invertido (claro sobre verde) para que no se pierda contra el fondo */
+  .cl-btn { background: #ffffff; color: #0b5445; }
+  .cl-btn:hover:not(:disabled) { background: #f0faf6; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .cl-spinner { border-color: rgba(11,84,69,0.25); border-top-color: #0b5445; }
+
+  .cl-legal-mobile {
+    display: flex;
+    border-top-color: rgba(255,255,255,0.15);
+    padding: 1.125rem 1.75rem 1.75rem;
+  }
+  .cl-legal-mobile p { color: rgba(255,255,255,0.55); }
+}
+
+/* Celulares */
+@media (max-width: 30rem) {
+  .cl-left-body { padding: 1.5rem 1.25rem; }
+  .cl-logo      { width: 3.25rem; }
+  .cl-form-wrap { padding: 1.75rem 1.25rem 1rem; }
+  .cl-legal-mobile { padding: 1.125rem 1.25rem 1.25rem; }
+  .cl-form-title { font-size: 1.6rem; }
+  .cl-form-hint  { font-size: 0.78rem; }
+  .cl-btn       { height: 3rem; font-size: 0.92rem; }
 }

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
-import logo_imss from '../../../assets/logo_imms.png';
+import TopBar from '../../../shared/componentes/TopBar';
 import './ftp.css';
 import { getGreeting } from '../utils/horario';
 
@@ -32,7 +31,6 @@ const IconNight = () => (
  */
 const FTPLanding = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { puedeGenFTP } = useRol();
 
   const { saludo, icono } = getGreeting();
@@ -44,22 +42,7 @@ const FTPLanding = () => {
         <div className="ftp-circle ftp-c2" />
       </div>
 
-      <div className="ftp-top-bar">
-        <div className="ftp-nav-left">
-          <img src={logo_imss} alt="IMSS" className="ftp-logo-top" />
-          <div className="ftp-nav-divider" />
-          <button className="ftp-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos')}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Indicadores
-          </button>
-        </div>
-        <div className="ftp-user-chip">
-          <span className="ftp-user-dot" />
-          {user?.user || 'Invitado'}
-        </div>
-      </div>
+      <TopBar backTo="/CIAE/IndicadoresMedicos" />
 
       <div className="ftp-hub-main">
         <div className="ftp-hero-hub">

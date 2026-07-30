@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Plot from 'react-plotly.js'
 
 const ZONA_COLORES = {
@@ -18,6 +19,16 @@ export default function CanalChart({ datos }) {
 
   const upper = Math.max(Math.max(...q3) * 2, Math.max(...casos_actual) * 1.15, 1)
   const coloresMarcador = zonas.map(z => ZONA_COLORES[z] || '#000')
+
+  // Altura fija de 480px queda desproporcionada en mobile (chart muy alto y
+  // angosto, obliga a scrollear para ver la mayor parte de los datos) — se
+  // achica según el ancho de pantalla al cargar. Se toma una sola vez (sin
+  // listener de resize): Plotly ya maneja su propio resize con
+  // config.responsive, y cambiar la altura en vivo compite con eso y a
+  // veces deja el gráfico en blanco.
+  const [altura] = useState(
+    () => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 320 : 480)
+  )
 
   const traces = [
     {
@@ -78,7 +89,7 @@ export default function CanalChart({ datos }) {
           tickfont: { size: 11, color: '#64748b', family: 'Inter' },
           zeroline: false,
         },
-        height: 480,
+        height: altura,
         plot_bgcolor : 'transparent',
         paper_bgcolor: 'transparent',
         showlegend: false,

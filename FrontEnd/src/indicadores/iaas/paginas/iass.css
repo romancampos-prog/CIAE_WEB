@@ -474,7 +474,57 @@
 .ia-num::-webkit-inner-spin-button,
 .ia-num::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-/* â”€â”€ Shimmer â”€â”€ */
+/* ── Tarjetas por unidad (mobile) — reemplazan la tabla ancha; oculto
+   fuera de mobile (ver media query al final del archivo) ── */
+.ia-mobile-cards { display: none; }
+
+.ia-mcard-global {
+  border: 1.5px dashed #e2e8f0; border-radius: 12px;
+  padding: 14px; margin: 14px 14px 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ia-mcard-global--over { background: color-mix(in srgb, var(--color-oro-institucional) 6%, white); }
+.ia-mcard-global--done {
+  border-style: solid;
+  background: color-mix(in srgb, var(--color-imss-primario) 5%, white);
+}
+
+.ia-mcard {
+  border: 1px solid #f1f5f9; border-radius: 12px;
+  margin: 0 14px 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: background 0.15s;
+}
+.ia-mcard--ok { background: color-mix(in srgb, var(--color-imss-primario) 4%, white); }
+.ia-mcard-header { display: flex; align-items: center; gap: 8px; }
+
+.ia-mcard-num {
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+.ia-mcard-num--over { background: color-mix(in srgb, var(--color-oro-institucional) 6%, white); }
+.ia-mcard-num .ia-mini-subir {
+  width: 100%; justify-content: center; padding: 10px 16px;
+}
+.ia-mcard-num .ia-mini-archivo {
+  width: 100%; padding: 10px 12px;
+  border: 1.5px solid var(--color-imss-primario);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-imss-primario) 6%, white);
+}
+
+.ia-mcard-denoms {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+.ia-mcard-denom-field { display: flex; flex-direction: column; gap: 4px; }
+.ia-mcard-denom-label {
+  font-size: 0.62rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.4px; color: var(--color-oro-institucional); text-align: center;
+}
+.ia-mcard-denoms .ia-num { width: 100%; }
+
+/* ── Shimmer ── */
 .ia-shimmer-stack { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px 20px; }
 .ia-shimmer-row {
   height: 48px; border-radius: 10px;
@@ -989,13 +1039,19 @@
 /* La tabla es ancha a propÃ³sito (8 columnas); en pantallas chicas se deja
    scrollear horizontal en vez de comprimir las columnas hasta ilegibles. */
 @media (max-width: 820px) {
-  .ia-nav  { padding: 0 18px; height: 56px; }
   .ia-main { padding: 18px 14px 16px; }
   .ia-hero { margin-bottom: 10px; }
   .ia-hero-bottom { margin-top: 8px; }
   .ia-tabla-head { padding: 14px 16px; }
   .ia-table-wrap { margin: 0 16px 16px; }
   .ia-action-bar { flex-wrap: wrap; padding: 14px 18px; }
+}
+
+/* Mobile: la tabla ancha se reemplaza por tarjetas por unidad (mismo corte
+   que el resto de la app — ver auth.css/inicio.css: 48rem) */
+@media (max-width: 48rem) {
+  .ia-table-wrap  { display: none; }
+  .ia-mobile-cards { display: block; padding-bottom: 10px; }
 }
 
 @media (max-width: 480px) {

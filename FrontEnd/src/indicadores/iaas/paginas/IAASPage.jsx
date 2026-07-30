@@ -1,8 +1,6 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
-import logo_imss from '../../../assets/logo_imms.png';
+import TopBar from '../../../shared/componentes/TopBar';
 import { getUnidadesIAAS, getIndicadoresIAAS, generarIAAS, getSesionIAAS, getIAASMesesGuardados } from '../api/IAAS';
 import { descargarB64 } from '../../shared/utils/download';
 import { mesDisponible, calcularFaltantes } from '../utils/calculos';
@@ -16,8 +14,6 @@ import './iass.css';
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 const IAASPage = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const { puedeGenIAAS } = useRol();
 
   const [unidades, setUnidades]       = useState([]);
@@ -163,27 +159,13 @@ const IAASPage = () => {
           <div className="ciae-grid" />
         </div>
 
-        <header className="ia-nav">
-          <div className="ia-nav-left">
-            <img src={logo_imss} alt="IMSS" className="ia-logo" />
-            <div className="ia-nav-sep" />
-            <button className="ia-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/Generar')}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-              </svg>
-              Generar
-            </button>
-          </div>
+        <TopBar backTo="/CIAE/IndicadoresMedicos/Generar">
           <span className="ia-legal-note" title="Este sistema solo extrae los valores de los Excel que subes para generar el reporte — no modifica ni altera los archivos originales en ningún momento.">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
           </span>
-          <div className="ia-user-pill">
-            <span className="ia-user-led" />
-            {user?.user || 'Invitado'}
-          </div>
-        </header>
+        </TopBar>
 
         <main className="ia-main">
           <div className="ia-hero">
@@ -366,6 +348,102 @@ const IAASPage = () => {
                   </tbody>
                 </table>
               )}
+            </div>
+
+            {/* Vista mobile: una tarjeta por unidad en vez de la tabla ancha
+                (mismos datos/handlers que la tabla — solo cambia el markup;
+                ver .ia-mobile-cards en iass.css, oculto fuera de mobile) */}
+            <div className="ia-mobile-cards">
+
+              <div
+                className={`ia-mcard-global ${dragOver ? 'ia-mcard-global--over' : ''} ${numeradores ? 'ia-mcard-global--done' : ''}`}
+                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => { e.preventDefault(); setDragOver(false); setGlobal(e.dataTransfer.files[0]); }}
+              >
+                {numeradores ? (
+                  <div className="ia-td-global-listo">
+                    <span className="ia-td-global-nota">IAAS 01 — un solo archivo para las {unidades.length} unidades</span>
+                    <span className="ia-td-global-check"><CheckIcon size={16} /></span>
+                    <span className="ia-td-global-archivo" title={numeradores.name}>
+                      {numeradores.name.replace('.xlsx', '')}
+                    </span>
+                    <div className="ia-td-global-acciones">
+                      <label className="ia-td-global-cambiar">
+                        <input type="file" accept=".xlsx" hidden onChange={e => setGlobal(e.target.files[0])} />
+                        Cambiar archivo
+                      </label>
+                      <button className="ia-td-global-quitar" title="Quitar archivo" onClick={() => setNumeradores(null)}>
+                        <XIcon />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="ia-td-global-dropzone">
+                    <input type="file" accept=".xlsx" hidden onChange={e => setGlobal(e.target.files[0])} />
+                    <span className="ia-td-global-nota">IAAS 01 — un solo archivo para las {unidades.length} unidades</span>
+                    <UploadIcon />
+                    <strong>Arrastra tu Excel aquí</strong>
+                    <span>o haz clic para buscar</span>
+                  </label>
+                )}
+              </div>
+
+              {cargando ? (
+                <div className="ia-shimmer-stack">
+                  {[1,2,3,4].map(i => <div key={i} className="ia-shimmer-row" />)}
+                </div>
+              ) : unidades.map(u => {
+                const okDenom = indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
+                const okNum   = !!archivosUnidad[u];
+                return (
+                  <div key={u} className={`ia-mcard ${okDenom && okNum ? 'ia-mcard--ok' : ''}`}>
+                    <div className="ia-mcard-header">
+                      <span className={`ia-row-status ${okNum ? 'ia-row-status--ok' : ''}`}>
+                        {okNum ? <CheckIcon size={10} /> : <span className="ia-row-dot" />}
+                      </span>
+                      <span className="ia-unit-name">{u}</span>
+                    </div>
+
+                    <div
+                      className={`ia-mcard-num ${dragOverUnidad === u ? 'ia-mcard-num--over' : ''}`}
+                      onDragOver={e => { e.preventDefault(); setDragOverUnidad(u); }}
+                      onDragLeave={() => setDragOverUnidad(null)}
+                      onDrop={e => { e.preventDefault(); setDragOverUnidad(null); setUnidadFile(u, e.dataTransfer.files[0]); }}
+                    >
+                      {okNum ? (
+                        <div className="ia-mini-archivo">
+                          <span title={archivosUnidad[u].name}>{archivosUnidad[u].name.replace('.xlsx', '')}</span>
+                          <button title="Quitar archivo" onClick={() => setArchivosUnidad(p => { const n = {...p}; delete n[u]; return n; })}>
+                            <XIcon />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="ia-mini-subir">
+                          <input type="file" accept=".xlsx" hidden onChange={e => setUnidadFile(u, e.target.files[0])} />
+                          <UploadIcon /><span>Subir Excel numerador</span>
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="ia-mcard-denoms">
+                      {indicadores.map(d => (
+                        <label key={d.id} className="ia-mcard-denom-field">
+                          <span className="ia-mcard-denom-label" title={d.subT2}>{d.id}</span>
+                          <input
+                            type="number"
+                            className={`ia-num ${(denominadores[u]?.[d.id] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
+                            placeholder="—"
+                            min="0"
+                            value={denominadores[u]?.[d.id] ?? ''}
+                            onChange={e => setDenom(u, d.id, e.target.value)}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

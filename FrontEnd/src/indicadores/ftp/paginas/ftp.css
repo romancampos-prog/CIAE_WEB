@@ -2,11 +2,10 @@
    FTP PAGE — CIAE
    ═══════════════════════════════════════ */
 .ftp-screen-container {
-  width: 100%; height: 100%;
-  overflow: hidden;
+  width: 100%; min-height: 100%;
   background: #f0f4f2;
   display: flex; flex-direction: column;
-  position: relative; overflow-x: hidden;
+  position: relative; overflow-x: hidden; overflow-y: auto;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -18,44 +17,8 @@
 .ftp-c1 { width: 520px; height: 520px; background: #0b5445; top: -180px; right: -120px; opacity: 0.06; }
 .ftp-c2 { width: 420px; height: 420px; background: #9a7026; bottom: -80px; left: -100px; opacity: 0.06; }
 
-/* ── Nav ── */
-.ftp-top-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 36px; height: 64px;
-  z-index: 10;
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(11,84,69,0.07);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-  flex-shrink: 0;
-  animation: ftp-navIn 0.5s ease both;
-}
-@keyframes ftp-navIn {
-  from { opacity: 0; transform: translateY(-12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.ftp-nav-left  { display: flex; align-items: center; gap: 14px; }
-.ftp-nav-right { display: flex; align-items: center; gap: 10px; }
-
-.ftp-logo-top { height: 40px; width: auto; }
-
-.ftp-nav-divider {
-  width: 1px; height: 26px;
-  background: rgba(11,84,69,0.15);
-}
-
-.ftp-btn-back {
-  display: flex; align-items: center; gap: 7px;
-  background: none; border: 1.5px solid rgba(11,84,69,0.18);
-  border-radius: 100px; padding: 6px 16px;
-  font-size: 0.8rem; font-weight: 700; color: #0b5445;
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-}
-.ftp-btn-back:hover {
-  background: #0b5445; color: white; border-color: #0b5445;
-  transform: translateX(-2px);
-}
+/* ── Nav: el header ahora es el componente compartido TopBar
+   (src/shared/componentes/TopBar.jsx + topbar.css) ── */
 
 .ftp-btn-poblacion {
   display: flex; align-items: center; gap: 7px;
@@ -121,7 +84,7 @@
 }
 
 /* ── Hub (FTPPage selección) ── */
-.ftp-hub-main { justify-content: center; align-items: center; display: flex; flex-direction: column; gap: 32px; padding-top: 32px; flex: 1; overflow: hidden; }
+.ftp-hub-main { justify-content: center; align-items: center; display: flex; flex-direction: column; gap: 32px; padding-top: 32px; flex: 1; }
 
 /* ── Hero del hub ── */
 .ftp-hero-hub { text-align: center; animation: ftp-heroIn 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
@@ -259,24 +222,6 @@
 .ftp-screen-container .hc-icon-box--gold { background: linear-gradient(135deg, #7a5010, #9a7026); color: rgba(255,230,180,0.95); box-shadow: 0 6px 18px rgba(154,112,38,0.3); }
 .ftp-screen-container .hc-header--gold .hc-eyebrow { color: #9a7026; }
 .ftp-screen-container .hc-chip--gold { color: #9a7026; background: rgba(154,112,38,0.08); border: 1px solid rgba(154,112,38,0.2); }
-
-/* User chip en nav */
-.ftp-user-chip {
-  display: flex; align-items: center; gap: 7px;
-  background: #f0faf6; border: 1px solid rgba(11,84,69,0.15);
-  border-radius: 100px; padding: 5px 14px;
-  font-size: 0.78rem; font-weight: 600; color: #0b5445;
-}
-.ftp-user-dot {
-  width: 7px; height: 7px; background: #4ade80; border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
-  animation: ftp-pulse 2.2s ease infinite;
-}
-@keyframes ftp-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.65); }
-  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
-  100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
-}
 
 /* ── Módulos ── */
 .ftp-modules {
@@ -418,12 +363,15 @@
   transform: translateY(-1px);
 }
 
-/* Responsive */
-@media (max-width: 680px) {
-  .ftp-top-bar { padding: 0 16px; }
-  .ftp-nav-divider { display: none; }
-  .ftp-main-content { padding: 24px 16px 120px; }
-  .ftp-modules { grid-template-columns: 1fr; }
+/* Responsive — mismos cortes que auth.css / inicio.css (48rem / 30rem) */
+
+/* Tablets */
+@media (max-width: 48rem) {
+  .ftp-main-content { padding: 1.5rem 1rem 7.5rem; }
+  .ftp-modules      { grid-template-columns: 1fr; }
+  /* las tarjetas del hub forzaban 2 columnas con !important sin revertir en mobile,
+     partiendo el texto ("Segui/de/Indica"); pasan a 1 columna aquí */
+  .ftp-hub-cards    { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
 }
 
 /* Los estilos ig-dl-* se encuentran en:

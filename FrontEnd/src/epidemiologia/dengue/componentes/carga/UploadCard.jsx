@@ -117,7 +117,7 @@ export default function UploadCard({ titulo, hint, onUpload, nombreActual, paso,
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px 20px 0',
+        padding: '18px 20px 0', flexWrap: 'wrap', gap: 8,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
