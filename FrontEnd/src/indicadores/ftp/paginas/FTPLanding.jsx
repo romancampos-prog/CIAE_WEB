@@ -31,7 +31,7 @@ const IconNight = () => (
  */
 const FTPLanding = () => {
   const navigate = useNavigate();
-  const { puedeGenFTP } = useRol();
+  const { puedeGenFTP, esVisitante } = useRol();
 
   const { saludo, icono } = getGreeting();
 
@@ -42,7 +42,7 @@ const FTPLanding = () => {
         <div className="ftp-circle ftp-c2" />
       </div>
 
-      <TopBar backTo="/CIAE/IndicadoresMedicos" />
+      <TopBar backTo={esVisitante ? '/CIAE/Inicio' : '/CIAE/IndicadoresMedicos'} />
 
       <div className="ftp-hub-main">
         <div className="ftp-hero-hub">

@@ -278,6 +278,15 @@
 .mut-den-input::-webkit-outer-spin-button,
 .mut-den-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .mut-den-input:focus { border-color: var(--color-tinto-gobierno); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-tinto-gobierno) 8%, transparent); }
+.mut-den-input:disabled { background: #f8fafc; color: #cbd5e1; cursor: not-allowed; }
+
+.mut-den-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; justify-self: center; }
+.mut-sindato {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .62rem; font-weight: 600; color: #94a3b8;
+  cursor: pointer; white-space: nowrap;
+}
+.mut-sindato input[type="checkbox"] { width: 11px; height: 11px; cursor: pointer; accent-color: var(--color-tinto-gobierno); }
 
 /* ── Warning ── */
 .mut-warning {

@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
+import { useRol } from '../../../auth/hooks/useRol';
 import { getAllIndicadores } from '../api/indicadores';
 import { CAT_COLOR } from '../constantes/colores';
 import { INDICADORES as IAAS_INDS } from '../../iaas/constantes/colores';
@@ -35,6 +36,7 @@ const MenuIcon = () => (
 );
 
 const GraficasUnificadasPage = () => {
+  const { esVisitante } = useRol();
   const [indSel, setIndSel]       = useState('');
   const [drawerOpen, setDrawer]   = useState(false);
   const [ftpLista, setFtpLista]   = useState({});

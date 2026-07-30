@@ -123,14 +123,18 @@
 @keyframes ftp-lineGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .ftp-hub-sub { font-size: 0.84rem; color: #94a3b8; margin: 14px 0 0; line-height: 1.5; font-weight: 400; }
 
+/* Flex en vez de grid de 2 columnas fijas: si solo hay una card (rol sin
+   permiso de generar, por ejemplo) queda centrada en vez de pegada a la
+   izquierda con un hueco vacío al lado. */
 .ftp-hub-cards {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
   gap: 32px !important;
-  flex-wrap: unset !important;
   width: 100%;
   max-width: 1060px;
 }
+.ftp-hub-cards .home-card { flex: 1 1 460px; max-width: 514px; }
 
 /* ── Clases compartidas con Inicio (hc-*) ── */
 .ftp-screen-container .home-card {
@@ -369,9 +373,8 @@
 @media (max-width: 48rem) {
   .ftp-main-content { padding: 1.5rem 1rem 7.5rem; }
   .ftp-modules      { grid-template-columns: 1fr; }
-  /* las tarjetas del hub forzaban 2 columnas con !important sin revertir en mobile,
-     partiendo el texto ("Segui/de/Indica"); pasan a 1 columna aquí */
-  .ftp-hub-cards    { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
+  .ftp-hub-cards    { gap: 1.25rem !important; }
+  .ftp-hub-cards .home-card { flex-basis: 100%; }
 }
 
 /* Los estilos ig-dl-* se encuentran en:

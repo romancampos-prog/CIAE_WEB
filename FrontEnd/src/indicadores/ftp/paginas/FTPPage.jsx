@@ -29,13 +29,14 @@ const IconNight = () => (
 
 /**
  * Página de inicio del módulo Indicadores Médicos.
- * Muestra las tarjetas de navegación a Gráficas y Generar según el rol del usuario.
- * Los visitantes son redirigidos automáticamente a Gráficas.
+ * Es la MISMA vista para todos los roles -- lo único que cambia es que la
+ * tarjeta "Generar indicadores" solo aparece si el rol puede generar algo
+ * (el visitante ve exactamente esta pantalla, nada más ni menos).
  */
 const FTPPage = () => {
   const navigate = useNavigate();
   const { icono } = getGreeting();
-  const { esVisitante, puedeGenFTP, puedeGenIAAS } = useRol();
+  const { puedeGenFTP, puedeGenIAAS } = useRol();
 
   const puedeGenerar   = puedeGenFTP || puedeGenIAAS;
   const navDestGenerar =
@@ -44,13 +45,6 @@ const FTPPage = () => {
                                   '/CIAE/IndicadoresMedicos/IAAS/Reporte';
 
   useEffect(() => { document.title = 'Indicadores | CIAE'; }, []);
-
-  // Visitante va directo a gráficas
-  useEffect(() => {
-    if (esVisitante) navigate('/CIAE/IndicadoresMedicos/Graficas', { replace: true });
-  }, [esVisitante]);
-
-  if (esVisitante) return null;
 
   return (
     <div className="ftp-screen-container">

@@ -84,8 +84,8 @@ const SeleccionPage = () => {
           <NavCard
             titulo="Indicadores Médicos"
             eyebrow="Módulo activo"
-            desc="Consulta y generación de indicadores mediante la integración de archivos FTP y Exceles de bases."
-            chips={['FTP', 'Excel']}
+            desc="Indicadores de desempeño y calidad de la atención médica en las unidades del OOAD Guanajuato, conforme al MMIM."
+            chips={['Generación', 'Consulta']}
             color="green"
             onClick={() => navigate('/CIAE/IndicadoresMedicos')}
           >
