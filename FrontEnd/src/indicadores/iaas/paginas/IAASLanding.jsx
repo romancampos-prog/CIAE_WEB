@@ -8,7 +8,7 @@ import './iass.css';
 
 const IAASLanding = () => {
   const navigate   = useNavigate();
-  const { puedeGenIAAS } = useRol();
+  const { puedeGenIAAS, esVisitante } = useRol();
   const anioActual = String(new Date().getFullYear());
   const [mesesGuardados, setMesesGuardados] = useState(null);
 
@@ -31,7 +31,7 @@ const IAASLanding = () => {
         <div className="ciae-grid" />
       </div>
 
-      <TopBar backTo="/CIAE/IndicadoresMedicos" />
+      <TopBar backTo={esVisitante ? '/CIAE/Inicio' : '/CIAE/IndicadoresMedicos'} />
 
       <main className="ia-hub-main">
         <div className="ia-hub-hero">

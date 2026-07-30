@@ -328,8 +328,13 @@ def calcular_unidad_tardia(
                 if nums_unidad is not None
                 else (datos_sesion.get(ind, {}).get(unidad) or {}).get("numerador")
             )
-            den_v = str(denominadores_02_06.get(ind, "")).strip()
-            den = int(den_v) if den_v.isdigit() else (datos_sesion.get(ind, {}).get(unidad) or {}).get("denominador")
+            if ind in denominadores_02_06 and denominadores_02_06[ind] is None:
+                # El usuario marcó "sin dato" a propósito -- se deja nulo (Gris),
+                # no se reutiliza el valor previo guardado en sesión.
+                den = None
+            else:
+                den_v = str(denominadores_02_06.get(ind, "")).strip()
+                den = int(den_v) if den_v.isdigit() else (datos_sesion.get(ind, {}).get(unidad) or {}).get("denominador")
             raw = {unidad: {"numerador": num, "denominador": den}}
             resultado[ind] = _semaforo_general(raw, ind)
 

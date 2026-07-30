@@ -16,6 +16,8 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
   const [excelFile,    setExcelFile]    = useState(null);
   const [excelDenIAAS01, setExcelDenIAAS01] = useState(null);
   const [denoms,       setDenoms]       = useState({});
+  const [sinDato,      setSinDato]      = useState(new Set());
+  const [denomsBackup, setDenomsBackup] = useState({});
   const [dragOver,     setDragOver]     = useState(false);
   const [dragOverDen,  setDragOverDen]  = useState(false);
   const [enviando,     setEnviando]     = useState(false);
@@ -40,6 +42,8 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     setUnidad(primerU);
     setSelInd(new Set());
     setDenoms(primerU ? denomsParaUnidad(primerU) : {});
+    setSinDato(new Set());
+    setDenomsBackup({});
     setExcelFile(null);
     setExcelDenIAAS01(null);
     setPassError('');
@@ -54,6 +58,25 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     s.has(ind) ? s.delete(ind) : s.add(ind);
     return s;
   });
+
+  /**
+   * Marca/desmarca un indicador como "sin dato". Al marcar, guarda el valor
+   * que había y lo borra; al desmarcar, restaura ese mismo valor.
+   */
+  const toggleSinDato = (ind) => {
+    setSinDato(prev => {
+      const s = new Set(prev);
+      if (s.has(ind)) {
+        s.delete(ind);
+        setDenoms(p => ({ ...p, [ind]: denomsBackup[ind] ?? '' }));
+      } else {
+        s.add(ind);
+        setDenomsBackup(b => ({ ...b, [ind]: denoms[ind] ?? '' }));
+        setDenoms(p => ({ ...p, [ind]: '' }));
+      }
+      return s;
+    });
+  };
 
   const setFile    = (f) => { if (f?.name.endsWith('.xlsx')) setExcelFile(f); };
   const setFileDen = (f) => { if (f?.name.endsWith('.xlsx')) setExcelDenIAAS01(f); };
@@ -80,8 +103,8 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
       return false;
     }
     const ind_02_06_sel = [...selInd].filter(i => i !== 'IAAS 01');
-    const sinDen = ind_02_06_sel.filter(i => denoms[i] == null || denoms[i] === '');
-    if (sinDen.length)     { setError(`Captura el denominador para: ${sinDen.join(', ')}`); return false; }
+    const sinDen = ind_02_06_sel.filter(i => !sinDato.has(i) && (denoms[i] == null || denoms[i] === ''));
+    if (sinDen.length)     { setError(`Captura el denominador para: ${sinDen.join(', ')} (o marca "Sin dato")`); return false; }
     return true;
   };
 
@@ -99,7 +122,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
     try {
       const ind_02_06_sel = [...selInd].filter(i => i !== 'IAAS 01');
       const denomsEnviar  = {};
-      ind_02_06_sel.forEach(i => { denomsEnviar[i] = denoms[i]; });
+      ind_02_06_sel.forEach(i => { denomsEnviar[i] = sinDato.has(i) ? null : denoms[i]; });
       const res = await completarUnidadTardia(anio, mes, unidad, [...selInd], denomsEnviar, excelFile, password, excelDenIAAS01);
       if (res.success) { onSuccess?.(res.data); onClose(); }
       else setPassError(res.message || 'Error al actualizar.');
@@ -158,6 +181,8 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                       setUnidad(u);
                       setSelInd(new Set());
                       setDenoms(denomsParaUnidad(u));
+                      setSinDato(new Set());
+                      setDenomsBackup({});
                       setExcelFile(null);
                       setExcelDenIAAS01(null);
                       setError('');
@@ -180,6 +205,8 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                         setUnidad(u);
                         setSelInd(new Set());
                         setDenoms(denomsParaUnidad(u));
+                        setSinDato(new Set());
+                        setDenomsBackup({});
                         setExcelFile(null);
                         setExcelDenIAAS01(null);
                         setError('');
@@ -229,12 +256,19 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                         {tieneNum ? numGuardado : 'falta'}
                       </span>
                       {!esIAAS01 ? (
-                        <input
-                          type="number" min="0" className="mut-den-input"
-                          placeholder={info?.subT2 ? info.subT2.slice(0, 16) : 'Denominador'}
-                          value={denoms[ind] ?? ''}
-                          onChange={e => setDenoms(p => ({ ...p, [ind]: e.target.value }))}
-                        />
+                        <span className="mut-den-wrap">
+                          <input
+                            type="number" min="0" className="mut-den-input"
+                            placeholder={info?.subT2 ? info.subT2.slice(0, 16) : 'Denominador'}
+                            value={denoms[ind] ?? ''}
+                            disabled={sinDato.has(ind)}
+                            onChange={e => setDenoms(p => ({ ...p, [ind]: e.target.value }))}
+                          />
+                          <label className="mut-sindato" title="Marca si esta unidad no tiene dato para este indicador (queda en Gris)">
+                            <input type="checkbox" checked={sinDato.has(ind)} onChange={() => toggleSinDato(ind)} />
+                            Sin dato
+                          </label>
+                        </span>
                       ) : excelDenIAAS01 ? (
                         <span className="mut-ind-den-auto" title="Se recalculará con el Excel de denominador que subiste abajo.">
                           se recalcula ({excelDenIAAS01.name.replace('.xlsx', '')})

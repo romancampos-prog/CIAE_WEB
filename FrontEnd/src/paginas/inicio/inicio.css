@@ -126,8 +126,12 @@
 }
 
 /* ── Card base ── */
+/* flex-basis + max-width en vez de un ancho fijo: si solo hay una card
+   (depende del rol, p. ej. no-admin sin "Epidemiología") se ensancha un
+   poco en vez de quedarse en su tamaño de "iba a compartir espacio". */
 .home-card {
-  width: 500px; background: white; border-radius: 20px; overflow: hidden;
+  flex: 1 1 500px; max-width: 560px;
+  background: white; border-radius: 20px; overflow: hidden;
   cursor: pointer; border: 1px solid rgba(0,0,0,0.07);
   box-shadow: 0 8px 32px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
   transition: all 0.32s cubic-bezier(0.16,1,0.3,1);
@@ -214,12 +218,12 @@
 
 @media (max-width: 70rem) {
   .home-cards { gap: 1.5rem; }
-  .home-card  { width: 26.25rem; }
+  .home-card  { flex-basis: 26.25rem; }
 }
 
 /* Tablets (mismo corte que auth.css: 48rem) */
 @media (max-width: 48rem) {
-  .home-card      { width: 100%; max-width: 31.25rem; }
+  .home-card      { flex-basis: 100%; max-width: 31.25rem; }
   .home-cards     { gap: 1rem; }
 }
 
