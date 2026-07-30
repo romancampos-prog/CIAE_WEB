@@ -14,6 +14,11 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
   const [saliendo, setSaliendo] = useState(false)
   const [progreso, setProgreso] = useState(100)
 
+  const cerrar = () => {
+    setSaliendo(true)
+    setTimeout(() => { setVisible(false); setSaliendo(false) }, 350)
+  }
+
   useEffect(() => {
     if (!ultimoReporte || !trigger) return
 
@@ -36,15 +41,10 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
     return () => { clearTimeout(t1); clearTimeout(t2); clearInterval(intervalo) }
   }, [trigger])
 
-  const cerrar = () => {
-    setSaliendo(true)
-    setTimeout(() => { setVisible(false); setSaliendo(false) }, 350)
-  }
-
   if (!visible || !ultimoReporte) return null
 
   return createPortal(
-    <div style={{
+    <div className="epi-toast" style={{
       position: 'fixed', top: 80, right: 24, zIndex: 2000,
       width: 320,
       transform: saliendo ? 'translateX(calc(100% + 32px))' : 'translateX(0)',
@@ -68,9 +68,9 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
         border: '1px solid rgba(255,255,255,0.6)',
         overflow: 'hidden',
       }}>
-        <div style={{ padding: '13px 15px', display: 'flex', gap: 11, alignItems: 'center' }}>
+        <div className="epi-toast-content" style={{ padding: '13px 15px', display: 'flex', gap: 11, alignItems: 'center' }}>
 
-          <div style={{
+          <div className="epi-toast-icon" style={{
             width: 36, height: 36, borderRadius: 10, flexShrink: 0,
             background: 'linear-gradient(135deg, #245c4f, #2d7060)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -78,10 +78,10 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
           }}>📋</div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            <div className="epi-toast-label" style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
               Último reporte generado
             </div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', marginTop: 2, lineHeight: 1.2 }}>
+            <div className="epi-toast-valor" style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', marginTop: 2, lineHeight: 1.2 }}>
               {ultimoReporte}
             </div>
           </div>

@@ -52,6 +52,15 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
+/* "Último reporte" reubicado — solo existe visualmente en mobile (ver media query) */
+.epi-carga-reporte-mobile { display: none; }
+
+/* Badge de alertas de Canal Endémico — versión mobile (debajo de la
+   gráfica), oculta fuera de mobile (ver media query). !important porque
+   el botón tiene display:'flex' puesto por estilo inline, que si no le
+   gana a esta regla y el badge queda visible en cualquier tamaño. */
+.epi-canal-alerta--mobile { display: none !important; }
+
 /* ── Body (sidebar + main) ── */
 .epi-body {
   display: flex; flex: 1; overflow: hidden;
@@ -225,6 +234,11 @@
    flotante para abrirlo; abierto se despliega como overlay sobre el
    contenido, con backdrop, en vez de apachurrarlo. Desktop no cambia. ── */
 @media (max-width: 48rem) {
+  /* El label "Epidemiología · Dengue" seguía rompiéndose contra el chip
+     de usuario aunque truncara — en mobile se saca del todo del header;
+     el resto de las vistas ya no muestran ningún texto ahí tampoco. */
+  .tb-left > div { display: none; }
+
   .epi-sidebar-fab {
     display: flex; align-items: center; justify-content: center;
     position: fixed; left: 1rem; bottom: 1.25rem; z-index: 250;
@@ -248,6 +262,109 @@
   }
 
   .epi-main, .epi-main--expanded { padding: 1.25rem 1rem; }
+
+  /* Barra de progreso (Base Operativa → Base SisCep → Ejecutar): usaba
+     estilos inline con flex:1 + nowrap, así que en mobile no entraban los
+     3 pasos y el último se cortaba. Ahora los 3 caben completos: el texto
+     pasa a 2 líneas si hace falta y todo se achica un poco, en vez de
+     cortarse o depender de hacer scroll. (usa !important por ser inline) */
+  .epi-progreso-bar {
+    padding: 0.625rem 0.75rem !important;
+  }
+  .epi-progreso-item  { flex: 1 !important; min-width: 0 !important; }
+  .epi-progreso-inner { gap: 0.375rem !important; min-width: 0; }
+  .epi-progreso-circle {
+    width: 1.5rem !important; height: 1.5rem !important;
+    font-size: 0.62rem !important;
+  }
+  .epi-progreso-label {
+    white-space: normal !important;
+    font-size: 0.62rem !important;
+    line-height: 1.15;
+    min-width: 0; flex: 1;
+  }
+  .epi-progreso-sep { flex: 0 0 0.5rem !important; margin: 0 !important; }
+
+  /* "Carga de bases de datos": título y subtítulo centrados; la tarjeta
+     de "Último reporte" (la de siempre visible, no el toast/notificación
+     que aparece al terminar el pipeline) deja de ser una tarjeta blanca
+     y pasa a ser solo texto chico en gris. */
+  .epi-carga-hero {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+  .epi-carga-titleblock { width: 100%; }
+  .epi-carga-titulo, .epi-carga-sub { text-align: center !important; }
+
+  /* Badge "Sistema de Vigilancia del Dengue": sin fondo/borde, solo las
+     letras en su mismo color, centrado */
+  .epi-carga-badge {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100%;
+  }
+
+  /* La tarjeta de "Último reporte" del hero se oculta en mobile — ahora
+     se muestra más abajo, debajo de "Sube ambos archivos para continuar"
+     (ver .epi-carga-reporte-mobile). */
+  .epi-carga-reporte { display: none !important; }
+
+  .epi-carga-reporte-mobile {
+    display: block;
+    margin: 0.25rem 0 0;
+    font-size: 0.66rem;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  /* Toast "Último reporte generado" — quedaba muy grande en mobile con
+     su ancho fijo de 320px; se achica y se acomoda a cualquier pantalla. */
+  .epi-toast {
+    top: 0.75rem !important; right: 0.75rem !important; left: 0.75rem !important;
+    width: auto !important;
+  }
+  .epi-toast-content { padding: 0.625rem 0.75rem !important; gap: 0.5rem !important; }
+  .epi-toast-icon {
+    width: 1.75rem !important; height: 1.75rem !important;
+    font-size: 0.85rem !important;
+  }
+  .epi-toast-label { font-size: 0.58rem !important; }
+  .epi-toast-valor { font-size: 0.78rem !important; }
+
+  /* Canal Endémico: título y subtítulo centrados */
+  .epi-canal-hero { justify-content: center !important; }
+  .epi-canal-titleblock { width: 100%; }
+  .epi-canal-titulo, .epi-canal-sub { text-align: center !important; }
+
+  /* Las 3 tarjetas KPI quedaban en 2+1 (dispares); pasan a una sola
+     columna, prolijo. El badge de alertas se estira a todo el ancho para
+     no verse como "una cosita roja" perdida. La leyenda del gráfico se
+     centra en vez de quedar pegada a la derecha. */
+  .epi-canal-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  .epi-canal-kpis > div { padding: 0.5rem 0.625rem !important; border-radius: 0.75rem !important; }
+  .epi-canal-kpis > div > div:nth-child(1) { font-size: 1.05rem !important; }
+  .epi-canal-kpis > div > div:nth-child(2) { font-size: 0.62rem !important; }
+  .epi-canal-kpis > div > div:nth-child(3) { font-size: 0.56rem !important; }
+  /* El badge de alertas se mueve debajo de la gráfica en mobile: todo en
+     una sola línea (ícono, número y texto), angosto y centrado — no de
+     ancho completo. */
+  .epi-canal-alerta { justify-content: center !important; }
+  .epi-canal-alerta--desktop { display: none !important; }
+  .epi-canal-alerta--mobile {
+    display: flex !important;
+    width: auto !important;
+    align-self: center;
+    padding: 0.625rem 1.75rem !important;
+  }
+  .epi-canal-leyenda { justify-content: center !important; width: 100%; }
 }
 
 @media (max-width: 30rem) {

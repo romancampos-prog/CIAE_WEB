@@ -42,7 +42,7 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
         style={{
           width: '100%', background: 'none', border: 'none',
           padding: '14px 18px', cursor: vacio ? 'default' : 'pointer',
-          display: 'flex', alignItems: 'center', gap: 14,
+          display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
           fontFamily: 'inherit', textAlign: 'left',
         }}
       >
@@ -57,7 +57,7 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
         }}>{numAlerta}</div>
 
         {/* Título y descripción */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: '1 1 12rem', minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span style={{
               fontSize: 13, fontWeight: 700,
