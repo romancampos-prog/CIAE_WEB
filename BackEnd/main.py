@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from configs.cors import ORIGINS, ORIGINS_REGEX
+from configs.cors import ORIGINS
 
 from auth.controllers.auth_controller import router as auth_router
 
@@ -28,7 +28,6 @@ app = FastAPI(title="CIAE Backend", version="2.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ORIGINS,
-    allow_origin_regex=ORIGINS_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,12 +45,18 @@ for _router, _prefix in epi_module.ROUTERS:
 
 app.mount("/assets", StaticFiles(directory=os.path.join(DIST, "assets")), name="assets")
 
+
+
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
-    file_path = os.path.join(DIST, full_path)
-    if os.path.exists(file_path) and os.path.isfile(file_path):
+    file_path = os.path.realpath(os.path.join(DIST, full_path))
+    dist_real = os.path.realpath(DIST)
+    if file_path.startswith(dist_real) and os.path.isfile(file_path):
         return FileResponse(file_path)
     return FileResponse(os.path.join(DIST, "index.html"))
+
+
+
 
 if __name__ == "__main__":
     import uvicorn
