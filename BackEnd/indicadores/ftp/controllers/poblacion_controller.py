@@ -2,10 +2,11 @@
 Recibe y procesa el Excel de población.
 Usado en: ftp/__init__.py (prefix /ftp)
 """
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from auth.services.jwt_utils import solo_roles
 from ftp.services.poblacion_service import procesar_archivo_poblacion, obtener_ultimo_archivo_poblacion
 from configs.response import ApiResponse
+from shared.validarArchivo_service import validarPeso_Archivo
 
 router = APIRouter()
 
@@ -24,12 +25,15 @@ async def obtener_archivo_poblacion_actual(
 @router.post("/poblacion/subir")
 async def subir_poblacion(
     archivo:  UploadFile = File(...),
+    pesoArchivo: int     = Form(...),
     payload:  dict       = Depends(solo_roles("admin", "trabajador_ftp"))
 ):
     if not archivo.filename.endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="Solo se aceptan archivos Excel (.xlsx, .xls)")
 
     contenido = await archivo.read()
+    if not validarPeso_Archivo(contenido, pesoArchivo):
+        raise HTTPException(status_code=413, detail="Archivo demasiado grande o tamaño inconsistente")
     resultado = procesar_archivo_poblacion(contenido, archivo.filename)
 
     if not resultado["ok"]:

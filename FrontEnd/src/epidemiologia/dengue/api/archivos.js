@@ -8,6 +8,7 @@ import api from '../../../shared/api/axiosInstance';
 export const subirOperativa = (archivo) => {
     const form = new FormData();
     form.append('archivo', archivo);
+    form.append('pesoArchivo', archivo.size);
     return api.post('/epidemiologia/archivos/operativa', form);
 };
 
@@ -19,5 +20,6 @@ export const subirOperativa = (archivo) => {
 export const subirSiscep = (archivo) => {
     const form = new FormData();
     form.append('archivo', archivo);
+    form.append('pesoArchivo', archivo.size);
     return api.post('/epidemiologia/archivos/siscep', form);
 };

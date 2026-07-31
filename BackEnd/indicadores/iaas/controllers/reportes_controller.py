@@ -22,6 +22,7 @@ from iaas.services.grafica_service import (
     calcular_datos_grafica_iaas,
     NOMBRE_A_NUM_IAAS as _NOMBRE_A_NUM_IAAS,
 )
+from shared.validarArchivo_service import validarPeso_Archivo
 
 router = APIRouter()
 
@@ -92,14 +93,33 @@ async def recibir_datos_iass(
     anio:                       str                  = Form(...),
     mes:                        str                  = Form(...),
     numerador:                  List[UploadFile]     = File(default=[]),
+    pesoNumerador:               List[int]           = Form(default=[]),
     denominador:                Optional[str]        = Form(None),
     excel_denominador_IAAS_01: Optional[UploadFile] = File(None),
+    peso_excel_denominador_IAAS_01: Optional[int] = Form(None),
     payload:                    dict                 = Depends(solo_roles(*ROLES_IAAS))
 ):
+    # Validación de tamaño va ANTES del try/except de abajo: si no, el
+    # "except Exception" genérico atraparía nuestro HTTPException(413) y
+    # lo convertiría en un 500 en vez de dejarlo pasar como 413.
+    if len(numerador) != len(pesoNumerador):
+        raise HTTPException(status_code=400, detail="Falta el peso declarado de alguno de los archivos")
+
+    numerador_bytes = {}
+    for archivo, peso in zip(numerador, pesoNumerador):
+        contenido = await archivo.read()
+        if not validarPeso_Archivo(contenido, peso):
+            raise HTTPException(status_code=413, detail=f"Archivo '{archivo.filename}' demasiado grande o tamaño inconsistente")
+        numerador_bytes[archivo.filename] = contenido
+
+    excel_denominador_01_bytes = None
+    if excel_denominador_IAAS_01:
+        excel_denominador_01_bytes = await excel_denominador_IAAS_01.read()
+        if not validarPeso_Archivo(excel_denominador_01_bytes, peso_excel_denominador_IAAS_01):
+            raise HTTPException(status_code=413, detail="Archivo del denominador demasiado grande o tamaño inconsistente")
+
     try:
-        numerador_bytes            = {f.filename: await f.read() for f in numerador}
-        excel_denominador_01_bytes = await excel_denominador_IAAS_01.read() if excel_denominador_IAAS_01 else None
-        denominador_dict           = json.loads(denominador) if denominador else {}
+        denominador_dict = json.loads(denominador) if denominador else {}
 
         resultado = ProcesarIAAS(
             anio                       = anio,
