@@ -7,6 +7,7 @@ from auth.services.jwt_utils import solo_roles
 from ftp.services.poblacion_service import procesar_archivo_poblacion, obtener_ultimo_archivo_poblacion
 from configs.response import ApiResponse
 from shared.validarArchivo_service import validarPeso_Archivo
+from shared.auditoria_service import registrar
 
 router = APIRouter()
 
@@ -38,6 +39,8 @@ async def subir_poblacion(
 
     if not resultado["ok"]:
         raise HTTPException(status_code=422, detail=resultado["detalle"])
+
+    registrar("SUBIDA_ARCHIVO", usuario=payload.get("sub"), detalle=f"archivo=poblacion({archivo.filename}) bytes={len(contenido)}")
 
     return ApiResponse(
         success=True,

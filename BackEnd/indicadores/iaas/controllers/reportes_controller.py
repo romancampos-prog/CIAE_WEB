@@ -23,6 +23,7 @@ from iaas.services.grafica_service import (
     NOMBRE_A_NUM_IAAS as _NOMBRE_A_NUM_IAAS,
 )
 from shared.validarArchivo_service import validarPeso_Archivo
+from shared.auditoria_service import registrar
 
 router = APIRouter()
 
@@ -128,6 +129,7 @@ async def recibir_datos_iass(
             denominador                = denominador_dict,
             excel_denominador_IAAS_01 = excel_denominador_01_bytes
         )
+        registrar("SUBIDA_ARCHIVO", usuario=payload.get("sub"), detalle=f"IAAS/Generar anio={anio} mes={mes} archivos={len(numerador_bytes)}")
         return ApiResponse(success=True, message=resultado["mensaje"], data={
             "archivo_b64":    resultado["archivo_b64"],
             "nombre_archivo": resultado["nombre_archivo"]

@@ -10,8 +10,8 @@ from fastapi import HTTPException, status
 
 _intentos_fallidos: dict = {}   # { ip: {"cuenta": int, "bloqueado_hasta": float} }
 
-MAX_INTENTOS = 5
-BLOQUEO_SEGUNDOS = 15 * 60   # 15 minutos
+MAX_INTENTOS = 3   # 3 intentos si no bloqueado por 30 min 
+BLOQUEO_SEGUNDOS = 30 * 60   # 15 minutos
 
 
 def revisar_bloqueo(ip: str):

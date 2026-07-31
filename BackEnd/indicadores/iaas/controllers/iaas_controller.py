@@ -22,6 +22,7 @@ from iaas.services.procesar_service import (
 from iaas.services.datos_json_service import leer_indicador_anio
 from configs.response import ApiResponse
 from shared.validarArchivo_service import validarPeso_Archivo
+from shared.auditoria_service import registrar
 
 router = APIRouter()
 
@@ -142,6 +143,7 @@ async def completar_unidad(
         raise HTTPException(status_code=400, detail=detail)
 
     mes_nombre = MESES_NOMBRE.get(mes, mes)
+    registrar("SUBIDA_ARCHIVO", usuario=usuario, detalle=f"completar-unidad unidad={unidad} anio={anio} mes={mes}")
     return ApiResponse(
         success=True,
         message=f"Unidad {unidad} actualizada en {mes_nombre} {anio}",

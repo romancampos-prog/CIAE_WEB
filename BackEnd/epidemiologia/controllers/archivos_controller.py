@@ -9,6 +9,7 @@ from epidemiologia.config import RUTA_OPERATIVA, RUTA_SISCEP
 from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
 from shared.validarArchivo_service import validarPeso_Archivo
+from shared.auditoria_service import registrar
 
 router = APIRouter()
 
@@ -30,6 +31,7 @@ async def subir_operativa(
         raise HTTPException(status_code=413, detail="Archivo demasiado grande o tamaño inconsistente")
     RUTA_OPERATIVA.parent.mkdir(parents=True, exist_ok=True)
     RUTA_OPERATIVA.write_bytes(contenido)
+    registrar("SUBIDA_ARCHIVO", usuario=payload.get("sub"), detalle=f"archivo=operativa.xlsx bytes={len(contenido)}")
     return ApiResponse(success=True, message="Base operativa guardada", data={"nombre": archivo.filename, "bytes": len(contenido)})
 
 
@@ -45,4 +47,5 @@ async def subir_siscep(
         raise HTTPException(status_code=413, detail="Archivo demasiado grande o tamaño inconsistente")
     RUTA_SISCEP.parent.mkdir(parents=True, exist_ok=True)
     RUTA_SISCEP.write_bytes(contenido)
+    registrar("SUBIDA_ARCHIVO", usuario=payload.get("sub"), detalle=f"archivo=siscep.xlsx bytes={len(contenido)}")
     return ApiResponse(success=True, message="Base SisCep guardada", data={"nombre": archivo.filename, "bytes": len(contenido)})
