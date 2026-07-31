@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from configs.cors import ORIGINS
+from configs.cors import AMBIENTE, ORIGINS
 
 from auth.controllers.auth_controller import router as auth_router
 
@@ -32,6 +32,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http") #middleware para eivtar estas tres cosas  X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Strict-Transport-Security
+async def agregar_cabeceras_seguridad(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    if AMBIENTE == "produccion":
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    return response
 
 app.include_router(auth_router, prefix="/auth")
 for _router, _prefix in ftp_module.ROUTERS:

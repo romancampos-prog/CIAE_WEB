@@ -22,7 +22,7 @@ module.exports = {
 
       cwd: path.join(__dirname, 'BackEnd'),  // decirle que para ejecutar el comando de arruba lo ejecute apradoi en backend
       interpreter: 'none',  //pm2 es realizado por node, pero como ejecutamos py le ponemos none por q no es js 
-      env: { PYTHONUNBUFFERED: '1', PYTHONIOENCODING: 'utf-8' },  
+      env: { PYTHONUNBUFFERED: '1', PYTHONIOENCODING: 'utf-8', AMBIENTE: 'produccion' },  //para que no haga buffering y se vea en tiempo real lo que hace el backend, y para que no haya problemas con acentos y ñ
     },
   ],
 };
