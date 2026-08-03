@@ -143,6 +143,8 @@
 }
 .home-card--coming { cursor: default; opacity: 0.75; }
 .home-card--coming:hover { transform: none !important; box-shadow: 0 8px 32px rgba(0,0,0,0.07) !important; }
+.home-card--disabled { cursor: not-allowed; opacity: 0.6; }
+.home-card--disabled:hover { transform: none !important; box-shadow: 0 8px 32px rgba(0,0,0,0.07) !important; }
 
 /* ── Header (icono + nombre) ── */
 .hc-header {

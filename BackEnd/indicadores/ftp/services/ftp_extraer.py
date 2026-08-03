@@ -118,6 +118,12 @@ def _diagnosticar_segmento(ftp, buscado: str) -> str:
         if d_strip == b_strip and (d != d_strip or b != b_strip):
             return f"espacios extra en ambos lados — real en FTP: '{d}', buscado: '{b}'"
 
+        # Mismas letras, pero con un espacio de más/menos a media palabra
+        # (ej. 'SIAIS_Reportes' vs 'SIAIS_ Reportes') -- no lo cubre .strip()
+        # porque el espacio no está al inicio ni al final.
+        if d.replace(" ", "") == b.replace(" ", "") and d != b:
+            return f"hay un espacio de más — buscado: '{b}', real: '{d}'"
+
         # Sólo diferencia de mayúsculas/minúsculas (sin espacios)
         if d_lower == b_lower and d != b:
             difs = [f"pos {i}: '{x}'→'{y}'" for i, (x, y) in enumerate(zip(d, b)) if x != y]
@@ -127,19 +133,16 @@ def _diagnosticar_segmento(ftp, buscado: str) -> str:
         if d_snorm == b_snorm and d != b:
             return f"mayúsculas/espacios distintos — real: '{d}', buscado: '{b}'"
 
-    # Búsqueda de la carpeta más parecida con difflib
+    # Búsqueda de la carpeta más parecida con difflib.
+    # Antes se listaba "pos X: 'a'->'b'" letra por letra, pero un solo carácter
+    # insertado corre todas las posiciones siguientes y hace ver 4-5 diferencias
+    # donde en realidad hay una sola -- mejor mostrar las dos carpetas completas
+    # y que el ojo humano compare, como en los demás casos de esta función.
     candidatos = difflib.get_close_matches(b, disponibles, n=1, cutoff=0.55)
     if candidatos:
-        c = candidatos[0]
-        difs = []
-        for i, (x, y) in enumerate(zip(b, c)):
-            if x != y:
-                difs.append(f"pos {i}: '{x}'→'{y}'")
-        if len(b) != len(c):
-            difs.append(f"longitud {len(b)} vs {len(c)}")
-        detalle = ", ".join(difs[:4]) if difs else "nombres muy similares"
+        c   = candidatos[0]
         pct = int(difflib.SequenceMatcher(None, b.lower(), c.lower()).ratio() * 100)
-        return f"carpeta más parecida: '{c}' ({pct}% similar) — {detalle}"
+        return f"carpeta más parecida: '{c}' ({pct}% similar) — buscado: '{b}'"
 
     # Sin candidatos: mostrar lo disponible en ese nivel
     muestra = ", ".join(f"'{d}'" for d in disponibles[:6])

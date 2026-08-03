@@ -50,13 +50,13 @@ const Login = () => {
     try {
       const data = await auth_login(credentials);
       if (data.success) {
-        login({ user: data.data.usuario, token: data.data.token });
+        login({ user: data.data.usuario, rol: data.data.rol });
         const destinos = {
           trabajador_IAAS: '/CIAE/IndicadoresMedicos/IAAS',
           ftp:             '/CIAE/IndicadoresMedicos/FTP',
+          visitante:       '/CIAE/IndicadoresMedicos',
         };
-        const payload = JSON.parse(atob(data.data.token.split('.')[1]));
-        const destino = destinos[payload?.rol] ?? '/CIAE/Inicio';
+        const destino = destinos[data.data.rol] ?? '/CIAE/Inicio';
         setTimeout(() => navigate(destino), 600);
       }
     } catch (err) {

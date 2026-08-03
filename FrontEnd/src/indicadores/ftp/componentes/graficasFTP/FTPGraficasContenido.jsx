@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useRol } from '../../../../auth/hooks/useRol';
 import { useFTPGrafica } from '../../hooks/useFTPGrafica';
 import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
@@ -17,7 +16,6 @@ const VISTAS_FTP = [
 const POR_PAGINA = 12;
 
 const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
-  const { puedeGenFTP } = useRol();
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
   const [hoveredMes, setHoveredMes]   = useState(null);
@@ -185,7 +183,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
 
                 <div className="ig-controls">
                   <span className="ig-year-chip">{anio}</span>
-                  {puedeGenFTP && mesSel && (
+                  {mesSel && (
                     <MenuDescarga
                       disabled={descargando}
                       opciones={[

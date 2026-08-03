@@ -1,6 +1,7 @@
 ﻿import './ftp.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../auth/contexto/AuthContext';
 import { useRol } from '../../../auth/hooks/useRol';
 import NavCard from '../../../shared/componentes/NavCard';
 import TopBar from '../../../shared/componentes/TopBar';
@@ -29,20 +30,28 @@ const IconNight = () => (
 
 /**
  * Página de inicio del módulo Indicadores Médicos.
- * Es la MISMA vista para todos los roles -- lo único que cambia es que la
- * tarjeta "Generar indicadores" solo aparece si el rol puede generar algo
- * (el visitante ve exactamente esta pantalla, nada más ni menos).
+ * La tarjeta "Generar indicadores" se oculta solo para quien no puede
+ * generar NADA (hoy, únicamente el visitante) -- admin/trabajador_ftp/
+ * trabajador_IAAS siempre tienen al menos un permiso de generación, así
+ * que siempre la ven habilitada aquí. El detalle de "FTP sí, IAAS no" (o
+ * viceversa) se ve un nivel más adentro, en GenerarHub.jsx, con el patrón
+ * de tarjeta deshabilitada.
  */
 const FTPPage = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { icono } = getGreeting();
-  const { puedeGenFTP, puedeGenIAAS } = useRol();
+  const { puedeGenFTP, puedeGenIAAS, esVisitante } = useRol();
 
-  const puedeGenerar   = puedeGenFTP || puedeGenIAAS;
-  const navDestGenerar =
-    puedeGenFTP && puedeGenIAAS ? '/CIAE/IndicadoresMedicos/Generar'     :
-    puedeGenFTP                 ? '/CIAE/IndicadoresMedicos/FTP/Generar' :
-                                  '/CIAE/IndicadoresMedicos/IAAS/Reporte';
+  const puedeGenerar = puedeGenFTP || puedeGenIAAS;
+  // Siempre al hub de seleccion (GenerarHub), igual para todos los roles --
+  // ahi es donde se ve FTP/IAAS habilitado o deshabilitado segun el permiso.
+  const navDestGenerar = '/CIAE/IndicadoresMedicos/Generar';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/CIAE/LOGIN');
+  };
 
   useEffect(() => { document.title = 'Indicadores | CIAE'; }, []);
 
@@ -55,7 +64,7 @@ const FTPPage = () => {
         <div className="ciae-grid" />
       </div>
 
-      <TopBar backTo="/CIAE/Inicio" />
+      {esVisitante ? <TopBar onLogout={handleLogout} /> : <TopBar backTo="/CIAE/Inicio" />}
 
       <main className="ftp-main-content ftp-hub-main">
 

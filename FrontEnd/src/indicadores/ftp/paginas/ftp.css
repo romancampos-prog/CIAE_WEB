@@ -38,7 +38,12 @@
 .ftp-main-content {
   flex: 1; max-width: 1100px; width: 100%;
   margin: 0 auto;
-  padding: 36px 4% 120px;
+  /* min(4%, 44px): el 4% se mide contra el ancho de PANTALLA COMPLETA (el
+     padre), no contra estos 1100px de max-width -- sin el tope de 44px
+     (4% de 1100), en pantallas anchas el padding sigue creciendo con el
+     ancho de la ventana aunque esta caja ya dejo de crecer, comiendose el
+     espacio real disponible para las tarjetas. */
+  padding: 36px min(4%, 44px) 120px;
   z-index: 5; position: relative;
   animation: ftp-contentIn 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both;
 }
@@ -130,6 +135,7 @@
   display: flex !important;
   flex-wrap: wrap !important;
   justify-content: center !important;
+  align-self: stretch !important;
   gap: 32px !important;
   width: 100%;
   max-width: 1060px;

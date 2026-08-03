@@ -13,7 +13,10 @@ const Footer = () => (
       </div>
 
       <div className="cf-right">
-        <span className="cf-dev">Desarrollo · R.G. Campos Barraza &amp; L.V. López Hernández</span>
+        <span className="cf-dev">
+          Desarrollo · R.G. Campos Barraza &amp; L.V. López Hernández ·{' '}
+          <a href="mailto:rblvcblh1110@gmail.com" className="cf-mail">rblvcblh1110@gmail.com</a>
+        </span>
         <span className="cf-dot">·</span>
         <span className="cf-copy">© 2026 IMSS · León, Gto.</span>
       </div>

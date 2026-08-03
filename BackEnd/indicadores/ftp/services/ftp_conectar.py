@@ -7,6 +7,10 @@ from configs.settings import FTP_SERVER, FTP_USER, FTP_PASS
 
 
 def conectar_ftp():
+    # NOTA: se intentó migrar a FTP_TLS (conexión cifrada) pero el servidor
+    # del IMSS rechazó la conexión — no soporta FTPS por ahora. Pendiente
+    # de confirmar con el equipo que administra ese servidor si algún día
+    # lo habilitan, para volver a intentar este cambio.
     try:
         ftp = FTP()
         ftp.connect(FTP_SERVER, 21, timeout=120)
