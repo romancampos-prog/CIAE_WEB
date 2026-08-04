@@ -8,6 +8,7 @@ import api from '../../../shared/api/axiosInstance';
 export const subirArchivoPoblacion = async (archivo) => {
     const formData = new FormData();
     formData.append('archivo', archivo);
+    formData.append('pesoArchivo', archivo.size);
     const respuesta = await api.post('/ftp/poblacion/subir', formData);
     return respuesta.data;
 };

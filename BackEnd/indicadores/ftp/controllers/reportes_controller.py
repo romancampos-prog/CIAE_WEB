@@ -323,6 +323,7 @@ async def generar_categoria_guardado(
 
     completados = []
     errores     = {}
+    semanas_encontradas = set()
 
     for indicador, resultado in pares:
         if resultado["status"] != "success":
@@ -336,6 +337,8 @@ async def generar_categoria_guardado(
                 ano, mes, resultado["semana"], resultado["es_semana"]
             )
             completados.append(indicador)
+            if resultado["es_semana"] and resultado["semana"] is not None:
+                semanas_encontradas.add(resultado["semana"])
         except Exception as exc:
             errores[indicador] = str(exc)
 
@@ -347,7 +350,12 @@ async def generar_categoria_guardado(
     output.seek(0)
     excel_b64 = base64.b64encode(output.getvalue()).decode("utf-8")
     mes_fmt   = str(mes).zfill(2)
-    nombre    = f"{categoria}_{ano}_{mes_fmt}.xlsx"
+    # Igual que ExcelReporteGuardado: si lo que se descarga es un respaldo
+    # semanal (mes aun no cerrado), el nombre lo marca con _S<numero>.
+    nombre = (
+        f"{categoria}_{ano}_{mes_fmt}_S{max(semanas_encontradas)}.xlsx"
+        if semanas_encontradas else f"{categoria}_{ano}_{mes_fmt}.xlsx"
+    )
 
     return ApiResponse(success=True, message="Categoría obtenida", data={
         "archivo_b64":    excel_b64,

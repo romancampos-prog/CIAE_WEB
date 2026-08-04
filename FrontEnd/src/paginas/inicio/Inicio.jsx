@@ -45,8 +45,16 @@ const SeleccionPage = () => {
 
   useEffect(() => {
     document.title = "Inicio | CIAE";
-    console.log(user)
   }, []);
+
+  // El visitante no tiene nada que hacer en Inicio (solo ve Indicadores
+  // Medicos) -- si llega aqui por cualquier via (boton atras, URL directa),
+  // se manda derecho a su unico modulo.
+  useEffect(() => {
+    if (user?.rol === 'visitante') {
+      navigate('/CIAE/IndicadoresMedicos', { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="home-root">
@@ -94,13 +102,14 @@ const SeleccionPage = () => {
             </svg>
           </NavCard>
 
-          {user.rol === 'admin' && (
+          {['admin', 'trabajador_ftp', 'trabajador_IAAS'].includes(user.rol) && (
             <NavCard
               titulo="Epidemiología"
               eyebrow="Módulo activo"
               desc="Vigilancia Epidemiológica: Análisis y seguimiento de enfermedades prioritarias en el OOAD Guanajuato."
               chips={['Dengue']}
               color="tinto"
+              disabled={user.rol !== 'admin'}
               onClick={() => navigate('/CIAE/Epidemiologia')}
             >
               <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">

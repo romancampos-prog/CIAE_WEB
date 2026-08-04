@@ -5,17 +5,15 @@ Qué hace: Verifica tokens JWT. Se usa como dependencia en endpoints protegidos.
 Usado en: cualquier controller que requiera autenticación
 """
 import jwt
-from fastapi import HTTPException, Security, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Cookie, Depends, HTTPException, status
 from configs.settings import SECRET_KEY
-from fastapi import Depends
-
-security = HTTPBearer()
 
 
-def verificar_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+def verificar_token(token: str | None = Cookie(default=None)):
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No autenticado")
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado")
@@ -23,7 +21,7 @@ def verificar_token(credentials: HTTPAuthorizationCredentials = Security(securit
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
-def solo_admin(payload: dict = Security(verificar_token)):
+def solo_admin(payload: dict = Depends(verificar_token)):
     if payload.get("rol") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso restringido")
     return payload

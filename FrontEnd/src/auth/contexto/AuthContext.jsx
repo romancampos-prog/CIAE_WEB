@@ -1,46 +1,38 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import api from '../../shared/api/axiosInstance';
 
 const AuthContext = createContext();
-
-function decodeJwtPayload(token) {
-  try {
-    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-}
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const savedToken = localStorage.getItem('token');
-      if (!savedToken) { setLoading(false); return logout(); }
-
-      const payload = decodeJwtPayload(savedToken);
-      if (!payload) { setLoading(false); return logout(); }
-
-      const now = Math.floor(Date.now() / 1000);
-      if (payload.exp && now >= payload.exp) { setLoading(false); return logout(); }
-
-      setUser({ token: savedToken, user: payload.sub, rol: payload.rol });
-      setLoading(false);
+    // el token vive en una cookie httpOnly, no lo podemos leer aqui —
+    // le preguntamos al backend "quien soy" para saber si hay sesion activa.
+    const checkAuth = async () => {
+      try {
+        const { data } = await api.get('/auth/me');
+        setUser({ user: data.data.usuario, rol: data.data.rol });
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
     checkAuth();
   }, []);
 
   const login = (userData) => {
-    const payload = decodeJwtPayload(userData.token);
-    localStorage.setItem('token', userData.token);
-    const sessionData = { token: userData.token, user: userData.user, rol: payload?.rol || 'visor' };
-    setUser(sessionData);
+    setUser({ user: userData.user, rol: userData.rol });
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // aunque falle la llamada al backend, igual limpiamos la sesion local
+    }
     setUser(null);
   };
 

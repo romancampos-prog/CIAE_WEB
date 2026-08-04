@@ -16,6 +16,7 @@ class LoginRequest(BaseModel):
     contrasena : str
 
 #clase para enviar datos al front
+#el token ya no viaja aqui, ahora vive en una cookie httpOnly
 class LoginResponse(BaseModel):
     usuario: str
-    token: str
+    rol: str

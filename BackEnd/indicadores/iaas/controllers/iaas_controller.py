@@ -21,6 +21,8 @@ from iaas.services.procesar_service import (
 )
 from iaas.services.datos_json_service import leer_indicador_anio
 from configs.response import ApiResponse
+from shared.validarArchivo_service import validarPeso_Archivo
+from shared.auditoria_service import registrar
 
 router = APIRouter()
 
@@ -52,7 +54,10 @@ async def get_sesion(
     payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA)),
 ):
     mes_nombre = MESES_NOMBRE.get(mes, mes)
-    ruta       = _ruta_sesion(anio)
+    try:
+        ruta = _ruta_sesion(anio)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     if not ruta.exists():
         return ApiResponse(success=True, message="Sin sesión activa", data=None)
@@ -100,7 +105,9 @@ async def completar_unidad(
     denominadores: str      = Form(...),
     password:    str        = Form(...),
     excel_unidad: Optional[UploadFile] = File(None),
+    peso_excel_unidad: Optional[int] = Form(None),
     excel_denominador_iaas01: Optional[UploadFile] = File(None),
+    peso_excel_denominador_iaas01: Optional[int] = Form(None),
     payload: dict           = Depends(solo_roles("admin", "trabajador_IAAS")),
 ):
     usuario = payload.get("sub")
@@ -109,8 +116,18 @@ async def completar_unidad(
 
     indicadores_list   = json.loads(indicadores)
     denominadores_dict = json.loads(denominadores)
-    excel_bytes        = await excel_unidad.read() if excel_unidad else None
-    excel_den01_bytes  = await excel_denominador_iaas01.read() if excel_denominador_iaas01 else None
+
+    excel_bytes = None
+    if excel_unidad:
+        excel_bytes = await excel_unidad.read()
+        if not validarPeso_Archivo(excel_bytes, peso_excel_unidad):
+            raise HTTPException(status_code=413, detail="Archivo de la unidad demasiado grande o tamaño inconsistente")
+
+    excel_den01_bytes = None
+    if excel_denominador_iaas01:
+        excel_den01_bytes = await excel_denominador_iaas01.read()
+        if not validarPeso_Archivo(excel_den01_bytes, peso_excel_denominador_iaas01):
+            raise HTTPException(status_code=413, detail="Archivo del denominador demasiado grande o tamaño inconsistente")
 
     try:
         resultado = completar_unidad_tardia(
@@ -129,6 +146,7 @@ async def completar_unidad(
         raise HTTPException(status_code=400, detail=detail)
 
     mes_nombre = MESES_NOMBRE.get(mes, mes)
+    registrar("SUBIDA_ARCHIVO", usuario=usuario, detalle=f"completar-unidad unidad={unidad} anio={anio} mes={mes}")
     return ApiResponse(
         success=True,
         message=f"Unidad {unidad} actualizada en {mes_nombre} {anio}",

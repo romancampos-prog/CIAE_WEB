@@ -4,6 +4,7 @@ import Inicio from '../paginas/inicio/Inicio';
 import Login from '../auth/paginas/Auth';
 import Footer from '../shared/componentes/Footer';
 import ProtectedRoute from '../auth/componentes/RouteProtected';
+import RoleRoute from '../auth/componentes/RoleRoute';
 import IndicadoresRoutes from '../indicadores/routes/IndicadoresRoutes';
 import EpiRoutes from '../epidemiologia/routes/EpiRoutes';
 
@@ -35,7 +36,7 @@ export default function AppRouter() {
             <Route element={<ProtectedLayout />}>
               <Route path="CIAE/Inicio" element={<Inicio />} />
               <Route path="CIAE/IndicadoresMedicos/*" element={<IndicadoresRoutes />} /> {/* Módulo Indicadores Médicos (FTP + IAAS) */}
-              <Route path="CIAE/Epidemiologia/*" element={<EpiRoutes />} /> {/* Módulo Epidemiología */}
+              <Route path="CIAE/Epidemiologia/*" element={<RoleRoute roles={['admin']}><EpiRoutes /></RoleRoute>} /> {/* Módulo Epidemiología — solo admin, incluso por URL directa */}
             </Route>
 
             <Route path="*" element={<Navigate to="/CIAE/LOGIN" replace />} />

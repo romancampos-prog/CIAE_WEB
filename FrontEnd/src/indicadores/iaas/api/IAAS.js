@@ -50,9 +50,14 @@ export const generarIAAS = async (anio, mes, numerador, denominador, excel_denom
     const form = new FormData();
     form.append('anio', anio);
     form.append('mes', mes);
-    if (excel_denominador_IAAS_01) form.append('excel_denominador_IAAS_01', excel_denominador_IAAS_01);
+    if (excel_denominador_IAAS_01) {
+        form.append('excel_denominador_IAAS_01', excel_denominador_IAAS_01);
+        form.append('peso_excel_denominador_IAAS_01', excel_denominador_IAAS_01.size);
+    }
     if (numerador) Object.entries(numerador).forEach(([unidad, file]) => {
-        form.append('numerador', new File([file], unidad, { type: file.type }));
+        const archivo = new File([file], unidad, { type: file.type });
+        form.append('numerador', archivo);
+        form.append('pesoNumerador', archivo.size);
     });
     const denPorIndicador = {};
     Object.entries(denominador).forEach(([unidad, inds]) => {
@@ -127,8 +132,14 @@ export const completarUnidadTardia = async (anio, mes, unidad, indicadores, deno
     form.append('indicadores', JSON.stringify(indicadores));
     form.append('denominadores', JSON.stringify(denominadores));
     form.append('password', password);
-    if (excelFile) form.append('excel_unidad', excelFile);
-    if (excelDenominadorIAAS01) form.append('excel_denominador_iaas01', excelDenominadorIAAS01);
+    if (excelFile) {
+        form.append('excel_unidad', excelFile);
+        form.append('peso_excel_unidad', excelFile.size);
+    }
+    if (excelDenominadorIAAS01) {
+        form.append('excel_denominador_iaas01', excelDenominadorIAAS01);
+        form.append('peso_excel_denominador_iaas01', excelDenominadorIAAS01.size);
+    }
     const { data } = await api.post('/iass/completar-unidad', form);
     return data;
 };

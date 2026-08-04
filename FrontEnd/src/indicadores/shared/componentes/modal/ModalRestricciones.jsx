@@ -40,6 +40,17 @@ const IcoAdvertencia = () => (
   </svg>
 );
 
+// Separa "{ruta}  ✗ fallo en: '{segmento}' — {diagnostico}" en sus 3 partes
+// para poder darles su propia línea/estilo en vez de un solo párrafo pegado.
+// Si el texto no trae ese formato (otros tipos de error), regresa null y se
+// muestra el texto tal cual, sin partir nada.
+const partirRutaError = (texto) => {
+  const m = /^(.*?)\s*✗\s*fallo en:\s*'([^']*)'\s*—\s*(.*)$/s.exec(texto ?? '');
+  if (!m) return null;
+  const [, ruta, segmento, diagnostico] = m;
+  return { ruta: ruta.trim(), segmento, diagnostico };
+};
+
 const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }) => {
   const entries = Object.entries(restricciones ?? {});
 
@@ -162,12 +173,29 @@ const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }) => {
                                 ))}
                               </div>
                               <div className="res-fila-ruta">
-                                <code
-                                  className={`res-ruta ${cardSev === 'critico' && LABEL_RUTA[key] ? 'res-ruta--error' : ''}`}
-                                  title={bloque.ruta}
-                                >
-                                  {bloque.ruta}
-                                </code>
+                                {(() => {
+                                  const partes = partirRutaError(bloque.ruta);
+                                  if (!partes) {
+                                    return (
+                                      <code
+                                        className={`res-ruta ${cardSev === 'critico' && LABEL_RUTA[key] ? 'res-ruta--error' : ''}`}
+                                        title={bloque.ruta}
+                                      >
+                                        {bloque.ruta}
+                                      </code>
+                                    );
+                                  }
+                                  return (
+                                    <div className="res-ruta-partes" title={bloque.ruta}>
+                                      <code className="res-ruta-camino">{partes.ruta}</code>
+                                      <div className="res-ruta-fallo">
+                                        <span className="res-ruta-fallo-ico">✗</span>
+                                        <span>falló en <code>'{partes.segmento}'</code></span>
+                                      </div>
+                                      <p className="res-ruta-diag">{partes.diagnostico}</p>
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </div>
                           ))

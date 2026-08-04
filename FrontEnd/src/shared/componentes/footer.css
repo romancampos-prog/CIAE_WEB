@@ -93,6 +93,12 @@
   white-space: nowrap;
 }
 
+.cf-mail {
+  color: #0b5445;
+  text-decoration: none;
+}
+.cf-mail:hover { text-decoration: underline; }
+
 .cf-dot {
   font-size: 0.6rem;
   color: #cbd5e1;
