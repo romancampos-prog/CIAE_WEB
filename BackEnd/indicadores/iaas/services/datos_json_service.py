@@ -5,11 +5,23 @@ Usado en: generar_iaas.py, procesar_service.py, info_service.py,
           iaas/controllers/iaas_controller.py, reportes_controller.py
 """
 import json
+import re
 from iaas.config import RUTA_DATA_IAAS, RUTA_IAAS_JSON
+
+_RE_ANIO = re.compile(r"20\d{2}")
+
+
+def _anio_valido(anio: str) -> bool:
+    # anio llega desde formularios del front sin validar -- si no tiene forma
+    # de año real (ej. trae "../"), no debe usarse para armar rutas de archivo.
+    return bool(_RE_ANIO.fullmatch(str(anio)))
 
 
 def leer_indicador_anio(anio: str, ind_n: int) -> dict:
-    """JSON completo de IAAS_0N para ese año. {} si no existe o no se puede leer."""
+    """JSON completo de IAAS_0N para ese año. {} si no existe, no se puede leer o el año es inválido."""
+    if not _anio_valido(anio):
+        print(f"[IAAS JSON] Año inválido, se ignora: {anio!r}")
+        return {}
     ruta = RUTA_DATA_IAAS / str(anio) / f"IAAS_0{ind_n}.json"
     if not ruta.exists():
         return {}
@@ -23,6 +35,8 @@ def leer_indicador_anio(anio: str, ind_n: int) -> dict:
 
 def escribir_indicador_anio(anio: str, ind_n: int, data: dict) -> None:
     """Guarda el JSON completo de IAAS_0N para ese año, creando la carpeta si falta."""
+    if not _anio_valido(anio):
+        raise ValueError(f"Año inválido: {anio!r}")
     ruta = RUTA_DATA_IAAS / str(anio)
     ruta.mkdir(parents=True, exist_ok=True)
     with open(ruta / f"IAAS_0{ind_n}.json", "w", encoding="utf-8") as f:

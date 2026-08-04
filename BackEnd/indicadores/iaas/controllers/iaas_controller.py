@@ -54,7 +54,10 @@ async def get_sesion(
     payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA)),
 ):
     mes_nombre = MESES_NOMBRE.get(mes, mes)
-    ruta       = _ruta_sesion(anio)
+    try:
+        ruta = _ruta_sesion(anio)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     if not ruta.exists():
         return ApiResponse(success=True, message="Sin sesión activa", data=None)

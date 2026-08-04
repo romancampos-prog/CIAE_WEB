@@ -10,7 +10,7 @@ from pathlib import Path
 from iaas.config import RUTA_DATA_IAAS
 from iaas.config import ORDEN_DEMAS_IAAS
 from iaas.services.extraccion_service import calcular_IAAS
-from iaas.services.datos_json_service import leer_indicador_anio, escribir_indicador_anio
+from iaas.services.datos_json_service import leer_indicador_anio, escribir_indicador_anio, _anio_valido
 
 MESES_NOMBRE = {
     "01": "ENERO",  "02": "FEBRERO",   "03": "MARZO",    "04": "ABRIL",
@@ -20,6 +20,8 @@ MESES_NOMBRE = {
 
 
 def _ruta_sesion(anio: str) -> Path:
+    if not _anio_valido(anio):
+        raise ValueError(f"Año inválido: {anio!r}")
     return RUTA_DATA_IAAS / anio
 
 
