@@ -163,7 +163,7 @@ async def recalcular_poblacion(request: Request, payload: dict = Depends(solo_ro
     body = await request.json()
     ano  = str(body.get("ano", "2026"))
 
-    todos        = consultarTodosIndicadores()
+    todos        = consultarTodosIndicadores("generaFTP")
     recalculados = []
     errores      = []
 
@@ -201,7 +201,7 @@ async def _generar_categoria_excel(categoria: str, ano: str, mes: str, semana):
     """Arma el Excel con una pestaña por indicador de la categoría. Compartido
     por /generar-categoria (primera generación) y /generar-categoria/regenerar
     (mes definitivo ya generado, requiere contraseña)."""
-    todos    = consultarTodosIndicadores()
+    todos    = consultarTodosIndicadores("generaFTP")
     cat_data = todos.get(categoria)
     if not cat_data:
         raise HTTPException(status_code=404, detail=f"Categoría '{categoria}' no encontrada")

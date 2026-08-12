@@ -35,7 +35,8 @@
             "Bajo": 12,
             "Esperado": 16
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "CE 02": {
         "fechaModificacion": "04/03/2026",
@@ -99,6 +100,7 @@
             "Bajo": 12,
             "Esperado": 16
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

@@ -127,7 +127,8 @@
                 "Esperado": 69.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "EH 02": {
         "fechaModificacion": "04/03/2026",
@@ -160,6 +161,7 @@
             "Bajo": 83.5,
             "Esperado": 85.2
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

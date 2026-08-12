@@ -127,7 +127,8 @@
                 "Esperado": 28.5
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "DM 02": {
         "fechaModificacion": "04/03/2026",
@@ -159,6 +160,7 @@
             "Bajo": 29.6,
             "Esperado": 32.6
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

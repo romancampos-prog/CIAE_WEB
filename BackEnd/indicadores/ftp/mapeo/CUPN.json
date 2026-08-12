@@ -90,7 +90,8 @@
                 "Esperado": 63.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "CUPN 03": {
         "fechaModificacion": "04/03/2026",
@@ -122,7 +123,8 @@
             "Alto": 8.1,
             "Esperado": 7.0
         },
-        "mostrar": false
+        "generaFTP": false,
+        "mostrarGrafica": false
     },
     "CUPN 04": {
         "fechaModificacion": "04/03/2026",
@@ -163,7 +165,8 @@
             "Alto": 8.1,
             "Esperado": 7.0
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "CUPN 05": {
         "fechaModificacion": "04/03/2026",
@@ -196,7 +199,8 @@
             "Bajo": 3.1,
             "Esperado": 4.0
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "CUPN 07": {
         "fechaModificacion": "04/03/2026",
@@ -252,6 +256,7 @@
             "Bajo": 2.0,
             "Esperado": 2.8
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

@@ -31,6 +31,7 @@
             "Bajo": 50.0,
             "Esperado": 53.0
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

@@ -96,7 +96,8 @@
                 "Esperado": 15.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "CAMA 40-49": {
         "fechaModificacion": "04/03/2026",
@@ -182,7 +183,8 @@
                 "Esperado": 7.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "CAMA 50-69": {
         "fechaModificacion": "04/03/2026",
@@ -270,6 +272,7 @@
                 "Esperado": 20.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

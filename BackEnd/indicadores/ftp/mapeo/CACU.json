@@ -89,6 +89,21 @@
                 "Esperado": 27.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
+    },
+    "CACU 02": {
+        "periocidad": "Mensual - Semestralizado",
+        "titulo": "CACU 02 - Tiempo promedio para el diagnóstico de cáncer cérvico uterino a partir de la sospecha por citología cérvico vaginal de tamizaje.",
+        "descripcionNumerador": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
+        "descripcionDenominador": "Total de pacientes que cuenten con fecha del diagnóstico histopatológico con tipode conducta “malignos” durante el periodo a evaluar y con fecha de toma decitología cérvico vaginal de tamizaje con reporte de lesión.",
+        "nombreArchivoFinal": "CACU 02",
+        "semaforo": {
+            "Esperado": 30,
+            "Alto": 60
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
+        
     }
 }

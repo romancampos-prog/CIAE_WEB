@@ -93,7 +93,8 @@
                 "Esperado": 65.0
             }
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "S_Ob 02": {
         "fechaModificacion": "04/03/2026",
@@ -126,7 +127,8 @@
             "Alto": 38.0,
             "Esperado": 35.0
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     },
     "S_Ob 04": {
         "fechaModificacion": "04/03/2026",
@@ -159,6 +161,7 @@
             "Bajo": 5.0,
             "Esperado": 10.0
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }
