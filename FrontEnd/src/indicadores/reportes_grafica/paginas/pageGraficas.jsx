@@ -6,6 +6,7 @@ import logo_imss from '../../../assets/logo_imms.png';
 import './pageGrafica.css';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
 import { getIndicador } from '../../ftp/api/indicadores';
+import { numeroDeUmbral, textoDeUmbral } from '../../ftp/utils/calculos';
 
 export default function PageGrafica() {
   const location  = useLocation();
@@ -46,6 +47,8 @@ export default function PageGrafica() {
   const totalUnidades    = Object.keys(datosMapa).length;
   const unidadesMostrando = Object.keys(datosFiltrados).length;
   const esDescendente    = semaforo?.Alto !== undefined;
+  const semCritico       = esDescendente ? semaforo?.Alto : semaforo?.Bajo;
+  const semSinMedio      = numeroDeUmbral(semaforo?.Esperado) === numeroDeUmbral(semCritico);
 
   const handleVolver = () => {
     if (retornoSeguro) navigate('/CIAE/IndicadoresMedicos/Grafica/Config', { state: { indicador: Indicador, retornoSeguro } });
@@ -109,27 +112,31 @@ export default function PageGrafica() {
               <span className="pg-sem-dot" />
               <div>
                 <small>Esperado</small>
-                <strong>{esDescendente ? `≤ ${semaforo?.Esperado}%` : `≥ ${semaforo?.Esperado}%`}</strong>
+                <strong>{textoDeUmbral(semaforo?.Esperado, esDescendente ? '≤' : '≥')}%</strong>
               </div>
             </div>
-            <div className="pg-sem-sep" />
-            <div className="pg-sem-item pg-sem-amarillo">
-              <span className="pg-sem-dot" />
-              <div>
-                <small>Medio</small>
-                <strong>
-                  {esDescendente
-                    ? `> ${semaforo?.Esperado}% — < ${semaforo?.Alto}%`
-                    : `> ${semaforo?.Bajo}% — < ${semaforo?.Esperado}%`}
-                </strong>
-              </div>
-            </div>
+            {!semSinMedio && (
+              <>
+                <div className="pg-sem-sep" />
+                <div className="pg-sem-item pg-sem-amarillo">
+                  <span className="pg-sem-dot" />
+                  <div>
+                    <small>Medio</small>
+                    <strong>
+                      {esDescendente
+                        ? `> ${numeroDeUmbral(semaforo?.Esperado)}% — < ${numeroDeUmbral(semaforo?.Alto)}%`
+                        : `> ${numeroDeUmbral(semaforo?.Bajo)}% — < ${numeroDeUmbral(semaforo?.Esperado)}%`}
+                    </strong>
+                  </div>
+                </div>
+              </>
+            )}
             <div className="pg-sem-sep" />
             <div className="pg-sem-item pg-sem-rojo">
               <span className="pg-sem-dot" />
               <div>
                 <small>{esDescendente ? 'Alto' : 'Bajo'}</small>
-                <strong>{esDescendente ? `≥ ${semaforo?.Alto}%` : `≤ ${semaforo?.Bajo}%`}</strong>
+                <strong>{textoDeUmbral(semCritico, esDescendente ? (semSinMedio ? '>' : '≥') : (semSinMedio ? '<' : '≤'))}%</strong>
               </div>
             </div>
           </div>

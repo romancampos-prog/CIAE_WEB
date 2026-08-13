@@ -41,69 +41,108 @@
         },
         "semaforo": {
             "Enero": {
-                "Bajo": 1.7,
-                "Esperado": 2.3
+                "Bajo": "<= 1.7",
+                "Esperado": ">= 2.3"
             },
             "Febrero": {
-                "Bajo": 3.4,
-                "Esperado": 4.5
+                "Bajo": "<= 3.4",
+                "Esperado": ">= 4.5"
             },
             "Marzo": {
-                "Bajo": 5.1,
-                "Esperado": 6.8
+                "Bajo": "<= 5.1",
+                "Esperado": ">= 6.8"
             },
             "Abril": {
-                "Bajo": 6.8,
-                "Esperado": 9.9
+                "Bajo": "<= 6.8",
+                "Esperado": ">= 9.0"
             },
             "Mayo": {
-                "Bajo": 8.6,
-                "Esperado": 11.3
+                "Bajo": "<= 8.6",
+                "Esperado": ">= 11.3"
             },
             "Junio": {
-                "Bajo": 10.3,
-                "Esperado": 13.5
+                "Bajo": "<= 10.3",
+                "Esperado": ">= 13.5"
             },
             "Julio": {
-                "Bajo": 12.0,
-                "Esperado": 15.8
+                "Bajo": "<= 12.0",
+                "Esperado": ">= 15.8"
             },
             "Agosto": {
-                "Bajo": 13.7,
-                "Esperado": 18.8
+                "Bajo": "<= 13.7",
+                "Esperado": ">= 18.0"
             },
             "Septiembre": {
-                "Bajo": 15.4,
-                "Esperado": 20.3
+                "Bajo": "<= 15.4",
+                "Esperado": ">= 20.3"
             },
             "Octubre": {
-                "Bajo": 17.1,
-                "Esperado": 22.5
+                "Bajo": "<= 17.1",
+                "Esperado": ">= 22.5"
             },
             "Noviembre": {
-                "Bajo": 18.8,
-                "Esperado": 24.8
+                "Bajo": "<= 18.8",
+                "Esperado": ">= 24.8"
             },
             "Diciembre": {
-                "Bajo": 20.5,
-                "Esperado": 27.0
+                "Bajo": "<= 20.5",
+                "Esperado": ">= 27.0"
             }
         },
         "generaFTP": true,
         "mostrarGrafica": true
     },
     "CACU 02": {
-        "periocidad": "Mensual - Semestralizado",
+        "periodicidad": "Mensual - Semestralizado",
         "titulo": "CACU 02 - Tiempo promedio para el diagnóstico de cáncer cérvico uterino a partir de la sospecha por citología cérvico vaginal de tamizaje.",
         "descripcionNumerador": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
         "descripcionDenominador": "Total de pacientes que cuenten con fecha del diagnóstico histopatológico con tipode conducta “malignos” durante el periodo a evaluar y con fecha de toma decitología cérvico vaginal de tamizaje con reporte de lesión.",
         "nombreArchivoFinal": "CACU 02",
         "semaforo": {
-            "Esperado": 30,
-            "Alto": 60
+            "Esperado": "<= 30",
+            "Alto": "> 60"
         },
         "generaFTP": false,
         "mostrarGrafica": true
-        
+    },
+    "CACU 03": {
+        "periodicidad": "Mensual - Semestralizado",
+        "titulo": "CACU 03 - Tiempo promedio para el inicio del tratamiento en cáncer cérvico uterino.",
+        "descripcionNumerador": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
+        "descripcionDenominador": "Total de pacientes que cuentan con fecha de diagnóstico histopatológico con tipo de conducta “malignos” y con fecha de inicio de tratamiento por cualquiera de las modalidades durante el periodo a evaluar.",
+        "nombreArchivoFinal": "CACU 03",
+        "semaforo": {
+            "Esperado": "<= 30",
+            "Alto": "> 30"
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
+    },
+     "CACU 04": {
+        "periodicidad": "Trimestral Acumulado",
+        "titulo": "CACU 04 - Tasa de incidencia de invalidez por cáncer cérvico uterino por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora.",
+        "descripcionNumerador": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de cáncer cérvico uterino, según OOAD de origen acumulados al trimestre del reporte.",
+        "descripcionDenominador": "Promedio de trabajadoras aseguradas en invalidez y vida en el OOAD de origen, al trimestre del reporte.",
+        "nombreArchivoFinal": "CACU 04",
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 0.00",
+                "Alto": "> 1.52"
+            },
+            "Junio": {
+                "Esperado": "<= 0.00",
+                "Alto": "> 2.37"
+            },
+            "Septiembre": {
+                "Esperado": "<= 1.25",
+                "Alto": "> 3.01"
+            },
+            "Diciembre": {
+                "Esperado": "<= 1.44",
+                "Alto": "> 4.32"
+            }
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
     }
 }

@@ -6,6 +6,7 @@ import io
 import xlsxwriter
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
 from ftp.services.datos_json_service import leer_historicos_para_excel
+from shared.semaforo_service import evaluar_color
 
 
 def _calcular_color(valor, idx_mes, indicadorSemaforo):
@@ -14,20 +15,9 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
     if valor == "" or valor is None:
         return 'Gris'
     try:
-        val        = float(valor)
-        limites    = indicadorSemaforo.get(MESES_LISTA[idx_mes], indicadorSemaforo)
-        v_esp      = limites.get("Esperado", 0)
-        tiene_alto = "Alto" in limites
-        v_critico  = limites.get("Alto") if tiene_alto else limites.get("Bajo", 0)
-
-        if tiene_alto:
-            if val <= v_esp:      return 'Esperado'
-            elif val < v_critico: return 'Medio'
-            else:                 return 'Bajo'
-        else:
-            if val >= v_esp:      return 'Esperado'
-            elif val > v_critico: return 'Medio'
-            else:                 return 'Bajo'
+        val     = float(valor)
+        limites = indicadorSemaforo.get(MESES_LISTA[idx_mes], indicadorSemaforo)
+        return evaluar_color(val, limites)
     except Exception:
         return 'Gris'
 

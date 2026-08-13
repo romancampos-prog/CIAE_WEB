@@ -235,9 +235,11 @@ const IndicadoresPage = () => {
                       <div className="cfg-sem-block cfg-sem-verde">
                         <span className="cfg-sem-dot" /><div><small>Esperado</small><strong>{semData.txtVerde}</strong></div>
                       </div>
-                      <div className="cfg-sem-block cfg-sem-amarillo">
-                        <span className="cfg-sem-dot" /><div><small>Medio</small><strong>{semData.txtAmarillo}</strong></div>
-                      </div>
+                      {semData.txtAmarillo && (
+                        <div className="cfg-sem-block cfg-sem-amarillo">
+                          <span className="cfg-sem-dot" /><div><small>Medio</small><strong>{semData.txtAmarillo}</strong></div>
+                        </div>
+                      )}
                       <div className="cfg-sem-block cfg-sem-rojo">
                         <span className="cfg-sem-dot" /><div><small>Rojo</small><strong>{semData.txtRojo}</strong></div>
                       </div>

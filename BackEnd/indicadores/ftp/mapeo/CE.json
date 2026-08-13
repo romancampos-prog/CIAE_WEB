@@ -32,8 +32,8 @@
             "resultado": "round((numerador / denominador), 2)"
         },
         "semaforo": {
-            "Bajo": 12,
-            "Esperado": 16
+            "Bajo": "<= 12",
+            "Esperado": ">= 16"
         },
         "generaFTP": true,
         "mostrarGrafica": true
@@ -97,8 +97,8 @@
             "resultado": "round((numerador / denominador), 2)"
         },
         "semaforo": {
-            "Bajo": 12,
-            "Esperado": 16
+            "Bajo": "<= 12",
+            "Esperado": ">= 16"
         },
         "generaFTP": true,
         "mostrarGrafica": true

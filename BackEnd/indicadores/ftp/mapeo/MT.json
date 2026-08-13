@@ -28,8 +28,8 @@
             "resultado": "round((numerador / denominador) * 100, 2)"
         },
         "semaforo": {
-            "Bajo": 50.0,
-            "Esperado": 53.0
+            "Bajo": "<= 50.0",
+            "Esperado": ">= 53.0"
         },
         "generaFTP": true,
         "mostrarGrafica": true

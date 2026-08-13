@@ -30,9 +30,15 @@ const CumplimientoTile = ({ conteo, colorActivo, onSelectColor, rangos }) => {
 
   // Gris no tiene umbral -- en la vista volteada nunca se muestra, ni aunque haya
   // unidades en gris. En la vista normal sí, pero solo si de verdad hay alguna.
-  const colores = volteado
-    ? ORDEN.filter(c => c !== 'Gris')
-    : ORDEN.filter(c => c !== 'Gris' || (conteo.Gris ?? 0) > 0);
+  // Medio tampoco se muestra cuando el indicador no tiene rango medio real (ej.
+  // CACU 03/04, donde Esperado y el crítico son el mismo número) -- calcularRangosFTP
+  // ya no manda la clave "Medio" en ese caso, así que se detecta con su ausencia.
+  const sinMedioReal = rangos != null && !('Medio' in rangos);
+  const colores = ORDEN.filter(c => {
+    if (c === 'Medio' && sinMedioReal) return false;
+    if (c === 'Gris') return !volteado && (conteo.Gris ?? 0) > 0;
+    return true;
+  });
 
   const clickeable = typeof onSelectColor === 'function';
 

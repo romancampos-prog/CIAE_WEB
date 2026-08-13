@@ -2,6 +2,7 @@
 Aplica semáforo (Esperado/Medio/Bajo/Gris) a cada unidad según los umbrales del indicador.
 Usado en: ftp/services/reporte_final.py, reporte_categoria.py
 """
+from shared.semaforo_service import evaluar_color
 
 
 def Semaforizado(diccionarioPrevio, indicadorSemaforo, mes):
@@ -25,23 +26,6 @@ def Semaforizado(diccionarioPrevio, indicadorSemaforo, mes):
             datos["color"] = "Bajo"
             continue
 
-        color = "Gris"
-
-        if "Bajo" in metas and "Esperado" in metas:
-            if resultado >= metas["Esperado"]:
-                color = "Esperado"
-            elif resultado <= metas["Bajo"]:
-                color = "Bajo"
-            else:
-                color = "Medio"
-        elif "Alto" in metas and "Esperado" in metas:
-            if resultado <= metas["Esperado"]:
-                color = "Esperado"
-            elif resultado >= metas["Alto"]:
-                color = "Bajo"
-            else:
-                color = "Medio"
-
-        datos["color"] = color
+        datos["color"] = evaluar_color(resultado, metas)
 
     return diccionarioPrevio

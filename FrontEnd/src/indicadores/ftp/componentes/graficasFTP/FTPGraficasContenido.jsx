@@ -7,6 +7,7 @@ import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
 import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
+import { etiquetaMesLarga, etiquetaMesCorta } from '../../utils/calculos';
 
 const VISTAS_FTP = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
@@ -144,7 +145,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       style={mesSel === m ? { borderLeftColor: indColor } : {}}
                       onClick={() => setMesSel(m)}
                     >
-                      <span className="ig-unit-name">{MESES_LARGOS[m]}</span>
+                      <span className="ig-unit-name">{etiquetaMesLarga(parseInt(m), indInfo)}</span>
                     </button>
                   ))}
                 </div>
@@ -175,7 +176,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                     )}
                     {vistaGrafica === 'mes' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {MESES_CORTOS[parseInt(mesSel) - 1]}
+                        {etiquetaMesCorta(parseInt(mesSel), indInfo)}
                       </span>
                     )}
                   </div>

@@ -83,8 +83,8 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** Tendencia mensual de la unidad seleccionada */
   const chartData = useMemo(
-    () => buildFTPChartDataUnidad(datos, unidadSel),
-    [datos, unidadSel]
+    () => buildFTPChartDataUnidad(datos, unidadSel, indInfo),
+    [datos, unidadSel, indInfo]
   );
 
   const maxTasa = useMemo(

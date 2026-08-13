@@ -93,22 +93,44 @@ const BloquePaso = ({ num, titulo, descripcion, parsed }) => {
   );
 };
 
+// ── Helpers de umbral: soportan formato legado (numero puro) y explícito
+//    (texto con operador, ej. "<= 30") -- ver shared/semaforo_service.py ──────
+const numeroDe = (valor) => {
+  if (typeof valor === 'number') return valor;
+  const m = String(valor).match(/-?\d+\.?\d*/);
+  return m ? parseFloat(m[0]) : NaN;
+};
+
+// Si ya viene explícito ("<= 30") se muestra tal cual; si es legado (30), se
+// arma con el operador que el propio backend usaba de forma implícita.
+const textoUmbral = (valor, operadorLegado) =>
+  typeof valor === 'string' ? valor : `${operadorLegado} ${valor}`;
+
 // ── Semáforo fijo ─────────────────────────────────────────────────────────────
 const SemaforoFijo = ({ semaforo }) => {
   const esDec = 'Alto' in semaforo;
+  const critico = esDec ? semaforo.Alto : semaforo.Bajo;
+  // Cuando Esperado y el umbral crítico son el mismo número no existe franja
+  // "Medio" (ancho cero) -- el propio evaluar_color() nunca clasifica nada
+  // como Medio en ese caso, así que tampoco se dibuja.
+  const sinMedio = numeroDe(semaforo.Esperado) === numeroDe(critico);
   return (
     <div className="metas-fijas-row">
       {esDec ? (
         <>
-          <div className="meta-blk meta-verde">   <span className="meta-lbl">Esperado</span><span className="meta-val">≤ {semaforo.Esperado}</span></div>
-          <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span>   <span className="meta-val">&gt; {semaforo.Esperado} — &lt; {semaforo.Alto}</span></div>
-          <div className="meta-blk meta-rojo">    <span className="meta-lbl">Alto</span>    <span className="meta-val">≥ {semaforo.Alto}</span></div>
+          <div className="meta-blk meta-verde">   <span className="meta-lbl">Esperado</span><span className="meta-val">{textoUmbral(semaforo.Esperado, '≤')}</span></div>
+          {!sinMedio && (
+            <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span>   <span className="meta-val">&gt; {numeroDe(semaforo.Esperado)} — &lt; {numeroDe(semaforo.Alto)}</span></div>
+          )}
+          <div className="meta-blk meta-rojo">    <span className="meta-lbl">Alto</span>    <span className="meta-val">{textoUmbral(semaforo.Alto, sinMedio ? '>' : '≥')}</span></div>
         </>
       ) : (
         <>
-          <div className="meta-blk meta-rojo">    <span className="meta-lbl">Bajo</span>    <span className="meta-val">≤ {semaforo.Bajo}</span></div>
-          <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span>   <span className="meta-val">&gt; {semaforo.Bajo} — &lt; {semaforo.Esperado}</span></div>
-          <div className="meta-blk meta-verde">   <span className="meta-lbl">Esperado</span><span className="meta-val">≥ {semaforo.Esperado}</span></div>
+          <div className="meta-blk meta-rojo">    <span className="meta-lbl">Bajo</span>    <span className="meta-val">{textoUmbral(semaforo.Bajo, sinMedio ? '<' : '≤')}</span></div>
+          {!sinMedio && (
+            <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span>   <span className="meta-val">&gt; {numeroDe(semaforo.Bajo)} — &lt; {numeroDe(semaforo.Esperado)}</span></div>
+          )}
+          <div className="meta-blk meta-verde">   <span className="meta-lbl">Esperado</span><span className="meta-val">{textoUmbral(semaforo.Esperado, '≥')}</span></div>
         </>
       )}
     </div>
@@ -131,9 +153,9 @@ const SemaforoMensual = ({ semaforo }) => (
         {Object.entries(semaforo).map(([mes, v]) => (
           <tr key={mes}>
             <td>{mes}</td>
-            <td className="cell-critico">≤ {v.Bajo}%</td>
-            <td className="cell-regular">&gt; {v.Bajo}% y &lt; {v.Esperado}%</td>
-            <td className="cell-esperado">≥ {v.Esperado}%</td>
+            <td className="cell-critico">{textoUmbral(v.Bajo, '≤')}%</td>
+            <td className="cell-regular">&gt; {numeroDe(v.Bajo)}% y &lt; {numeroDe(v.Esperado)}%</td>
+            <td className="cell-esperado">{textoUmbral(v.Esperado, '≥')}%</td>
           </tr>
         ))}
       </tbody>

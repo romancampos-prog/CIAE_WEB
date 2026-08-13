@@ -45,52 +45,52 @@
         },
         "semaforo": {
             "Enero": {
-                "Bajo": 4.5,
-                "Esperado": 5.4
+                "Bajo": "<= 4.5",
+                "Esperado": ">= 5.4"
             },
             "Febrero": {
-                "Bajo": 9.1,
-                "Esperado": 10.8
+                "Bajo": "<= 9.1",
+                "Esperado": ">= 10.8"
             },
             "Marzo": {
-                "Bajo": 13.7,
-                "Esperado": 16.2
+                "Bajo": "<= 13.7",
+                "Esperado": ">= 16.2"
             },
             "Abril": {
-                "Bajo": 18.2,
-                "Esperado": 21.6
+                "Bajo": "<= 18.2",
+                "Esperado": ">= 21.6"
             },
             "Mayo": {
-                "Bajo": 22.8,
-                "Esperado": 27.0
+                "Bajo": "<= 22.8",
+                "Esperado": ">= 27.0"
             },
             "Junio": {
-                "Bajo": 27.4,
-                "Esperado": 32.4
+                "Bajo": "<= 27.4",
+                "Esperado": ">= 32.4"
             },
             "Julio": {
-                "Bajo": 31.9,
-                "Esperado": 37.8
+                "Bajo": "<= 31.9",
+                "Esperado": ">= 37.8"
             },
             "Agosto": {
-                "Bajo": 38.8,
-                "Esperado": 43.2
+                "Bajo": "<= 38.0",
+                "Esperado": ">= 43.2"
             },
             "Septiembre": {
-                "Bajo": 41.1,
-                "Esperado": 48.6
+                "Bajo": "<= 41.1",
+                "Esperado": ">= 48.6"
             },
             "Octubre": {
-                "Bajo": 45.7,
-                "Esperado": 54.0
+                "Bajo": "<= 45.7",
+                "Esperado": ">= 54.0"
             },
             "Noviembre": {
-                "Bajo": 50.2,
-                "Esperado": 59.4
+                "Bajo": "<= 50.2",
+                "Esperado": ">= 59.4"
             },
             "Diciembre": {
-                "Bajo": 54.9,
-                "Esperado": 65.0
+                "Bajo": "<= 54.9",
+                "Esperado": ">= 65.0"
             }
         },
         "generaFTP": true,
@@ -124,8 +124,8 @@
             "resultado": "round((numerador / denominador) * 100, 2)"
         },
         "semaforo": {
-            "Alto": 38.0,
-            "Esperado": 35.0
+            "Alto": ">= 38.0",
+            "Esperado": "<= 35.0"
         },
         "generaFTP": true,
         "mostrarGrafica": true
@@ -158,8 +158,8 @@
             "resultado": "round((numerador / denominador) * 100, 2)"
         },
         "semaforo": {
-            "Bajo": 5.0,
-            "Esperado": 10.0
+            "Bajo": "<= 5.0",
+            "Esperado": ">= 10.0"
         },
         "generaFTP": true,
         "mostrarGrafica": true

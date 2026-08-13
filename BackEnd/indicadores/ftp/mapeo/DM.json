@@ -79,52 +79,52 @@
         },
         "semaforo": {
             "Enero": {
-                "Bajo": 1.8,
-                "Esperado": 2.4
+                "Bajo": "<= 1.8",
+                "Esperado": ">= 2.4"
             },
             "Febrero": {
-                "Bajo": 3.6,
-                "Esperado": 4.8
+                "Bajo": "<= 3.6",
+                "Esperado": ">= 4.8"
             },
             "Marzo": {
-                "Bajo": 5.3,
-                "Esperado": 7.1
+                "Bajo": "<= 5.3",
+                "Esperado": ">= 7.1"
             },
             "Abril": {
-                "Bajo": 7.1,
-                "Esperado": 9.5
+                "Bajo": "<= 7.1",
+                "Esperado": ">= 9.5"
             },
             "Mayo": {
-                "Bajo": 8.9,
-                "Esperado": 11.9
+                "Bajo": "<= 8.9",
+                "Esperado": ">= 11.9"
             },
             "Junio": {
-                "Bajo": 10.7,
-                "Esperado": 14.3
+                "Bajo": "<= 10.7",
+                "Esperado": ">= 14.3"
             },
             "Julio": {
-                "Bajo": 12.5,
-                "Esperado": 16.6
+                "Bajo": "<= 12.5",
+                "Esperado": ">= 16.6"
             },
             "Agosto": {
-                "Bajo": 14.3,
-                "Esperado": 19.0
+                "Bajo": "<= 14.3",
+                "Esperado": ">= 19.0"
             },
             "Septiembre": {
-                "Bajo": 16.0,
-                "Esperado": 21.4
+                "Bajo": "<= 16.0",
+                "Esperado": ">= 21.4"
             },
             "Octubre": {
-                "Bajo": 17.8,
-                "Esperado": 23.8
+                "Bajo": "<= 17.8",
+                "Esperado": ">= 23.8"
             },
             "Noviembre": {
-                "Bajo": 19.6,
-                "Esperado": 26.1
+                "Bajo": "<= 19.6",
+                "Esperado": ">= 26.1"
             },
             "Diciembre": {
-                "Bajo": 21.4,
-                "Esperado": 28.5
+                "Bajo": "<= 21.4",
+                "Esperado": ">= 28.5"
             }
         },
         "generaFTP": true,
@@ -157,8 +157,8 @@
             "resultado": "round((numerador / denominador) * 100, 2)"
         },
         "semaforo": {
-            "Bajo": 29.6,
-            "Esperado": 32.6
+            "Bajo": "<= 29.6",
+            "Esperado": ">= 32.6"
         },
         "generaFTP": true,
         "mostrarGrafica": true
