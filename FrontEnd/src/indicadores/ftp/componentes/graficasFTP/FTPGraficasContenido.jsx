@@ -145,7 +145,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       style={mesSel === m ? { borderLeftColor: indColor } : {}}
                       onClick={() => setMesSel(m)}
                     >
-                      <span className="ig-unit-name">{etiquetaMesLarga(parseInt(m), indInfo)}</span>
+                      <span className="ig-unit-name">{etiquetaMesLarga(parseInt(m), indInfo, anio)}</span>
                     </button>
                   ))}
                 </div>
@@ -176,7 +176,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                     )}
                     {vistaGrafica === 'mes' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {etiquetaMesCorta(parseInt(mesSel), indInfo)}
+                        {etiquetaMesCorta(parseInt(mesSel), indInfo, anio)}
                       </span>
                     )}
                   </div>

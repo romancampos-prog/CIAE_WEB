@@ -11,28 +11,62 @@ export function textoDeUmbral(valor, operadorLegado) {
   return typeof valor === 'string' ? valor : `${operadorLegado} ${valor}`;
 }
 
-// Indicadores "Trimestral Acumulado" (ej. CACU 04) no reportan mes a mes --
-// cada punto que sí tiene dato es un corte acumulado desde enero, así que la
-// etiqueta debe decir "Ene - Mar" y no solo "Mar" para no confundirlo con un
-// indicador mensual normal.
-export function esTrimestralAcumulado(indInfo) {
-  return /trimestral/i.test(indInfo?.periodicidad ?? '');
+// Hay dos formas de "trimestral" en el mapeo (campo periodicidad), y arman la
+// etiqueta distinto:
+//   - "Trimestral - Acumulado" (ej. CACU 04, CAMA 04): solo 4 cortes al año
+//     (Mar/Jun/Sep/Dic), cada uno acumulado desde enero -- "Ene - Mar", "Ene - Jun"...
+//   - "Mensual - Trimestralizado" (ej. DM 03): un corte CADA mes, cada uno con
+//     la ventana móvil de los últimos 3 meses (el actual + los 2 anteriores) --
+//     "Feb - Abr" para el corte de abril, "Mar - May" para el de mayo, etc.
+export function tipoAcumulacionTrimestral(indInfo) {
+  const texto = (indInfo?.periodicidad ?? '').toLowerCase();
+  if (!/trimestral/.test(texto)) return null;
+  return /acumulado/.test(texto) ? 'acumulado' : 'movil';
 }
 
-function etiquetaMes(mesNum, indInfo) {
+// Se mantiene por compatibilidad -- true para cualquiera de los dos tipos.
+export function esTrimestralAcumulado(indInfo) {
+  return tipoAcumulacionTrimestral(indInfo) !== null;
+}
+
+// Ventana móvil: mesNum-3 puede caer en el año anterior (ej. Enero o Febrero,
+// donde "los 2 meses anteriores" son Noviembre/Diciembre del año previo). En
+// ese caso hay que envolver el índice a Oct/Nov/Dic y marcar el año anterior,
+// si se conoce, para no dar a entender que es del mismo año en curso.
+function inicioVentanaMovil(mesNum, anio) {
+  const idx = mesNum - 3;
+  if (idx >= 0) return { mes: idx, sufijoAnio: '' };
+  const anioAnt = anio ? String(parseInt(anio, 10) - 1).slice(-2) : '';
+  return { mes: idx + 12, sufijoAnio: anioAnt ? ` ${anioAnt}` : '' };
+}
+
+function etiquetaMes(mesNum, indInfo, anio) {
   const mesCorto = MESES_CORTOS[mesNum - 1];
-  return esTrimestralAcumulado(indInfo) ? `Ene - ${mesCorto}` : mesCorto;
+  const tipo = tipoAcumulacionTrimestral(indInfo);
+  if (tipo === 'acumulado') return `Ene - ${mesCorto}`;
+  if (tipo === 'movil') {
+    const { mes, sufijoAnio } = inicioVentanaMovil(mesNum, anio);
+    return `${MESES_CORTOS[mes]}${sufijoAnio} - ${mesCorto}`;
+  }
+  return mesCorto;
 }
 
 /** Igual que etiquetaMes pero con el nombre completo del mes (ej. "Enero - Marzo"). */
-export function etiquetaMesLarga(mesNum, indInfo) {
+export function etiquetaMesLarga(mesNum, indInfo, anio) {
   const larga = MESES_LARGOS_ARR[mesNum - 1];
-  return esTrimestralAcumulado(indInfo) ? `Enero - ${larga}` : larga;
+  const tipo  = tipoAcumulacionTrimestral(indInfo);
+  if (tipo === 'acumulado') return `Enero - ${larga}`;
+  if (tipo === 'movil') {
+    const { mes, sufijoAnio } = inicioVentanaMovil(mesNum, anio);
+    const prefijoAnio = sufijoAnio ? ` 20${sufijoAnio.trim()}` : '';
+    return `${MESES_LARGOS_ARR[mes]}${prefijoAnio} - ${larga}`;
+  }
+  return larga;
 }
 
 /** Igual que etiquetaMes pero exportada para usar fuera de calculos.js. */
-export function etiquetaMesCorta(mesNum, indInfo) {
-  return etiquetaMes(mesNum, indInfo);
+export function etiquetaMesCorta(mesNum, indInfo, anio) {
+  return etiquetaMes(mesNum, indInfo, anio);
 }
 
 /**
@@ -42,16 +76,17 @@ export function etiquetaMesCorta(mesNum, indInfo) {
  * @param {Object} datos - Datos crudos de la API (meses_con_datos, datos por unidad)
  * @param {string} unidadSel - Clave de la unidad seleccionada
  * @param {Object|null} [indInfo] - Ficha del indicador (para detectar periodicidad trimestral)
+ * @param {string|number} [anio] - Año seleccionado (para el rótulo de Ene/Feb en ventana móvil)
  * @returns {Array<{mes:string, mesNum:number, tasa:number, numerador:number, denominador:number, color:string, esSemana:boolean, semana:number|null}>}
  */
-export function buildFTPChartDataUnidad(datos, unidadSel, indInfo) {
+export function buildFTPChartDataUnidad(datos, unidadSel, indInfo, anio) {
   if (!datos || !unidadSel || !datos.meses_con_datos?.length) return [];
   const arr = datos.datos?.[unidadSel] ?? [];
   return datos.meses_con_datos.map(mes => {
     const reg      = arr.find(r => r.mes === mes);
     const esSemana = !!reg?.semana;
     const mesNum   = parseInt(mes);
-    const etiqueta = etiquetaMes(mesNum, indInfo);
+    const etiqueta = etiquetaMes(mesNum, indInfo, anio);
     return {
       mes:         esSemana ? `S${reg.semana}·${etiqueta}` : etiqueta,
       mesNum,

@@ -163,5 +163,33 @@
         },
         "generaFTP": true,
         "mostrarGrafica": true
+    },
+
+    "EH 04" : {
+        "periodicidad": "Trimestral - Acumulado",
+        "titulo": "EH 04 - Tasa de incidencia de invalidez por enfermedades hipertensivas y sus complicaciones por cada 100,000 trabajadores asegurados, según unidad médica de adscripción del trabajador.",
+        "descripcionNumerador": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de enfermedad hipertensiva y sus complicaciones, según OOAD de origen acumulados al trimestre del reporte",
+        "descripcionDenominador": "Promedio de trabajadores asegurados en invalidez y vida en el OOAD origen, al trimestre del reporte.",
+        "nombreArchivoFinal": "EH 04",
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 1.16",
+                "Alto": "> 4.19"
+            },
+            "Junio": {
+                "Esperado": "<= 2.68",
+                "Alto": "> 10.19"
+            },
+            "Septiembre": {
+                "Esperado": "<= 4.31",
+                "Alto": "> 15.73"
+            },
+            "Diciembre": {
+                "Esperado": "<= 6.00",
+                "Alto": "> 21.83"
+            }
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
     }
 }

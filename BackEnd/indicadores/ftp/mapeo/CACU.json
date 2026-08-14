@@ -119,7 +119,7 @@
         "mostrarGrafica": true
     },
      "CACU 04": {
-        "periodicidad": "Trimestral Acumulado",
+        "periodicidad": "Trimestral - Acumulado",
         "titulo": "CACU 04 - Tasa de incidencia de invalidez por cáncer cérvico uterino por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora.",
         "descripcionNumerador": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de cáncer cérvico uterino, según OOAD de origen acumulados al trimestre del reporte.",
         "descripcionDenominador": "Promedio de trabajadoras aseguradas en invalidez y vida en el OOAD de origen, al trimestre del reporte.",

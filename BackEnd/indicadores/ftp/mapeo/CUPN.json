@@ -169,6 +169,19 @@
         "generaFTP": true,
         "mostrarGrafica": true
     },
+     "CUPN 06" : {
+        "periodicidad": "Mensual y mensual acumulado",
+        "titulo": "CUPN 06 - Porcentaje de niños de 6 meses alimentados con lactancia materna exclusiva.",
+        "descripcionNumerador" : "Número de niños de 6 meses de edad que mantuvieron alimentación con lactancia materna exclusiva",
+        "descripcionDenominador": "Número de niños vivos de 6 meses de edad al mes del reporte. (recién nacidos vivos de término, 6 meses previos a la fecha de reporte). menos Defunciones de lactantes clasificados como muerte neonatal e infantil del grupo de edad 0 - 6 meses, durante el periodo de 6 meses anteriores a la fecha del reporte.",
+        "nombreArchivoFinal": "CUPN 06",
+        "semaforo": {
+           "Esperado": ">= 50",
+            "Bajo": "< 30"
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
+     },
     "CUPN 07": {
         "fechaModificacion": "04/03/2026",
         "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",

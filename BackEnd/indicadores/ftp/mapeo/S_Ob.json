@@ -130,6 +130,22 @@
         "generaFTP": true,
         "mostrarGrafica": true
     },
+
+    "S_Ob 03": {
+        "periodicidad": "Mensual",
+        "titulo": "S_Ob 03 - Proporción de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0).",
+        "descripcionNumerador": "Número de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), en el periodo evaluado.",
+        "descripcionDenominador": "Total, de población derechohabiente de 20 años y más años, adscrita a Médico Familiar con medición de peso y talla en periodo evaluado",
+        "nombreArchivoFinal": "S_Ob 03",
+        "semaforo": {
+            "Esperado": "<= 4.0",
+            "Alto": ">= 6.0"
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
+    },
+
+
     "S_Ob 04": {
         "fechaModificacion": "04/03/2026",
         "titulo": "S_Ob 04 - Porcentaje de confirmación diagnóstica de obesidad en Medicina Familiar de derechohabientes de 20 años y más, con índice de masa corporal igual o mayor a 30 kg/m2",

@@ -22,10 +22,6 @@ def Semaforizado(diccionarioPrevio, indicadorSemaforo, mes):
             datos["color"] = "Gris"
             continue
 
-        if datos.get("forzar_bajo"):
-            datos["color"] = "Bajo"
-            continue
-
         datos["color"] = evaluar_color(resultado, metas)
 
     return diccionarioPrevio

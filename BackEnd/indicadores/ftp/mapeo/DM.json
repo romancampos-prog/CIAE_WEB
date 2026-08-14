@@ -162,5 +162,45 @@
         },
         "generaFTP": true,
         "mostrarGrafica": true
+    },
+     "DM 03" : {
+        "periodicidad": "Mensual - TRIMESTRALIZADO",
+        "titulo": "DM 03 - Porcentaje de pacientes que viven con diabetes en control glucémico con hemoglobina glucosilada (HbA1c) menor o igual a 7%.",
+        "descripcionNumerador": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con resultado de hemoglobina glucosilada (HbA1c) menor o igual a 7% del periodo evaluado .",
+        "descripcionDenominador": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con registro de hemoglobina glucosilada (HbA1c) del periodo evaluado.",
+        "nombreArchivoFinal": "DM 03",
+        "semaforo": {
+           "Esperado": ">= 53.0",
+            "Bajo": "<= 49"
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
+    },
+    "DM 06" : {
+        "periodicidad": "Trimestral - Acumulado",
+        "titulo": "DM 06 - Tasa de incidencia de invalidez por diabetes y sus complicaciones por cada 100,000 trabajadores asegurados, según unidad médica de adscripción del trabajador.",
+        "descripcionNumerador": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de diabetes y sus complicaciones, según OOAD de origen acumulados al trimestre del reporte.",
+        "descripcionDenominador": "Promedio de trabajadores asegurados en invalidez y vida en el OOAD de origen, al trimestre del reporte.",
+        "nombreArchivoFinal": "DM 06",
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 8.42",
+                "Alto": "> 12.45"
+            },
+            "Junio": {
+                "Esperado": "<= 17.76",
+                "Alto": "> 29.12"
+            },
+            "Septiembre": {
+                "Esperado": "<= 26.23",
+                "Alto": "> 41.34"
+            },
+            "Diciembre": {
+                "Esperado": "<= 36.81",
+                "Alto": "> 58.21"
+            }
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
     }
 }
