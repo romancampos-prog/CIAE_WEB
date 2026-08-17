@@ -263,7 +263,9 @@ async def _generar_categoria_excel(categoria: str, ano: str, mes: str, semana):
     output.seek(0)
     excel_b64 = base64.b64encode(output.getvalue()).decode("utf-8")
     mes_fmt   = str(mes).zfill(2)
-    nombre    = f"{categoria}_{ano}_{mes_fmt}_S{semana}.xlsx" if es_semana else f"{categoria}_{ano}_{mes_fmt}.xlsx"
+    # La semana ya va marcada en el nombre de cada pestaña (ver escribir_hoja_indicador),
+    # así que el nombre del archivo no la necesita.
+    nombre    = f"{categoria}_{ano}_{mes_fmt}.xlsx"
 
     return ApiResponse(success=True, message="Categoría generada", data={
         "archivo_b64":    excel_b64,
@@ -293,12 +295,18 @@ async def generar_categoria(request: Request, payload: dict = Depends(solo_roles
 # gráficas. Nunca extrae de FTP ni guarda nada, solo vuelca al Excel lo que cada
 # indicador ya tenga guardado (definitivo o semanal). Usa ROLES_FTP_GRAF, igual
 # que /Indicadores/guardado.
+#
+# A diferencia de /generar-categoria, esta variante NO recibe/usa un mes de
+# referencia: cada indicador siempre trae TODO lo que tenga guardado hasta su
+# propio último mes (ver preparar_datos_guardados / leer_ultimo_mes_guardado)
+# -- si un indicador de la categoría se quedó atrás (ej. uno cargado a mano
+# que solo llega a mayo) eso no debe recortar a los demás que sí tengan meses
+# más recientes.
 
 @router.get("/generar-categoria/guardado")
 async def generar_categoria_guardado(
     categoria: str = Query(...),
     ano:       str = Query(...),
-    mes:       str = Query(...),
     payload:   dict = Depends(solo_roles(*ROLES_FTP_GRAF))
 ):
     todos    = consultarTodosIndicadores()
@@ -313,7 +321,7 @@ async def generar_categoria_guardado(
     loop  = asyncio.get_running_loop()
     pares = []
     for ind in indicadores:
-        resultado = await loop.run_in_executor(None, preparar_datos_guardados, ind, ano, mes)
+        resultado = await loop.run_in_executor(None, preparar_datos_guardados, ind, ano)
         pares.append((ind, resultado))
 
     output = io.BytesIO()
@@ -323,7 +331,6 @@ async def generar_categoria_guardado(
 
     completados = []
     errores     = {}
-    semanas_encontradas = set()
 
     for indicador, resultado in pares:
         if resultado["status"] != "success":
@@ -334,28 +341,23 @@ async def generar_categoria_guardado(
                 wb, fmt, indicador,
                 resultado["diccionarioPrevio"],
                 resultado["metadata"],
-                ano, mes, resultado["semana"], resultado["es_semana"]
+                ano, resultado["mes_real"], resultado["semana"], resultado["es_semana"],
             )
             completados.append(indicador)
-            if resultado["es_semana"] and resultado["semana"] is not None:
-                semanas_encontradas.add(resultado["semana"])
         except Exception as exc:
             errores[indicador] = str(exc)
 
     wb.close()
 
     if not completados:
-        return ApiResponse(success=False, message="Ningún indicador tiene datos guardados para ese mes", data={"errores": errores})
+        return ApiResponse(success=False, message="Ningún indicador tiene datos guardados todavía", data={"errores": errores})
 
     output.seek(0)
     excel_b64 = base64.b64encode(output.getvalue()).decode("utf-8")
-    mes_fmt   = str(mes).zfill(2)
-    # Igual que ExcelReporteGuardado: si lo que se descarga es un respaldo
-    # semanal (mes aun no cerrado), el nombre lo marca con _S<numero>.
-    nombre = (
-        f"{categoria}_{ano}_{mes_fmt}_S{max(semanas_encontradas)}.xlsx"
-        if semanas_encontradas else f"{categoria}_{ano}_{mes_fmt}.xlsx"
-    )
+    # Cada pestaña ya se etiqueta con su propio mes/semana (ver
+    # escribir_hoja_indicador) -- distintos indicadores de la misma categoría
+    # pueden traer meses distintos, así que el archivo ya no lleva un mes fijo.
+    nombre = f"{categoria}_{ano}.xlsx"
 
     return ApiResponse(success=True, message="Categoría obtenida", data={
         "archivo_b64":    excel_b64,

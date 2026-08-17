@@ -11,57 +11,66 @@ export function textoDeUmbral(valor, operadorLegado) {
   return typeof valor === 'string' ? valor : `${operadorLegado} ${valor}`;
 }
 
-// Hay dos formas de "trimestral" en el mapeo (campo periodicidad), y arman la
-// etiqueta distinto:
+// El mapeo (campo periodicidad) tiene tres formas de acumulación, cada una
+// arma la etiqueta del corte distinto:
 //   - "Trimestral - Acumulado" (ej. CACU 04, CAMA 04): solo 4 cortes al año
 //     (Mar/Jun/Sep/Dic), cada uno acumulado desde enero -- "Ene - Mar", "Ene - Jun"...
-//   - "Mensual - Trimestralizado" (ej. DM 03): un corte CADA mes, cada uno con
-//     la ventana móvil de los últimos 3 meses (el actual + los 2 anteriores) --
-//     "Feb - Abr" para el corte de abril, "Mar - May" para el de mayo, etc.
+//   - "Mensual - Trimestralizado" (ej. DM 03): un corte CADA mes, ventana móvil
+//     de 3 meses (el actual + los 2 anteriores) -- "Feb - Abr" para abril.
+//   - "Mensual - Semestralizado" (ej. CACU 02/03, CAMA 02/03): un corte CADA
+//     mes, ventana móvil de 6 meses -- "Ago - Ene" para el corte de enero.
 export function tipoAcumulacionTrimestral(indInfo) {
   const texto = (indInfo?.periodicidad ?? '').toLowerCase();
-  if (!/trimestral/.test(texto)) return null;
-  return /acumulado/.test(texto) ? 'acumulado' : 'movil';
+  if (/trimestral/.test(texto) && /acumulado/.test(texto)) {
+    return { tipo: 'acumulado', ventana: 3 };
+  }
+  if (/trimestralizado/.test(texto)) return { tipo: 'movil', ventana: 3 };
+  if (/semestralizado/.test(texto)) return { tipo: 'movil', ventana: 6 };
+  return null;
 }
 
-// Se mantiene por compatibilidad -- true para cualquiera de los dos tipos.
+// Se mantiene por compatibilidad -- true para cualquiera de los tres tipos.
 export function esTrimestralAcumulado(indInfo) {
   return tipoAcumulacionTrimestral(indInfo) !== null;
 }
 
-// Ventana móvil: mesNum-3 puede caer en el año anterior (ej. Enero o Febrero,
-// donde "los 2 meses anteriores" son Noviembre/Diciembre del año previo). En
-// ese caso hay que envolver el índice a Oct/Nov/Dic y marcar el año anterior,
-// si se conoce, para no dar a entender que es del mismo año en curso.
-function inicioVentanaMovil(mesNum, anio) {
-  const idx = mesNum - 3;
-  if (idx >= 0) return { mes: idx, sufijoAnio: '' };
-  const anioAnt = anio ? String(parseInt(anio, 10) - 1).slice(-2) : '';
-  return { mes: idx + 12, sufijoAnio: anioAnt ? ` ${anioAnt}` : '' };
+// Ventana móvil de N meses: mesNum-ventana puede caer en el año anterior (ej.
+// Enero con ventana de 6 necesita Agosto del año previo). En ese caso hay que
+// envolver el índice y marcar los DOS años (el de inicio y el del corte),
+// para no dar a entender que ambos extremos son del mismo año.
+function inicioVentanaMovil(mesNum, ventana) {
+  const idx = mesNum - ventana;
+  if (idx >= 0) return { mes: idx, cruzaAnio: false };
+  return { mes: idx + 12, cruzaAnio: true };
 }
 
 function etiquetaMes(mesNum, indInfo, anio) {
   const mesCorto = MESES_CORTOS[mesNum - 1];
-  const tipo = tipoAcumulacionTrimestral(indInfo);
-  if (tipo === 'acumulado') return `Ene - ${mesCorto}`;
-  if (tipo === 'movil') {
-    const { mes, sufijoAnio } = inicioVentanaMovil(mesNum, anio);
-    return `${MESES_CORTOS[mes]}${sufijoAnio} - ${mesCorto}`;
+  const info = tipoAcumulacionTrimestral(indInfo);
+  if (!info) return mesCorto;
+  const anioActual = anio ? String(parseInt(anio, 10)).slice(-2)     : '';
+  const anioAnt    = anio ? String(parseInt(anio, 10) - 1).slice(-2) : '';
+  if (info.tipo === 'acumulado') {
+    return `Ene${anioActual ? ` ${anioActual}` : ''} - ${mesCorto}${anioActual ? ` ${anioActual}` : ''}`;
   }
-  return mesCorto;
+  const { mes, cruzaAnio } = inicioVentanaMovil(mesNum, info.ventana);
+  const anioInicio = cruzaAnio ? anioAnt : anioActual;
+  return `${MESES_CORTOS[mes]}${anioInicio ? ` ${anioInicio}` : ''} - ${mesCorto}${anioActual ? ` ${anioActual}` : ''}`;
 }
 
 /** Igual que etiquetaMes pero con el nombre completo del mes (ej. "Enero - Marzo"). */
 export function etiquetaMesLarga(mesNum, indInfo, anio) {
   const larga = MESES_LARGOS_ARR[mesNum - 1];
-  const tipo  = tipoAcumulacionTrimestral(indInfo);
-  if (tipo === 'acumulado') return `Enero - ${larga}`;
-  if (tipo === 'movil') {
-    const { mes, sufijoAnio } = inicioVentanaMovil(mesNum, anio);
-    const prefijoAnio = sufijoAnio ? ` 20${sufijoAnio.trim()}` : '';
-    return `${MESES_LARGOS_ARR[mes]}${prefijoAnio} - ${larga}`;
+  const info  = tipoAcumulacionTrimestral(indInfo);
+  if (!info) return larga;
+  const anioActual = anio ? String(parseInt(anio, 10))     : '';
+  const anioAnt    = anio ? String(parseInt(anio, 10) - 1) : '';
+  if (info.tipo === 'acumulado') {
+    return `Enero${anioActual ? ` ${anioActual}` : ''} - ${larga}${anioActual ? ` ${anioActual}` : ''}`;
   }
-  return larga;
+  const { mes, cruzaAnio } = inicioVentanaMovil(mesNum, info.ventana);
+  const anioInicio = cruzaAnio ? anioAnt : anioActual;
+  return `${MESES_LARGOS_ARR[mes]}${anioInicio ? ` ${anioInicio}` : ''} - ${larga}${anioActual ? ` ${anioActual}` : ''}`;
 }
 
 /** Igual que etiquetaMes pero exportada para usar fuera de calculos.js. */

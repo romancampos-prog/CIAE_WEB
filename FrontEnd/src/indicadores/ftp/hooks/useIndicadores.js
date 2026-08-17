@@ -49,9 +49,11 @@ export function useIndicadores(user) {
   const catData     = allIndicadores[categoria];
   const indicadores = catData?.indicadores ?? [];
 
-  /** Carga inicial de todos los indicadores agrupados por categorÃ­a */
+  /** Carga inicial de todos los indicadores agrupados por categoría -- solo
+   *  los que corren por el pipeline automático (generaFTP), ya que esta es
+   *  la página de Generar FTP, no la de gráficas. */
   useEffect(() => {
-    getAllIndicadores()
+    getAllIndicadores('generaFTP')
       .then(res => {
         const data = res?.data ?? {};
         setAllIndicadores(data);

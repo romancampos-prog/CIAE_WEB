@@ -2,11 +2,14 @@ import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene todos los indicadores FTP agrupados por categoría.
+ * @param {string} [campo='mostrarGrafica'] - Campo de filtro: "mostrarGrafica"
+ *   (gráficas/descargas, default) o "generaFTP" (solo los que sí corren por
+ *   el pipeline automático -- usado en la página de Generar FTP).
  * @returns {Promise<Object<string, {color:string, indicadores:string[]}>>} Mapa categoría → metadatos
  */
-export const getAllIndicadores = async () => {
+export const getAllIndicadores = async (campo = 'mostrarGrafica') => {
     try {
-        const respuesta = await api.get('/ftp/todos');
+        const respuesta = await api.get('/ftp/todos', { params: { campo } });
         return respuesta.data;
     } catch (error) {
         console.error('Error al traer todos los indicadores', error);

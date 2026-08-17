@@ -42,6 +42,18 @@ def _parsear_umbral(valor):
     return _OPERADORES[m.group(1)], float(m.group(2))
 
 
+def numero_de_umbral(valor):
+    """
+    Saca el número de un umbral sin importar el formato: 1.7 -> 1.7, "<= 1.7" -> 1.7.
+    Para armar textos (leyendas, ejes) sin duplicar el operador cuando ya viene
+    en formato explícito. Devuelve None si no se pudo interpretar.
+    """
+    if isinstance(valor, (int, float)):
+        return valor
+    m = re.search(r'-?\d+(?:\.\d+)?', str(valor))
+    return float(m.group(0)) if m else None
+
+
 def evaluar_color(resultado: float, metas: dict) -> str:
     """
     Devuelve "Esperado" / "Medio" / "Bajo" según el resultado y las metas.

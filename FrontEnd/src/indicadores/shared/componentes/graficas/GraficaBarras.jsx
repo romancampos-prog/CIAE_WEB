@@ -24,6 +24,33 @@ import { ticksEscala } from '../../utils/escala';
  *   onBarHover  — fn       — callback(mesNum) para hover en modo unidad (FTP)
  *   onBarLeave  — fn       — callback() al salir del hover
  */
+// Etiquetas de periodicidad vienen como rango ("Ago 25 - Ene 26") -- se
+// parten en dos líneas (mes inicio arriba, mes fin abajo) para no ocupar
+// tanto ancho horizontal. Las etiquetas simples ("Ene") no tienen " - " y
+// se quedan en una sola línea. Dentro de cada línea, el año ("25"/"26") va
+// más chico y apagado que el mes -- es el dato secundario, ahorra espacio.
+const lineaMesAnio = (texto, dy) => {
+  const m = String(texto).match(/^(.*\S)\s+(\d{2,4})$/);
+  return (
+    <tspan key={dy} x={0} dy={dy}>
+      {m ? m[1] : texto}
+      {m && <tspan fontSize={8.5} fontWeight={500} fill="#a3acb8"> {m[2]}</tspan>}
+    </tspan>
+  );
+};
+
+const TickMes = ({ x, y, payload }) => {
+  const partes = String(payload.value).split(' - ');
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text textAnchor="middle" fontSize={11} fontWeight={600} fill="#64748b">
+        {lineaMesAnio(partes[0], '0.9em')}
+        {partes.length === 2 && lineaMesAnio(partes[1], '1.15em')}
+      </text>
+    </g>
+  );
+};
+
 const GraficaBarras = ({
   chartKey,
   data,
@@ -40,7 +67,7 @@ const GraficaBarras = ({
   onBarLeave,
 }) => {
   const xTickProps = xKey === 'mes'
-    ? { tick: { fontSize: 12, fill: '#64748b', fontWeight: 600 } }
+    ? { tick: <TickMes />, interval: 0, height: 40 }
     : tickEl
       ? { tick: tickEl, interval: 0 }
       : {
@@ -50,6 +77,12 @@ const GraficaBarras = ({
           tickFormatter: v => { const s = v === 'TOTAL_OOAD' ? 'TOTAL OOAD' : v; return s.length > 15 ? s.slice(0, 14) + '…' : s; },
           interval: 0,
         };
+
+  // El techo real del eje es el último tick (ya redondeado a un paso parejo
+  // en ticksEscala) -- no el maxTasa crudo, para que el domain nunca corte
+  // el último tick ni deje un tramo final más chico que los demás.
+  const ticksY = ticksEscala(maxTasa);
+  const techoY = ticksY[ticksY.length - 1];
 
   return (
     <ResponsiveContainer width="100%" height={440}>
@@ -63,8 +96,8 @@ const GraficaBarras = ({
         <YAxis
           tick={{ fontSize: 10, fill: '#94a3b8' }}
           axisLine={false} tickLine={false} width={40}
-          domain={[0, maxTasa]}
-          ticks={ticksEscala(maxTasa)}
+          domain={[0, techoY]}
+          ticks={ticksY}
         />
         <Tooltip content={<ChartTooltip indSel={indSel} />} cursor={{ fill: 'rgba(0,0,0,0.025)' }} />
 

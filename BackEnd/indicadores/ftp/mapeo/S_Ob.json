@@ -140,6 +140,7 @@
         "semaforo": {
             "Esperado": "<= 4.0",
             "Alto": ">= 6.0"
+            
         },
         "generaFTP": false,
         "mostrarGrafica": true

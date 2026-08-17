@@ -6,7 +6,7 @@ import io
 import xlsxwriter
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
 from ftp.services.datos_json_service import leer_historicos_para_excel
-from shared.semaforo_service import evaluar_color
+from shared.semaforo_service import evaluar_color, numero_de_umbral
 
 
 def _calcular_color(valor, idx_mes, indicadorSemaforo):
@@ -22,6 +22,60 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
         return 'Gris'
 
 
+_MESES_CORTAS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                 "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+
+
+def _inicio_ventana_movil(mes_num, ventana):
+    """Índice 0-based (en _MESES_CORTAS) del mes de inicio de la ventana móvil
+    de `ventana` meses que termina en mes_num (1-indexed), y si esa ventana
+    cruza al año anterior (ej. Enero con ventana de 6 necesita Agosto previo)."""
+    idx = mes_num - ventana
+    if idx >= 0:
+        return idx, False
+    return idx + 12, True
+
+
+def _checkpoints_y_etiquetas(periodicidad, ano=None):
+    """
+    El mapeo (campo periodicidad) tiene tres formas de acumulación, mismo
+    criterio que ya usa la gráfica del front (ver calculos.js):
+      - "Trimestral - Acumulado" (CACU 04, CAMA 04, DM 06, EH 04): solo 4
+        cortes reales al año (Mar/Jun/Sep/Dic), acumulado desde enero. En vez
+        de armar las 12 columnas mensuales de siempre (la mayoría vacías), se
+        arman solo esas 4, con etiqueta "Ene - Mar" en vez de "Marzo".
+      - "Mensual - Trimestralizado" (DM 03): dato cada mes, pero cada uno es
+        una ventana móvil de 3 meses -- se mantienen las 12 columnas, solo
+        cambia la etiqueta ("Feb - Abr" para abril).
+      - "Mensual - Semestralizado" (CACU 02/03, CAMA 02/03): igual que arriba
+        pero con ventana de 6 meses ("Ago - Ene" para enero).
+    Cualquier otra periodicidad usa las 12 columnas y etiquetas de siempre.
+    Devuelve (lista de índices de mes 0-based a mostrar, dict índice->etiqueta o None).
+    """
+    texto = (periodicidad or "").lower()
+
+    anio_act = str(ano)[-2:] if ano else ""
+    anio_ant = str(int(ano) - 1)[-2:] if ano else ""
+    sufA_act = f" {anio_act}" if anio_act else ""
+    sufA_ant = f" {anio_ant}" if anio_ant else ""
+
+    if "trimestral" in texto and "acumulado" in texto:
+        idxs = [2, 5, 8, 11]  # Marzo, Junio, Septiembre, Diciembre
+        etiquetas = {i: f"Ene{sufA_act} - {_MESES_CORTAS[i]}{sufA_act}" for i in idxs}
+        return idxs, etiquetas
+
+    ventana = 3 if "trimestralizado" in texto else 6 if "semestralizado" in texto else None
+    if ventana:
+        etiquetas = {}
+        for idx in range(12):
+            idx_inicio, cruza = _inicio_ventana_movil(idx + 1, ventana)
+            sufA = sufA_ant if cruza else sufA_act
+            etiquetas[idx] = f"{_MESES_CORTAS[idx_inicio]}{sufA} - {_MESES_CORTAS[idx]}{sufA_act}"
+        return list(range(12)), etiquetas
+
+    return list(range(12)), None
+
+
 def _estilo_valor(fmt, clave_base, valor):
     """Formato de una celda de numerador/denominador dentro de una fila Gris.
     Si el valor sí existe (no None/""), usa la variante gris RGB(49,134,155)
@@ -34,7 +88,7 @@ def _estilo_valor(fmt, clave_base, valor):
 
 def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadordesDen,
                 indicadoresArch, ano, mes, semana, indicadorSemaforo,
-                es_semana=False, historicos={}, leyendas={}, indicador=''):
+                es_semana=False, historicos={}, leyendas={}, indicador='', periodicidad=None):
 
     output = io.BytesIO()
     try:
@@ -49,13 +103,13 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         idx_mes_activo = int(mes) - 1
         nombre_mes_act = MESES_LISTA[idx_mes_activo]
 
-        n_meses    = 12
-        ultima_col = 36
+        checkpoints, etiquetas_especiales = _checkpoints_y_etiquetas(periodicidad, ano)
+        ultima_col = len(checkpoints) * 3
 
         limites    = indicadorSemaforo.get(nombre_mes_act, indicadorSemaforo)
-        v_esp      = limites.get("Esperado", 0)
+        v_esp      = numero_de_umbral(limites.get("Esperado", 0))
         tiene_alto = "Alto" in limites
-        v_critico  = limites.get("Alto") if tiene_alto else limites.get("Bajo", 0)
+        v_critico  = numero_de_umbral(limites.get("Alto") if tiene_alto else limites.get("Bajo", 0))
 
         worksheet.set_column(0, 0, 50)
         worksheet.set_column(1, ultima_col, 14)
@@ -69,11 +123,12 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         worksheet.merge_range(4, 1, 4, ultima_col, f"  {indicadordesDen.upper()}", fmt['descripcion'])
         worksheet.merge_range(5, 0, 9, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
 
-        for index, nombre_m in enumerate(MESES_LISTA[:n_meses]):
-            sc = index * 3 + 1
+        for pos, idx_real in enumerate(checkpoints):
+            nombre_m = etiquetas_especiales[idx_real] if etiquetas_especiales else MESES_LISTA[idx_real]
+            sc = pos * 3 + 1
             worksheet.merge_range(5, sc, 5, sc + 2, nombre_m.upper(), fmt['subtitulo'])
 
-            if index == idx_mes_activo:
+            if idx_real == idx_mes_activo:
                 if tiene_alto:
                     worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Esperado_Leyenda'])
                     worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Medio_Leyenda'])
@@ -83,10 +138,10 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                     worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Medio_Leyenda'])
                     worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Bajo_Leyenda'])
             else:
-                lim_h  = indicadorSemaforo.get(MESES_LISTA[index], indicadorSemaforo)
-                v_h    = lim_h.get("Esperado", 0)
+                lim_h  = indicadorSemaforo.get(MESES_LISTA[idx_real], indicadorSemaforo)
+                v_h    = numero_de_umbral(lim_h.get("Esperado", 0))
                 alt_h  = "Alto" in lim_h
-                crit_h = lim_h.get("Alto") if alt_h else lim_h.get("Bajo", 0)
+                crit_h = numero_de_umbral(lim_h.get("Alto") if alt_h else lim_h.get("Bajo", 0))
                 if alt_h:
                     worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",            fmt['Esperado_Leyenda'])
                     worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}",  fmt['Medio_Leyenda'])
@@ -95,8 +150,8 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                     worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",            fmt['Esperado_Leyenda'])
                     worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}",  fmt['Medio_Leyenda'])
                     worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",             fmt['Bajo_Leyenda'])
-            
-          
+
+
             worksheet.write(9, sc,     "NUM", fmt['header_sub'])
             worksheet.write(9, sc + 1, "DEN", fmt['header_sub'])
             worksheet.write(9, sc + 2, "%",   fmt['header_sub'])
@@ -125,10 +180,10 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
 
             worksheet.write(fila_excel, 0, nombre_oficial, estilo_celda_nombre)
 
-            for idx_mes in range(n_meses):
-                col_base = (idx_mes * 3) + 1
+            for pos, idx_real in enumerate(checkpoints):
+                col_base = (pos * 3) + 1
 
-                if idx_mes == idx_mes_activo:
+                if idx_real == idx_mes_activo:
                     reg      = diccionarioPrevio[unidad_id_ftp]
                     num      = reg.get("numerador")
                     den      = reg.get("denominador")
@@ -149,8 +204,8 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                         worksheet.write(fila_excel, col_base,     num, estilo_base)
                         worksheet.write(fila_excel, col_base + 1, den, estilo_base)
                         worksheet.write(fila_excel, col_base + 2, res, estilo_pct)
-                elif idx_mes < idx_mes_activo:
-                    hist_mes = historicos.get(unidad_id_ftp, {}).get(idx_mes, {})
+                elif idx_real < idx_mes_activo:
+                    hist_mes = historicos.get(unidad_id_ftp, {}).get(idx_real, {})
                     if hist_mes:
                         h_num    = hist_mes.get("numerador", "")
                         h_den    = hist_mes.get("denominador", "")
@@ -162,7 +217,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
                             worksheet.write(fila_excel, col_base + 1, h_den if h_den not in (None, "") else "", _estilo_valor(fmt, clave_base, h_den if h_den not in (None, "") else None))
                             worksheet.write(fila_excel, col_base + 2, "", fmt_gris)
                         else:
-                            color_tag  = _calcular_color(h_res, idx_mes, indicadorSemaforo)
+                            color_tag  = _calcular_color(h_res, idx_real, indicadorSemaforo)
                             estilo_pct = fmt.get(f"{color_tag}_Capsula", fmt['dato_normal'])
                             worksheet.write(fila_excel, col_base,     h_num, estilo_base)
                             worksheet.write(fila_excel, col_base + 1, h_den, estilo_base)
@@ -185,7 +240,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
 
 def ExcelFinalConPlantilla(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadordesDen,
                            indicadoresArch, ano, mes, semana, indicadorSemaforo,
-                           indicador, es_semana=False):
+                           indicador, es_semana=False, periodicidad=None):
 
     idx_mes_activo       = int(mes) - 1
     historicos, leyendas = _leer_historicos(indicador, ano, idx_mes_activo, list(diccionarioPrevio.keys()))
@@ -194,7 +249,7 @@ def ExcelFinalConPlantilla(diccionarioPrevio, indicadorTitulo, indicadordesNum, 
         diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadordesDen,
         indicadoresArch, ano, mes, semana, indicadorSemaforo,
         es_semana=es_semana, historicos=historicos, leyendas=leyendas,
-        indicador=indicador
+        indicador=indicador, periodicidad=periodicidad
     )
 
     return archivo
