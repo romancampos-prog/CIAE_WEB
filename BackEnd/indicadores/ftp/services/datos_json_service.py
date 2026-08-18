@@ -102,6 +102,40 @@ def leer_mes_guardado(indicador: str, ano: str, mes: str):
     return None, False, None
 
 
+def _ultimo_mes_disponible(indicador: str, ano: str):
+    """
+    Mes más reciente (definitivo o semanal) que tenga algún dato guardado ese
+    año, como '01'..'12'. None si no hay nada guardado todavía.
+    """
+    meses = meses_con_datos(indicador, ano)
+
+    semanal = leer_semana_indicador(indicador, ano)
+    meses += [
+        str(MESES_NOMBRES.index(m) + 1).zfill(2)
+        for m in semanal.get("MESES", {}) if m in MESES_NOMBRES
+    ]
+
+    return max(meses, key=int) if meses else None
+
+
+def leer_ultimo_mes_guardado(indicador: str, ano: str):
+    """
+    Para la descarga de categoría ("todos" desde gráficas): siempre trae el
+    mes MÁS RECIENTE que el indicador tenga guardado (definitivo o semanal),
+    sin importar qué mes se haya pedido en la URL -- cada indicador de la
+    categoría muestra TODO lo que tiene hasta su propio último dato, no se
+    recorta al mes de otro indicador de la misma descarga (ver
+    generar_categoria_guardado). Devuelve (diccionarioPrevio, es_semana,
+    semana, mes_usado), o (None, False, None, None) si no hay nada guardado.
+    """
+    mes_reciente = _ultimo_mes_disponible(indicador, ano)
+    if mes_reciente is None:
+        return None, False, None, None
+
+    diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes_reciente)
+    return diccionarioPrevio, es_semana, semana, mes_reciente
+
+
 def _normalizar_para_guardar(datos: dict) -> dict:
     # Convierte "resultado" → "%" para mantener formato uniforme en disco
     out = {}

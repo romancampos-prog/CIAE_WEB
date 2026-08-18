@@ -4,6 +4,7 @@ import {
     ResponsiveContainer, Cell, LabelList, ReferenceLine
 } from 'recharts';
 import './gBarras.css';
+import { numeroDeUmbral } from '../../utils/calculos';
 
 /* ─────────────────────────────────────────
     Tooltip personalizado (2 decimales)
@@ -16,14 +17,16 @@ const CustomTooltip = ({ active, payload, config }) => {
         if (!cfg) return { label: 'Sin clasificar', color: '#aaa', icon: '—' };
         const v = parseFloat(valor);
         const esDescendente = cfg.esDescendente || cfg.Alto !== undefined;
+        const esperado = numeroDeUmbral(cfg.Esperado);
+        const critico  = numeroDeUmbral(esDescendente ? cfg.Alto : cfg.Bajo);
 
         if (esDescendente) {
-            if (v <= cfg.Esperado) return { label: 'Esperado ✓', color: '#28a745', icon: '✅' };
-            if (v <= cfg.Alto)     return { label: 'Medio', color: '#ffc107', icon: '⚠️' };
+            if (v <= esperado) return { label: 'Esperado ✓', color: '#28a745', icon: '✅' };
+            if (v <= critico)  return { label: 'Medio', color: '#ffc107', icon: '⚠️' };
             return { label: 'Alto (Crítico)', color: '#dc3545', icon: '🔴' };
         } else {
-            if (v >= cfg.Esperado) return { label: 'Esperado ✓', color: '#28a745', icon: '✅' };
-            if (v >= cfg.Bajo)     return { label: 'Medio', color: '#ffc107', icon: '⚠️' };
+            if (v >= esperado) return { label: 'Esperado ✓', color: '#28a745', icon: '✅' };
+            if (v >= critico)  return { label: 'Medio', color: '#ffc107', icon: '⚠️' };
             return { label: 'Bajo (Crítico)', color: '#dc3545', icon: '🔴' };
         }
     };
@@ -85,7 +88,11 @@ const GBarras = ({ datos, config }) => {
         const promedioReal = sumaDen > 0 ? ((sumaNum / sumaDen) * 100).toFixed(2) : "0.00";
 
         const maxData = Math.max(...dataTransformada.map(d => d.resultado));
-        const maxRef = Math.max(config?.Esperado || 0, config?.Alto || 0, config?.Bajo || 0);
+        const maxRef = Math.max(
+            numeroDeUmbral(config?.Esperado) || 0,
+            numeroDeUmbral(config?.Alto) || 0,
+            numeroDeUmbral(config?.Bajo) || 0,
+        );
 
         return {
             promedio: promedioReal,
@@ -157,8 +164,8 @@ const GBarras = ({ datos, config }) => {
                             cursor={{ fill: 'rgba(36,92,79,0.04)', radius: 4 }}
                         />
 
-                        <ReferenceLine y={config?.Esperado} stroke="#28a745" strokeDasharray="6 4" strokeWidth={1.5} />
-                        <ReferenceLine y={esDescendente ? config?.Alto : config?.Bajo} stroke="#dc3545" strokeDasharray="6 4" strokeWidth={1.5} />
+                        <ReferenceLine y={numeroDeUmbral(config?.Esperado)} stroke="#28a745" strokeDasharray="6 4" strokeWidth={1.5} />
+                        <ReferenceLine y={numeroDeUmbral(esDescendente ? config?.Alto : config?.Bajo)} stroke="#dc3545" strokeDasharray="6 4" strokeWidth={1.5} />
 
                         <Bar
                             dataKey="resultado"

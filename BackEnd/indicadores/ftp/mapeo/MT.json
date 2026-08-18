@@ -1,4 +1,17 @@
-{
+{   
+     "MT 01": {
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "titulo": "Materna 01 - Porcentaje de adolescentes embarazadas.",
+        "descripcionNumerador": "Número de embarazadas adolescentes de 10 a 19 años.",
+        "descripcionDenominador": "Total de embarazadas.",
+        "nombreArchivoFinal": "MT 01",
+        "semaforo": {
+            "Esperado": "<= 8.5",
+            "Alto": ">= 9.1"
+        },
+        "generaFTP": false,
+        "mostrarGrafica": true
+    },
     "MT 02": {
         "fechaModificacion": "04/03/2026",
         "titulo": "Materna 02 - Oportunidad de inicio de la vigilancia prenatal.",
@@ -28,9 +41,10 @@
             "resultado": "round((numerador / denominador) * 100, 2)"
         },
         "semaforo": {
-            "Bajo": 50.0,
-            "Esperado": 53.0
+            "Bajo": "<= 50.0",
+            "Esperado": ">= 53.0"
         },
-        "mostrar": true
+        "generaFTP": true,
+        "mostrarGrafica": true
     }
 }

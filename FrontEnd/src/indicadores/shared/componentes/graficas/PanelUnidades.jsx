@@ -83,6 +83,9 @@ const PanelUnidades = ({
         {color === "Medio" && (
           <span className="ig-unit-medio-badge" title="Umbral medio en último mes">!</span>
         )}
+        {color === "Esperado" && (
+          <span className="ig-unit-esperado-badge" title="Umbral esperado en último mes">✓</span>
+        )}
       </button>
     );
   };
@@ -134,6 +137,9 @@ const PanelUnidades = ({
               )}
               {totalItem.color === "Medio" && (
                 <span className="ig-unit-medio-badge" title="Umbral medio en último mes">!</span>
+              )}
+              {totalItem.color === "Esperado" && (
+                <span className="ig-unit-esperado-badge" title="Umbral esperado en último mes">✓</span>
               )}
             </button>
           </>

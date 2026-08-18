@@ -1,22 +1,104 @@
-import { MESES_CORTOS } from '../../shared/constantes/meses';
+import { MESES_CORTOS, MESES_LARGOS_ARR } from '../../shared/constantes/meses';
+
+// Umbrales de semáforo pueden venir en formato legado (número puro, ej. 1.7)
+// o explícito (texto con operador, ej. "<= 1.7") -- ver shared/semaforo_service.py.
+export function numeroDeUmbral(valor) {
+  if (typeof valor === 'number') return valor;
+  const m = String(valor).match(/-?\d+\.?\d*/);
+  return m ? parseFloat(m[0]) : NaN;
+}
+export function textoDeUmbral(valor, operadorLegado) {
+  return typeof valor === 'string' ? valor : `${operadorLegado} ${valor}`;
+}
+
+// El mapeo (campo periodicidad) tiene tres formas de acumulación, cada una
+// arma la etiqueta del corte distinto:
+//   - "Trimestral - Acumulado" (ej. CACU 04, CAMA 04): solo 4 cortes al año
+//     (Mar/Jun/Sep/Dic), cada uno acumulado desde enero -- "Ene - Mar", "Ene - Jun"...
+//   - "Mensual - Trimestralizado" (ej. DM 03): un corte CADA mes, ventana móvil
+//     de 3 meses (el actual + los 2 anteriores) -- "Feb - Abr" para abril.
+//   - "Mensual - Semestralizado" (ej. CACU 02/03, CAMA 02/03): un corte CADA
+//     mes, ventana móvil de 6 meses -- "Ago - Ene" para el corte de enero.
+export function tipoAcumulacionTrimestral(indInfo) {
+  const texto = (indInfo?.periodicidad ?? '').toLowerCase();
+  if (/trimestral/.test(texto) && /acumulado/.test(texto)) {
+    return { tipo: 'acumulado', ventana: 3 };
+  }
+  if (/trimestralizado/.test(texto)) return { tipo: 'movil', ventana: 3 };
+  if (/semestralizado/.test(texto)) return { tipo: 'movil', ventana: 6 };
+  return null;
+}
+
+// Se mantiene por compatibilidad -- true para cualquiera de los tres tipos.
+export function esTrimestralAcumulado(indInfo) {
+  return tipoAcumulacionTrimestral(indInfo) !== null;
+}
+
+// Ventana móvil de N meses: mesNum-ventana puede caer en el año anterior (ej.
+// Enero con ventana de 6 necesita Agosto del año previo). En ese caso hay que
+// envolver el índice y marcar los DOS años (el de inicio y el del corte),
+// para no dar a entender que ambos extremos son del mismo año.
+function inicioVentanaMovil(mesNum, ventana) {
+  const idx = mesNum - ventana;
+  if (idx >= 0) return { mes: idx, cruzaAnio: false };
+  return { mes: idx + 12, cruzaAnio: true };
+}
+
+function etiquetaMes(mesNum, indInfo, anio) {
+  const mesCorto = MESES_CORTOS[mesNum - 1];
+  const info = tipoAcumulacionTrimestral(indInfo);
+  if (!info) return mesCorto;
+  const anioActual = anio ? String(parseInt(anio, 10)).slice(-2)     : '';
+  const anioAnt    = anio ? String(parseInt(anio, 10) - 1).slice(-2) : '';
+  if (info.tipo === 'acumulado') {
+    return `Ene${anioActual ? ` ${anioActual}` : ''} - ${mesCorto}${anioActual ? ` ${anioActual}` : ''}`;
+  }
+  const { mes, cruzaAnio } = inicioVentanaMovil(mesNum, info.ventana);
+  const anioInicio = cruzaAnio ? anioAnt : anioActual;
+  return `${MESES_CORTOS[mes]}${anioInicio ? ` ${anioInicio}` : ''} - ${mesCorto}${anioActual ? ` ${anioActual}` : ''}`;
+}
+
+/** Igual que etiquetaMes pero con el nombre completo del mes (ej. "Enero - Marzo"). */
+export function etiquetaMesLarga(mesNum, indInfo, anio) {
+  const larga = MESES_LARGOS_ARR[mesNum - 1];
+  const info  = tipoAcumulacionTrimestral(indInfo);
+  if (!info) return larga;
+  const anioActual = anio ? String(parseInt(anio, 10))     : '';
+  const anioAnt    = anio ? String(parseInt(anio, 10) - 1) : '';
+  if (info.tipo === 'acumulado') {
+    return `Enero${anioActual ? ` ${anioActual}` : ''} - ${larga}${anioActual ? ` ${anioActual}` : ''}`;
+  }
+  const { mes, cruzaAnio } = inicioVentanaMovil(mesNum, info.ventana);
+  const anioInicio = cruzaAnio ? anioAnt : anioActual;
+  return `${MESES_LARGOS_ARR[mes]}${anioInicio ? ` ${anioInicio}` : ''} - ${larga}${anioActual ? ` ${anioActual}` : ''}`;
+}
+
+/** Igual que etiquetaMes pero exportada para usar fuera de calculos.js. */
+export function etiquetaMesCorta(mesNum, indInfo, anio) {
+  return etiquetaMes(mesNum, indInfo, anio);
+}
 
 /**
  * Construye los puntos de la gráfica de tendencia mensual para una unidad FTP.
- * Soporta datos semanales (campo `semana` en el registro).
+ * Soporta datos semanales (campo `semana` en el registro) e indicadores
+ * trimestrales acumulados (etiqueta "Ene - Mar" en vez de "Mar").
  * @param {Object} datos - Datos crudos de la API (meses_con_datos, datos por unidad)
  * @param {string} unidadSel - Clave de la unidad seleccionada
+ * @param {Object|null} [indInfo] - Ficha del indicador (para detectar periodicidad trimestral)
+ * @param {string|number} [anio] - Año seleccionado (para el rótulo de Ene/Feb en ventana móvil)
  * @returns {Array<{mes:string, mesNum:number, tasa:number, numerador:number, denominador:number, color:string, esSemana:boolean, semana:number|null}>}
  */
-export function buildFTPChartDataUnidad(datos, unidadSel) {
+export function buildFTPChartDataUnidad(datos, unidadSel, indInfo, anio) {
   if (!datos || !unidadSel || !datos.meses_con_datos?.length) return [];
   const arr = datos.datos?.[unidadSel] ?? [];
   return datos.meses_con_datos.map(mes => {
     const reg      = arr.find(r => r.mes === mes);
     const esSemana = !!reg?.semana;
-    const mesCorto = MESES_CORTOS[parseInt(mes) - 1];
+    const mesNum   = parseInt(mes);
+    const etiqueta = etiquetaMes(mesNum, indInfo, anio);
     return {
-      mes:         esSemana ? `S${reg.semana}·${mesCorto}` : mesCorto,
-      mesNum:      parseInt(mes),
+      mes:         esSemana ? `S${reg.semana}·${etiqueta}` : etiqueta,
+      mesNum,
       tasa:        reg?.tasa        ?? 0,
       numerador:   reg?.numerador   ?? null,
       denominador: reg?.denominador ?? null,
@@ -71,9 +153,17 @@ export function calcularRangosFTP(indInfo, mesParaSem, MESES_LARGOS_ARR) {
   if (esp === undefined) return null;
   const tieneAlto = 'Alto' in limites;
   const critico   = tieneAlto ? limites.Alto : limites.Bajo;
+  const espNum    = numeroDeUmbral(esp);
+  const criticoNum = numeroDeUmbral(critico);
+  const sinMedio  = espNum === criticoNum;
+  if (sinMedio) {
+    return tieneAlto
+      ? { Esperado: textoDeUmbral(esp, '≤'), Bajo: textoDeUmbral(critico, '>'), _mes: nombreMes }
+      : { Esperado: textoDeUmbral(esp, '≥'), Bajo: textoDeUmbral(critico, '<'), _mes: nombreMes };
+  }
   return tieneAlto
-    ? { Esperado: `≤ ${esp}`, Medio: `> ${esp} – < ${critico}`, Bajo: `≥ ${critico}`, _mes: nombreMes }
-    : { Esperado: `≥ ${esp}`, Medio: `> ${critico} – < ${esp}`, Bajo: `≤ ${critico}`, _mes: nombreMes };
+    ? { Esperado: textoDeUmbral(esp, '≤'), Medio: `> ${espNum} – < ${criticoNum}`, Bajo: textoDeUmbral(critico, '≥'), _mes: nombreMes }
+    : { Esperado: textoDeUmbral(esp, '≥'), Medio: `> ${criticoNum} – < ${espNum}`, Bajo: textoDeUmbral(critico, '≤'), _mes: nombreMes };
 }
 
 /**
@@ -114,9 +204,20 @@ export function calcularSemDataFTP(infoIndicador, mes, MESES_LARGOS) {
     ? infoIndicador.semaforo[mesTexto] : infoIndicador.semaforo;
   if (!sem || (sem.Bajo === undefined && sem.Esperado === undefined)) return null;
   const esDesc = sem.Alto !== undefined;
+  const critico = esDesc ? sem.Alto : sem.Bajo;
+  const espNum    = numeroDeUmbral(sem.Esperado);
+  const criticoNum = numeroDeUmbral(critico);
+  const sinMedio  = espNum === criticoNum;
+  if (sinMedio) {
+    return {
+      txtVerde: `${textoDeUmbral(sem.Esperado, '≤')}%`,
+      txtAmarillo: null,
+      txtRojo: `${textoDeUmbral(critico, esDesc ? '>' : '<')}%`,
+    };
+  }
   return {
-    txtVerde:    esDesc ? `≤ ${sem.Esperado}%` : `≥ ${sem.Esperado}%`,
-    txtAmarillo: esDesc ? `> ${sem.Esperado}% — < ${sem.Alto}%` : `> ${sem.Bajo}% — < ${sem.Esperado}%`,
-    txtRojo:     esDesc ? `≥ ${sem.Alto}%`     : `≤ ${sem.Bajo}%`,
+    txtVerde:    `${textoDeUmbral(sem.Esperado, esDesc ? '≤' : '≥')}%`,
+    txtAmarillo: esDesc ? `> ${espNum}% — < ${criticoNum}%` : `> ${criticoNum}% — < ${espNum}%`,
+    txtRojo:     `${textoDeUmbral(critico, esDesc ? '≥' : '≤')}%`,
   };
 }

@@ -7,6 +7,7 @@ import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
 import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
+import { etiquetaMesLarga, etiquetaMesCorta } from '../../utils/calculos';
 
 const VISTAS_FTP = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
@@ -14,6 +15,14 @@ const VISTAS_FTP = [
 ];
 
 const POR_PAGINA = 12;
+
+// Resalta menos el año dentro de una etiqueta tipo "Noviembre 2025 - Enero
+// 2026" -- lo envuelve en un span más chico y apagado (ig-mes-anio) para que
+// el mes, que es el dato que se lee rápido, no compita por espacio/atención.
+const conAnioChico = (texto) =>
+  texto.split(/(\d{4})/).map((parte, i) =>
+    /^\d{4}$/.test(parte) ? <span key={i} className="ig-mes-anio">{parte}</span> : parte
+  );
 
 const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
   const [busqUnidad, setBusqUnidad]   = useState('');
@@ -144,7 +153,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       style={mesSel === m ? { borderLeftColor: indColor } : {}}
                       onClick={() => setMesSel(m)}
                     >
-                      <span className="ig-unit-name">{MESES_LARGOS[m]}</span>
+                      <span className="ig-unit-name">{conAnioChico(etiquetaMesLarga(parseInt(m), indInfo, anio))}</span>
                     </button>
                   ))}
                 </div>
@@ -175,7 +184,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                     )}
                     {vistaGrafica === 'mes' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {MESES_CORTOS[parseInt(mesSel) - 1]}
+                        {etiquetaMesCorta(parseInt(mesSel), indInfo, anio)}
                       </span>
                     )}
                   </div>
@@ -203,17 +212,19 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               </div>
 
               {vistaGrafica === 'unidad' && (
-                <GraficaBarras
-                  chartKey={`u-${indSel}-${unidadSel}`}
-                  data={chartData}
-                  xKey="mes"
-                  maxTasa={maxTasa}
-                  indSel={indSel}
-                  maxBarSize={56}
-                  conLinea
-                  onBarHover={esSemPorMes ? setHoveredMes : undefined}
-                  onBarLeave={esSemPorMes ? () => setHoveredMes(null) : undefined}
-                />
+                <div style={{ marginTop: '14px' }}>
+                  <GraficaBarras
+                    chartKey={`u-${indSel}-${unidadSel}`}
+                    data={chartData}
+                    xKey="mes"
+                    maxTasa={maxTasa}
+                    indSel={indSel}
+                    maxBarSize={56}
+                    conLinea
+                    onBarHover={esSemPorMes ? setHoveredMes : undefined}
+                    onBarLeave={esSemPorMes ? () => setHoveredMes(null) : undefined}
+                  />
+                </div>
               )}
 
               {vistaGrafica === 'mes' && (

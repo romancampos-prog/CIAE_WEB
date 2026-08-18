@@ -24,7 +24,12 @@ def obtenerInformacionIndicador(indicador: str) -> dict:
         return {"error": str(e)}
 
 
-def consultarTodosIndicadores() -> dict:
+def consultarTodosIndicadores(campo_mostrar: str = "mostrarGrafica") -> dict:
+    """
+    campo_mostrar: qué bandera del mapeo filtra la lista --
+    "mostrarGrafica" (listado/gráfica/descarga guardado) o
+    "generaFTP" (generación real por extracción, ver /generar-categoria).
+    """
     resultado = {}
 
     for tipo, entrada in ICONOS_INDICADORES.items():
@@ -34,7 +39,7 @@ def consultarTodosIndicadores() -> dict:
 
             sub_indicadores = [
                 key for key, val in datos.items()
-                if isinstance(val, dict) and val.get("mostrar", True)
+                if isinstance(val, dict) and val.get(campo_mostrar, True)
             ]
 
             if sub_indicadores:

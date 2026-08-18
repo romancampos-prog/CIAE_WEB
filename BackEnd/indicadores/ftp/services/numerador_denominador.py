@@ -5,7 +5,7 @@ Usado en: ftp/services/reporte_final.py, reporte_categoria.py
 import math
 import re
 
-from shared.color_service import es_gris, es_bajo_forzado
+from shared.color_service import es_gris, es_inconsistente
 
 
 def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
@@ -65,24 +65,20 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
                 denominador_raw   = eval(indicadorOperacion['denominador'], {"__builtins__": None}, contexto_unidad)
                 denominador_final = redondeo_personalizado(denominador_raw)
 
-            if es_gris(numerador_final, denominador_final):
+            if es_gris(numerador_final, denominador_final) or es_inconsistente(numerador_final, denominador_final):
+                # Gris: falta el dato, o hay numerador sin denominador (no se puede dividir).
                 resultado = None
             elif denominador_final != 0:
                 contexto_unidad['numerador']   = numerador_final
                 contexto_unidad['denominador'] = denominador_final
                 resultado = eval(indicadorOperacion['resultado'], {"__builtins__": None}, contexto_unidad)
             else:
-                resultado = 0
-
-            # numerador o denominador en 0 (con el otro presente) es un dato sospechoso, no un
-            # resultado real — se fuerza Bajo en vez de dejar que el umbral normal lo evalúe.
-            forzar_bajo = es_bajo_forzado(numerador_final, denominador_final)
+                resultado = 0  # numerador y denominador ambos 0 -- cero real, se evalúa normal
 
             resultadosFinales[unidad] = {
                 "numerador":   numerador_final,
                 "denominador": denominador_final,
                 "resultado":   round(resultado, 2) if resultado is not None else None,
-                "forzar_bajo": forzar_bajo,
             }
 
         except Exception as e:
@@ -130,11 +126,10 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
             "numerador":   total_num,
             "denominador": total_den,
             "resultado":   resultado_total,
-            "forzar_bajo": es_bajo_forzado(total_num, total_den),
         }
     else:
         resultadosFinales["TOTAL_OOAD"] = {
-            "numerador": total_num, "denominador": None, "resultado": None, "forzar_bajo": False
+            "numerador": total_num, "denominador": None, "resultado": None
         }
 
     return resultadosFinales, errores_calculo

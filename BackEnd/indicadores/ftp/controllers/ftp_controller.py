@@ -27,8 +27,18 @@ async def info_indicador(
 
 
 @router.get("/todos")
-async def lista_indicadores(payload: dict = Depends(solo_roles(*ROLES_FTP_GRAFICA))):
-    resultado = consultarTodosIndicadores()
+async def lista_indicadores(
+    campo:   str  = Query("mostrarGrafica"),
+    payload: dict = Depends(solo_roles(*ROLES_FTP_GRAFICA))
+):
+    """
+    Lista de indicadores por categoría. Dos consumidores con reglas distintas:
+    la página de gráficas quiere "mostrarGrafica" (default, todo lo que se
+    puede visualizar/descargar); la página de "Generar FTP" (previo/final)
+    quiere "generaFTP" (solo lo que sí corre por el pipeline automático --
+    los indicadores manuales como CAMA 02/03/04 no deben aparecer ahí).
+    """
+    resultado = consultarTodosIndicadores(campo)
     return ApiResponse(
         success=True,
         message="Indicadores obtenidos exitosamente",

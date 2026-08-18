@@ -10,6 +10,7 @@ import TopBar from '../../../shared/componentes/TopBar';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
 import { useAuth } from '../../../auth/contexto/AuthContext';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
+import { numeroDeUmbral, textoDeUmbral } from '../../ftp/utils/calculos';
 
 const ConfiguracionReporte = () => {
   const navigate   = useNavigate();
@@ -84,15 +85,30 @@ const ConfiguracionReporte = () => {
     let sem = (mesTexto && infoIndicador.semaforo[mesTexto])
       ? infoIndicador.semaforo[mesTexto] : infoIndicador.semaforo;
     if (!sem || (sem.Bajo === undefined && sem.Esperado === undefined)) return null;
-    const esDesc = sem.Alto !== undefined;
+    const esDesc  = sem.Alto !== undefined;
+    const critico = esDesc ? sem.Alto : sem.Bajo;
+    const espNum     = numeroDeUmbral(sem.Esperado);
+    const criticoNum = numeroDeUmbral(critico);
+    const sinMedio   = espNum === criticoNum;
+    if (sinMedio) {
+      return {
+        ...sem,
+        labelVerde: 'Esperado',
+        labelAmarillo: null,
+        labelRojo:  esDesc ? 'Alto' : 'Bajo',
+        txtVerde:   `${textoDeUmbral(sem.Esperado, '≤')}%`,
+        txtAmarillo: null,
+        txtRojo:    `${textoDeUmbral(critico, esDesc ? '>' : '<')}%`,
+      };
+    }
     return {
       ...sem,
       labelVerde:   'Esperado',
       labelAmarillo:'Medio',
       labelRojo:    esDesc ? 'Alto' : 'Bajo',
-      txtVerde:     esDesc ? `≤ ${sem.Esperado}%` : `≥ ${sem.Esperado}%`,
-      txtAmarillo:  esDesc ? `> ${sem.Esperado}% — < ${sem.Alto}%` : `> ${sem.Bajo}% — < ${sem.Esperado}%`,
-      txtRojo:      esDesc ? `≥ ${sem.Alto}%` : `≤ ${sem.Bajo}%`,
+      txtVerde:     `${textoDeUmbral(sem.Esperado, esDesc ? '≤' : '≥')}%`,
+      txtAmarillo:  esDesc ? `> ${espNum}% — < ${criticoNum}%` : `> ${criticoNum}% — < ${espNum}%`,
+      txtRojo:      `${textoDeUmbral(critico, esDesc ? '≥' : '≤')}%`,
     };
   }, [infoIndicador, datos.mes]);
 
@@ -311,13 +327,15 @@ const ConfiguracionReporte = () => {
                           <strong>{semData.txtVerde}</strong>
                         </div>
                       </div>
-                      <div className="cfg-sem-block cfg-sem-amarillo">
-                        <span className="cfg-sem-dot" />
-                        <div>
-                          <small>{semData.labelAmarillo}</small>
-                          <strong>{semData.txtAmarillo}</strong>
+                      {semData.txtAmarillo && (
+                        <div className="cfg-sem-block cfg-sem-amarillo">
+                          <span className="cfg-sem-dot" />
+                          <div>
+                            <small>{semData.labelAmarillo}</small>
+                            <strong>{semData.txtAmarillo}</strong>
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div className="cfg-sem-block cfg-sem-rojo">
                         <span className="cfg-sem-dot" />
                         <div>

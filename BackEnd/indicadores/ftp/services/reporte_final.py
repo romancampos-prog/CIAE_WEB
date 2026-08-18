@@ -24,6 +24,7 @@ def ExcelReporteFinal(indicador, ano, mes, semana):
     indicadordesDen    = informacionIndicador.get("descripcionDenominador")
     indicadoresArch    = informacionIndicador.get("nombreArchivoFinal")
     indicadorDecimal   = informacionIndicador.get("decimales")
+    indicadorPeriodo   = informacionIndicador.get("periodicidad")
     MESES_CIP01        = informacionIndicador.get("MESES_CIP01", {})
 
     diccionarioPrevio, diccionarioErrores = ExtraerInformacionPrevia(indicadorReportes, ano, mes, semana, MESES_CIP01)
@@ -72,7 +73,8 @@ def ExcelReporteFinal(indicador, ano, mes, semana):
         semana,
         indicadorSemaforo,
         indicador,
-        es_semana=es_semana
+        es_semana=es_semana,
+        periodicidad=indicadorPeriodo,
     )
 
     if archivo_descargable:
@@ -114,6 +116,7 @@ def ExcelReporteGuardado(indicador, ano, mes):
     indicadordesNum    = informacionIndicador.get("descripcionNumerador")
     indicadordesDen    = informacionIndicador.get("descripcionDenominador")
     indicadoresArch    = informacionIndicador.get("nombreArchivoFinal")
+    indicadorPeriodo   = informacionIndicador.get("periodicidad")
 
     diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes)
     if diccionarioPrevio is None:
@@ -133,7 +136,8 @@ def ExcelReporteGuardado(indicador, ano, mes):
         semana,
         indicadorSemaforo,
         indicador,
-        es_semana=es_semana
+        es_semana=es_semana,
+        periodicidad=indicadorPeriodo,
     )
 
     if not archivo_descargable:
