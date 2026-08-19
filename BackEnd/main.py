@@ -20,6 +20,7 @@ from auth.controllers.auth_controller import router as auth_router
 import iaas as iass_module
 import ftp as ftp_module
 import epidemiologia as epi_module
+from indicadores.Routes import indicadores_Route 
 
 DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')
 
@@ -41,6 +42,9 @@ async def agregar_cabeceras_seguridad(request, call_next):
     if AMBIENTE == "produccion":
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
     return response
+
+#cmabios de delcaraciones de Rutas
+app.include_router(indicadores_Route , prefix="/Indicadores")
 
 app.include_router(auth_router, prefix="/auth")
 for _router, _prefix in ftp_module.ROUTERS:
