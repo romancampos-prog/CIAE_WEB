@@ -1,0 +1,211 @@
+{
+    "S_Ob 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Acumulado",
+        "informacion": {
+            "titulo": "S_Ob 01 - Cobertura de medición de peso y talla de la población derechohabiente, en unidad médica de primer nivel.",
+            "objetivo": "Medir el porcentaje de población derechohabiente con medición de peso y talla para identificar peso bajo, peso normal, sobrepeso y obesidad a través del Índice de Masa Corporal (IMC).",
+            "descNum": "Número de derechohabientes con medición de peso y talla acumulado al mes evaluado ",
+            "descDen": "Población derechohabiente adscrita a médico familiar"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP03_A": {
+                        "hoja": "15_EvalNut_20_120",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["BZ"]
+                    },
+                    "CP03_B": {
+                        "hoja": "14_EvalNut_0_19",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["F", "AA", "AV"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Todos": ["Total"]
+                }
+            },
+            "operacion": {
+                "numerador": "(CP03_A[0] + sum(CP03_B[0:3]))",
+                "denominador": "(poblacion[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": "<= 4.5",
+                "Esperado": ">= 5.4"
+            },
+            "Febrero": {
+                "Bajo": "<= 9.1",
+                "Esperado": ">= 10.8"
+            },
+            "Marzo": {
+                "Bajo": "<= 13.7",
+                "Esperado": ">= 16.2"
+            },
+            "Abril": {
+                "Bajo": "<= 18.2",
+                "Esperado": ">= 21.6"
+            },
+            "Mayo": {
+                "Bajo": "<= 22.8",
+                "Esperado": ">= 27.0"
+            },
+            "Junio": {
+                "Bajo": "<= 27.4",
+                "Esperado": ">= 32.4"
+            },
+            "Julio": {
+                "Bajo": "<= 31.9",
+                "Esperado": ">= 37.8"
+            },
+            "Agosto": {
+                "Bajo": "<= 38.0",
+                "Esperado": ">= 43.2"
+            },
+            "Septiembre": {
+                "Bajo": "<= 41.1",
+                "Esperado": ">= 48.6"
+            },
+            "Octubre": {
+                "Bajo": "<= 45.7",
+                "Esperado": ">= 54.0"
+            },
+            "Noviembre": {
+                "Bajo": "<= 50.2",
+                "Esperado": ">= 59.4"
+            },
+            "Diciembre": {
+                "Bajo": "<= 54.9",
+                "Esperado": ">= 65.0"
+            }
+        }
+    },
+    "S_Ob 02": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual",
+        "informacion": {
+            "titulo": "S_Ob 02 - Proporción de obesidad en derechohabientes de 20 años y más que acudieron a medición de peso y talla.",
+            "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad, para identificar un factor de riesgo para desarrollar enfermedades crónicas.",
+            "descNum": "Número de derechohabientes de 20 años y más, con obesidad en el mes evaluado ",
+            "descDen": "Total de población derechohabiente de 20 años y más adscrita a médico familiar con medición de peso y talla en el mes evaluado"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP03": {
+                        "hoja": "15_EvalNut_20_120",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["CB", "CF"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP03": {
+                        "hoja": "15_EvalNut_20_120",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["CB"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "CP03[0] * (CP03[1] / 100)",
+                "denominador": "(CP03[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Alto": ">= 38.0",
+            "Esperado": "<= 35.0"
+        }
+    },
+    "S_Ob 03": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual",
+        "informacion": {
+            "titulo": "S_Ob 03 - Proporción de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0).",
+            "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), como factor de riesgo de desarrollo de enfermedades crónicas.",
+            "descNum": "Número de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), en el periodo evaluado.",
+            "descDen": "Total, de población derechohabiente de 20 años y más años, adscrita a Médico Familiar con medición de peso y talla en periodo evaluado"
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": "<= 4.0",
+            "Alto": ">= 6.0"
+        }
+    },
+    "S_Ob 04": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Anualizado",
+        "informacion": {
+            "titulo": "S_Ob 04 - Porcentaje de confirmación diagnóstica de obesidad en Medicina Familiar de derechohabientes de 20 años y más, con índice de masa corporal igual o mayor a 30 kg/m2",
+            "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más a los que se les confirmó Obesidad, una vez que se le realizó una prueba de detección con Índice de masa corporal con datos de obesidad.",
+            "descNum": "Número de derechohabientes de 20 años y más con UP161 en Módulos PrevenIMSS a quienes se les confirmó un diagnóstico de Obesidad en Medicina Familiar (CIE 10: E66X, E66.1, E66.2, E66.8, E66.9, E66.0) ",
+            "descDen": "Número de derechohabientes de 20 años y más con UP 161 en Módulos PrevenIMSS."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IN27": {
+                        "hoja": "Indicadores_Obesidad",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "G",
+                        "buscar": "99 TOTAL",
+                        "columna_dato": ["K"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IN27": {
+                        "hoja": "Indicadores_Obesidad",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "G",
+                        "buscar": "99 TOTAL",
+                        "columna_dato": ["J"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(IN27[0])",
+                "denominador": "(IN27[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 5.0",
+            "Esperado": ">= 10.0"
+        }
+    }
+}

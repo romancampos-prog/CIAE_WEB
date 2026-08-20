@@ -1,0 +1,98 @@
+{
+    "CE 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual",
+        "informacion": {
+            "titulo": "CE 01 - Promedio de atenciones preventivas por personal de enfermería.",
+            "objetivo": "Medir la productividad diaria del personal auxiliar de enfermería en salud pública que proporciona atenciones preventivas (80).",
+            "descNum": "Total de atenciones preventivas otorgadas del personal auxiliar de enfermería en salud pública (servicio 80) en el periodo evaluado",
+            "descDen": "Días laborados del personal auxiliar de enfermería en salud pública (servicio 80) durante el periodo evaluado"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IAP03": {
+                        "hoja": "Prod_Enf_Mens_Serv80",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "G",
+                        "buscar": "TOTAL DEL SERVICIO  [ 80 ]",
+                        "columna_dato": ["L"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IAP03": {
+                        "hoja": "Prod_Enf_Mens_Serv80",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "G",
+                        "buscar": "TOTAL DEL SERVICIO  [ 80 ]",
+                        "columna_dato": ["K"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(IAP03[0])",
+                "denominador": "(IAP03[0])",
+                "resultado": "round((numerador / denominador), 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 12",
+            "Esperado": ">= 16"
+        }
+    },
+    "CE 02": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual",
+        "informacion": {
+            "titulo": "CE 02 - Promedio de atenciones integrales por personal de enfermería especialista en medicina de familia.",
+            "objetivo": "Medir la productividad diaria del personal de enfermería especialista en medicina de familia que proporciona atenciones integrales.",
+            "descNum": "Total de atenciones integrales otorgadas del personal de enfermería especialista en medicina de familia (servicio 87) en el periodo evaluado.",
+            "descDen": "Días laborados del personal de enfermería especialista en medicina de familia (servicio 87) durante el periodo evaluado."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IAP03": {
+                        "hoja": "Prod_Enf_Mens_Serv87",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "G",
+                        "buscar": "TOTAL DEL SERVICIO  [ 87 ]",
+                        "columna_dato": ["M"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IAP03": {
+                        "hoja": "Prod_Enf_Mens_Serv87",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "G",
+                        "buscar": "TOTAL DEL SERVICIO  [ 87 ]",
+                        "columna_dato": ["K"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(IAP03[0])",
+                "denominador": "(IAP03[0])",
+                "resultado": "round((numerador / denominador), 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 12",
+            "Esperado": ">= 16"
+        }
+    }
+}

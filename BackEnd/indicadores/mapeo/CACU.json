@@ -1,0 +1,167 @@
+{
+    "CACU 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Acumulado",
+        "informacion": {
+            "titulo": "CACU 01 - Cobertura de tamizaje de primera vez de cáncer cérvico uterino en mujeres entre 25 y 64 años.",
+            "objetivo": "Medir la proporción de mujeres entre 25 y 64 años, con tamizaje de cáncer cérvico uterino, a través de la prueba de papanicolaou, para identificar a derechohabientes con lesiones precancerosas y cáncer en etapa temprana.",
+            "descNum": "Número de mujeres entre 25 y 64 años, con tamizaje de cáncer cérvico uterino, a través de la prueba de papanicolau de primera vez acumuladas al mes del reporte.",
+            "descDen": "Población de mujeres entre 25 y 64 años, adscritas a médico familiar menos Prevalencia de mujeres histerectomizadas a aplicables por grupo de edad"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP02": {
+                        "hoja": "IMCPUM",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "CO",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["CQ"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Mujeres": [
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59",
+                        "60 a 64"
+                    ]
+                }
+            },
+            "operacion": {
+                "numerador": "(CP02[0])",
+                "denominador": "sum([ (poblacion[0] * (1 - 0.004)), (sum(poblacion[1:3]) * (1 - 0.029)), (sum(poblacion[3:5]) * (1 - 0.109)), (sum(poblacion[5:7]) * (1 - 0.211)), (poblacion[7] * (1 - 0.295)) ])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": "<= 1.7",
+                "Esperado": ">= 2.3"
+            },
+            "Febrero": {
+                "Bajo": "<= 3.4",
+                "Esperado": ">= 4.5"
+            },
+            "Marzo": {
+                "Bajo": "<= 5.1",
+                "Esperado": ">= 6.8"
+            },
+            "Abril": {
+                "Bajo": "<= 6.8",
+                "Esperado": ">= 9.0"
+            },
+            "Mayo": {
+                "Bajo": "<= 8.6",
+                "Esperado": ">= 11.3"
+            },
+            "Junio": {
+                "Bajo": "<= 10.3",
+                "Esperado": ">= 13.5"
+            },
+            "Julio": {
+                "Bajo": "<= 12.0",
+                "Esperado": ">= 15.8"
+            },
+            "Agosto": {
+                "Bajo": "<= 13.7",
+                "Esperado": ">= 18.0"
+            },
+            "Septiembre": {
+                "Bajo": "<= 15.4",
+                "Esperado": ">= 20.3"
+            },
+            "Octubre": {
+                "Bajo": "<= 17.1",
+                "Esperado": ">= 22.5"
+            },
+            "Noviembre": {
+                "Bajo": "<= 18.8",
+                "Esperado": ">= 24.8"
+            },
+            "Diciembre": {
+                "Bajo": "<= 20.5",
+                "Esperado": ">= 27.0"
+            }
+        }
+    },
+    "CACU 02": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Semestralizado",
+        "informacion": {
+            "titulo": "CACU 02 - Tiempo promedio para el diagnóstico de cáncer cérvico uterino a partir de la sospecha por citología cérvico vaginal de tamizaje.",
+            "objetivo": "Medir el tiempo promedio en días que emplea el Institución Mexicano del Seguro Social para emitir el diagnóstico de cáncer cérvico uterino una vez que se establece la sospecha a través de la citología cérvico vaginal de tamizaje",
+            "descNum": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
+            "descDen": "Total de pacientes que cuenten con fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y con fecha de toma de citología cérvico vaginal de tamizaje con reporte de lesión."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": "<= 30",
+            "Alto": "> 60"
+        }
+    },
+    "CACU 03": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Semestralizado",
+        "informacion": {
+            "titulo": "CACU 03 - Tiempo promedio para el inicio del tratamiento en cáncer cérvico uterino.",
+            "objetivo": "Medir el tiempo promedio en días que emplea el Instituto Mexicano del Seguro Social para iniciar el tratamiento del cáncer cérvico uterino una vez que se establece el diagnóstico histopatológico de cáncer cérvico uterino.",
+            "descNum": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
+            "descDen": "Total de pacientes que cuentan con fecha de diagnóstico histopatológico con tipo de conducta “malignos” y con fecha de inicio de tratamiento por cualquiera de las modalidades durante el periodo a evaluar."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": "<= 30",
+            "Alto": "> 30"
+        }
+    },
+    "CACU 04": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Trimestral - Acumulado",
+        "informacion": {
+            "titulo": "CACU 04 - Tasa de incidencia de invalidez por cáncer cérvico uterino por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora.",
+            "objetivo": "Medir el impacto de los programas de prevención y detección oportuna del cáncer cérvico uterino, así como de las acciones de atención médica para el tratamiento oportuno y adecuado de las trabajadoras, para evitar que las complicaciones resulten en la imposibilidad de que las trabajadoras aseguradas en el ramo de invalidez y vida continúen realizando sus actividades laborales.",
+            "descNum": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de cáncer cérvico uterino, según OOAD de origen acumulados al trimestre del reporte.",
+            "descDen": "Promedio de trabajadoras aseguradas en invalidez y vida en el OOAD de origen, al trimestre del reporte."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 0.00",
+                "Alto": "> 1.52"
+            },
+            "Junio": {
+                "Esperado": "<= 0.00",
+                "Alto": "> 2.37"
+            },
+            "Septiembre": {
+                "Esperado": "<= 1.25",
+                "Alto": "> 3.01"
+            },
+            "Diciembre": {
+                "Esperado": "<= 1.44",
+                "Alto": "> 4.32"
+            }
+        }
+    }
+}

@@ -1,0 +1,272 @@
+{
+    "CUPN 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Acumulado",
+        "informacion": {
+            "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
+            "objetivo": "Medir la proporción de población derechohabiente que recibió, en el último año, acciones preventivas de acuerdo con su grupo de edad y sexo, para conocer la población beneficiada con PrevenIMSS.",
+            "descNum": "Número de derechohabientes a los que se les otorgó acciones preventivas en los últimos 12 meses ",
+            "descDen": "Total de población derechohabiente adscrita a médico familiar"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CIP01": {
+                        "hoja": "CIP Unidad Médica",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "T   O   T   A   L",
+                        "columna_dato": ["MESES_CIP01"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CIP01": {
+                        "hoja": "CIP Unidad Médica",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "T   O   T   A   L",
+                        "columna_dato": ["C"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(CIP01[0])",
+                "denominador": "(CIP01[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "MESES_CIP01": {
+            "1": "D",
+            "2": "F",
+            "3": "H",
+            "4": "J",
+            "5": "L",
+            "6": "N",
+            "7": "S",
+            "8": "U",
+            "9": "W",
+            "10": "Y",
+            "11": "AA",
+            "12": "AC"
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": "<= 4.8",
+                "Esperado": ">= 5.3"
+            },
+            "Febrero": {
+                "Bajo": "<= 9.7",
+                "Esperado": ">= 10.5"
+            },
+            "Marzo": {
+                "Bajo": "<= 14.5",
+                "Esperado": ">= 15.8"
+            },
+            "Abril": {
+                "Bajo": "<= 19.3",
+                "Esperado": ">= 21.0"
+            },
+            "Mayo": {
+                "Bajo": "<= 24.2",
+                "Esperado": ">= 26.3"
+            },
+            "Junio": {
+                "Bajo": "<= 29.0",
+                "Esperado": ">= 31.5"
+            },
+            "Julio": {
+                "Bajo": "<= 33.8",
+                "Esperado": ">= 36.8"
+            },
+            "Agosto": {
+                "Bajo": "<= 38.7",
+                "Esperado": ">= 42.0"
+            },
+            "Septiembre": {
+                "Bajo": "<= 43.5",
+                "Esperado": ">= 47.3"
+            },
+            "Octubre": {
+                "Bajo": "<= 48.3",
+                "Esperado": ">= 52.5"
+            },
+            "Noviembre": {
+                "Bajo": "<= 53.2",
+                "Esperado": ">= 57.8"
+            },
+            "Diciembre": {
+                "Bajo": "<= 58.0",
+                "Esperado": ">= 63.0"
+            }
+        }
+    },
+    "CUPN 04": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual",
+        "informacion": {
+            "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
+            "objetivo": "Medir el porcentaje de derechohabientes que requieren atención con mayor grado de especialización y recursos, para conocer la capacidad resolutiva de las Unidades de Medicina Familiar.",
+            "descNum": "Número de derechohabientes referidos al segundo nivel de atención con ocasión de servicio de primera vez, por las Unidades de Medicina Familiar",
+            "descDen": "Número de consultas otorgadas en Medicina Familiar"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IN08": {
+                        "hoja": "Indicadores",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "T O T A L E S",
+                        "columna_dato": ["D"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "PU01": {
+                        "hoja": "Parte I",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "MEDICINA FAMILIAR",
+                        "columna_dato": ["E"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(IN08[0])",
+                "denominador": "(PU01[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Alto": ">= 8.1",
+            "Esperado": "<= 7.0"
+        }
+    },
+    "CUPN 05": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
+            "objetivo": "Medir la productividad y la eficiencia en el aprovechamiento del turno del Médico Familiar.",
+            "descNum": "Número de consultas otorgadas en Medicina Familiar (servicio 04)",
+            "descDen": "Número de horas trabajadas por los médicos familiares (servicio 04)"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "PU01": {
+                        "hoja": "Parte I",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "MEDICINA FAMILIAR",
+                        "columna_dato": ["E"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "PU01": {
+                        "hoja": "Parte I",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "MEDICINA FAMILIAR",
+                        "columna_dato": ["C"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(PU01[0])",
+                "denominador": "(PU01[0])",
+                "resultado": "round((numerador / denominador), 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 3.1",
+            "Esperado": ">= 4.0"
+        }
+    },
+    "CUPN 06": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "CUPN 06 - Porcentaje de niños de 6 meses alimentados con lactancia materna exclusiva.",
+            "objetivo": "Conocer la prevalencia de alimentación con lactancia materna exclusiva en los niños de 6 meses de edad.",
+            "descNum": "Número de niños de 6 meses de edad que mantuvieron alimentación con lactancia materna exclusiva",
+            "descDen": "Número de niños vivos de 6 meses de edad al mes del reporte. (recién nacidos vivos de término, 6 meses previos a la fecha de reporte). menos Defunciones de lactantes clasificados como muerte neonatal e infantil del grupo de edad 0 - 6 meses, durante el periodo de 6 meses anteriores a la fecha del reporte."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": ">= 50",
+            "Bajo": "< 30"
+        }
+    },
+    "CUPN 07": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",
+            "objetivo": "Medir la productividad y la eficiencia en el aprovechamiento de la jornada laboral del estomatólogo.",
+            "descNum": "Número total de consultas otorgadas en el servicio de Estomatología",
+            "descDen": "Total de horas trabajadas por el estomatólogo"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "PU01": {
+                        "hoja": "Parte I",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "ESTOMATOLOGIA",
+                        "columna_dato": ["E"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "PU01": {
+                        "hoja": "Parte I",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "ESTOMATOLOGIA",
+                        "columna_dato": ["C"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(PU01[0])",
+                "denominador": "(PU01[0])",
+                "resultado": "round((numerador / denominador), 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 2.0",
+            "Esperado": ">= 2.8"
+        }
+    }
+}

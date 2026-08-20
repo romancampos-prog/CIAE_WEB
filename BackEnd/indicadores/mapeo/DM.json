@@ -1,0 +1,220 @@
+{
+    "DM 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Acumulado",
+        "informacion": {
+            "titulo": "DM 01 - Cobertura de detección de diabetes en población derechohabiente de 20 años y más.",
+            "objetivo": "Medir la proporción de derechohabientes de 20 años y más a los que se realizó la medición de glucosa en el primer nivel de atención, para identificar niveles elevados que permitan la detección temprana de prediabetes o de diabetes tipo 2.",
+            "descNum": "Número de derechohabientes de 20 años y más, con detección de diabetes acumuladas al mes del reporte",
+            "descDen": "Población de 20 años y más adscrita a médico familiar menos Prevalencias de diabetes tipo 2 específicas por grupo de edad y sexo"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP02": {
+                        "hoja": "IMCPUM",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "CO",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["DF", "ET", "GD"]
+                    },
+                    "CP03": {
+                        "hoja": "04CobDM_HTA_COL",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["C", "G"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Mujeres": [
+                        "20 a 24",
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59"
+                    ],
+                    "Hombres": [
+                        "20 a 24",
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59"
+                    ],
+                    "Todos": [
+                        "60 a 64",
+                        "65 a 69",
+                        "70 a 74",
+                        "75 a 79",
+                        "80 a 84",
+                        "85 y más"
+                    ]
+                }
+            },
+            "operacion": {
+                "numerador": "sum(CP02[0:3]) + sum(CP03[0:2])",
+                "denominador": "sum([ (sum(Mujeres[0:5]) * (1 - 0.029)), (sum(Hombres[0:5]) * (1 - 0.025)), (sum(Mujeres[5:8]) * (1 - 0.17)), (sum(Hombres[5:8]) * (1 - 0.145)), (sum(Todos) * (1 - 0.268)) ])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": "<= 1.8",
+                "Esperado": ">= 2.4"
+            },
+            "Febrero": {
+                "Bajo": "<= 3.6",
+                "Esperado": ">= 4.8"
+            },
+            "Marzo": {
+                "Bajo": "<= 5.3",
+                "Esperado": ">= 7.1"
+            },
+            "Abril": {
+                "Bajo": "<= 7.1",
+                "Esperado": ">= 9.5"
+            },
+            "Mayo": {
+                "Bajo": "<= 8.9",
+                "Esperado": ">= 11.9"
+            },
+            "Junio": {
+                "Bajo": "<= 10.7",
+                "Esperado": ">= 14.3"
+            },
+            "Julio": {
+                "Bajo": "<= 12.5",
+                "Esperado": ">= 16.6"
+            },
+            "Agosto": {
+                "Bajo": "<= 14.3",
+                "Esperado": ">= 19.0"
+            },
+            "Septiembre": {
+                "Bajo": "<= 16.0",
+                "Esperado": ">= 21.4"
+            },
+            "Octubre": {
+                "Bajo": "<= 17.8",
+                "Esperado": ">= 23.8"
+            },
+            "Noviembre": {
+                "Bajo": "<= 19.6",
+                "Esperado": ">= 26.1"
+            },
+            "Diciembre": {
+                "Bajo": "<= 21.4",
+                "Esperado": ">= 28.5"
+            }
+        }
+    },
+    "DM 02": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Anualizado",
+        "informacion": {
+            "titulo": "DM 02 - Índice de confirmación de diabetes en casos sospechosos, población derechohabiente de 20 años y más.",
+            "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más, a quienes se les confirmó el diagnóstico de diabetes, clasificados inicialmente como casos sospechosos en la detección mediante glucosa capilar.",
+            "descNum": "Número de derechohabientes de 20 años y más sospechosos de diabetes, resultado de la medición con glucosa capilar (UP-14) en quienes se le confirmó el padecimiento (CIE-10: E11.0 - E14.9)",
+            "descDen": "Población derechohabiente de 20 años y más con resultado anormal en la detección con glucosa capilar (UP-14: 192 o 193)"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP04": {
+                        "hoja": "01Confirmacion_DM_HTA",
+                        "modoExtraccion": "ULTIMA_FILA",
+                        "columna_dato": ["G"],
+                        "encabezado": 8
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP04": {
+                        "hoja": "01Confirmacion_DM_HTA",
+                        "modoExtraccion": "ULTIMA_FILA",
+                        "columna_dato": ["F"],
+                        "encabezado": 8
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(CP04[0])",
+                "denominador": "(CP04[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 29.6",
+            "Esperado": ">= 32.6"
+        }
+    },
+    "DM 03": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Trimestralizado",
+        "informacion": {
+            "titulo": "DM 03 - Porcentaje de pacientes que viven con diabetes en control glucémico con hemoglobina glucosilada (HbA1c) menor o igual a 7%.",
+            "objetivo": "Evaluar la eficiencia del control de los pacientes que viven con diabetes tipo 2, mediante el seguimiento de los resultados de la hemoglobina glucosilada (HbA1c).",
+            "descNum": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con resultado de hemoglobina glucosilada (HbA1c) menor o igual a 7% del periodo evaluado .",
+            "descDen": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con registro de hemoglobina glucosilada (HbA1c) del periodo evaluado."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": ">= 53.0",
+            "Bajo": "<= 49"
+        }
+    },
+    "DM 06": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Trimestral Acumulado",
+        "informacion": {
+            "titulo": "DM 06 - Tasa de incidencia de invalidez por diabetes y sus complicaciones por cada 100,000 trabajadores asegurados, según unidad médica de adscripción del trabajador.",
+            "objetivo": "Medir el impacto de los programas de prevención y detección oportuna de la diabetes; así como de las acciones de atención médica para el control adecuado de los trabajadores, para evitar la aparición de complicaciones tardías que resulten en la imposibilidad de que los trabajadores asegurados en el ramo de invalidez y vida continúen realizando sus actividades laborales.",
+            "descNum": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de diabetes y sus complicaciones, según OOAD de origen acumulados al trimestre del reporte.",
+            "descDen": "Promedio de trabajadores asegurados en invalidez y vida en el OOAD de origen, al trimestre del reporte."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 8.42",
+                "Alto": "> 12.45"
+            },
+            "Junio": {
+                "Esperado": "<= 17.76",
+                "Alto": "> 29.12"
+            },
+            "Septiembre": {
+                "Esperado": "<= 26.23",
+                "Alto": "> 41.34"
+            },
+            "Diciembre": {
+                "Esperado": "<= 36.81",
+                "Alto": "> 58.21"
+            }
+        }
+    }
+}

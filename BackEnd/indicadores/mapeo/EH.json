@@ -1,0 +1,204 @@
+{
+    "EH 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual Acumulado",
+        "informacion": {
+            "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
+            "objetivo": "Medir la proporción de derechohabientes de 20 años y más, con medición de tensión arterial en el primer nivel de atención, que permita la identificación temprana de hipertensión arterial y prehipertensión.",
+            "descNum": "Número de derechohabiente de 20 años y más, con detección de hipertensión arterial, acumulados al mes del reporte",
+            "descDen": "Población de 20 años y más, adscrita a Médico Familiar menos Prevalencia de hipertensión arterial específicas por grupo de edad y sexo"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "CP02": {
+                        "hoja": "IMCPUM",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "DD",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["DJ", "EX", "GG"]
+                    },
+                    "CP03": {
+                        "hoja": "04CobDM_HTA_COL",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "M",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": ["O", "S"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Mujeres": [
+                        "20 a 24",
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59"
+                    ],
+                    "Hombres": [
+                        "20 a 24",
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59"
+                    ],
+                    "Todos": [
+                        "60 a 64",
+                        "65 a 69",
+                        "70 a 74",
+                        "75 a 79",
+                        "80 a 84",
+                        "85 y más"
+                    ]
+                }
+            },
+            "operacion": {
+                "numerador": "sum(CP02[0:3]) + sum(CP03[0:2])",
+                "denominador": "sum([ (sum(Mujeres[0:2]) * (1 - 0.012)), (sum(Hombres[0:2]) * (1 - 0.016)), (sum(Mujeres[2:8]) * (1 - 0.158)), (sum(Hombres[2:8]) * (1 - 0.135)), (sum(Todos) * (1 - 0.433)) ])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Enero": {
+                "Bajo": "<= 4.8",
+                "Esperado": ">= 5.8"
+            },
+            "Febrero": {
+                "Bajo": "<= 9.5",
+                "Esperado": ">= 11.5"
+            },
+            "Marzo": {
+                "Bajo": "<= 14.3",
+                "Esperado": ">= 17.3"
+            },
+            "Abril": {
+                "Bajo": "<= 19.0",
+                "Esperado": ">= 23.0"
+            },
+            "Mayo": {
+                "Bajo": "<= 23.8",
+                "Esperado": ">= 28.8"
+            },
+            "Junio": {
+                "Bajo": "<= 28.6",
+                "Esperado": ">= 34.5"
+            },
+            "Julio": {
+                "Bajo": "<= 33.3",
+                "Esperado": ">= 40.3"
+            },
+            "Agosto": {
+                "Bajo": "<= 38.1",
+                "Esperado": ">= 46.0"
+            },
+            "Septiembre": {
+                "Bajo": "<= 42.8",
+                "Esperado": ">= 51.8"
+            },
+            "Octubre": {
+                "Bajo": "<= 47.6",
+                "Esperado": ">= 57.5"
+            },
+            "Noviembre": {
+                "Bajo": "<= 52.3",
+                "Esperado": ">= 63.3"
+            },
+            "Diciembre": {
+                "Bajo": "<= 57.1",
+                "Esperado": ">= 69.0"
+            }
+        }
+    },
+    "EH 02": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
+            "objetivo": "Medir el porcentaje de pacientes hipertensos mayores de 20 años, con cifras de tensión arterial en control adecuado (sistólica menor de 140 mmHg y diastólica menor de 90 mm Hg), que acudieron a consulta en el periodo de medición (mes, año), para conocer la eficiencia de la atención en este grupo de pacientes",
+            "descNum": "Número de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial (CIE-10: I10 - I15) con cifras de tensión arterial sistólica menor de 140 mmHg y diastólica menor de 90 mmHg atendidos en el período",
+            "descDen": "Total de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial atendidos en el período"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IN22": {
+                        "hoja": "Indicadores_MM2018",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "T O T A L E S",
+                        "columna_dato": ["P"]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IN22": {
+                        "hoja": "Indicadores_MM2018",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "A",
+                        "buscar": "T O T A L E S",
+                        "columna_dato": ["M"]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(IN22[0])",
+                "denominador": "(IN22[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 83.5",
+            "Esperado": ">= 85.2"
+        }
+    },
+    "EH 04": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Trimestral Acumulado",
+        "informacion": {
+            "titulo": "EH 04 - Tasa de incidencia de invalidez por enfermedades hipertensivas y sus complicaciones por cada 100,000 trabajadores asegurados, según unidad médica de adscripción del trabajador.",
+            "objetivo": "Medir el impacto de los programas de prevención y detección oportuna de las enfermedades hipertensivas, así como de las acciones de atención médica para el control adecuado de los trabajadores, y evitar la aparición de complicaciones que resulten en la imposibilidad de que los trabajadores asegurados en el ramo de invalidez y vida continúen realizando sus actividades laborales.",
+            "descNum": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de enfermedad hipertensiva y sus complicaciones, según OOAD de origen acumulados al trimestre del reporte",
+            "descDen": "Promedio de trabajadores asegurados en invalidez y vida en el OOAD origen, al trimestre del reporte."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 1.16",
+                "Alto": "> 4.19"
+            },
+            "Junio": {
+                "Esperado": "<= 2.68",
+                "Alto": "> 10.19"
+            },
+            "Septiembre": {
+                "Esperado": "<= 4.31",
+                "Alto": "> 15.73"
+            },
+            "Diciembre": {
+                "Esperado": "<= 6.00",
+                "Alto": "> 21.83"
+            }
+        }
+    }
+}

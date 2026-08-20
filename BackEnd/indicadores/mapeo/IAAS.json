@@ -1,0 +1,317 @@
+{
+    "IAAS 01": {
+        "fechaModificacion": "",
+        "modulo": "IAAS",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "IAAS 01 - Tasa de Infecciones Asociadas a la Atención de la Salud por 1,000 días estancia en Unidades médicas de Segundo Nivel de atención con 20 camas censables o más o en Unidades Médicas de Alta Especialidad (UMAE).",
+            "objetivo": "Medir la velocidad de cambio que presentan las infecciones asociadas a la atención de la salud en las unidades médicas de segundo nivel de atención, con 20 o más camas censables o en las Unidades Médicas de Alta Especialidad.",
+            "descNum": "Total de infecciones asociadas a la atención de la salud del servicio de hospitalización en unidades médicas de segundo nivel de atención, con 20 o más camas censables o en UMAE",
+            "descDen": "Total de días paciente en Unidades médicas de segundo nivel de atención con 20 o más camas censables o en UMAE"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente" : "xlsxWeb",
+                "hoja" : "rep_infeccionmicroorga",
+                "modoExtraccion" : "FILTRO_CONTEO",
+                "encabezado": 5,
+                "filtroColumna": {
+                    "R" : {"filtro": "NO", "nombreColumna" : "Infección importada de otro hospital" },
+                    "AF" : {"filtro": "CONFIRMADA", "nombreColumna" : "Clasificación de la infección" }
+                }
+            },
+            "denominador": {
+                "fuente": "xlsxWeb",
+                "hoja": "PARTE_2_crosstab",
+                "modoExtraccion": "FILTRO_UNIDAD_VALOR",
+                "encabezado" : 1,
+                "columnaUnidad" : { 
+                    "B" : {"filtro" : "UNIDADES_IAAS", "nombreColumna" : "Denominacion Unidad"}
+                },
+                "filtroColumna" : {
+                    "F" : {"filtro" : "Total Unidad" , "nombreColumna": "Division"}
+                },
+                "tomarValor" : { "Z" : "Dias Paciente"}
+            },
+            "operacion": {
+                "numerador": "(numerador)",
+                "denominador": "(denominador)",
+                "resultado": "round((numerador / denominador) * 1000, 2)"
+            }
+        },
+        "semaforoIAAS01": {
+            "HGS": {
+                "Esperado": {
+                    "Menor": 7,
+                    "Mayor": 4
+                },
+                "Medio": {
+                    "Menor": 4,
+                    "Mayor": 1
+                }
+            },
+            "HGR": {
+                "Esperado": {
+                    "Menor": 12,
+                    "Mayor": 7
+                },
+                "Medio": {
+                    "Menor": 7,
+                    "Mayor": 4
+                }
+            },
+            "HGZ": {
+                "Esperado": {
+                    "Menor": 12,
+                    "Mayor": 7
+                },
+                "Medio": {
+                    "Menor": 7,
+                    "Mayor": 4
+                }
+            },
+            "HGO": {
+                "Esperado": {
+                    "Menor": 12,
+                    "Mayor": 7
+                },
+                "Medio": {
+                    "Menor": 7,
+                    "Mayor": 4
+                }
+            },
+            "HGP": {
+                "Esperado": {
+                    "Menor": 12,
+                    "Mayor": 7
+                },
+                "Medio": {
+                    "Menor": 7,
+                    "Mayor": 4
+                }
+            },
+            "OOAD": {
+                "Esperado": {
+                    "Menor": 12,
+                    "Mayor": 7
+                },
+                "Medio": {
+                    "Menor": 7,
+                    "Mayor": 4
+                }
+            }
+        }
+    },
+    "IAAS 02": {
+        "fechaModificacion": "",
+        "modulo": "IAAS",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "",
+        "informacion": {
+            "titulo": "IAAS 02 - Tasa de infección de sitio quirúrgico en cirugías limpias en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Atención Ambulatoria o en Unidades Médicas de Alta Especialidad.",
+            "objetivo": "",
+            "descNum": "Total de infecciones de sitio quirúrgico en cirugías limpias y limpias con implantes realizadas en Unidades Médicas de segundo nivel de atención, con 20 o más camas censables, UMAA o en UMAE",
+            "descDen": "Total de cirugías limpias y limpias con implantes realizadas en Unidades Médicas de segundo nivel de atención, con 20 o más camas censables, UMAA o en UMAE"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "xlsxWeb",
+                "hoja": "rep_infeccionmicroorga",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 5,
+                "filtroColumna": {
+                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
+                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
+                    "AB": {"filtro": "^CIRUGIA", "nombreColumna": "Servicio de cama censable"}
+                }
+            },
+            "denominador": {},
+            "operacion": {
+                "numerador": "(numerador)",
+                "denominador": "(denominador)",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": {
+                "Menor": 3.5,
+                "Mayor": 1.5
+            },
+            "Medio": {
+                "Menor": 4.5,
+                "Mayor": 3.5
+            }
+        }
+    },
+    "IAAS 03": {
+        "fechaModificacion": "",
+        "modulo": "IAAS",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "",
+        "informacion": {
+            "titulo": "IAAS 03 - Tasa de neumonía asociada a ventilación mecánica por 1,000 días ventilador en Unidades médicas de Segundo Nivel de atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad",
+            "objetivo": "",
+            "descNum": "Total de neumonías asociadas a ventilación mecánica en unidades médicas de segundo nivel de atención con 20 o más camas censables, o en UMAE",
+            "descDen": "Total de días ventilador mecánico en unidades médicas de segundo nivel de atención con 20 o más camas censables, o en UMAE"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "xlsxWeb",
+                "hoja": "rep_infeccionmicroorga",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 5,
+                "filtroColumna": {
+                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
+                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
+                    "AI": {"filtro": "NEUMONIA ASOCIADA A VENTILADOR", "nombreColumna": "Tipo de infección"}
+                }
+            },
+            "denominador": {},
+            "operacion": {
+                "numerador": "(numerador)",
+                "denominador": "(denominador)",
+                "resultado": "round((numerador / denominador) * 1000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": {
+                "Menor": 14,
+                "Mayor": 8
+            },
+            "Medio": {
+                "Menor": 8,
+                "Mayor": 5
+            }
+        }
+    },
+    "IAAS 04": {
+        "fechaModificacion": "",
+        "modulo": "IAAS",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "",
+        "informacion": {
+            "titulo": "IAAS 04 - Tasa de infección del torrente sanguíneo asociada a catéter venoso central por 1,000 días catéter en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad.",
+            "objetivo": "",
+            "descNum": "Total de infecciones del torrente sanguíneo asociada a CVC en las Unidades Médicas de segundo nivel de atención, con 20 o más camas censables o en UMAE",
+            "descDen": "Total de días CVC en las Unidades Médicas de segundo nivel de atención con 20 o más camas censables o en UMAE"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "xlsxWeb",
+                "hoja": "rep_infeccionmicroorga",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 5,
+                "filtroColumna": {
+                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
+                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
+                    "AI": {"filtro": "ITS RELACIONADA A CATETER VENOSO CENTRAL", "nombreColumna": "Tipo de infección"}
+                }
+            },
+            "denominador": {},
+            "operacion": {
+                "numerador": "(numerador)",
+                "denominador": "(denominador)",
+                "resultado": "round((numerador / denominador) * 1000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": {
+                "Menor": 4,
+                "Mayor": 1
+            },
+            "Medio": {
+                "Menor": 7,
+                "Mayor": 4
+            }
+        }
+    },
+    "IAAS 05": {
+        "fechaModificacion": "",
+        "modulo": "IAAS",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "",
+        "informacion": {
+            "titulo": "IAAS 05 - Tasa de infección de vías urinarias asociada a sonda vesical por 1,000 días sonda en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad",
+            "objetivo": "",
+            "descNum": "Total de infecciones asociadas a la atención de la salud de vías urinarias asociada a sonda vesical, en las Unidades Médicas de segundo nivel atención, con 20 o más camas censables o en UMAE",
+            "descDen": "Total de días sonda vesical en las Unidades Médicas de segundo nivel de atención, con 20 o más camas censables o en UMAE"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "xlsxWeb",
+                "hoja": "rep_infeccionmicroorga",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 5,
+                "filtroColumna": {
+                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
+                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
+                    "AI": {"filtro": "IVU ASOCIADA A SONDA VESICAL", "nombreColumna": "Tipo de infección"}
+                }
+            },
+            "denominador": {},
+            "operacion": {
+                "numerador": "(numerador)",
+                "denominador": "(denominador)",
+                "resultado": "round((numerador / denominador) * 1000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": {
+                "Menor": 14,
+                "Mayor": 5
+            },
+            "Medio": {
+                "Menor": 5,
+                "Mayor": 1
+            }
+        }
+    },
+    "IAAS 06": {
+        "fechaModificacion": "",
+        "modulo": "IAAS",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "",
+        "informacion": {
+            "titulo": "IAAS 06 - Tasa de Infecciones Asociadas a la Atención de la Salud por 1,000 días estancia en las Unidades de Cuidados Intensivos de Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables, o de Unidades Médicas de Alta Especialidad.",
+            "objetivo": "",
+            "descNum": "Total de infecciones asociadas a la atención de la salud en las UCI de las Unidades Médicas de segundo nivel de atención, con 20 o más camas censables o en UMAE",
+            "descDen": "Total de días estancia en las UCI de las Unidades Médicas de segundo nivel de atención, con 20 o más camas censables o en UMAE"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "xlsxWeb",
+                "hoja": "rep_infeccionmicroorga",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 5,
+                "filtroColumna": {
+                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
+                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
+                    "AC": {"filtro": "^UCI", "nombreColumna": "En caso que ocurra la infección en terapia"}
+                }
+            },
+            "denominador": {},
+            "operacion": {
+                "numerador": "(numerador)",
+                "denominador": "(denominador)",
+                "resultado": "round((numerador / denominador) * 1000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": {
+                "Menor": 26,
+                "Mayor": 10
+            },
+            "Medio": {
+                "Menor": 10,
+                "Mayor": 3
+            }
+        }
+    }
+}

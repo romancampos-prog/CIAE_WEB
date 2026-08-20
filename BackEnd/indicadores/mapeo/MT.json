@@ -1,0 +1,66 @@
+{
+    "MT 01": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "Materna 01 - Porcentaje de adolescentes embarazadas.",
+            "objetivo": "Medir la proporción de mujeres derechohabientes de 10 a 19 años que se embarazan, grupo vulnerable de alto riesgo para su salud y la supervivencia, así como el desarrollo del binomio madre-hijo.",
+            "descNum": "Número de embarazadas adolescentes de 10 a 19 años.",
+            "descDen": "Total de embarazadas."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": "<= 8.5",
+            "Alto": ">= 9.1"
+        }
+    },
+    "MT 02": {
+        "fechaModificacion": "19/08/2026",
+        "modulo": "ftp",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "Materna 02 - Oportunidad de inicio de la vigilancia prenatal.",
+            "objetivo": "Medir el porcentaje de mujeres que acuden dentro del primer trimestre de gestación a la vigilancia prenatal en el servicio de medicina familiar, para identificar tempranamente factores de riesgo, otorgar tratamiento y prevenir complicaciones durante el embarazo; así como brindar educación para el cuidado de la salud en el beneficio del binomio madre-hijo.",
+            "descNum": "Consultas prenatales con ocasión de servicio de primera vez, en el primer trimestre de la gestación",
+            "descDen": "Total de consultas prenatales con ocasión de servicio de primera vez"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "MT03": {
+                        "hoja": "Vigilancia Materna",
+                        "modoExtraccion": "INTERSECCION_FILA",
+                        "columna_dato": ["J"],
+                        "fila": [65]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "MT03": {
+                        "hoja": "Vigilancia Materna",
+                        "modoExtraccion": "INTERSECCION_FILA",
+                        "columna_dato": ["J"],
+                        "fila": [69]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(MT03[0])",
+                "denominador": "(MT03[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Bajo": "<= 50.0",
+            "Esperado": ">= 53.0"
+        }
+    }
+}
