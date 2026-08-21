@@ -128,7 +128,9 @@
                     "AB": {"filtro": "^CIRUGIA", "nombreColumna": "Servicio de cama censable"}
                 }
             },
-            "denominador": {},
+            "denominador": {
+                "fuente": "capturaWeb"
+            },
             "operacion": {
                 "numerador": "(numerador)",
                 "denominador": "(denominador)",
@@ -170,7 +172,9 @@
                     "AI": {"filtro": "NEUMONIA ASOCIADA A VENTILADOR", "nombreColumna": "Tipo de infección"}
                 }
             },
-            "denominador": {},
+            "denominador": {
+                "fuente": "capturaWeb"
+            },
             "operacion": {
                 "numerador": "(numerador)",
                 "denominador": "(denominador)",
@@ -212,7 +216,9 @@
                     "AI": {"filtro": "ITS RELACIONADA A CATETER VENOSO CENTRAL", "nombreColumna": "Tipo de infección"}
                 }
             },
-            "denominador": {},
+            "denominador": {
+                "fuente": "capturaWeb"
+            },
             "operacion": {
                 "numerador": "(numerador)",
                 "denominador": "(denominador)",
@@ -254,7 +260,9 @@
                     "AI": {"filtro": "IVU ASOCIADA A SONDA VESICAL", "nombreColumna": "Tipo de infección"}
                 }
             },
-            "denominador": {},
+            "denominador": {
+                "fuente": "capturaWeb"
+            },
             "operacion": {
                 "numerador": "(numerador)",
                 "denominador": "(denominador)",
@@ -296,7 +304,9 @@
                     "AC": {"filtro": "^UCI", "nombreColumna": "En caso que ocurra la infección en terapia"}
                 }
             },
-            "denominador": {},
+            "denominador": {
+                "fuente": "capturaWeb"
+            },
             "operacion": {
                 "numerador": "(numerador)",
                 "denominador": "(denominador)",
