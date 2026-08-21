@@ -88,6 +88,7 @@ export default function CanalPage() {
   )
 
   const { totalCasos, picoCasos, picaSemana, semsAlerta, semsConDatos } = calcularKpisCanal(datos)
+  console.log("mi log ",totalCasos, picoCasos, picaSemana, semsAlerta, semsConDatos)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>

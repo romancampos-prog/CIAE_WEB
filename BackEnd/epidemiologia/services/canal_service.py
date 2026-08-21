@@ -18,7 +18,10 @@ def procesar_canal(df, año: int = AÑO_ACTUAL) -> dict:
         "q1"          : df_combinado["Q1"].tolist(),
         "mediana"     : df_combinado["MEDIANA"].tolist(),
         "q3"          : df_combinado["Q3"].tolist(),
-        "casos_actual": df_combinado["CASOS_ACTUAL"].tolist(),
+        "casos_actual": df_combinado["CASOS_ACTUAL"].where(df_combinado["CASOS_ACTUAL"].notna(), other=None).tolist(),
         "zonas"       : df_combinado["ZONA"].tolist(),
         "alertas"     : alertas,
+        
+        
+        
     }
