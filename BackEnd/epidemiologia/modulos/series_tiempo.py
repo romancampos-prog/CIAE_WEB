@@ -242,7 +242,16 @@ def generar_resumen_alertas(df_combinado):
 
 # ─── 6. FUNCIÓN PRINCIPAL ────────────────────────────────────────────────
 
-def ejecutar_series_tiempo(df_actual):
+def ejecutar_series_tiempo(df_actual, año):
+    
+    # Excluye casos que caen en la última semana del año anterior (ej: 1-3 ene 2026
+    # pertenecen a la semana 53 de 2025) para no contarlos en el canal del año actual.
+    inicio_actual = _inicio_sem1(año)
+    incio_siguiente = _inicio_sem1(año + 1)
+    df_actual = df_actual[
+        (df_actual["FEC_INI_SIGNOS_SINT"] >= inicio_actual) &
+        (df_actual["FEC_INI_SIGNOS_SINT"] <= incio_siguiente)
+    ]
     
     ultima_semana = int(df_actual['SEM'].max())
     print(f"DEBUG ultima_semana = {ultima_semana}")

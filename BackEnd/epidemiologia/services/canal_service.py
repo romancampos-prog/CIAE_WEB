@@ -10,7 +10,7 @@ from epidemiologia.config import AÑO_ACTUAL
 def procesar_canal(df, año: int = AÑO_ACTUAL) -> dict:
     from epidemiologia.modulos.series_tiempo import ejecutar_series_tiempo
 
-    df_combinado, alertas = ejecutar_series_tiempo(df)
+    df_combinado, alertas = ejecutar_series_tiempo(df, año)
 
     return {
         "año"         : año,
@@ -18,10 +18,9 @@ def procesar_canal(df, año: int = AÑO_ACTUAL) -> dict:
         "q1"          : df_combinado["Q1"].tolist(),
         "mediana"     : df_combinado["MEDIANA"].tolist(),
         "q3"          : df_combinado["Q3"].tolist(),
-        "casos_actual": df_combinado["CASOS_ACTUAL"].where(df_combinado["CASOS_ACTUAL"].notna(), other=None).tolist(),
-        "zonas"       : df_combinado["ZONA"].tolist(),
+        # astype(object) evita que pandas reconvierta None a NaN (float no
+        # admite None); Starlette rechaza NaN en la respuesta JSON.
+        "casos_actual": df_combinado["CASOS_ACTUAL"].astype(object).where(df_combinado["CASOS_ACTUAL"].notna(), None).tolist(),
+        "zonas"       : df_combinado["ZONA"].astype(object).where(df_combinado["ZONA"].notna(), None).tolist(),
         "alertas"     : alertas,
-        
-        
-        
     }
