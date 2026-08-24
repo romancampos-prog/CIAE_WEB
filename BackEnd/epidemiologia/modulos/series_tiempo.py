@@ -166,7 +166,7 @@ def preparar_año_actual(df_actual):
 
 # ─── 4. DETECCIÓN DE ANOMALÍAS ───────────────────────────────────────────
 
-def detectar_anomalias(df_canal, df_actual):
+def detectar_anomalias(df_canal, df_actual, ultima_semana):
     """
     Cruza el canal endémico con los casos del año actual.
     Clasifica cada semana en su zona epidemiológica:
@@ -189,9 +189,15 @@ def detectar_anomalias(df_canal, df_actual):
 
     df['ZONA'] = df.apply(clasificar_zona, axis=1)
 
+    mask_futuro = df['SEM']>ultima_semana
+    df.loc[mask_futuro, ['CASOS_ACTUAL', 'ZONA']] = None
+    
+    
     print("Clasificación por zona:")
     for zona, conteo in df['ZONA'].value_counts().items():
         print(f"  {zona}: {conteo} semanas")
+    
+    
 
     return df
 
@@ -236,7 +242,20 @@ def generar_resumen_alertas(df_combinado):
 
 # ─── 6. FUNCIÓN PRINCIPAL ────────────────────────────────────────────────
 
-def ejecutar_series_tiempo(df_actual):
+def ejecutar_series_tiempo(df_actual, año):
+    
+    # Excluye casos que caen en la última semana del año anterior (ej: 1-3 ene 2026
+    # pertenecen a la semana 53 de 2025) para no contarlos en el canal del año actual.
+    inicio_actual = _inicio_sem1(año)
+    incio_siguiente = _inicio_sem1(año + 1)
+    df_actual = df_actual[
+        (df_actual["FEC_INI_SIGNOS_SINT"] >= inicio_actual) &
+        (df_actual["FEC_INI_SIGNOS_SINT"] <= incio_siguiente)
+    ]
+    
+    ultima_semana = int(df_actual['SEM'].max())
+    print(f"DEBUG ultima_semana = {ultima_semana}")
+    print(df_actual['SEM'].value_counts().sort_index())
 
     print("=" * 50)
     print("SERIES DE TIEMPO — CANAL ENDÉMICO")
@@ -250,9 +269,9 @@ def ejecutar_series_tiempo(df_actual):
 
     print("\n[3] Preparando año actual...")
     df_actual_sem = preparar_año_actual(df_actual)
-
+    
     print("\n[4] Detectando anomalías...")
-    df_combinado = detectar_anomalias(df_canal, df_actual_sem)
+    df_combinado = detectar_anomalias(df_canal, df_actual_sem, ultima_semana)
 
     print("\n[5] Generando resumen de alertas...")
     alertas = generar_resumen_alertas(df_combinado)
