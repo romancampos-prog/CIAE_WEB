@@ -21,10 +21,13 @@ import iaas as iass_module
 import ftp as ftp_module
 import epidemiologia as epi_module
 from indicadores.Routes import indicadores_Route 
+from middleware.endPoints_Middleware import ErroresEndpointsMiddleware
 
 DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')
 
 app = FastAPI(title="CIAE Backend", version="2.0.0")
+
+app.add_middleware(ErroresEndpointsMiddleware) ##middleware para todos los endpoitns por si algo truena
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,7 +47,7 @@ async def agregar_cabeceras_seguridad(request, call_next):
     return response
 
 #cmabios de delcaraciones de Rutas
-app.include_router(indicadores_Route , prefix="/Indicadores")
+app.include_router(indicadores_Route.routesIndicadores , prefix="/Indicadores")
 
 app.include_router(auth_router, prefix="/auth")
 for _router, _prefix in ftp_module.ROUTERS:

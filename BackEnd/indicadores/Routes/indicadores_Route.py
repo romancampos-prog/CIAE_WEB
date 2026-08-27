@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import APIRouter
 
 from ..Controller import ftp_Controller
 from ..Controller import iaas_Controller
@@ -6,16 +6,16 @@ from ..Controller import informacion_Controller
 from ..Controller import reportes_Controller
 
 
-appIndicadores = FastAPI()
+routesIndicadores = APIRouter()
 
 #EndPoints FTP (GENERACION MEDIANTE EXTRACCION DE FTP)
-appIndicadores.include_router(ftp_Controller, prefix="/ftp")
+routesIndicadores.include_router(ftp_Controller.ftpApi, prefix="/ftp")
 
 #EndPoints IASS (GENERACION DE IAAS)
-appIndicadores.include_router(iaas_Controller, prefix="/iaas")
+routesIndicadores.include_router(iaas_Controller.iaasApi, prefix="/iaas")
 
 #EndPoints REPORTES (BD_CIAE CONSULTAS DATOS DE LOS INDICADORES)
-appIndicadores.include_router(reportes_Controller, prefix="/reportes")
+routesIndicadores.include_router(reportes_Controller.reportesApi, prefix="/reportes")
 
 #EndPoints INFORMACION (JSON MAPEOS - INFORMACION DEL INDICADOR)
-appIndicadores.include_router(informacion_Controller, prefix="/informacion")
+routesIndicadores.include_router(informacion_Controller.informacionApi, prefix="/informacion")
