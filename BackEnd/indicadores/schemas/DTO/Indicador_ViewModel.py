@@ -4,3 +4,6 @@ from typing import Dict, List
 class IndicadorRequest(BaseModel):
     indicador: str
     ano: str
+    modulo: str | None = None
+    previos: bool
+    

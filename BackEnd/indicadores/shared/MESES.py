@@ -1,4 +1,4 @@
-MESES_MAYUSCULAS = [
-    "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
-    "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE",
+MESES_ESTANDAR = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ]

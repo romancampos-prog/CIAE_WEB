@@ -3,9 +3,10 @@ import logging
 import json
 
 #mis archivos
-from indicadores.schemas.model.indicadorReporte_Model import ReporteIndicador,ReportePrevio 
+from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePrevio 
 from configs.settings import DATA_INDICADORES
-from shared.MESES import MESES_MAYUSCULAS
+from shared.MESES import MESES_ESTANDAR
+from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 
 #ruta  a la BD_CIAE 
 
@@ -47,8 +48,8 @@ def IndicadorExiste(indicador: str, ano: str, rutaprevio: bool) -> str:
     return rutaArchivo
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
-def IndicadorConsultarReporte(indicador: str, ano:str) -> ReporteIndicador:
-    rutaIndicador = IndicadorExiste(indicador, ano, False)
+def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
+    rutaIndicador = IndicadorExiste(payload.indicador, payload.ano, False)
     if (not rutaIndicador): return None    
     
     with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
@@ -56,18 +57,19 @@ def IndicadorConsultarReporte(indicador: str, ano:str) -> ReporteIndicador:
         reporte = ReporteIndicador.model_validate(datosJson)
     
     if (not reporte): return None
-    if ((not reporte.INDICADOR == indicador) and (not reporte.ANIO == ano)): 
+    if ((not reporte.INDICADOR == payload.indicador) and (not reporte.ANIO == payload.ano)): 
         logging.error(f"El json y reporte existen, pero no coincide con el indicador o año solicitado")
         return None
         
-    if (reporte.PREVIOS):
-        rutaIndicadorPrevio = IndicadorExiste(indicador, ano, True)
+    if (payload.previos):
+        rutaIndicadorPrevio = IndicadorExiste(payload.indicador, payload.ano, payload.previos) #en payload previos si el indicador si contiene reportes semanales ´previos debria estar en true 
+        if (not rutaIndicadorPrevio):return reporte #si no existe el reporte previo, retornamos el reporte normal sin previo
         with open(rutaIndicadorPrevio, "r", encoding = "utf-8") as archivoJsonPrevio:
             datosJsonPrevio = json.load(archivoJsonPrevio) #todo el json leido 
             reportePrevio = ReportePrevio.model_validate(datosJsonPrevio)
             
-        ultimoMesReporte = MESES_MAYUSCULAS.index(list(reporte.MESES.keys())[-1]) + 1
-        mesPrevio = MESES_MAYUSCULAS.index(list(reportePrevio.MES)[-1]) + 1
+        ultimoMesReporte = MESES_ESTANDAR.index(list(reporte.MESES.keys())[-1]) + 1
+        mesPrevio = MESES_ESTANDAR.index(list(reportePrevio.MES)[-1]) + 1
         
         #el reporte previo solo peude ser del mes siguiente no peude ser de dos mese siguientes
         if(  ultimoMesReporte + 2 > mesPrevio > ultimoMesReporte): 
