@@ -4,6 +4,7 @@
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "IAAS 01 - Tasa de Infecciones Asociadas a la Atención de la Salud por 1,000 días estancia en Unidades médicas de Segundo Nivel de atención con 20 camas censables o más o en Unidades Médicas de Alta Especialidad (UMAE).",
@@ -13,27 +14,41 @@
         },
         "reporte": {
             "numerador": {
-                "fuente" : "xlsxWeb",
-                "hoja" : "rep_infeccionmicroorga",
-                "modoExtraccion" : "FILTRO_CONTEO",
+                "fuente": "xlsxWeb",
+                "hoja": "rep_infeccionmicroorga",
+                "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 5,
                 "filtroColumna": {
-                    "R" : {"filtro": "NO", "nombreColumna" : "Infección importada de otro hospital" },
-                    "AF" : {"filtro": "CONFIRMADA", "nombreColumna" : "Clasificación de la infección" }
+                    "R": {
+                        "filtro": "NO",
+                        "nombreColumna": "Infección importada de otro hospital"
+                    },
+                    "AF": {
+                        "filtro": "CONFIRMADA",
+                        "nombreColumna": "Clasificación de la infección"
+                    }
                 }
             },
             "denominador": {
                 "fuente": "xlsxWeb",
                 "hoja": "PARTE_2_crosstab",
                 "modoExtraccion": "FILTRO_UNIDAD_VALOR",
-                "encabezado" : 1,
-                "columnaUnidad" : { 
-                    "B" : {"filtro" : "UNIDADES_IAAS", "nombreColumna" : "Denominacion Unidad"}
+                "encabezado": 1,
+                "columnaUnidad": {
+                    "B": {
+                        "filtro": "UNIDADES_IAAS",
+                        "nombreColumna": "Denominacion Unidad"
+                    }
                 },
-                "filtroColumna" : {
-                    "F" : {"filtro" : "Total Unidad" , "nombreColumna": "Division"}
+                "filtroColumna": {
+                    "F": {
+                        "filtro": "Total Unidad",
+                        "nombreColumna": "Division"
+                    }
                 },
-                "tomarValor" : { "Z" : "Dias Paciente"}
+                "tomarValor": {
+                    "Z": "Dias Paciente"
+                }
             },
             "operacion": {
                 "numerador": "(numerador)",
@@ -41,66 +56,36 @@
                 "resultado": "round((numerador / denominador) * 1000, 2)"
             }
         },
-        "semaforoIAAS01": {
+        "semaforo": {
             "HGS": {
-                "Esperado": {
-                    "Menor": 7,
-                    "Mayor": 4
-                },
-                "Medio": {
-                    "Menor": 4,
-                    "Mayor": 1
-                }
+                "Esperado": ">= 4 a <= 7",
+                "Medio": ">= 1 a < 4",
+                "Bajo": "< 1 o > 7"
             },
             "HGR": {
-                "Esperado": {
-                    "Menor": 12,
-                    "Mayor": 7
-                },
-                "Medio": {
-                    "Menor": 7,
-                    "Mayor": 4
-                }
+                "Esperado": ">= 7 a <= 12",
+                "Medio": ">= 4 a < 7",
+                "Bajo": "< 4 o > 12"
             },
             "HGZ": {
-                "Esperado": {
-                    "Menor": 12,
-                    "Mayor": 7
-                },
-                "Medio": {
-                    "Menor": 7,
-                    "Mayor": 4
-                }
+                "Esperado": ">= 7 a <= 12",
+                "Medio": ">= 4 a < 7",
+                "Bajo": "< 4 o > 12"
             },
             "HGO": {
-                "Esperado": {
-                    "Menor": 12,
-                    "Mayor": 7
-                },
-                "Medio": {
-                    "Menor": 7,
-                    "Mayor": 4
-                }
+                "Esperado": ">= 7 a <= 12",
+                "Medio": ">= 4 a < 7",
+                "Bajo": "< 4 o > 12"
             },
             "HGP": {
-                "Esperado": {
-                    "Menor": 12,
-                    "Mayor": 7
-                },
-                "Medio": {
-                    "Menor": 7,
-                    "Mayor": 4
-                }
+                "Esperado": ">= 7 a <= 12",
+                "Medio": ">= 4 a < 7",
+                "Bajo": "< 4 o > 12"
             },
             "OOAD": {
-                "Esperado": {
-                    "Menor": 12,
-                    "Mayor": 7
-                },
-                "Medio": {
-                    "Menor": 7,
-                    "Mayor": 4
-                }
+                "Esperado": ">= 7 a <= 12",
+                "Medio": ">= 4 a < 7",
+                "Bajo": "< 4 o > 12"
             }
         }
     },
@@ -109,7 +94,8 @@
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "periodicidad": "",
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "IAAS 02 - Tasa de infección de sitio quirúrgico en cirugías limpias en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Atención Ambulatoria o en Unidades Médicas de Alta Especialidad.",
             "objetivo": "",
@@ -123,9 +109,18 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 5,
                 "filtroColumna": {
-                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
-                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
-                    "AB": {"filtro": "^CIRUGIA", "nombreColumna": "Servicio de cama censable"}
+                    "R": {
+                        "filtro": "NO",
+                        "nombreColumna": "Infección importada de otro hospital"
+                    },
+                    "AF": {
+                        "filtro": "CONFIRMADA",
+                        "nombreColumna": "Clasificación de la infección"
+                    },
+                    "AB": {
+                        "filtro": "^CIRUGIA",
+                        "nombreColumna": "Servicio de cama censable"
+                    }
                 }
             },
             "denominador": {
@@ -138,14 +133,9 @@
             }
         },
         "semaforo": {
-            "Esperado": {
-                "Menor": 3.5,
-                "Mayor": 1.5
-            },
-            "Medio": {
-                "Menor": 4.5,
-                "Mayor": 3.5
-            }
+            "Esperado": ">= 1.5 a <= 3.5",
+            "Medio": "> 3.5 a <= 4.5",
+            "Bajo": "< 1.5 o > 4.5"
         }
     },
     "IAAS 03": {
@@ -153,7 +143,8 @@
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "periodicidad": "",
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "IAAS 03 - Tasa de neumonía asociada a ventilación mecánica por 1,000 días ventilador en Unidades médicas de Segundo Nivel de atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad",
             "objetivo": "",
@@ -167,9 +158,18 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 5,
                 "filtroColumna": {
-                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
-                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
-                    "AI": {"filtro": "NEUMONIA ASOCIADA A VENTILADOR", "nombreColumna": "Tipo de infección"}
+                    "R": {
+                        "filtro": "NO",
+                        "nombreColumna": "Infección importada de otro hospital"
+                    },
+                    "AF": {
+                        "filtro": "CONFIRMADA",
+                        "nombreColumna": "Clasificación de la infección"
+                    },
+                    "AI": {
+                        "filtro": "NEUMONIA ASOCIADA A VENTILADOR",
+                        "nombreColumna": "Tipo de infección"
+                    }
                 }
             },
             "denominador": {
@@ -182,14 +182,9 @@
             }
         },
         "semaforo": {
-            "Esperado": {
-                "Menor": 14,
-                "Mayor": 8
-            },
-            "Medio": {
-                "Menor": 8,
-                "Mayor": 5
-            }
+            "Esperado": ">= 8 a <= 14",
+            "Medio": ">= 5 a < 8",
+            "Bajo": "< 5 o > 14"
         }
     },
     "IAAS 04": {
@@ -197,7 +192,8 @@
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "periodicidad": "",
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "IAAS 04 - Tasa de infección del torrente sanguíneo asociada a catéter venoso central por 1,000 días catéter en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad.",
             "objetivo": "",
@@ -211,9 +207,18 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 5,
                 "filtroColumna": {
-                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
-                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
-                    "AI": {"filtro": "ITS RELACIONADA A CATETER VENOSO CENTRAL", "nombreColumna": "Tipo de infección"}
+                    "R": {
+                        "filtro": "NO",
+                        "nombreColumna": "Infección importada de otro hospital"
+                    },
+                    "AF": {
+                        "filtro": "CONFIRMADA",
+                        "nombreColumna": "Clasificación de la infección"
+                    },
+                    "AI": {
+                        "filtro": "ITS RELACIONADA A CATETER VENOSO CENTRAL",
+                        "nombreColumna": "Tipo de infección"
+                    }
                 }
             },
             "denominador": {
@@ -226,14 +231,9 @@
             }
         },
         "semaforo": {
-            "Esperado": {
-                "Menor": 4,
-                "Mayor": 1
-            },
-            "Medio": {
-                "Menor": 7,
-                "Mayor": 4
-            }
+            "Esperado": ">= 1 a <= 4",
+            "Medio": "> 4 a <= 7",
+            "Bajo": "< 1.0 o > 7.0"
         }
     },
     "IAAS 05": {
@@ -241,7 +241,8 @@
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "periodicidad": "",
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "IAAS 05 - Tasa de infección de vías urinarias asociada a sonda vesical por 1,000 días sonda en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad",
             "objetivo": "",
@@ -255,9 +256,18 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 5,
                 "filtroColumna": {
-                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
-                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
-                    "AI": {"filtro": "IVU ASOCIADA A SONDA VESICAL", "nombreColumna": "Tipo de infección"}
+                    "R": {
+                        "filtro": "NO",
+                        "nombreColumna": "Infección importada de otro hospital"
+                    },
+                    "AF": {
+                        "filtro": "CONFIRMADA",
+                        "nombreColumna": "Clasificación de la infección"
+                    },
+                    "AI": {
+                        "filtro": "IVU ASOCIADA A SONDA VESICAL",
+                        "nombreColumna": "Tipo de infección"
+                    }
                 }
             },
             "denominador": {
@@ -270,14 +280,8 @@
             }
         },
         "semaforo": {
-            "Esperado": {
-                "Menor": 14,
-                "Mayor": 5
-            },
-            "Medio": {
-                "Menor": 5,
-                "Mayor": 1
-            }
+            "Esperado": ">= 5 a <= 14",
+            "Medio": ">= 1 a < 5"
         }
     },
     "IAAS 06": {
@@ -285,7 +289,8 @@
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "periodicidad": "",
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "IAAS 06 - Tasa de Infecciones Asociadas a la Atención de la Salud por 1,000 días estancia en las Unidades de Cuidados Intensivos de Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables, o de Unidades Médicas de Alta Especialidad.",
             "objetivo": "",
@@ -299,9 +304,18 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 5,
                 "filtroColumna": {
-                    "R": {"filtro": "NO", "nombreColumna": "Infección importada de otro hospital"},
-                    "AF": {"filtro": "CONFIRMADA", "nombreColumna": "Clasificación de la infección"},
-                    "AC": {"filtro": "^UCI", "nombreColumna": "En caso que ocurra la infección en terapia"}
+                    "R": {
+                        "filtro": "NO",
+                        "nombreColumna": "Infección importada de otro hospital"
+                    },
+                    "AF": {
+                        "filtro": "CONFIRMADA",
+                        "nombreColumna": "Clasificación de la infección"
+                    },
+                    "AC": {
+                        "filtro": "^UCI",
+                        "nombreColumna": "En caso que ocurra la infección en terapia"
+                    }
                 }
             },
             "denominador": {
@@ -314,14 +328,9 @@
             }
         },
         "semaforo": {
-            "Esperado": {
-                "Menor": 26,
-                "Mayor": 10
-            },
-            "Medio": {
-                "Menor": 10,
-                "Mayor": 3
-            }
+            "Esperado": ">= 10 a <= 26",
+            "Medio": ">= 3 a < 10",
+            "Bajo": "< 3 o > 26"
         }
     }
 }

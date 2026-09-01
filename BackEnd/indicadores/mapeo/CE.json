@@ -4,6 +4,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual",
         "informacion": {
             "titulo": "CE 01 - Promedio de atenciones preventivas por personal de enfermería.",
@@ -20,7 +21,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "G",
                         "buscar": "TOTAL DEL SERVICIO  [ 80 ]",
-                        "columna_dato": ["L"]
+                        "columna_dato": [
+                            "L"
+                        ]
                     }
                 }
             },
@@ -32,7 +35,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "G",
                         "buscar": "TOTAL DEL SERVICIO  [ 80 ]",
-                        "columna_dato": ["K"]
+                        "columna_dato": [
+                            "K"
+                        ]
                     }
                 }
             },
@@ -44,6 +49,7 @@
         },
         "semaforo": {
             "Bajo": "<= 12",
+            "Medio": "> 12 a < 16",
             "Esperado": ">= 16"
         }
     },
@@ -52,6 +58,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual",
         "informacion": {
             "titulo": "CE 02 - Promedio de atenciones integrales por personal de enfermería especialista en medicina de familia.",
@@ -68,7 +75,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "G",
                         "buscar": "TOTAL DEL SERVICIO  [ 87 ]",
-                        "columna_dato": ["M"]
+                        "columna_dato": [
+                            "M"
+                        ]
                     }
                 }
             },
@@ -80,7 +89,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "G",
                         "buscar": "TOTAL DEL SERVICIO  [ 87 ]",
-                        "columna_dato": ["K"]
+                        "columna_dato": [
+                            "K"
+                        ]
                     }
                 }
             },
@@ -92,6 +103,7 @@
         },
         "semaforo": {
             "Bajo": "<= 12",
+            "Medio": "> 12 a < 16 ",
             "Esperado": ">= 16"
         }
     }

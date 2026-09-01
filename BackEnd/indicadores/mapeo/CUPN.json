@@ -4,6 +4,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual Acumulado",
         "informacion": {
             "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
@@ -20,7 +21,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "T   O   T   A   L",
-                        "columna_dato": ["MESES_CIP01"]
+                        "columna_dato": [
+                            "MESES_CIP01"
+                        ]
                     }
                 }
             },
@@ -32,7 +35,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "T   O   T   A   L",
-                        "columna_dato": ["C"]
+                        "columna_dato": [
+                            "C"
+                        ]
                     }
                 }
             },
@@ -59,50 +64,62 @@
         "semaforo": {
             "Enero": {
                 "Bajo": "<= 4.8",
+                "Medio": "> 4.8 a < 5.3",
                 "Esperado": ">= 5.3"
             },
             "Febrero": {
                 "Bajo": "<= 9.7",
+                "Medio": "> 9.7 a < 10.5",
                 "Esperado": ">= 10.5"
             },
             "Marzo": {
                 "Bajo": "<= 14.5",
+                "Medio": "> 14.5 a < 15.8",
                 "Esperado": ">= 15.8"
             },
             "Abril": {
                 "Bajo": "<= 19.3",
+                "Medio": "> 19.3 a < 21.0",
                 "Esperado": ">= 21.0"
             },
             "Mayo": {
                 "Bajo": "<= 24.2",
+                "Medio": "> 24.2 a < 26.3",
                 "Esperado": ">= 26.3"
             },
             "Junio": {
                 "Bajo": "<= 29.0",
+                "Medio": "> 29.0 a < 31.5",
                 "Esperado": ">= 31.5"
             },
             "Julio": {
                 "Bajo": "<= 33.8",
+                "Medio": "> 33.8 a < 36.8",
                 "Esperado": ">= 36.8"
             },
             "Agosto": {
                 "Bajo": "<= 38.7",
+                "Medio": "> 38.7 a < 42.0",
                 "Esperado": ">= 42.0"
             },
             "Septiembre": {
                 "Bajo": "<= 43.5",
+                "Medio": "> 43.5 a < 47.3",
                 "Esperado": ">= 47.3"
             },
             "Octubre": {
                 "Bajo": "<= 48.3",
+                "Medio": "> 48.3 a < 52.5",
                 "Esperado": ">= 52.5"
             },
             "Noviembre": {
                 "Bajo": "<= 53.2",
+                "Medio": "> 53.2 a < 57.8",
                 "Esperado": ">= 57.8"
             },
             "Diciembre": {
                 "Bajo": "<= 58.0",
+                "Medio": "> 58.0 a < 63.0",
                 "Esperado": ">= 63.0"
             }
         }
@@ -112,6 +129,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual",
         "informacion": {
             "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
@@ -128,7 +146,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "T O T A L E S",
-                        "columna_dato": ["D"]
+                        "columna_dato": [
+                            "D"
+                        ]
                     }
                 }
             },
@@ -140,7 +160,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "MEDICINA FAMILIAR",
-                        "columna_dato": ["E"]
+                        "columna_dato": [
+                            "E"
+                        ]
                     }
                 }
             },
@@ -151,7 +173,8 @@
             }
         },
         "semaforo": {
-            "Alto": ">= 8.1",
+            "Bajo": ">= 8.1",
+            "Medio": "> 7.0 a < 8.1",
             "Esperado": "<= 7.0"
         }
     },
@@ -160,6 +183,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
@@ -176,7 +200,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "MEDICINA FAMILIAR",
-                        "columna_dato": ["E"]
+                        "columna_dato": [
+                            "E"
+                        ]
                     }
                 }
             },
@@ -188,7 +214,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "MEDICINA FAMILIAR",
-                        "columna_dato": ["C"]
+                        "columna_dato": [
+                            "C"
+                        ]
                     }
                 }
             },
@@ -200,6 +228,7 @@
         },
         "semaforo": {
             "Bajo": "<= 3.1",
+            "Medio": "> 3.1 a < 4.0",
             "Esperado": ">= 4.0"
         }
     },
@@ -208,6 +237,7 @@
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
+        "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "CUPN 06 - Porcentaje de niños de 6 meses alimentados con lactancia materna exclusiva.",
@@ -218,6 +248,7 @@
         "reporte": {},
         "semaforo": {
             "Esperado": ">= 50",
+            "Medio": ">= 30 a < 50",
             "Bajo": "< 30"
         }
     },
@@ -226,6 +257,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",
@@ -242,7 +274,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "ESTOMATOLOGIA",
-                        "columna_dato": ["E"]
+                        "columna_dato": [
+                            "E"
+                        ]
                     }
                 }
             },
@@ -254,7 +288,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "ESTOMATOLOGIA",
-                        "columna_dato": ["C"]
+                        "columna_dato": [
+                            "C"
+                        ]
                     }
                 }
             },
@@ -266,6 +302,7 @@
         },
         "semaforo": {
             "Bajo": "<= 2.0",
+            "Medio": "> 2.0 a < 2.8",
             "Esperado": ">= 2.8"
         }
     }

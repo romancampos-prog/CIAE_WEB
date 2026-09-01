@@ -4,6 +4,7 @@
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
+        "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "Materna 01 - Porcentaje de adolescentes embarazadas.",
@@ -14,7 +15,8 @@
         "reporte": {},
         "semaforo": {
             "Esperado": "<= 8.5",
-            "Alto": ">= 9.1"
+            "Medio": "> 8.5 a < 9.1",
+            "Bajo": ">= 9.1"
         }
     },
     "MT 02": {
@@ -22,6 +24,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "Materna 02 - Oportunidad de inicio de la vigilancia prenatal.",
@@ -36,8 +39,12 @@
                     "MT03": {
                         "hoja": "Vigilancia Materna",
                         "modoExtraccion": "INTERSECCION_FILA",
-                        "columna_dato": ["J"],
-                        "fila": [65]
+                        "columna_dato": [
+                            "J"
+                        ],
+                        "fila": [
+                            65
+                        ]
                     }
                 }
             },
@@ -47,8 +54,12 @@
                     "MT03": {
                         "hoja": "Vigilancia Materna",
                         "modoExtraccion": "INTERSECCION_FILA",
-                        "columna_dato": ["J"],
-                        "fila": [69]
+                        "columna_dato": [
+                            "J"
+                        ],
+                        "fila": [
+                            69
+                        ]
                     }
                 }
             },
@@ -59,8 +70,9 @@
             }
         },
         "semaforo": {
-            "Bajo": "<= 50.0",
-            "Esperado": ">= 53.0"
+            "Bajo": "<= 50",
+            "Medio": "> 50 a < 53",
+            "Esperado": ">= 53"
         }
     }
 }

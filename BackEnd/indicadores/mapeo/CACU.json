@@ -4,6 +4,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual Acumulado",
         "informacion": {
             "titulo": "CACU 01 - Cobertura de tamizaje de primera vez de cáncer cérvico uterino en mujeres entre 25 y 64 años.",
@@ -20,7 +21,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "CO",
                         "buscar": "TOTAL DE LA UNIDAD",
-                        "columna_dato": ["CQ"]
+                        "columna_dato": [
+                            "CQ"
+                        ]
                     }
                 }
             },
@@ -48,50 +51,62 @@
         "semaforo": {
             "Enero": {
                 "Bajo": "<= 1.7",
+                "Medio": "> 1.7 a < 2.3",
                 "Esperado": ">= 2.3"
             },
             "Febrero": {
                 "Bajo": "<= 3.4",
+                "Medio": "> 3.4 a < 4.5",
                 "Esperado": ">= 4.5"
             },
             "Marzo": {
                 "Bajo": "<= 5.1",
+                "Medio": "> 5.1 a < 6.8",
                 "Esperado": ">= 6.8"
             },
             "Abril": {
                 "Bajo": "<= 6.8",
+                "Medio": "> 6.8 a < 9.0",
                 "Esperado": ">= 9.0"
             },
             "Mayo": {
                 "Bajo": "<= 8.6",
+                "Medio": "> 8.6 a < 11.3",
                 "Esperado": ">= 11.3"
             },
             "Junio": {
                 "Bajo": "<= 10.3",
+                "Medio": "> 10.3 a < 13.5",
                 "Esperado": ">= 13.5"
             },
             "Julio": {
                 "Bajo": "<= 12.0",
+                "Medio": "> 12.0 a < 15.8",
                 "Esperado": ">= 15.8"
             },
             "Agosto": {
                 "Bajo": "<= 13.7",
+                "Medio": "> 13.7 a < 18.0",
                 "Esperado": ">= 18.0"
             },
             "Septiembre": {
                 "Bajo": "<= 15.4",
+                "Medio": "> 15.4 a < 20.3",
                 "Esperado": ">= 20.3"
             },
             "Octubre": {
                 "Bajo": "<= 17.1",
+                "Medio": "> 17.1 a < 22.5",
                 "Esperado": ">= 22.5"
             },
             "Noviembre": {
                 "Bajo": "<= 18.8",
+                "Medio": "> 18.8 a < 24.8",
                 "Esperado": ">= 24.8"
             },
             "Diciembre": {
                 "Bajo": "<= 20.5",
+                "Medio": "> 20.5 a < 27.0",
                 "Esperado": ">= 27.0"
             }
         }
@@ -101,7 +116,8 @@
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
-        "periodicidad": "Mensual - Semestralizado",
+        "previos": false,
+        "periodicidad": "Mensual Semestralizado",
         "informacion": {
             "titulo": "CACU 02 - Tiempo promedio para el diagnóstico de cáncer cérvico uterino a partir de la sospecha por citología cérvico vaginal de tamizaje.",
             "objetivo": "Medir el tiempo promedio en días que emplea el Institución Mexicano del Seguro Social para emitir el diagnóstico de cáncer cérvico uterino una vez que se establece la sospecha a través de la citología cérvico vaginal de tamizaje",
@@ -111,7 +127,8 @@
         "reporte": {},
         "semaforo": {
             "Esperado": "<= 30",
-            "Alto": "> 60"
+            "Medio": "> 30 a <= 60 ",
+            "Bajo": "> 60"
         }
     },
     "CACU 03": {
@@ -119,7 +136,8 @@
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
-        "periodicidad": "Mensual - Semestralizado",
+        "previos": false,
+        "periodicidad": "Mensual Semestralizado",
         "informacion": {
             "titulo": "CACU 03 - Tiempo promedio para el inicio del tratamiento en cáncer cérvico uterino.",
             "objetivo": "Medir el tiempo promedio en días que emplea el Instituto Mexicano del Seguro Social para iniciar el tratamiento del cáncer cérvico uterino una vez que se establece el diagnóstico histopatológico de cáncer cérvico uterino.",
@@ -129,7 +147,8 @@
         "reporte": {},
         "semaforo": {
             "Esperado": "<= 30",
-            "Alto": "> 30"
+            "Medio": null,
+            "Bajo": "> 30"
         }
     },
     "CACU 04": {
@@ -137,7 +156,8 @@
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
-        "periodicidad": "Trimestral - Acumulado",
+        "previos": false,
+        "periodicidad": "Trimestral Acumulado",
         "informacion": {
             "titulo": "CACU 04 - Tasa de incidencia de invalidez por cáncer cérvico uterino por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora.",
             "objetivo": "Medir el impacto de los programas de prevención y detección oportuna del cáncer cérvico uterino, así como de las acciones de atención médica para el tratamiento oportuno y adecuado de las trabajadoras, para evitar que las complicaciones resulten en la imposibilidad de que las trabajadoras aseguradas en el ramo de invalidez y vida continúen realizando sus actividades laborales.",
@@ -148,19 +168,23 @@
         "semaforo": {
             "Marzo": {
                 "Esperado": "<= 0.00",
-                "Alto": "> 1.52"
+                "Medio": "> 0.00 a <= 1.52",
+                "Bajo": "> 1.52"
             },
             "Junio": {
                 "Esperado": "<= 0.00",
-                "Alto": "> 2.37"
+                "Medio": "> 0.00 a <= 2.37",
+                "Bajo": "> 2.37"
             },
             "Septiembre": {
                 "Esperado": "<= 1.25",
-                "Alto": "> 3.01"
+                "Medio": "> 1.25 a <= 3.01",
+                "Bajo": "> 3.01"
             },
             "Diciembre": {
                 "Esperado": "<= 1.44",
-                "Alto": "> 4.32"
+                "Medio": "> 1.44 a <= 4.32",
+                "Bajo": "> 4.32"
             }
         }
     }

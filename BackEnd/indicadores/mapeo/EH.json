@@ -4,6 +4,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual Acumulado",
         "informacion": {
             "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
@@ -20,14 +21,21 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "DD",
                         "buscar": "TOTAL DE LA UNIDAD",
-                        "columna_dato": ["DJ", "EX", "GG"]
+                        "columna_dato": [
+                            "DJ",
+                            "EX",
+                            "GG"
+                        ]
                     },
                     "CP03": {
                         "hoja": "04CobDM_HTA_COL",
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "M",
                         "buscar": "TOTAL DE LA UNIDAD",
-                        "columna_dato": ["O", "S"]
+                        "columna_dato": [
+                            "O",
+                            "S"
+                        ]
                     }
                 }
             },
@@ -73,50 +81,62 @@
         "semaforo": {
             "Enero": {
                 "Bajo": "<= 4.8",
+                "Medio": "> 4.8 a < 5.8",
                 "Esperado": ">= 5.8"
             },
             "Febrero": {
                 "Bajo": "<= 9.5",
+                "Medio": "> 9.5 a < 11.5",
                 "Esperado": ">= 11.5"
             },
             "Marzo": {
                 "Bajo": "<= 14.3",
+                "Medio": "> 14.3 a < 17.3",
                 "Esperado": ">= 17.3"
             },
             "Abril": {
                 "Bajo": "<= 19.0",
+                "Medio": "> 19.0 a < 23.0",
                 "Esperado": ">= 23.0"
             },
             "Mayo": {
                 "Bajo": "<= 23.8",
+                "Medio": "> 23.8 a < 28.8",
                 "Esperado": ">= 28.8"
             },
             "Junio": {
                 "Bajo": "<= 28.6",
+                "Medio": "> 28.6 a < 34.5",
                 "Esperado": ">= 34.5"
             },
             "Julio": {
                 "Bajo": "<= 33.3",
+                "Medio": "> 33.3 a < 40.3",
                 "Esperado": ">= 40.3"
             },
             "Agosto": {
                 "Bajo": "<= 38.1",
+                "Medio": "> 38.1 a < 46.0",
                 "Esperado": ">= 46.0"
             },
             "Septiembre": {
                 "Bajo": "<= 42.8",
+                "Medio": "> 42.8 a < 51.8",
                 "Esperado": ">= 51.8"
             },
             "Octubre": {
                 "Bajo": "<= 47.6",
+                "Medio": "> 47.6 a < 57.5",
                 "Esperado": ">= 57.5"
             },
             "Noviembre": {
                 "Bajo": "<= 52.3",
+                "Medio": "> 52.3 a < 63.3",
                 "Esperado": ">= 63.3"
             },
             "Diciembre": {
                 "Bajo": "<= 57.1",
+                "Medio": "> 57.1 a < 69.0",
                 "Esperado": ">= 69.0"
             }
         }
@@ -126,6 +146,7 @@
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
+        "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
         "informacion": {
             "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
@@ -142,7 +163,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "T O T A L E S",
-                        "columna_dato": ["P"]
+                        "columna_dato": [
+                            "P"
+                        ]
                     }
                 }
             },
@@ -154,7 +177,9 @@
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
                         "buscar": "T O T A L E S",
-                        "columna_dato": ["M"]
+                        "columna_dato": [
+                            "M"
+                        ]
                     }
                 }
             },
@@ -166,6 +191,7 @@
         },
         "semaforo": {
             "Bajo": "<= 83.5",
+            "Medio": "> 83.5 a < 85.2",
             "Esperado": ">= 85.2"
         }
     },
@@ -174,6 +200,7 @@
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
+        "previos": false,
         "periodicidad": "Trimestral Acumulado",
         "informacion": {
             "titulo": "EH 04 - Tasa de incidencia de invalidez por enfermedades hipertensivas y sus complicaciones por cada 100,000 trabajadores asegurados, según unidad médica de adscripción del trabajador.",
@@ -185,19 +212,23 @@
         "semaforo": {
             "Marzo": {
                 "Esperado": "<= 1.16",
-                "Alto": "> 4.19"
+                "Medio": "> 1.16 a <= 4.19",
+                "Bajo": "> 4.19"
             },
             "Junio": {
                 "Esperado": "<= 2.68",
-                "Alto": "> 10.19"
+                "Medio": "> 2.68 a <= 10.19",
+                "Bajo": "> 10.19"
             },
             "Septiembre": {
                 "Esperado": "<= 4.31",
-                "Alto": "> 15.73"
+                "Medio": "> 4.31 a <= 15.73",
+                "Bajo": "> 15.73"
             },
             "Diciembre": {
                 "Esperado": "<= 6.00",
-                "Alto": "> 21.83"
+                "Medio": "> 6.00 a <= 21.83",
+                "Bajo": "> 21.83"
             }
         }
     }
