@@ -25,7 +25,7 @@ class ReporteIndicador(BaseModel):
 
 #---------------------------------------------------
 #CLASES PARA EXTRAER SOLO INFORMAICON VISUAL DEL INDICADOR
-class InformaionFicha(BaseModel):
+class InformacionFicha(BaseModel):
     titulo: str
     objetivo: str
     descNum: str
@@ -37,11 +37,27 @@ class Semaforo(BaseModel):
     Bajo: str | None = None
     
 
-class InfoVisualIndicador(BaseModel):
+class InfoIndicador(BaseModel):
     modulo: str
     mostrarGenerar: bool
     mostrarGrafica: bool
+    previos: bool
     periodicidad: str
-    informacion: InformaionFicha | None = None
+    informacion: InformacionFicha
     semaforo: Dict[str,Semaforo] | Semaforo
+    
+
+#---------------------------------------------------
+class IndicadorMostrar(BaseModel):
+    indicadorPadre: str
+    indicadorhijo: str
+    info: InfoIndicador
+    reporte: ReporteIndicador
+    
+#---------------------------------------------------
+#Model osolo para trerme la categorias derl indicaodr 
+#ejem: CACU: [CACU 01, CACU 02, CACU 03, etc...]
+class IndicesIndicadores(BaseModel):
+    categoriaIndicador: str
+    indicadores: list[str]
 
