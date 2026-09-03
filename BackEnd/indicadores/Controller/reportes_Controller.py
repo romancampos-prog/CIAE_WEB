@@ -8,7 +8,7 @@ import logging
 reportesApi = APIRouter()
 
 
-#Get Indicador (toda la familia del indicador)
+#Get Indicadores/reporte/Indicador)
 @reportesApi.get("/Indicador/{indicador}")
 async def Obtener_Indicador(payload: IndicadorRequest):
     try:
