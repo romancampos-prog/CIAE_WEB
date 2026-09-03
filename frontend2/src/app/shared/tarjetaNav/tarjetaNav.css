@@ -1,0 +1,103 @@
+.home-card {
+  flex: 1 1 500px; max-width: 560px;
+  background: white; border-radius: 20px; overflow: hidden;
+  cursor: pointer; border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.32s cubic-bezier(0.16,1,0.3,1);
+  display: flex; flex-direction: column;
+}
+.home-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 48px rgba(11,84,69,0.14), 0 4px 14px rgba(0,0,0,0.06);
+}
+.home-card--disabled { cursor: not-allowed; opacity: 0.6; }
+.home-card--disabled:hover { transform: none !important; box-shadow: 0 8px 32px rgba(0,0,0,0.07) !important; }
+
+.hc-header {
+  display: flex; align-items: center; gap: 18px;
+  padding: 24px 26px 20px;
+  border-bottom: 1px solid var(--color-borde-suave);
+}
+.hc-header--green { border-left: 5px solid var(--color-verde); }
+.hc-header--tinto { border-left: 5px solid var(--color-tinto); }
+.hc-header--gold  { border-left: 5px solid var(--color-oro); }
+
+.hc-icon-box {
+  width: 58px; height: 58px; border-radius: 16px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.25s;
+}
+.home-card:not(.home-card--disabled):hover .hc-icon-box { transform: scale(1.08) rotate(-3deg); }
+.hc-icon-box--green {
+  background: linear-gradient(135deg, var(--color-verde), var(--color-verde-claro));
+  color: white; box-shadow: 0 6px 18px rgba(11,84,69,0.3);
+}
+.hc-icon-box--tinto {
+  background: linear-gradient(135deg, var(--color-tinto-oscuro), var(--color-tinto));
+  color: rgba(255,200,200,0.9); box-shadow: 0 6px 18px rgba(126,8,8,0.25);
+}
+.hc-icon-box--gold {
+  background: linear-gradient(135deg, var(--color-oro-oscuro), var(--color-oro));
+  color: rgba(255,230,180,0.95); box-shadow: 0 6px 18px rgba(154,112,38,0.3);
+}
+
+.hc-eyebrow {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; margin: 0 0 3px;
+}
+.hc-header--green .hc-eyebrow { color: var(--color-verde); }
+.hc-header--tinto .hc-eyebrow { color: var(--color-tinto); }
+.hc-header--gold  .hc-eyebrow { color: var(--color-oro); }
+
+.hc-name {
+  font-size: 1.55rem; font-weight: 800; color: var(--color-texto-principal);
+  margin: 0; letter-spacing: -0.5px; line-height: 1;
+}
+
+.hc-desc {
+  font-size: 0.85rem; color: var(--color-texto-secundario); line-height: 1.65;
+  padding: 18px 26px; flex: 1; margin: 0;
+}
+
+.hc-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 26px 18px; border-top: 1px solid var(--color-borde-suave);
+}
+.hc-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.hc-chip {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; padding: 3px 10px; border-radius: 100px;
+}
+.hc-chip--green { color: var(--color-verde); background: rgba(11,84,69,0.08); border: 1px solid rgba(11,84,69,0.2); }
+.hc-chip--tinto { color: var(--color-tinto); background: rgba(126,8,8,0.07); border: 1px solid rgba(126,8,8,0.18); }
+.hc-chip--gold  { color: var(--color-oro); background: rgba(154,112,38,0.08); border: 1px solid rgba(154,112,38,0.2); }
+.hc-chip--muted { color: var(--color-texto-muted); background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.25); }
+
+.hc-arrow {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; flex-shrink: 0; transition: all 0.22s;
+}
+.hc-arrow--green    { background: var(--color-oro); box-shadow: 0 4px 12px rgba(154,112,38,0.35); }
+.hc-arrow--tinto    { background: var(--color-tinto); box-shadow: 0 4px 12px rgba(126,8,8,0.3); }
+.hc-arrow--gold     { background: var(--color-oro); box-shadow: 0 4px 12px rgba(154,112,38,0.35); }
+.hc-arrow--disabled { background: #cbd5e1; }
+.home-card:not(.home-card--disabled):hover .hc-arrow--tinto {
+  background: var(--color-tinto-oscuro); transform: translateX(4px);
+  box-shadow: 0 6px 16px rgba(126,8,8,0.35);
+}
+.home-card:not(.home-card--disabled):hover .hc-arrow--green {
+  background: var(--color-verde); transform: translateX(4px);
+  box-shadow: 0 6px 16px rgba(11,84,69,0.3);
+}
+.home-card:not(.home-card--disabled):hover .hc-arrow--gold {
+  background: var(--color-oro-oscuro); transform: translateX(4px);
+  box-shadow: 0 6px 16px rgba(154,112,38,0.35);
+}
+
+@media (max-width: 70rem) {
+  .home-card { flex-basis: 26.25rem; }
+}
+@media (max-width: 48rem) {
+  .home-card { flex-basis: 100%; max-width: 31.25rem; }
+}

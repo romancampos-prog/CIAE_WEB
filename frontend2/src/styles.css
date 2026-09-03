@@ -1,0 +1,46 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  --font-principal: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bg-principal: #fdfdfb;
+
+  --color-verde: #0b5445;
+  --color-verde-claro: #1a7a62;
+  --color-verde-hover: #0e6655;
+  --color-verde-fondo: #f0faf6;
+  --color-verde-estado: #4ade80;
+  --color-oro: #9a7026;
+  --color-oro-oscuro: #7a5010;
+  --color-oro-claro: #d4a840;
+  --color-tinto: #7e0808;
+  --color-tinto-oscuro: #5a0606;
+
+  --color-fondo-pagina: #f0f4f2;
+
+  --color-texto-principal: #1e293b;
+  --color-texto-secundario: #64748b;
+  --color-texto-muted: #94a3b8;
+  --color-borde: #e2e8f0;
+  --color-borde-suave: #f1f5f9;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: var(--font-principal);
+  background-color: var(--bg-principal);
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  letter-spacing: -0.02em;
+}
