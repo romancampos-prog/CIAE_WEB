@@ -9,7 +9,7 @@ reportesApi = APIRouter()
 
 
 #Get Indicadores/reporte/Indicador)
-@reportesApi.get("/Indicador/{indicador}")
+@reportesApi.get("/{indicador}")
 async def Obtener_Indicador(payload: IndicadorRequest):
     try:
         if (not payload.indicador or not payload.ano):

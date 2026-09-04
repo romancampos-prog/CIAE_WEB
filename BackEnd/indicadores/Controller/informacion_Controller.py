@@ -31,7 +31,7 @@ def IndiceIndicadores():
 
 
 @informacionApi.get("/ficha/{indicador}")
-def InformacionVisual_All_Imdiocadores(payload: IndicadorRequest):
+def FichaIndicador(payload: IndicadorRequest):
     try:
         
         if (not payload.indicador or not payload):

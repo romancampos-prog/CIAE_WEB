@@ -61,16 +61,24 @@ def AllIndicadores() -> list[IndicesIndicadores]:
             data = json.load(archivo)
         
         indicadores = []
+        imagen = ""
+        color = ""
         #extraer los indicadores del json
         for indicador, info in data.items():
             if info.get("mostrarGrafica", True):  # Solo incluir indicadores disponibles
                 indicadores.append(indicador)
-        
-        
+            if not imagen:
+                imagen = info.get("imagen", "")
+            if not color:
+                color = info.get("color", "")
+
+
         #crear objeto IndicesIndicadores
         indice = IndicesIndicadores(
             categoriaIndicador=categoria,
-            indicadores=indicadores
+            indicadores=indicadores,
+            imagen=imagen,
+            color=color
         )
         
         indicesIndicadores.append(indice)
