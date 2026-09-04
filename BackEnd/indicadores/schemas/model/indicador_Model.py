@@ -21,6 +21,7 @@ class ReporteIndicador(BaseModel):
     ANIO:         int
     MESES:        Dict[str, Dict[str, UnidadDatos]]
     SEMANA:       ReportePrevio | None = None
+    MENSUAL_ACUMULADO: Dict[str, Dict[str, UnidadDatos]] | None
     
 
 #---------------------------------------------------
@@ -60,4 +61,6 @@ class IndicadorMostrar(BaseModel):
 class IndicesIndicadores(BaseModel):
     categoriaIndicador: str
     indicadores: list[str]
+    imagen: str
+    color: str
 

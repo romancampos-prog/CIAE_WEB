@@ -14,4 +14,6 @@ class IndicadorRequest(BaseModel):
     ano: str
     modulo: str | None = None
     previos: bool
+    mensual: bool
+    mensualAcumulado: bool
     
