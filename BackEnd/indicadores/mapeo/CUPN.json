@@ -1,11 +1,15 @@
 {
     "CUPN 01": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_cupn.png",
+        "color": "#336699",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Acumulado",
+        "mensual": false,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
             "objetivo": "Medir la proporción de población derechohabiente que recibió, en el último año, acciones preventivas de acuerdo con su grupo de edad y sexo, para conocer la población beneficiada con PrevenIMSS.",
@@ -126,11 +130,15 @@
     },
     "CUPN 04": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_cupn.png",
+        "color": "#336699",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
             "objetivo": "Medir el porcentaje de derechohabientes que requieren atención con mayor grado de especialización y recursos, para conocer la capacidad resolutiva de las Unidades de Medicina Familiar.",
@@ -180,11 +188,15 @@
     },
     "CUPN 05": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_cupn.png",
+        "color": "#336699",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
             "objetivo": "Medir la productividad y la eficiencia en el aprovechamiento del turno del Médico Familiar.",
@@ -234,6 +246,8 @@
     },
     "CUPN 06": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_cupn.png",
+        "color": "#336699",
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
@@ -254,11 +268,15 @@
     },
     "CUPN 07": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_cupn.png",
+        "color": "#336699",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",
             "objetivo": "Medir la productividad y la eficiencia en el aprovechamiento de la jornada laboral del estomatólogo.",

@@ -1,6 +1,8 @@
 {
     "MT 01": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_mt.png",
+        "color": "#7E0808",
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
@@ -21,11 +23,15 @@
     },
     "MT 02": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_mt.png",
+        "color": "#7E0808",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "Materna 02 - Oportunidad de inicio de la vigilancia prenatal.",
             "objetivo": "Medir el porcentaje de mujeres que acuden dentro del primer trimestre de gestación a la vigilancia prenatal en el servicio de medicina familiar, para identificar tempranamente factores de riesgo, otorgar tratamiento y prevenir complicaciones durante el embarazo; así como brindar educación para el cuidado de la salud en el beneficio del binomio madre-hijo.",

@@ -1,11 +1,15 @@
 {
     "IAAS 01": {
         "fechaModificacion": "",
+        "imagen": "icono_iaas.png",
+        "color": "#1a5276",
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "IAAS 01 - Tasa de Infecciones Asociadas a la Atención de la Salud por 1,000 días estancia en Unidades médicas de Segundo Nivel de atención con 20 camas censables o más o en Unidades Médicas de Alta Especialidad (UMAE).",
             "objetivo": "Medir la velocidad de cambio que presentan las infecciones asociadas a la atención de la salud en las unidades médicas de segundo nivel de atención, con 20 o más camas censables o en las Unidades Médicas de Alta Especialidad.",
@@ -91,11 +95,15 @@
     },
     "IAAS 02": {
         "fechaModificacion": "",
+        "imagen": "icono_iaas.png",
+        "color": "#1a5276",
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "IAAS 02 - Tasa de infección de sitio quirúrgico en cirugías limpias en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Atención Ambulatoria o en Unidades Médicas de Alta Especialidad.",
             "objetivo": "",
@@ -140,11 +148,15 @@
     },
     "IAAS 03": {
         "fechaModificacion": "",
+        "imagen": "icono_iaas.png",
+        "color": "#1a5276",
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "IAAS 03 - Tasa de neumonía asociada a ventilación mecánica por 1,000 días ventilador en Unidades médicas de Segundo Nivel de atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad",
             "objetivo": "",
@@ -189,11 +201,15 @@
     },
     "IAAS 04": {
         "fechaModificacion": "",
+        "imagen": "icono_iaas.png",
+        "color": "#1a5276",
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "IAAS 04 - Tasa de infección del torrente sanguíneo asociada a catéter venoso central por 1,000 días catéter en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad.",
             "objetivo": "",
@@ -238,11 +254,15 @@
     },
     "IAAS 05": {
         "fechaModificacion": "",
+        "imagen": "icono_iaas.png",
+        "color": "#1a5276",
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "IAAS 05 - Tasa de infección de vías urinarias asociada a sonda vesical por 1,000 días sonda en Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables o en Unidades Médicas de Alta Especialidad",
             "objetivo": "",
@@ -286,11 +306,15 @@
     },
     "IAAS 06": {
         "fechaModificacion": "",
+        "imagen": "icono_iaas.png",
+        "color": "#1a5276",
         "modulo": "IAAS",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "IAAS 06 - Tasa de Infecciones Asociadas a la Atención de la Salud por 1,000 días estancia en las Unidades de Cuidados Intensivos de Unidades Médicas de Segundo Nivel de Atención con 20 o más camas censables, o de Unidades Médicas de Alta Especialidad.",
             "objetivo": "",

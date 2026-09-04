@@ -1,11 +1,15 @@
 {
     "DM 01": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_dm.png",
+        "color": "#5c35a0",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Acumulado",
+        "mensual": false,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "DM 01 - Cobertura de detección de diabetes en población derechohabiente de 20 años y más.",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más a los que se realizó la medición de glucosa en el primer nivel de atención, para identificar niveles elevados que permitan la detección temprana de prediabetes o de diabetes tipo 2.",
@@ -143,11 +147,15 @@
     },
     "DM 02": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_dm.png",
+        "color": "#5c35a0",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Anualizado",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "DM 02 - Índice de confirmación de diabetes en casos sospechosos, población derechohabiente de 20 años y más.",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más, a quienes se les confirmó el diagnóstico de diabetes, clasificados inicialmente como casos sospechosos en la detección mediante glucosa capilar.",
@@ -195,6 +203,8 @@
     },
     "DM 03": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_dm.png",
+        "color": "#5c35a0",
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
@@ -215,6 +225,8 @@
     },
     "DM 06": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_dm.png",
+        "color": "#5c35a0",
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,

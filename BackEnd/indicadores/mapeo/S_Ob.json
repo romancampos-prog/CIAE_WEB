@@ -1,11 +1,15 @@
 {
     "S_Ob 01": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_S_Ob.png",
+        "color": "#9a7026",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Acumulado",
+        "mensual": false,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "S_Ob 01 - Cobertura de medición de peso y talla de la población derechohabiente, en unidad médica de primer nivel.",
             "objetivo": "Medir el porcentaje de población derechohabiente con medición de peso y talla para identificar peso bajo, peso normal, sobrepeso y obesidad a través del Índice de Masa Corporal (IMC).",
@@ -117,11 +121,15 @@
     },
     "S_Ob 02": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_S_Ob.png",
+        "color": "#9a7026",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "S_Ob 02 - Proporción de obesidad en derechohabientes de 20 años y más que acudieron a medición de peso y talla.",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad, para identificar un factor de riesgo para desarrollar enfermedades crónicas.",
@@ -172,6 +180,8 @@
     },
     "S_Ob 03": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_S_Ob.png",
+        "color": "#9a7026",
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
@@ -192,11 +202,15 @@
     },
     "S_Ob 04": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_S_Ob.png",
+        "color": "#9a7026",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Anualizado",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "S_Ob 04 - Porcentaje de confirmación diagnóstica de obesidad en Medicina Familiar de derechohabientes de 20 años y más, con índice de masa corporal igual o mayor a 30 kg/m2",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más a los que se les confirmó Obesidad, una vez que se le realizó una prueba de detección con Índice de masa corporal con datos de obesidad.",

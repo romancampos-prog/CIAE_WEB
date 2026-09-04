@@ -1,11 +1,15 @@
 {
     "EH 01": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_eh.png",
+        "color": "#4e1224",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Acumulado",
+        "mensual": false,
+        "mensualAcumulado": true,
         "informacion": {
             "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más, con medición de tensión arterial en el primer nivel de atención, que permita la identificación temprana de hipertensión arterial y prehipertensión.",
@@ -143,11 +147,15 @@
     },
     "EH 02": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_eh.png",
+        "color": "#4e1224",
         "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
+        "mensual": true,
+        "mensualAcumulado": false,
         "informacion": {
             "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
             "objetivo": "Medir el porcentaje de pacientes hipertensos mayores de 20 años, con cifras de tensión arterial en control adecuado (sistólica menor de 140 mmHg y diastólica menor de 90 mm Hg), que acudieron a consulta en el periodo de medición (mes, año), para conocer la eficiencia de la atención en este grupo de pacientes",
@@ -197,6 +205,8 @@
     },
     "EH 04": {
         "fechaModificacion": "19/08/2026",
+        "imagen": "icono_eh.png",
+        "color": "#4e1224",
         "modulo": "",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
