@@ -74,22 +74,22 @@ def _calcular_datos_grafica_ftp(indicador: str, anio: str) -> dict:
 
     meses_definitivos = set(meses_set)
     semanal_json      = leer_semana_indicador(indicador, anio)
-    for mes_nombre, mes_data in semanal_json.get("MESES", {}).items():
+    semana_num        = semanal_json.get("SEMANA", 1)
+    for mes_nombre, mes_data in semanal_json.get("MES", {}).items():
         if mes_nombre not in FTP_MESES_NOMBRES:
             continue
         idx_mes = FTP_MESES_NOMBRES.index(mes_nombre)
         mes_str = str(idx_mes + 1).zfill(2)
         if mes_str in meses_definitivos:
             continue
-        semana_num = mes_data.get("semana", 1)
         meses_set.add(mes_str)
         for unidad, vals in mes_data.items():
-            if unidad == "semana" or not isinstance(vals, dict):
+            if not isinstance(vals, dict):
                 continue
             pct = vals.get("%")
             num = vals.get("numerador")
             den = vals.get("denominador")
-            col = vals.get("color", "Gris")
+            col = vals.get("desempeno", "Gris")
             if unidad not in unidades_set:
                 unidades_set.append(unidad)
             datos.setdefault(unidad, []).append({

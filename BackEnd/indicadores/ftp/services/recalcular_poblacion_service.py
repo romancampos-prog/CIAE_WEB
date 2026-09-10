@@ -49,7 +49,7 @@ def actualizar_historico_con_nueva_poblacion(indicador: str, ano: str, info: dic
         if isinstance(v, dict) and v.get("modo") == "JSON_POBLACION"
     }
     for repo, repo_info in repos_pb.items():
-        ExtraerPBDesdeJSON(repo, repo_info, diccionarioPB)
+        ExtraerPBDesdeJSON(repo, repo_info, diccionarioPB, anio=ano)
 
     nuevos_den = {}
     for unidad in UNIDADES_FINALES:

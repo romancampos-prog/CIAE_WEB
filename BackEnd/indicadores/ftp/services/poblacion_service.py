@@ -7,16 +7,17 @@ import re
 import json
 import pandas as pd
 from ftp.config import NOMBREUNIDADESARCHIVO
-from ftp.config import RUTA_POBLACION, RUTA_MAPEO_POBLACION
+from ftp.config import ruta_poblacion, RUTA_MAPEO_POBLACION
 
 DELEGACION_FILTRO = "Guanajuato"
 
 
-def obtener_ultimo_archivo_poblacion() -> str | None:
+def obtener_ultimo_archivo_poblacion(anio: str | int | None = None) -> str | None:
     """Nombre (sin extensión) del último Excel de población subido, o None si no hay ninguno."""
-    if not RUTA_POBLACION.exists():
+    ruta = ruta_poblacion(anio)
+    if not ruta.exists():
         return None
-    with open(RUTA_POBLACION, encoding="utf-8") as f:
+    with open(ruta, encoding="utf-8") as f:
         return json.load(f).get("ARCHIVO") or None
 
 
@@ -69,7 +70,7 @@ def _sugerir_alias(no_encontradas: list, extras: list) -> dict:
     return sugeridos
 
 
-def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str) -> dict:
+def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio: str | int | None = None) -> dict:
     try:
         mapeo  = _cargar_mapeo()
         buffer = io.BytesIO(contenido_bytes)
@@ -176,8 +177,9 @@ def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str) -> d
 
         nombre_sin_ext = re.sub(r"\.(xlsx|xls)$", "", nombre_archivo, flags=re.IGNORECASE)
 
-        RUTA_POBLACION.parent.mkdir(parents=True, exist_ok=True)
-        with open(RUTA_POBLACION, "w", encoding="utf-8") as f:
+        ruta = ruta_poblacion(anio)
+        ruta.parent.mkdir(parents=True, exist_ok=True)
+        with open(ruta, "w", encoding="utf-8") as f:
             json.dump(
                 {"ARCHIVO": nombre_sin_ext, "POBLACION": resultado_ordenado},
                 f, indent=2, ensure_ascii=False,

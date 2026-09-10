@@ -8,7 +8,7 @@ import pandas as pd
 from ftp.config import (
     UNIDADES_FINALES, UNIDADES_PREVIOS, CLAVE_UNIDADES, NOMBREUNIDADESARCHIVO
 )
-from ftp.config import RUTA_POBLACION
+from ftp.config import ruta_poblacion
 from ftp.services.ftp_conectar import conectar_ftp, desconectar_ftp
 
 
@@ -38,7 +38,7 @@ def ExtraerInformacionPrevia(informacionReportes, ano, mes, semana, meses_mapeo=
     try:
         for repo, infoRepo in informacionReportes.items():
             if infoRepo.get('modo') == 'JSON_POBLACION':
-                ExtraerPBDesdeJSON(repo, infoRepo, diccionarioPrevio, logErrores)
+                ExtraerPBDesdeJSON(repo, infoRepo, diccionarioPrevio, logErrores, ano)
                 continue
 
             prefRepor = repo[:2]
@@ -222,9 +222,9 @@ def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionari
             diccionarioGlobal[nombre_final][repo] = None
 
 
-def ExtraerPBDesdeJSON(repo, infoReporte, diccionarioGlobal, logErrores=None):
+def ExtraerPBDesdeJSON(repo, infoReporte, diccionarioGlobal, logErrores=None, anio=None):
     try:
-        with open(RUTA_POBLACION, encoding='utf-8') as f:
+        with open(ruta_poblacion(anio), encoding='utf-8') as f:
             poblacion = json.load(f).get("POBLACION", {})
     except FileNotFoundError:
         for unidad in diccionarioGlobal:

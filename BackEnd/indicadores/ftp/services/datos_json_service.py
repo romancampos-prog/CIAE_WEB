@@ -9,8 +9,8 @@ from pathlib import Path
 from ftp.config import RUTA_DATA_FTP
 
 MESES_NOMBRES = [
-    "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
-    "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ]
 
 
@@ -23,7 +23,7 @@ def _ruta_json(indicador: str, ano: str) -> Path:
 
 def _ruta_semana_json(indicador: str, ano: str) -> Path:
     nombre = indicador.replace(" ", "_") + f"_{ano}_semana.json"
-    return RUTA_DATA_FTP / "semanal" / nombre
+    return RUTA_DATA_FTP / ano / "SEMANAL" / nombre
 
 
 def meses_con_datos(indicador: str, ano: str) -> list:
@@ -93,10 +93,10 @@ def leer_mes_guardado(indicador: str, ano: str, mes: str):
         return _normalizar_para_leer(definitivo["MESES"][mes_nombre]), False, None
 
     semanal     = leer_semana_indicador(indicador, ano)
-    mes_semanal = semanal.get("MESES", {}).get(mes_nombre)
+    mes_semanal = semanal.get("MES", {}).get(mes_nombre)
     if mes_semanal:
-        semana_num = mes_semanal.get("semana")
-        unidades   = {k: v for k, v in mes_semanal.items() if k != "semana"}
+        semana_num = semanal.get("SEMANA")
+        unidades   = mes_semanal
         return _normalizar_para_leer(unidades), True, semana_num
 
     return None, False, None
@@ -112,7 +112,7 @@ def _ultimo_mes_disponible(indicador: str, ano: str):
     semanal = leer_semana_indicador(indicador, ano)
     meses += [
         str(MESES_NOMBRES.index(m) + 1).zfill(2)
-        for m in semanal.get("MESES", {}) if m in MESES_NOMBRES
+        for m in semanal.get("MES", {}) if m in MESES_NOMBRES
     ]
 
     return max(meses, key=int) if meses else None
@@ -211,11 +211,11 @@ def borrar_semana_del_mes(indicador: str, ano: str, mes: str) -> None:
     except Exception:
         return
 
-    if mes_nombre not in json_data.get("MESES", {}):
+    if mes_nombre not in json_data.get("MES", {}):
         return
-    del json_data["MESES"][mes_nombre]
+    del json_data["MES"][mes_nombre]
 
-    if json_data["MESES"]:
+    if json_data["MES"]:
         with open(ruta, "w", encoding="utf-8") as f:
             json.dump(json_data, f, ensure_ascii=False, indent=2)
     else:
@@ -230,12 +230,14 @@ def guardar_semana_en_json(indicador: str, ano: str, mes: str, semana: str, dato
         with open(ruta, encoding="utf-8") as f:
             json_data = json.load(f)
     else:
-        json_data = {"INDICADOR": indicador, "ANO": ano, "MESES": {}}
+        json_data = {"INDICADOR": indicador, "ANIO": ano, "SEMANA": int(semana), "MES": {}}
+
+    json_data["SEMANA"] = int(semana)
 
     idx = int(mes) - 1
     if 0 <= idx < len(MESES_NOMBRES):
         mes_nombre = MESES_NOMBRES[idx]
-        json_data["MESES"][mes_nombre] = {"semana": int(semana), **_normalizar_para_guardar(datos)}
+        json_data["MES"][mes_nombre] = _normalizar_para_guardar(datos)
 
     with open(ruta, "w", encoding="utf-8") as f:
         json.dump(json_data, f, ensure_ascii=False, indent=2)

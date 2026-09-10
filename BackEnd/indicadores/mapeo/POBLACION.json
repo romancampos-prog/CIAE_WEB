@@ -1,0 +1,45 @@
+{
+  "hoja": "Grupo de Edad MF",
+  "fila_grupos": 11,
+  "fila_encabezados": 12,
+  "delegacion_filtro": "Guanajuato",
+  "columnas_unicas": {
+    "delegacion": "Delegación",
+    "unidad": "Unidad"
+  },
+  "encabezados_edad": [
+    "Total", "<1", "1", "2", "3", "4", "1 a 4", "5", "6", "7", "8", "9",
+    "5 a 9", "10 a 14", "15 a 19", "20 a 24", "25  a 29", "30 a 34",
+    "35 a 39", "40 a 44", "45 a 49", "50 a 54", "55 a 59", "60 a 64",
+    "65 a 69", "70 a 74", "75 a 79", "80 a 84", "85 y más", "No especificada"
+  ],
+  "bloques_edad": {
+    "Todos":   { "etiqueta_grupo": "Total Géneros" },
+    "Hombres": { "etiqueta_grupo": "Hombres" },
+    "Mujeres": { "etiqueta_grupo": "Mujeres" }
+  },
+  "alias": {
+    "total ooad":                    "TOTAL OOAD",
+    "umfh 11 s. miguel allende":     "UMFH 11 S.MIGUEL ALLEND",
+    "hgzmf 2 irapuato":              "HGSMF 2 IRAPUATO",
+    "umf 16 s. cruz juventino":      "UMF 16 S.CRUZ JUVENTINO",
+    "umf 5 comonfort":               "UMF 05 COMONFORT",
+    "hgsmf 15 moroleón":             "HGSMF 15 MOROLEON",
+    "umfh 8 salvatierra":            "UMFH 08 SALVATIERRA",
+    "hgzmf 3 salamanca":             "HGZMF 03 SALAMANCA",
+    "umfh 9 penjamo":                "UMFH 09 PENJAMO",
+    "hgzmf 21 león":                 "HGZMF 21 LEON",
+    "umf 47 león":                   "UMF 47",
+    "umf 53 león":                   "UMF 53",
+    "umf 60 los naranjos":           "UMF 60 LEON",
+    "hgsmf 7 sn. fco. del rincón":  "HGSMF 07 SN FCO DEL RINCO",
+    "umf 27 purísima":               "UMF 27 PURISIMA",
+    "umf 19 v. santiago":            "UMF 19 V.SANTIAGO",
+    "hgsmf 20 s. luis paz":          "HGSMF 20 S.LUIS PAZ",
+    "umf 30 s. felipe":              "UMF 30 S.FELIPE",
+    "umf 38 s. josé iturbide":       "UMF 38 S.JOSE ITURBIDE",
+    "umf 25 jaral de berrios":       "UMF 25 JARAL BERRIO",
+    "umf 29 san diego de la unión":  "UMF 29",
+    "umf 51 león":                   "UMF 51 LEON"
+  }
+}

@@ -14,12 +14,13 @@ router = APIRouter()
 
 @router.get("/poblacion/archivo-actual")
 async def obtener_archivo_poblacion_actual(
+    anio: str | None = None,
     payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "trabajador_IAAS", "visitante"))
 ):
     return ApiResponse(
         success=True,
         message="Archivo de población actual",
-        data={"nombre_sin_ext": obtener_ultimo_archivo_poblacion()},
+        data={"nombre_sin_ext": obtener_ultimo_archivo_poblacion(anio)},
     )
 
 
@@ -27,6 +28,7 @@ async def obtener_archivo_poblacion_actual(
 async def subir_poblacion(
     archivo:  UploadFile = File(...),
     pesoArchivo: int     = Form(...),
+    anio: str | None     = Form(None),
     payload:  dict       = Depends(solo_roles("admin", "trabajador_ftp"))
 ):
     if not archivo.filename.endswith((".xlsx", ".xls")):
@@ -35,7 +37,7 @@ async def subir_poblacion(
     contenido = await archivo.read()
     if not validarPeso_Archivo(contenido, pesoArchivo):
         raise HTTPException(status_code=413, detail="Archivo demasiado grande o tamaño inconsistente")
-    resultado = procesar_archivo_poblacion(contenido, archivo.filename)
+    resultado = procesar_archivo_poblacion(contenido, archivo.filename, anio)
 
     if not resultado["ok"]:
         raise HTTPException(status_code=422, detail=resultado["detalle"])
