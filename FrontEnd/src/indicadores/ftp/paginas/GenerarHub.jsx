@@ -20,6 +20,7 @@ const UploadIcon = () => (
 const GenerarHub = () => {
   const navigate = useNavigate();
   const { puedeGenFTP, puedeGenIAAS } = useRol();
+  const puedeGenExtractor = puedeGenFTP; // mismo permiso que ftp -- back usa el mismo rol
 
   useEffect(() => { document.title = 'Generar | CIAE'; }, []);
 
@@ -63,6 +64,18 @@ const GenerarHub = () => {
             color="gold"
             disabled={!puedeGenIAAS}
             onClick={() => navigate('/CIAE/IndicadoresMedicos/IAAS/Reporte')}
+          >
+            <UploadIcon />
+          </NavCard>
+
+          <NavCard
+            titulo="Extractor"
+            eyebrow="SUI-13"
+            desc="Sube el SUI-13 mes a mes y sigue el avance hacia el corte semestral de EH 03 y DM 04."
+            chips={['EH 03', 'DM 04']}
+            color="tinto"
+            disabled={!puedeGenExtractor}
+            onClick={() => navigate('/CIAE/IndicadoresMedicos/Extractor/Generar')}
           >
             <UploadIcon />
           </NavCard>
