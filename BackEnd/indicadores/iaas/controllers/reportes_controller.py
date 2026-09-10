@@ -40,9 +40,10 @@ async def IAAS_meses_guardados(
     if not data:
         return ApiResponse(success=True, message="Sin datos guardados", data={"meses": []})
 
+    meses_guardados = {m.upper() for m in data.get("MESES", {})}
     meses = sorted(
         num for nombre, num in _NOMBRE_A_NUM_IAAS.items()
-        if nombre in data.get("MESES", {})
+        if nombre in meses_guardados
     )
     return ApiResponse(success=True, message="Meses guardados obtenidos", data={"meses": meses})
 

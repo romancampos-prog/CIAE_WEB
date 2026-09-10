@@ -10,7 +10,18 @@ reportesApi = APIRouter()
 
 #Get Indicadores/reporte/Indicador)
 @reportesApi.get("/{indicador}")
-async def Obtener_Indicador(payload: IndicadorRequest):
+async def Obtener_Indicador(
+    indicador: str,
+    ano: str,
+    modulo: str | None = None,
+    previos: bool = False,
+    mensual: bool = False,
+    mensualAcumulado: bool = False,
+):
+    payload = IndicadorRequest(
+        indicador=indicador, ano=ano, modulo=modulo,
+        previos=previos, mensual=mensual, mensualAcumulado=mensualAcumulado,
+    )
     try:
         if (not payload.indicador or not payload.ano):
             raise HTTPException (

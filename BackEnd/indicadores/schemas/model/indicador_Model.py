@@ -21,7 +21,7 @@ class ReporteIndicador(BaseModel):
     ANIO:         int
     MESES:        Dict[str, Dict[str, UnidadDatos]]
     SEMANA:       ReportePrevio | None = None
-    MENSUAL_ACUMULADO: Dict[str, Dict[str, UnidadDatos]] | None
+    MENSUAL_ACUMULADO: Dict[str, Dict[str, UnidadDatos]] | None = None
     
 
 #---------------------------------------------------
@@ -43,6 +43,8 @@ class InfoIndicador(BaseModel):
     mostrarGenerar: bool
     mostrarGrafica: bool
     previos: bool
+    mensual: bool = False
+    mensualAcumulado: bool = False
     periodicidad: str
     informacion: InformacionFicha
     semaforo: Dict[str,Semaforo] | Semaforo

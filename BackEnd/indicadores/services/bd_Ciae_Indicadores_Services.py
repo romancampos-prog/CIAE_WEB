@@ -7,6 +7,7 @@ from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePr
 from configs.settings import DATA_INDICADORES
 from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
+from shared.MESES_ACUMULADOS import MensualAcumulado
 
 #ruta  a la BD_CIAE 
 
@@ -61,7 +62,8 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
         logging.error(f"El json y reporte existen, pero no coincide con el indicador o año solicitado")
         return None
         
-    if (payload.previos):
+    #si previos true, cuneta con reporte semanal y si es ftp al mismo timepo 
+    if (payload.previos and payload.modulo == "ftp"):
         rutaIndicadorPrevio = IndicadorExiste(payload.indicador, payload.ano, payload.previos) #en payload previos si el indicador si contiene reportes semanales ´previos debria estar en true 
         if (not rutaIndicadorPrevio):return reporte #si no existe el reporte previo, retornamos el reporte normal sin previo
         with open(rutaIndicadorPrevio, "r", encoding = "utf-8") as archivoJsonPrevio:
@@ -74,6 +76,19 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
         #el reporte previo solo peude ser del mes siguiente no peude ser de dos mese siguientes
         if(  ultimoMesReporte + 2 > mesPrevio > ultimoMesReporte): 
             reporte.SEMANA = reportePrevio
+            
+    
+    # si el modulo tiene mensual acumualdo true y es del modulo de iaas   
+    if (payload.mensualAcumulado and payload.modulo == "iaas"):
+        reporteAcumulado = MensualAcumulado(reporte.MESES, payload.indicador)
+        
+        if(not reporteAcumulado):
+            logging.error("El mensual acumulado no calculo nada")
+            return reporte
+        reporte.MENSUAL_ACUMULADO = reporteAcumulado
+        return reporte
+
+        
     
     return reporte    
     

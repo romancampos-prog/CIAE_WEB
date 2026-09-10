@@ -22,7 +22,7 @@ def leer_indicador_anio(anio: str, ind_n: int) -> dict:
     if not _anio_valido(anio):
         print(f"[IAAS JSON] Año inválido, se ignora: {anio!r}")
         return {}
-    ruta = RUTA_DATA_IAAS / str(anio) / f"IAAS_0{ind_n}.json"
+    ruta = RUTA_DATA_IAAS / str(anio) / "IAAS" / f"IAAS_0{ind_n}.json"
     if not ruta.exists():
         return {}
     try:
@@ -37,7 +37,7 @@ def escribir_indicador_anio(anio: str, ind_n: int, data: dict) -> None:
     """Guarda el JSON completo de IAAS_0N para ese año, creando la carpeta si falta."""
     if not _anio_valido(anio):
         raise ValueError(f"Año inválido: {anio!r}")
-    ruta = RUTA_DATA_IAAS / str(anio)
+    ruta = RUTA_DATA_IAAS / str(anio) / "IAAS"
     ruta.mkdir(parents=True, exist_ok=True)
     with open(ruta / f"IAAS_0{ind_n}.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

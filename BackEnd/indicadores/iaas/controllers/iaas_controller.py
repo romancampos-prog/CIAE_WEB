@@ -69,14 +69,14 @@ async def get_sesion(
     for ind_n in range(1, 7):
         ind_key   = f"IAAS 0{ind_n}"
         d         = leer_indicador_anio(anio, ind_n)
-        mes_data  = d.get("MESES", {}).get(mes_nombre.upper(), {})
+        mes_data  = d.get("MESES", {}).get(mes_nombre, {})
         if not mes_data:
             continue
-        for unidad, vals in mes_data.get("DATOS", {}).items():
+        for unidad, vals in mes_data.items():
             if unidad == "TOTAL_OOAD":
                 continue
-            numeradores_guardados.setdefault(unidad, {})[ind_key]  = vals.get("NUMERADOR")
-            denominadores_guardados.setdefault(unidad, {})[ind_key] = vals.get("DENOMINADOR")
+            numeradores_guardados.setdefault(unidad, {})[ind_key]  = vals.get("numerador")
+            denominadores_guardados.setdefault(unidad, {})[ind_key] = vals.get("denominador")
 
     if not numeradores_guardados and not pendientes:
         return ApiResponse(success=True, message="Sin sesión para este período", data=None)

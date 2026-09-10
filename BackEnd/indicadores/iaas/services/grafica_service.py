@@ -47,12 +47,12 @@ def _calcular_indicador_iaas(anio: str, ind_n: int) -> dict:
         if not mes_str:
             continue
         mes_num = int(mes_str)
-        for unidad, vals in mes_data.get("DATOS", {}).items():
+        for unidad, vals in mes_data.items():
             unidad = _ALIAS_A_CANONICO_IAAS.get(unidad, unidad)
-            n_v   = vals.get("NUMERADOR")
-            d_v   = vals.get("DENOMINADOR")
-            t_v   = vals.get("TASA")
-            color = (vals.get("COLOR") or "Bajo").capitalize()
+            n_v   = vals.get("numerador")
+            d_v   = vals.get("denominador")
+            t_v   = vals.get("%")
+            color = vals.get("desempeno") or "Bajo"
             all_months.setdefault(mes_num, {})[unidad] = {"numerador": n_v, "denominador": d_v}
             if n_v is not None or t_v is not None or d_v is not None:
                 meses_set.add(mes_str)
@@ -98,7 +98,7 @@ def calcular_datos_grafica_iaas(anio: str) -> dict:
 
     for ind_n in range(1, 7):
         ind_key = f"IAAS 0{ind_n}"
-        archivo = RUTA_DATA_IAAS / str(anio) / f"IAAS_0{ind_n}.json"
+        archivo = RUTA_DATA_IAAS / str(anio) / "IAAS" / f"IAAS_0{ind_n}.json"
         resultado = obtener_o_calcular(
             _CACHE_IAAS, (ind_key, anio), [archivo],
             lambda anio=anio, ind_n=ind_n: _calcular_indicador_iaas(anio, ind_n),

@@ -26,7 +26,10 @@ _OPERADORES = {
     ">":  operator.gt,
     "==": operator.eq,
 }
-_RE_UMBRAL = re.compile(r'^\s*(<=|>=|<|>|==)\s*(-?\d+(?:\.\d+)?)\s*$')
+_RE_UMBRAL           = re.compile(r'^\s*(<=|>=|<|>|==)\s*(-?\d+(?:\.\d+)?)\s*$')
+_RE_UMBRAL_COMPUESTO = re.compile(
+    r'^\s*(<=|>=|<|>|==)\s*(-?\d+(?:\.\d+)?)\s*(a|o)\s*(<=|>=|<|>|==)\s*(-?\d+(?:\.\d+)?)\s*$'
+)
 
 
 def es_formato_explicito(metas: dict) -> bool:
@@ -40,6 +43,29 @@ def _parsear_umbral(valor):
     if not m:
         raise ValueError(f"Umbral con formato inválido: {valor!r}")
     return _OPERADORES[m.group(1)], float(m.group(2))
+
+
+def _condicion_de_umbral(valor):
+    """
+    Devuelve una funcion resultado -> bool que dice si 'resultado' cumple el umbral.
+    Soporta el formato simple de _parsear_umbral ("<= 1.7") y ademas los rangos
+    compuestos que usa IAAS:
+      - "a" = Y logico, rango cerrado:  ">= 4 a <= 7"  -> 4 <= resultado <= 7
+      - "o" = O logico, fuera de rango: "< 1 o > 7"    -> resultado < 1 o resultado > 7
+    """
+    texto = str(valor)
+
+    m = _RE_UMBRAL_COMPUESTO.match(texto)
+    if m:
+        op1_txt, val1_txt, conector, op2_txt, val2_txt = m.groups()
+        op1, val1 = _OPERADORES[op1_txt], float(val1_txt)
+        op2, val2 = _OPERADORES[op2_txt], float(val2_txt)
+        if conector == "a":
+            return lambda r: op1(r, val1) and op2(r, val2)
+        return lambda r: op1(r, val1) or op2(r, val2)  # "o"
+
+    op, val = _parsear_umbral(texto)
+    return lambda r: op(r, val)
 
 
 def numero_de_umbral(valor):
@@ -66,14 +92,12 @@ def evaluar_color(resultado: float, metas: dict) -> str:
 
 def _evaluar_explicito(resultado: float, metas: dict) -> str:
     if "Esperado" in metas:
-        op, val = _parsear_umbral(metas["Esperado"])
-        if op(resultado, val):
+        if _condicion_de_umbral(metas["Esperado"])(resultado):
             return "Esperado"
 
     for clave in ("Bajo", "Alto"):
         if clave in metas:
-            op, val = _parsear_umbral(metas[clave])
-            if op(resultado, val):
+            if _condicion_de_umbral(metas[clave])(resultado):
                 return "Bajo"
 
     return "Medio"

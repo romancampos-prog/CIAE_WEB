@@ -50,7 +50,9 @@ def AllIndicadores() -> list[IndicesIndicadores]:
         logging.error(f"La ruta de mapeo de indicadores no existe: {_RUTA_MAPEO}")
         raise FileNotFoundError(f"La ruta de mapeo de indicadores no existe: {_RUTA_MAPEO}")
     
-    categoriaIndicadores = [archivo.stem for archivo in _RUTA_MAPEO.glob("*.json")]
+    # POBLACION.json no es una familia de indicadores -- es la config de columnas
+    # del Excel de población, se excluye del glob.
+    categoriaIndicadores = [archivo.stem for archivo in _RUTA_MAPEO.glob("*.json") if archivo.stem != "POBLACION"]
     
     indicesIndicadores = []
     

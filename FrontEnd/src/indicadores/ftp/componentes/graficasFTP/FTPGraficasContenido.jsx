@@ -33,9 +33,9 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
 
   const {
     anio, indSel, indInfo,
-    datos, unidadSel, setUnidadSel,
+    reporte, unidadSel, setUnidadSel,
     cargando, descargando, vistaGrafica, setVistaGrafica,
-    mesSel, setMesSel,
+    mesSel, setMesSel, mesesDisponibles,
     chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes, unidadesStatus,
     cumplimientoMes, cumplimientoUltimoMes,
@@ -85,10 +85,10 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
           )}
           {indInfo && infoAbierta && (
             <div className="ig-desc-panel" style={{ '--ic': indColor }}>
-              <p className="ig-desc-titulo">{indInfo.titulo}</p>
+              <p className="ig-desc-titulo">{indInfo.informacion.titulo}</p>
               <div className="ig-desc-meta">
-                <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.descripcionNumerador}</span>
-                <span className="ig-desc-row"><span className="ig-desc-label">Den</span>{indInfo.descripcionDenominador}</span>
+                <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.informacion.descNum}</span>
+                <span className="ig-desc-row"><span className="ig-desc-label">Den</span>{indInfo.informacion.descDen}</span>
               </div>
             </div>
           )}
@@ -111,7 +111,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
       )}
 
       {/* ── Skeleton (solo primera carga, sin datos previos que mostrar) ── */}
-      {cargando && !datos && (
+      {cargando && !reporte && (
         <div className="ig-skeleton">
           {[180, 260, 220, 300, 240, 280, 200, 320, 190, 270].map((h, i) => (
             <div key={i} className="ig-skeleton-bar" style={{ height: `${h}px` }} />
@@ -120,7 +120,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
       )}
 
       {/* ── Sin datos ── */}
-      {!cargando && (!datos || datos.meses_con_datos?.length === 0) && indSel && (
+      {!cargando && (!reporte || mesesDisponibles.length === 0) && indSel && (
         <div className="ig-empty">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/>
@@ -130,7 +130,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
       )}
 
       {/* ── Gráfica ── */}
-      {datos?.meses_con_datos?.length > 0 && (
+      {mesesDisponibles.length > 0 && (
         <div className="ig-chart-card" style={{ opacity: cargando ? 0.55 : 1, transition: 'opacity 0.15s' }}>
 
           <CumplimientoTile
@@ -146,7 +146,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               <div className="ig-unit-panel ig-unit-panel--mes">
                 <p className="ig-unit-list-title">Mes</p>
                 <div className="ig-unit-list">
-                  {datos?.meses_con_datos?.map(m => (
+                  {mesesDisponibles.map(m => (
                     <button
                       key={m}
                       className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}

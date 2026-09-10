@@ -137,12 +137,12 @@ def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
                 continue
             datos_mes = {
                 unit: {
-                    "numerador":   v.get("NUMERADOR"),
-                    "denominador": v.get("DENOMINADOR"),
-                    "tasa":        v.get("TASA"),
-                    "color":       (v.get("COLOR") or "Bajo").capitalize(),
+                    "numerador":   v.get("numerador"),
+                    "denominador": v.get("denominador"),
+                    "tasa":        v.get("%"),
+                    "color":       v.get("desempeno") or "Bajo",
                 }
-                for unit, v in mes_data.get("DATOS", {}).items()
+                for unit, v in mes_data.items()
             }
             if datos_mes:
                 h_ind[m] = datos_mes

@@ -1,9 +1,8 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
 import { useRol } from '../../../auth/hooks/useRol';
-import { getAllIndicadores } from '../api/indicadores';
+import { obtenerTodosLosIndicadores } from '../../shared/api/indicadoresInfo';
 import { CAT_COLOR } from '../constantes/colores';
-import { INDICADORES as IAAS_INDS } from '../../iaas/constantes/colores';
 import FTPGraficasContenido from '../componentes/graficasFTP/FTPGraficasContenido';
 import IAASGraficasContenido from '../../iaas/componentes/IAASGraficasContenido';
 import './ftp.css';
@@ -25,8 +24,6 @@ const CAT_ICON = {
   IAAS: iconoIaas,
 };
 
-const IAAS_COLOR = '#1a5276';
-
 const MenuIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="3" y1="6"  x2="21" y2="6"/>
@@ -39,28 +36,27 @@ const GraficasUnificadasPage = () => {
   const { esVisitante } = useRol();
   const [indSel, setIndSel]       = useState('');
   const [drawerOpen, setDrawer]   = useState(false);
-  const [ftpLista, setFtpLista]   = useState({});
+  const [todosLosIndicadores, setTodosLosIndicadores] = useState([]);
 
   const modulo = indSel.startsWith('IAAS') ? 'iass' : 'ftp';
 
   useEffect(() => {
     document.title = 'Gráficas | CIAE';
-    getAllIndicadores()
-      .then(res => {
-        const lista = res?.data ?? {};
-        setFtpLista(lista);
-        const primero = Object.values(lista)[0]?.indicadores?.[0];
+    obtenerTodosLosIndicadores()
+      .then(lista => {
+        const arr = lista ?? [];
+        setTodosLosIndicadores(arr);
+        const primero = arr[0]?.indicadores?.[0];
         if (primero) setIndSel(prev => prev || primero);
       })
       .catch(() => {});
   }, []);
 
-  const todosGrupos = useMemo(() => [
-    ...Object.entries(ftpLista).map(([cat, data]) => ({
-      cat, color: CAT_COLOR[cat] ?? '#0b5445', inds: data.indicadores ?? [],
-    })),
-    { cat: 'IAAS', color: IAAS_COLOR, inds: IAAS_INDS },
-  ], [ftpLista]);
+  // El indice ya viene unificado del backend (ftp e IAAS por igual, con su
+  // propio color) -- no hay que separar IAAS a mano ni duplicar su catalogo.
+  const todosGrupos = useMemo(() => todosLosIndicadores.map(({ categoriaIndicador, indicadores, color }) => ({
+    cat: categoriaIndicador, color: color || CAT_COLOR[categoriaIndicador] || '#0b5445', inds: indicadores ?? [],
+  })), [todosLosIndicadores]);
 
   const indColor = useMemo(() => {
     for (const { inds, color } of todosGrupos) {

@@ -4,7 +4,6 @@ Persiste los datos en JSON por indicador (sesion/{anio}/IAAS_0N.json).
 Usado en: iass/controllers/iaas_controller.py, iass/controllers/reportes_controller.py
 """
 import base64
-import datetime
 from pathlib import Path
 
 from iaas.config import RUTA_DATA_IAAS
@@ -13,9 +12,9 @@ from iaas.services.extraccion_service import calcular_IAAS
 from iaas.services.datos_json_service import leer_indicador_anio, escribir_indicador_anio, _anio_valido
 
 MESES_NOMBRE = {
-    "01": "ENERO",  "02": "FEBRERO",   "03": "MARZO",    "04": "ABRIL",
-    "05": "MAYO",   "06": "JUNIO",     "07": "JULIO",    "08": "AGOSTO",
-    "09": "SEPTIEMBRE", "10": "OCTUBRE", "11": "NOVIEMBRE", "12": "DICIEMBRE",
+    "01": "Enero",  "02": "Febrero",   "03": "Marzo",    "04": "Abril",
+    "05": "Mayo",   "06": "Junio",     "07": "Julio",    "08": "Agosto",
+    "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre",
 }
 
 
@@ -50,25 +49,19 @@ def _calcular_indicadores_pendientes(datos: dict, numerador: dict) -> tuple[list
 
 def _guardar_sesion_json(anio: str, mes: str, datos: dict) -> None:
     mes_nombre = MESES_NOMBRE.get(mes, mes)
-    generado   = datetime.datetime.now().isoformat(timespec="seconds")
 
     for ind_key, ind_datos in datos.items():
         ind_n     = int(ind_key[-2:])
         json_data = leer_indicador_anio(anio, ind_n) or {"INDICADOR": ind_key, "ANIO": anio, "MESES": {}}
 
-        datos_mes = {
+        json_data["MESES"][mes_nombre] = {
             unit: {
-                "NUMERADOR":   vals.get("numerador"),
-                "DENOMINADOR": vals.get("denominador"),
-                "TASA":        vals.get("tasa"),
-                "COLOR":       (vals.get("color") or "Bajo").upper(),
+                "numerador":   vals.get("numerador"),
+                "denominador": vals.get("denominador"),
+                "%":           vals.get("tasa"),
+                "desempeno":   vals.get("color") or "Bajo",
             }
             for unit, vals in ind_datos.items()
-        }
-
-        json_data["MESES"][mes_nombre] = {
-            "GENERADO": generado,
-            "DATOS":    datos_mes,
         }
 
         escribir_indicador_anio(anio, ind_n, json_data)
@@ -81,13 +74,13 @@ def _leer_sesion_mes(anio: str, mes_nombre: str) -> dict:
         d       = leer_indicador_anio(anio, ind_n)
         if not d:
             continue
-        mes_data = d.get("MESES", {}).get(mes_nombre.upper(), {}).get("DATOS", {})
+        mes_data = d.get("MESES", {}).get(mes_nombre, {})
         datos[ind_key] = {
             unit: {
-                "numerador":   v.get("NUMERADOR"),
-                "denominador": v.get("DENOMINADOR"),
-                "tasa":        v.get("TASA"),
-                "color":       (v.get("COLOR") or "Bajo").capitalize(),
+                "numerador":   v.get("numerador"),
+                "denominador": v.get("denominador"),
+                "tasa":        v.get("%"),
+                "color":       v.get("desempeno") or "Bajo",
             }
             for unit, v in mes_data.items()
         }
@@ -104,7 +97,7 @@ def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
     for ind_n in range(1, 7):
         ind_key = f"IAAS 0{ind_n}"
         d       = leer_indicador_anio(anio, ind_n)
-        datos_por_ind[ind_key] = d.get("MESES", {}).get(mes_nombre.upper(), {}).get("DATOS", {})
+        datos_por_ind[ind_key] = d.get("MESES", {}).get(mes_nombre, {})
 
     if not any(datos_por_ind.values()):
         return [], {}
@@ -115,7 +108,7 @@ def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
         for ind_n in range(1, 7):
             ind_key    = f"IAAS 0{ind_n}"
             datos_unit = datos_por_ind.get(ind_key, {}).get(unidad)
-            if datos_unit is None or datos_unit.get("DENOMINADOR") is None:
+            if datos_unit is None or datos_unit.get("denominador") is None:
                 inds_pend.append(ind_key)
         if inds_pend:
             pendientes_ind[unidad] = inds_pend
