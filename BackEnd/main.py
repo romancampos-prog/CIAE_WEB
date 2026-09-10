@@ -20,6 +20,7 @@ from auth.controllers.auth_controller import router as auth_router
 import iaas as iass_module
 import ftp as ftp_module
 import epidemiologia as epi_module
+import extractor as extractor_module
 from indicadores.Routes import indicadores_Route 
 from middleware.endPoints_Middleware import ErroresEndpointsMiddleware
 
@@ -57,6 +58,9 @@ for _router, _prefix in iass_module.ROUTERS:
     app.include_router(_router, prefix=_prefix)
     
 for _router, _prefix in epi_module.ROUTERS:
+    app.include_router(_router, prefix=_prefix)
+
+for _router, _prefix in extractor_module.ROUTERS:
     app.include_router(_router, prefix=_prefix)
 
 app.mount("/assets", StaticFiles(directory=os.path.join(DIST, "assets")), name="assets")
