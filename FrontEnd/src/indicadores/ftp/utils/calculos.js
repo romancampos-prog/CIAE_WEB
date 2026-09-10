@@ -79,56 +79,110 @@ export function etiquetaMesCorta(mesNum, indInfo, anio) {
 }
 
 /**
+ * Nombre del mes parcial en curso dentro de reporte.SEMANA, o null si no hay.
+ * SEMANA.MES trae una sola llave (el mes que todavia no cierra).
+ */
+function nombreMesSemana(reporte) {
+  const mesSemana = reporte?.SEMANA?.MES;
+  return mesSemana ? Object.keys(mesSemana)[0] : null;
+}
+
+/**
+ * Meses disponibles de un reporte (ReporteIndicador), en formato "MM" y
+ * ordenados -- los meses cerrados de MESES mas el mes parcial de SEMANA
+ * si existe y todavia no esta cerrado.
+ * @param {Object} reporte - Respuesta de /Indicadores/reportes/{indicador}
+ * @returns {string[]}
+ */
+export function mesesDisponiblesDeReporte(reporte) {
+  if (!reporte?.MESES) return [];
+
+  const cerrados = Object.keys(reporte.MESES)
+    .map(nombre => MESES_LARGOS_ARR.indexOf(nombre) + 1)
+    .filter(n => n > 0)
+    .map(n => String(n).padStart(2, '0'));
+
+  const nombreSemana = nombreMesSemana(reporte);
+  const mesSemana    = nombreSemana ? MESES_LARGOS_ARR.indexOf(nombreSemana) + 1 : -1;
+  const mesSemanaStr = mesSemana > 0 ? String(mesSemana).padStart(2, '0') : null;
+
+  const todos = mesSemanaStr && !cerrados.includes(mesSemanaStr)
+    ? [...cerrados, mesSemanaStr]
+    : cerrados;
+
+  return todos.sort();
+}
+
+/**
  * Construye los puntos de la gráfica de tendencia mensual para una unidad FTP.
- * Soporta datos semanales (campo `semana` en el registro) e indicadores
- * trimestrales acumulados (etiqueta "Ene - Mar" en vez de "Mar").
- * @param {Object} datos - Datos crudos de la API (meses_con_datos, datos por unidad)
+ * Incluye el mes parcial en curso (reporte.SEMANA) al final si existe, e
+ * indicadores trimestrales acumulados (etiqueta "Ene - Mar" en vez de "Mar").
+ * @param {Object} reporte - Respuesta de /Indicadores/reportes/{indicador}
  * @param {string} unidadSel - Clave de la unidad seleccionada
  * @param {Object|null} [indInfo] - Ficha del indicador (para detectar periodicidad trimestral)
  * @param {string|number} [anio] - Año seleccionado (para el rótulo de Ene/Feb en ventana móvil)
  * @returns {Array<{mes:string, mesNum:number, tasa:number, numerador:number, denominador:number, color:string, esSemana:boolean, semana:number|null}>}
  */
-export function buildFTPChartDataUnidad(datos, unidadSel, indInfo, anio) {
-  if (!datos || !unidadSel || !datos.meses_con_datos?.length) return [];
-  const arr = datos.datos?.[unidadSel] ?? [];
-  return datos.meses_con_datos.map(mes => {
-    const reg      = arr.find(r => r.mes === mes);
-    const esSemana = !!reg?.semana;
-    const mesNum   = parseInt(mes);
-    const etiqueta = etiquetaMes(mesNum, indInfo, anio);
+export function buildFTPChartDataUnidad(reporte, unidadSel, indInfo, anio) {
+  if (!reporte?.MESES || !unidadSel) return [];
+
+  const mesSemanaStr = (() => {
+    const nombreSemana = nombreMesSemana(reporte);
+    const n = nombreSemana ? MESES_LARGOS_ARR.indexOf(nombreSemana) + 1 : -1;
+    return n > 0 ? String(n).padStart(2, '0') : null;
+  })();
+
+  return mesesDisponiblesDeReporte(reporte).map(mes => {
+    const mesNum    = parseInt(mes, 10);
+    const esSemana  = mes === mesSemanaStr;
+    const nombreMes = MESES_LARGOS_ARR[mesNum - 1];
+    const dato      = esSemana
+      ? reporte.SEMANA.MES[nombreMes]?.[unidadSel]
+      : reporte.MESES[nombreMes]?.[unidadSel];
+    const etiqueta  = etiquetaMes(mesNum, indInfo, anio);
+    const semana    = esSemana ? reporte.SEMANA.SEMANA : null;
+
     return {
-      mes:         esSemana ? `S${reg.semana}·${etiqueta}` : etiqueta,
+      mes:         esSemana ? `S${semana}·${etiqueta}` : etiqueta,
       mesNum,
-      tasa:        reg?.tasa        ?? 0,
-      numerador:   reg?.numerador   ?? null,
-      denominador: reg?.denominador ?? null,
-      color:       reg?.color       ?? 'Gris',
+      tasa:        dato?.["%"]       ?? null,
+      numerador:   dato?.numerador   ?? null,
+      denominador: dato?.denominador ?? null,
+      color:       dato?.desempeno   ?? 'Gris',
       esSemana,
-      semana:      reg?.semana      ?? null,
+      semana,
     };
   });
 }
 
 /**
  * Construye los puntos de la gráfica de todas las unidades en un mes específico.
- * Garantiza que TOTAL aparece al final si existe.
- * @param {Object} datos - Datos crudos de la API
+ * Garantiza que TOTAL_OOAD aparece al final si existe. El orden de las demas
+ * unidades es el que ya trae el propio reporte (BD_CIAE ya las entrega en el
+ * orden del catalogo, con las que no tienen dato en Gris).
+ * @param {Object} reporte - Respuesta de /Indicadores/reportes/{indicador}
  * @param {string} mesSel - Mes seleccionado en formato "MM"
  * @returns {Array<{unidad:string, tasa:number, numerador:number, denominador:number, color:string}>}
  */
-export function buildFTPChartDataMes(datos, mesSel) {
-  if (!datos?.unidades || !mesSel) return [];
-  const rows = datos.unidades.map(u => {
-    const arr = datos.datos?.[u] ?? [];
-    const reg = arr.find(r => r.mes === mesSel);
-    return {
-      unidad:      u,
-      tasa:        reg?.tasa        ?? 0,
-      numerador:   reg?.numerador   ?? null,
-      denominador: reg?.denominador ?? null,
-      color:       reg?.color       ?? 'Gris',
-    };
-  });
+export function buildFTPChartDataMes(reporte, mesSel) {
+  if (!reporte?.MESES || !mesSel) return [];
+
+  const nombreMes = MESES_LARGOS_ARR[parseInt(mesSel, 10) - 1];
+  let unidadesMes = reporte.MESES[nombreMes];
+
+  if (!unidadesMes && nombreMesSemana(reporte) === nombreMes) {
+    unidadesMes = reporte.SEMANA.MES[nombreMes];
+  }
+  if (!unidadesMes) return [];
+
+  const rows = Object.entries(unidadesMes).map(([unidad, dato]) => ({
+    unidad,
+    tasa:        dato?.["%"]       ?? null,
+    numerador:   dato?.numerador   ?? null,
+    denominador: dato?.denominador ?? null,
+    color:       dato?.desempeno   ?? 'Gris',
+  }));
+
   const sinTotal = rows.filter(r => r.unidad !== 'TOTAL_OOAD');
   const total    = rows.find(r => r.unidad === 'TOTAL_OOAD');
   return total ? [...sinTotal, total] : sinTotal;
