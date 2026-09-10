@@ -62,6 +62,7 @@ esos datos crudos para llegar al resultado final.
 | `poblacionInfoSalud` | Se lee de `POBLACION.json`, por grupo de sexo y rango de edad | denominadores basados en población |
 | `xlsxWeb` | Un Excel que la persona sube manualmente por la web (no se busca solo) | numerador/denominador de IAAS |
 | `capturaWeb` | El número se captura a mano en un formulario, no viene de ningún archivo | denominador de IAAS 02-06 |
+| `extractor` | Excel crudo (fila por paciente/evento) que la persona sube CADA MES; el numerador de cada mes se acumula en el JSON del indicador, y el corte final (con denominador y semáforo) se dispara solo cuando se junta la ventana completa de meses que pide la periodicidad | EH 03, DM 04 (módulo `indicadores/extractor/`) |
 
 ## Valores de `modoExtraccion` (fuentes `ftp` / `xlsxWeb`)
 
@@ -72,9 +73,27 @@ esos datos crudos para llegar al resultado final.
 | `ULTIMA_FILA` | Toma el último valor numérico no vacío de una columna, a partir de una fila de encabezado | `hoja`, `columna_dato`, `encabezado` (número) |
 | `FILTRO_CONTEO` | Filtra filas por condiciones columna=valor, cuenta cuántas cumplen | `hoja`, `encabezado` (número), `filtroColumna` |
 | `FILTRO_UNIDAD_VALOR` | Igual que `FILTRO_CONTEO`, pero además ubica la fila de una unidad médica específica y toma el valor de una columna (no cuenta) | `hoja`, `encabezado`, `columnaUnidad`, `filtroColumna`, `tomarValor` |
+| `FILTRO_CONTEO_ACUMULADO` | Igual que `FILTRO_CONTEO`, pero agrupa el conteo por unidad médica (`agrupacion`) y lo guarda como el numerador de UN mes dentro del acumulado del indicador, en vez de calcular el resultado de una sola vez | `hoja`, `encabezado`, `agrupacion`, `filtroColumna`, `cruce` (opcional) |
 
 En `filtroColumna`, un valor que empieza con `^` (ej. `"^CIRUGIA"`) significa "la celda
-empieza con este texto", no coincidencia exacta.
+empieza con este texto", no coincidencia exacta. Además de esa forma simple (match exacto
+o `^prefijo`), `filtroColumna` acepta un objeto con `"tipo"` explícito, usado por
+`FILTRO_CONTEO_ACUMULADO`:
+
+- `{"tipo": "LISTA", "filtro": [...], "nombreColumna": "..."}` — la celda debe ser
+  exactamente uno de los valores de la lista.
+- `{"tipo": "RANGO", "filtro": [min, max], "nombreColumna": "..."}` — la celda debe ser
+  un número entre min y max, inclusive.
+
+`cruce` (solo en `FILTRO_CONTEO_ACUMULADO`) define una segunda vía de conteo: filas que no
+cumplen los códigos directos de `filtroColumna`, pero SON candidatas a validarse cruzando
+contra un segundo archivo del mismo mes (mismo paciente por `columnaLlave`, buscando en
+`columnasDiagnostico` alguno de los `codigosValidos`).
+- `activa`: si esta segunda vía aplica para este indicador.
+- `codigosCandidatos`: valores de la columna de diagnóstico que activan el cruce.
+- `archivoCruce`: nombre base del segundo archivo (mismo mes, subido junto con el principal).
+- `columnaLlave` / `columnasDiagnostico`: dónde buscar en el archivo de cruce.
+- `codigosValidos`: si alguna de esas columnas trae uno de estos códigos, el candidato cuenta.
 
 ## Marcadores especiales
 

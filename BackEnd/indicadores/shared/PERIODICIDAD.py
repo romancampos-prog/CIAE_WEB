@@ -6,5 +6,6 @@ PERIODICIDAD: list[str] = [
     "Mensual - Mensual Acumulado",
     "Mensual Anualizado",
     "Mensual Trimestralizado",
+    "Semestral Anualizado",
 ]
     

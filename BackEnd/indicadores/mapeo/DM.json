@@ -223,6 +223,79 @@
             "Bajo": "<= 49"
         }
     },
+    "DM 04": {
+        "fechaModificacion": "10/09/2026",
+        "imagen": "icono_dm.png",
+        "color": "#5c35a0",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Semestral Anualizado",
+        "informacion": {
+            "titulo": "DM 04 - Tasa de hospitalizaciones evitables por diabetes en población derechohabiente de 20 a 74 años",
+            "objetivo": "Medir el comportamiento de las hospitalizaciones potencialmente evitables por diabetes en derechohabientes de 20 a 74 años, con el propósito de conocer la magnitud de este problema de salud pública.",
+            "descNum": "Número de egresos hospitalarios por diabetes (códigos CIE-10: E10-E14) en población derechohabiente de 20 a 74 años",
+            "descDen": "Población Adscrita a Médico Familiar (PAMF) de 20 a 74 años"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor",
+                "hoja": "Hoja1",
+                "modoExtraccion": "FILTRO_CONTEO_ACUMULADO",
+                "encabezado": 1,
+                "agrupacion": "undadAdscripcion",
+                "columnaLlaveCruce": "numeroAfiliacion",
+                "filtroColumna": {
+                    "I": { "tipo": "RANGO", "filtro": [20, 74], "nombreColumna": "edadAnios" },
+                    "K": { "tipo": "LISTA", "filtro": [1, 2], "nombreColumna": "tipoIngreso" },
+                    "L": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            "E100", "E101", "E102", "E103", "E104", "E105", "E106", "E107", "E108", "E10X",
+                            "E110", "E111", "E112", "E113", "E114", "E115", "E116", "E117", "E118", "E11X",
+                            "E120", "E121", "E122", "E123", "E124", "E125", "E126", "E127", "E128", "E12X",
+                            "E130", "E131", "E132", "E133", "E134", "E135", "E136", "E137", "E138", "E13X",
+                            "E140", "E141", "E142", "E143", "E144", "E145", "E146", "E147", "E148", "E14X"
+                        ],
+                        "nombreColumna": "diagnosticoPrincipal"
+                    }
+                },
+                "cruce": {
+                    "activa": true,
+                    "codigosCandidatos": ["E161", "E162", "G590", "G632", "H280", "H281", "H360", "M142", "N083", "N180", "N188", "N189", "N18X", "N19X", "T383"],
+                    "archivoCruce": "EGRESOS_PACIENTES_DIARIA",
+                    "hoja": "Hoja1",
+                    "encabezado": 1,
+                    "columnaLlave": "AFILIACION",
+                    "columnasDiagnostico": ["AC", "AD", "AE", "AF", "AG", "AH"],
+                    "codigosValidos": [
+                        "E100", "E101", "E102", "E103", "E104", "E105", "E106", "E107", "E108", "E10X",
+                        "E110", "E111", "E112", "E113", "E114", "E115", "E116", "E117", "E118", "E11X",
+                        "E120", "E121", "E122", "E123", "E124", "E125", "E126", "E127", "E128", "E12X",
+                        "E130", "E131", "E132", "E133", "E134", "E135", "E136", "E137", "E138", "E13X",
+                        "E140", "E141", "E142", "E143", "E144", "E145", "E146", "E147", "E148", "E14X"
+                    ]
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Todos": ["20 a 24", "25  a 29", "30 a 34", "35 a 39", "40 a 44", "45 a 49", "50 a 54", "55 a 59", "60 a 64", "65 a 69", "70 a 74"]
+                }
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "sum(Todos)",
+                "resultado": "round((numerador / denominador) * 100000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": "<= 67.53",
+            "Medio": null,
+            "Bajo": "> 67.53"
+        }
+    },
     "DM 06": {
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_dm.png",

@@ -203,6 +203,63 @@
             "Esperado": ">= 85.2"
         }
     },
+    "EH 03": {
+        "fechaModificacion": "10/09/2026",
+        "imagen": "icono_eh.png",
+        "color": "#4e1224",
+        "modulo": "",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Semestral Anualizado",
+        "informacion": {
+            "titulo": "EH 03 - Tasa de hospitalizaciones evitables por hipertensión arterial en población derechohabiente de 20 a 74 años",
+            "objetivo": "Medir el comportamiento de las hospitalizaciones potencialmente evitables por hipertensión arterial en derechohabientes de 20 a 74 años, con el propósito de conocer la magnitud de este problema de salud pública.",
+            "descNum": "Número de egresos hospitalarios por hipertensión arterial (códigos CIE-10: I10-I13) en derechohabientes de 20 a 74 años",
+            "descDen": "Población Adscrita a Médico Familiar (PAMF) de 20 a 74 años"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor",
+                "hoja": "Hoja1",
+                "modoExtraccion": "FILTRO_CONTEO_ACUMULADO",
+                "encabezado": 1,
+                "agrupacion": "undadAdscripcion",
+                "columnaLlaveCruce": "numeroAfiliacion",
+                "filtroColumna": {
+                    "I": { "tipo": "RANGO", "filtro": [20, 74], "nombreColumna": "edadAnios" },
+                    "K": { "tipo": "LISTA", "filtro": [1, 2], "nombreColumna": "tipoIngreso" },
+                    "L": { "tipo": "LISTA", "filtro": ["I10X", "I110", "I119", "I120", "I129", "I130", "I131", "I132", "I139"], "nombreColumna": "diagnosticoPrincipal" }
+                },
+                "cruce": {
+                    "activa": true,
+                    "codigosCandidatos": ["I160", "I161", "I169", "N180", "N188", "N189", "N18X", "N19X"],
+                    "archivoCruce": "EGRESOS_PACIENTES_DIARIA",
+                    "hoja": "Hoja1",
+                    "encabezado": 1,
+                    "columnaLlave": "AFILIACION",
+                    "columnasDiagnostico": ["AC", "AD", "AE", "AF", "AG", "AH"],
+                    "codigosValidos": ["I10X", "I110", "I119", "I120", "I129", "I130", "I131", "I132", "I139"]
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Todos": ["20 a 24", "25  a 29", "30 a 34", "35 a 39", "40 a 44", "45 a 49", "50 a 54", "55 a 59", "60 a 64", "65 a 69", "70 a 74"]
+                }
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "sum(Todos)",
+                "resultado": "round((numerador / denominador) * 100000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": "<= 17.38",
+            "Medio": null,
+            "Bajo": "> 17.38"
+        }
+    },
     "EH 04": {
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_eh.png",
