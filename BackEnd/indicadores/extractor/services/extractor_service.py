@@ -13,13 +13,17 @@ viene descrito en su propio mapeo.
 """
 import io
 import json
+import xlsxwriter
 import pandas as pd
 from pathlib import Path
 
-from ftp.config import CLAVE_UNIDADES_F, ruta_poblacion
+from ftp.config import CLAVE_UNIDADES_F, NOMBREUNIDADESARCHIVO, ruta_poblacion
 from ftp.services.ftp_extraer import letra_a_numero
+from ftp.services.datos_json_service import leer_mes_guardado
+from ftp.services.generar_excel import ExcelFinalConPlantilla, obtener_estilos_excel
+from ftp.services.reporte_categoria import escribir_hoja_indicador
 from extractor.config import (
-    ruta_indicador_json, leer_mapeo_indicador,
+    ruta_indicador_json, leer_mapeo_indicador, MESES_ESTANDAR,
     MESES_CORTE_SEMESTRAL, ventana_corte, INDICADORES_EXTRACTOR,
 )
 from schemas.model.indicador_Model import ReporteIndicador, UnidadDatos
@@ -69,7 +73,33 @@ def _fila_cumple(fila, filtro_columna: dict) -> bool:
     return True
 
 
-def contar_filtro_conteo_acumulado(contenido_excel, config_numerador: dict) -> tuple[dict, list[dict]]:
+def _validar_mes_anio_archivo(df, anio: int, mes_nombre: str) -> None:
+    """
+    El SUI-13 trae sus propias columnas "mes"/"anio" (declaradas por quien lo
+    exporto, no necesariamente el mes real de cada ingreso -- pero sirven para
+    detectar el caso mas comun de error: subir el archivo de un mes mientras
+    se declara otro en el formulario). Se compara contra el valor que MAS SE
+    REPITE en el archivo (no exige que el 100% de las filas coincidan, porque
+    es normal que un archivo traiga algunas filas de un mes vecino).
+    """
+    if 'mes' not in df.columns or 'anio' not in df.columns:
+        return  # el archivo no trae estas columnas -- no se puede validar, se deja pasar
+
+    mes_num_declarado = MESES_ESTANDAR.index(mes_nombre) + 1
+    combinaciones = df[['mes', 'anio']].dropna()
+    if combinaciones.empty:
+        return
+
+    mes_mas_comun, anio_mas_comun = combinaciones.mode().iloc[0]
+    if int(mes_mas_comun) != mes_num_declarado or int(anio_mas_comun) != int(anio):
+        raise ValueError(
+            f"El archivo parece ser de {int(mes_mas_comun):02d}/{int(anio_mas_comun)} "
+            f"(según sus propias columnas mes/anio), pero declaraste {mes_nombre} {anio}. "
+            f"Revisa que sea el archivo correcto antes de subirlo."
+        )
+
+
+def contar_filtro_conteo_acumulado(contenido_excel, config_numerador: dict, anio: int | None = None, mes_nombre: str | None = None) -> tuple[dict, list[dict]]:
     """
     Filtra y cuenta el Excel del mes segun 'reporte.numerador' del mapeo.
 
@@ -87,6 +117,9 @@ def contar_filtro_conteo_acumulado(contenido_excel, config_numerador: dict) -> t
     cruce_cfg = config_numerador.get("cruce")
 
     df = pd.read_excel(contenido_excel, sheet_name=hoja, header=encabezado - 1)
+
+    if anio is not None and mes_nombre is not None:
+        _validar_mes_anio_archivo(df, anio, mes_nombre)
 
     # columna de agrupacion (ej. "undadAdscripcion") -> se busca por nombre en el encabezado real
     if col_agrupacion not in df.columns:
@@ -185,11 +218,15 @@ def _guardar_reporte(indicador: str, anio: int, reporte: dict) -> None:
 
 
 def guardar_numerador_mes(indicador: str, anio: int, mes_nombre: str, conteo_por_unidad: dict) -> None:
-    """Guarda (o reemplaza, si se re-sube el mismo mes) el numerador crudo de un mes."""
+    """
+    Guarda (o reemplaza, si se re-sube el mismo mes) el numerador crudo de un
+    mes -- siempre con las 46 unidades (mismo orden que NOMBREUNIDADESARCHIVO),
+    las que no tuvieron ningun caso ese mes quedan en 0, no ausentes.
+    """
     reporte = _leer_reporte(indicador, anio)
     reporte["MESES"][mes_nombre] = {
-        unidad: {"numerador": conteo, "desempeno": "Gris"}
-        for unidad, conteo in conteo_por_unidad.items()
+        unidad: {"numerador": conteo_por_unidad.get(unidad, 0), "desempeno": "Gris"}
+        for unidad in NOMBREUNIDADESARCHIVO
     }
     _guardar_reporte(indicador, anio, reporte)
 
@@ -224,7 +261,10 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
     ventana = ventana_corte(mes_nombre, anio)  # [(mes, anio), ...] x12
 
     reportes_cache: dict[int, dict] = {}
-    numerador_acumulado: dict[str, int] = {}
+    # arranca con las 46 unidades en cero, mismo orden que usan los demas
+    # reportes (NOMBREUNIDADESARCHIVO) -- si no, una unidad sin ningun caso en
+    # todo el año simplemente no aparecia en el corte, en vez de salir en 0.
+    numerador_acumulado: dict[str, int] = {unidad: 0 for unidad in NOMBREUNIDADESARCHIVO}
 
     for mes, anio_mes in ventana:
         if anio_mes not in reportes_cache:
@@ -236,7 +276,11 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
         for unidad, dato in datos_mes.items():
             numerador_acumulado[unidad] = numerador_acumulado.get(unidad, 0) + (dato.get("numerador") or 0)
 
-    denominador_por_unidad = _denominador_por_unidad(anio)
+    # Poblacion base del corte: Junio usa la del año anterior (el corte
+    # Jul[anio-1]-Jun[anio] cae mayormente en anio-1), Diciembre usa la del
+    # mismo año (corte Ene-Dic[anio]).
+    anio_poblacion = anio - 1 if mes_nombre == "Junio" else anio
+    denominador_por_unidad = _denominador_por_unidad(anio_poblacion)
     mapeo = leer_mapeo_indicador(indicador)
     formula_resultado = mapeo["reporte"]["operacion"]["resultado"]
 
@@ -344,7 +388,7 @@ def _procesar_archivo_mensual_indicador(indicador: str, anio: int, mes_nombre: s
     mapeo = leer_mapeo_indicador(indicador)
     config_numerador = mapeo["reporte"]["numerador"]
 
-    conteo_por_unidad, candidatos_cruce = contar_filtro_conteo_acumulado(contenido_excel, config_numerador)
+    conteo_por_unidad, candidatos_cruce = contar_filtro_conteo_acumulado(contenido_excel, config_numerador, anio=anio, mes_nombre=mes_nombre)
 
     cruce_cfg = config_numerador.get("cruce")
     validados = {}
@@ -383,3 +427,115 @@ def procesar_archivo_mensual(anio: int, mes_nombre: str, contenido_bytes: bytes,
         cruce = io.BytesIO(contenido_cruce_bytes) if contenido_cruce_bytes else None
         resultados[indicador] = _procesar_archivo_mensual_indicador(indicador, anio, mes_nombre, excel, cruce)
     return resultados
+
+
+# --------------------------------------------------------------------------- #
+# 5) Excel del corte -- reusa el mismo motor que FTP (generar_excel.py)
+# --------------------------------------------------------------------------- #
+
+def generar_excel_corte(indicador: str, anio: int, mes_corte: str) -> dict:
+    """
+    Arma el Excel de un corte ya generado (Junio o Diciembre), con el mismo
+    motor y estilo que usa FTP (Excel_final/ExcelFinalConPlantilla) -- no se
+    escribe un generador aparte. El mapeo nuevo (indicadores/mapeo/) tiene
+    otra forma que el viejo de ftp/mapeo/ (informacion.titulo en vez de
+    titulo suelto, etc.), asi que aqui se adapta el nombre de los campos;
+    _checkpoints_y_etiquetas ya sabe mostrar solo Junio/Diciembre para la
+    periodicidad "Semestral Anualizado" (ver generar_excel.py).
+    """
+    if mes_corte not in MESES_CORTE_SEMESTRAL:
+        return {"status": "error", "mensaje": f"'{mes_corte}' no es un mes de corte valido -- debe ser Junio o Diciembre."}
+
+    mapeo = leer_mapeo_indicador(indicador)
+    informacion = mapeo.get("informacion", {})
+    mes_num = str(MESES_CORTE_SEMESTRAL.index(mes_corte) * 6 + 6).zfill(2)  # Junio->06, Diciembre->12
+
+    diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, str(anio), mes_num)
+    if diccionarioPrevio is None:
+        return {"status": "error", "mensaje": f"{indicador} no tiene el corte de {mes_corte} {anio} generado todavia."}
+
+    archivo_descargable = ExcelFinalConPlantilla(
+        diccionarioPrevio,
+        informacion.get("titulo", indicador),
+        informacion.get("descNum", ""),
+        informacion.get("descDen", ""),
+        indicador.replace(" ", "_"),
+        str(anio),
+        mes_num,
+        semana,
+        mapeo.get("semaforo", {}),
+        indicador,
+        es_semana=es_semana,
+        periodicidad=mapeo.get("periodicidad"),
+    )
+
+    if not archivo_descargable:
+        return {"status": "error", "mensaje": "No se pudo generar el archivo Excel"}
+
+    return {
+        "status": "success",
+        "mensaje": f"Reporte {indicador} -- corte {mes_corte} {anio} obtenido correctamente",
+        "stream": archivo_descargable,
+        "nombre_archivo": f"{indicador.replace(' ', '_')}_{anio}_{mes_corte}.xlsx",
+    }
+
+
+def generar_excel_familia(anio: int, mes_corte: str, indicadores: list[str] | None = None) -> dict:
+    """
+    Igual que generar_excel_corte, pero arma UN solo Excel con una pestaña por
+    indicador del extractor (EH 03, DM 04) -- "toda la familia" del corte,
+    mismo criterio que /generar-categoria/guardado usa para FTP (una pestana
+    por indicador con escribir_hoja_indicador, reutilizado tal cual).
+    """
+    if mes_corte not in MESES_CORTE_SEMESTRAL:
+        return {"status": "error", "mensaje": f"'{mes_corte}' no es un mes de corte valido -- debe ser Junio o Diciembre."}
+
+    indicadores = indicadores or INDICADORES_EXTRACTOR
+    mes_num = str(MESES_CORTE_SEMESTRAL.index(mes_corte) * 6 + 6).zfill(2)  # Junio->06, Diciembre->12
+
+    output = io.BytesIO()
+    wb = xlsxwriter.Workbook(output)
+    wb.set_properties({'author': 'Web CIAE'})
+    fmt = obtener_estilos_excel(wb)
+
+    completados = []
+    errores = {}
+
+    for indicador in indicadores:
+        mapeo = leer_mapeo_indicador(indicador)
+        informacion = mapeo.get("informacion", {})
+
+        diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, str(anio), mes_num)
+        if diccionarioPrevio is None:
+            errores[indicador] = f"{indicador} no tiene el corte de {mes_corte} {anio} generado todavia."
+            continue
+
+        metadata = {
+            "titulo":       informacion.get("titulo"),
+            "desNum":       informacion.get("descNum"),
+            "desDen":       informacion.get("descDen"),
+            "arch":         indicador.replace(" ", "_"),
+            "semaforo":     mapeo.get("semaforo", {}),
+            "decimales":    None,
+            "periodicidad": mapeo.get("periodicidad"),
+        }
+        try:
+            escribir_hoja_indicador(wb, fmt, indicador, diccionarioPrevio, metadata, str(anio), mes_num, semana, es_semana)
+            completados.append(indicador)
+        except Exception as exc:
+            errores[indicador] = str(exc)
+
+    wb.close()
+
+    if not completados:
+        return {"status": "error", "mensaje": "Ningun indicador tiene el corte generado todavia.", "errores": errores}
+
+    output.seek(0)
+    return {
+        "status": "success",
+        "mensaje": f"Corte {mes_corte} {anio} obtenido correctamente",
+        "stream": output,
+        "nombre_archivo": f"Extractor_{anio}_{mes_corte}.xlsx",
+        "completados": completados,
+        "errores": errores,
+    }

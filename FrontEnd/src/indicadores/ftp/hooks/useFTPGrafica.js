@@ -60,14 +60,22 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
    * mostrando lo del indicador anterior, para que el cambio no haga parpadear
    * todo el panel. `previos: true` para que el mes en curso (aun sin cerrar)
    * siga apareciendo como barra parcial via SEMANA.
+   *
+   * La ficha se pide primero (no en paralelo con el reporte) porque el
+   * reporte necesita el "modulo" real del indicador (ficha.modulo: "ftp",
+   * "iaas", "Extractor"...) para que el backend sepa si debe armar
+   * MENSUAL_ACUMULADO (iaas) o filtrar al ultimo corte (Extractor) -- antes
+   * se mandaba 'ftp' fijo para todos, lo cual funcionaba para CACU/CAMA/etc.
+   * pero no para EH 03/DM 04 (modulo "Extractor").
    */
   useEffect(() => {
     if (!indSel) return;
     setCargando(true);
-    Promise.all([
-      obtenerReporteIndicador(indSel, anio, { modulo: 'ftp', previos: true }),
-      obtenerFichaIndicador(indSel, anio).catch(() => null),
-    ]).then(([r, ficha]) => {
+    obtenerFichaIndicador(indSel, anio).catch(() => null).then(ficha => {
+      const moduloReal = ficha?.modulo || 'ftp';
+      return obtenerReporteIndicador(indSel, anio, { modulo: moduloReal, previos: true })
+        .then(r => [r, ficha]);
+    }).then(([r, ficha]) => {
       setReporte(r);
       setIndInfo(ficha);
       const meses      = mesesDisponiblesDeReporte(r);

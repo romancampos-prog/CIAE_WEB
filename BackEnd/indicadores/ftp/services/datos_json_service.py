@@ -64,6 +64,10 @@ def leer_semana_indicador(indicador: str, ano: str) -> dict:
 def _normalizar_para_leer(datos: dict) -> dict:
     # Inverso de _normalizar_para_guardar: "%" -> "resultado", para que Excel_final
     # lo lea correctamente (mismo criterio que leer_historicos_para_excel).
+    # "desempeno" -> "color": el modulo Extractor (y el endpoint unificado de
+    # /Indicadores en general) guarda el semaforo como "desempeno" (ver
+    # schemas.model.UnidadDatos), pero Excel_final espera "color" -- se
+    # traduce aqui para no duplicar la logica de semaforo en dos formatos.
     out = {}
     for unidad, vals in datos.items():
         if not isinstance(vals, dict):
@@ -71,6 +75,8 @@ def _normalizar_para_leer(datos: dict) -> dict:
         v = dict(vals)
         if "%" in v and "resultado" not in v:
             v["resultado"] = v.pop("%")
+        if "desempeno" in v and "color" not in v:
+            v["color"] = v.pop("desempeno")
         out[unidad] = v
     return out
 
@@ -162,10 +168,13 @@ def leer_historicos_para_excel(indicador: str, ano: str, idx_mes_activo: int, cl
         for unidad, vals in unidades_mes.items():
             if not isinstance(vals, dict):
                 continue
-            # Normaliza "%" → "resultado" para que Excel_final lo lea correctamente
+            # Normaliza "%" → "resultado" y "desempeno" → "color" para que
+            # Excel_final lo lea correctamente (mismo criterio que _normalizar_para_leer)
             v = dict(vals)
             if "%" in v and "resultado" not in v:
                 v["resultado"] = v.pop("%")
+            if "desempeno" in v and "color" not in v:
+                v["color"] = v.pop("desempeno")
             historicos.setdefault(unidad, {})[idx] = v
     return historicos, {}
 

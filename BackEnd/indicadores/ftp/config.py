@@ -23,6 +23,7 @@ def ruta_poblacion(anio: str | int | None = None) -> Path:
     return RUTA_POBLACION_DIR / f"POBLACION_{anio}.json"
 
 RUTA_INDICADORES_JSON = _MAPEO
+RUTA_MAPEO_UNIFICADO  = _MAPEO_UNIFICADO  # indicadores/mapeo/{familia}.json -- indicadores nuevos (ej. modulo "Extractor")
 RUTA_MAPEO_POBLACION  = _MAPEO_UNIFICADO / "POBLACION.json"  # movido a indicadores/mapeo -- ya no vive dentro de ftp/
 
 ICONOS_INDICADORES = {

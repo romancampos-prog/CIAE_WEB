@@ -13,19 +13,42 @@ from ftp.services.numerador_denominador import ObtenerNumDen
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import (
     obtener_estilos_excel, _leer_historicos, _calcular_color, _estilo_valor,
-    _checkpoints_y_etiquetas,
+    _checkpoints_y_etiquetas, _es_descendente, _texto_medio,
 )
 from shared.semaforo_service import numero_de_umbral
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
 from ftp.services.datos_json_service import (
     guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes,
-    leer_ultimo_mes_guardado,
+    leer_ultimo_mes_guardado, leer_datos_indicador, leer_mes_guardado,
 )
 
 MESES_LISTA = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ]
+
+
+def _ultimo_corte_extractor(indicador: str, ano: str):
+    """
+    Igual que leer_ultimo_mes_guardado, pero solo cuenta meses que ya tienen
+    TOTAL_OOAD (un corte real generado) -- para indicadores del modulo
+    Extractor (EH 03, DM 04), donde la mayoria de los meses en MESES solo
+    traen el numerador crudo (desempeno "Gris", sin cerrar) mientras se junta
+    la ventana del corte semestral. Tomar literal el ultimo mes ahi metería
+    un mes sin resultado real en la descarga.
+    """
+    datos_json = leer_datos_indicador(indicador, ano)
+    meses_con_corte = [
+        mes for mes, unidades in datos_json.get("MESES", {}).items()
+        if mes in MESES_LISTA and isinstance(unidades, dict) and "TOTAL_OOAD" in unidades
+    ]
+    if not meses_con_corte:
+        return None, False, None, None
+
+    mes_reciente = max(meses_con_corte, key=lambda m: MESES_LISTA.index(m))
+    mes_str = str(MESES_LISTA.index(mes_reciente) + 1).zfill(2)
+    diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes_str)
+    return diccionarioPrevio, es_semana, semana, mes_str
 
 
 def preparar_datos_indicador(indicador: str, ano: str, mes: str, semana) -> dict:
@@ -100,7 +123,10 @@ def preparar_datos_guardados(indicador: str, ano: str) -> dict:
             "periodicidad": info.get("periodicidad"),
         }
 
-        diccionarioPrevio, es_semana, semana, mes_real = leer_ultimo_mes_guardado(indicador, ano)
+        if info.get("modulo") == "Extractor":
+            diccionarioPrevio, es_semana, semana, mes_real = _ultimo_corte_extractor(indicador, ano)
+        else:
+            diccionarioPrevio, es_semana, semana, mes_real = leer_ultimo_mes_guardado(indicador, ano)
         if diccionarioPrevio is None:
             return {"status": "error", "mensaje": f"{indicador} no tiene ningún dato guardado todavía."}
 
@@ -138,10 +164,11 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     ultima_col = len(checkpoints) * 3
 
     nombre_mes_act = MESES_LISTA[idx_mes_activo]
-    limites    = semaforo.get(nombre_mes_act, semaforo)
-    v_esp      = numero_de_umbral(limites.get("Esperado", 0))
-    tiene_alto = "Alto" in limites
-    v_critico  = numero_de_umbral(limites.get("Alto") if tiene_alto else limites.get("Bajo", 0))
+    limites       = semaforo.get(nombre_mes_act, semaforo)
+    v_esp         = numero_de_umbral(limites.get("Esperado", 0))
+    tiene_alto    = _es_descendente(limites)
+    clave_critica = "Alto" if "Alto" in limites else "Bajo"
+    v_critico     = numero_de_umbral(limites.get(clave_critica, 0))
 
     # El mes (y la semana, si aplica) siempre van en el nombre de la pestaña
     # -- no en el nombre del archivo -- porque ahora cada indicador de la
@@ -172,26 +199,27 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
         if idx_real == idx_mes_activo:
             if tiene_alto:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {v_critico}",             fmt['Bajo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}", fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_esp, v_critico, True), fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"{clave_critica.upper()}: >= {v_critico}", fmt['Bajo_Leyenda'])
             else:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}",             fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Bajo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}", fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_esp, v_critico, False), fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}", fmt['Bajo_Leyenda'])
         else:
-            lim_h  = semaforo.get(MESES_LISTA[idx_real], semaforo)
-            v_h    = numero_de_umbral(lim_h.get("Esperado", 0))
-            alt_h  = "Alto" in lim_h
-            crit_h = numero_de_umbral(lim_h.get("Alto") if alt_h else lim_h.get("Bajo", 0))
+            lim_h         = semaforo.get(MESES_LISTA[idx_real], semaforo)
+            v_h           = numero_de_umbral(lim_h.get("Esperado", 0))
+            alt_h         = _es_descendente(lim_h)
+            clave_crit_h  = "Alto" if "Alto" in lim_h else "Bajo"
+            crit_h        = numero_de_umbral(lim_h.get(clave_crit_h, 0))
             if alt_h:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",           fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}", fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {crit_h}",            fmt['Bajo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}", fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_h, crit_h, True), fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"{clave_crit_h.upper()}: >= {crit_h}", fmt['Bajo_Leyenda'])
             else:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",           fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}", fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",            fmt['Bajo_Leyenda'])
+                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}", fmt['Esperado_Leyenda'])
+                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_h, crit_h, False), fmt['Medio_Leyenda'])
+                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}", fmt['Bajo_Leyenda'])
 
         ws.write(9, sc,     "NUM", fmt['header_sub'])
         ws.write(9, sc + 1, "DEN", fmt['header_sub'])

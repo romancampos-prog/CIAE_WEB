@@ -78,19 +78,33 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
             reporte.SEMANA = reportePrevio
             
     
-    # si el modulo tiene mensual acumualdo true y es del modulo de iaas   
+    # si el modulo tiene mensual acumualdo true y es del modulo de iaas
     if (payload.mensualAcumulado and payload.modulo == "iaas"):
         reporteAcumulado = MensualAcumulado(reporte.MESES, payload.indicador)
-        
+
         if(not reporteAcumulado):
             logging.error("El mensual acumulado no calculo nada")
             return reporte
         reporte.MENSUAL_ACUMULADO = reporteAcumulado
         return reporte
 
-        
-    
-    return reporte    
+    # Modulo Extractor (EH 03, DM 04, periodicidad "Semestral Anualizado"):
+    # la mayoria de los meses de MESES solo traen el numerador crudo mientras
+    # se junta la ventana del corte (desempeno "Gris", sin TOTAL_OOAD) -- no
+    # sirven para graficar. Se filtra para dejar solo el ultimo corte que ya
+    # se genero de verdad (el que si trae TOTAL_OOAD), para que la grafica
+    # muestre el ultimo resultado oficial en vez de una linea plana en 0 que
+    # salta al mes de corte.
+    if (payload.modulo == "Extractor"):
+        mesesConCorte = {mes: datos for mes, datos in reporte.MESES.items() if "TOTAL_OOAD" in datos}
+        if not mesesConCorte:
+            reporte.MESES = {}
+            return reporte
+        ultimoMesCorte = max(mesesConCorte, key=lambda m: MESES_ESTANDAR.index(m))
+        reporte.MESES = {ultimoMesCorte: mesesConCorte[ultimoMesCorte]}
+        return reporte
+
+    return reporte
     
         
    

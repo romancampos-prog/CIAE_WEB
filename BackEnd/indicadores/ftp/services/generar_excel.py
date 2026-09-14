@@ -9,6 +9,34 @@ from ftp.services.datos_json_service import leer_historicos_para_excel
 from shared.semaforo_service import evaluar_color, numero_de_umbral
 
 
+def _es_descendente(limites: dict) -> bool:
+    """
+    True si "menor es mejor" para este semaforo (hay que compararlo contra el
+    umbral con <=, no >=). Dos formatos posibles:
+      - Legado: clave "Alto" presente (ej. IAAS) en vez de "Bajo".
+      - Explicito (EH 03, DM 04, etc.): el valor de "Esperado" ya trae el
+        operador como texto, ej. "<= 17.38" -- ahi se lee el operador
+        directo, sin necesidad de la clave "Alto".
+    """
+    if "Alto" in limites:
+        return True
+    esperado = limites.get("Esperado")
+    return isinstance(esperado, str) and esperado.strip().startswith(("<=", "<"))
+
+
+def _texto_medio(v_esp, v_critico, descendente) -> str:
+    """
+    Texto de la leyenda MEDIO -- vacio si Esperado y el umbral critico son el
+    mismo numero (semaforo binario, sin nivel Medio real -- ej. "Medio": null
+    en el mapeo, como EH 03/DM 04). Sin esto se imprimia un rango vacio/
+    imposible (ej. "MEDIO: > 67.53 y < 67.53") que da a entender que existe
+    un nivel Medio aunque nunca se use.
+    """
+    if v_esp == v_critico:
+        return ""
+    return f"MEDIO: > {v_esp} y < {v_critico}" if descendente else f"MEDIO: < {v_esp} y > {v_critico}"
+
+
 def _calcular_color(valor, idx_mes, indicadorSemaforo):
     MESES_LISTA = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
@@ -64,6 +92,14 @@ def _checkpoints_y_etiquetas(periodicidad, ano=None):
         etiquetas = {i: f"Ene{sufA_act} - {_MESES_CORTAS[i]}{sufA_act}" for i in idxs}
         return idxs, etiquetas
 
+    if "semestral" in texto and "anualizado" in texto:
+        # EH 03, DM 04 (modulo Extractor): solo hay dato real en los 2 cortes
+        # del año (Junio = Jul(ano-1)-Jun(ano), Diciembre = Ene(ano)-Dic(ano)),
+        # el resto de los meses solo tienen numerador crudo sin semaforo --
+        # se muestran solo esas 2 columnas, igual que Trimestral Acumulado
+        # muestra solo sus 4 cortes en vez de las 12 columnas de siempre.
+        return [5, 11], None  # Junio, Diciembre
+
     ventana = 3 if "trimestralizado" in texto else 6 if "semestralizado" in texto else None
     if ventana:
         etiquetas = {}
@@ -106,10 +142,11 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         checkpoints, etiquetas_especiales = _checkpoints_y_etiquetas(periodicidad, ano)
         ultima_col = len(checkpoints) * 3
 
-        limites    = indicadorSemaforo.get(nombre_mes_act, indicadorSemaforo)
-        v_esp      = numero_de_umbral(limites.get("Esperado", 0))
-        tiene_alto = "Alto" in limites
-        v_critico  = numero_de_umbral(limites.get("Alto") if tiene_alto else limites.get("Bajo", 0))
+        limites       = indicadorSemaforo.get(nombre_mes_act, indicadorSemaforo)
+        v_esp         = numero_de_umbral(limites.get("Esperado", 0))
+        tiene_alto    = _es_descendente(limites)
+        clave_critica = "Alto" if "Alto" in limites else "Bajo"
+        v_critico     = numero_de_umbral(limites.get(clave_critica, 0))
 
         worksheet.set_column(0, 0, 50)
         worksheet.set_column(1, ultima_col, 14)
@@ -130,26 +167,27 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
 
             if idx_real == idx_mes_activo:
                 if tiene_alto:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}",             fmt['Esperado_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_esp} y < {v_critico}", fmt['Medio_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {v_critico}",             fmt['Bajo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}", fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, _texto_medio(v_esp, v_critico, True), fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"{clave_critica.upper()}: >= {v_critico}", fmt['Bajo_Leyenda'])
                 else:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}",             fmt['Esperado_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_esp} y > {v_critico}", fmt['Medio_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}",             fmt['Bajo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}", fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, _texto_medio(v_esp, v_critico, False), fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}", fmt['Bajo_Leyenda'])
             else:
-                lim_h  = indicadorSemaforo.get(MESES_LISTA[idx_real], indicadorSemaforo)
-                v_h    = numero_de_umbral(lim_h.get("Esperado", 0))
-                alt_h  = "Alto" in lim_h
-                crit_h = numero_de_umbral(lim_h.get("Alto") if alt_h else lim_h.get("Bajo", 0))
+                lim_h         = indicadorSemaforo.get(MESES_LISTA[idx_real], indicadorSemaforo)
+                v_h           = numero_de_umbral(lim_h.get("Esperado", 0))
+                alt_h         = _es_descendente(lim_h)
+                clave_crit_h  = "Alto" if "Alto" in lim_h else "Bajo"
+                crit_h        = numero_de_umbral(lim_h.get(clave_crit_h, 0))
                 if alt_h:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}",            fmt['Esperado_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: > {v_h} y < {crit_h}",  fmt['Medio_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"ALTO: >= {crit_h}",             fmt['Bajo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}", fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, _texto_medio(v_h, crit_h, True), fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"{clave_crit_h.upper()}: >= {crit_h}", fmt['Bajo_Leyenda'])
                 else:
-                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}",            fmt['Esperado_Leyenda'])
-                    worksheet.merge_range(7, sc, 7, sc + 2, f"MEDIO: < {v_h} y > {crit_h}",  fmt['Medio_Leyenda'])
-                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}",             fmt['Bajo_Leyenda'])
+                    worksheet.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}", fmt['Esperado_Leyenda'])
+                    worksheet.merge_range(7, sc, 7, sc + 2, _texto_medio(v_h, crit_h, False), fmt['Medio_Leyenda'])
+                    worksheet.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}", fmt['Bajo_Leyenda'])
 
 
             worksheet.write(9, sc,     "NUM", fmt['header_sub'])

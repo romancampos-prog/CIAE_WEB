@@ -12,12 +12,14 @@ ORIGINS_DESARROLLO = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5173",
-    "http://localhost:4200"
+    "http://localhost:4200",
+    "http://11.1.11.62:5173"
 ]
 
 ORIGINS_PRODUCCION = [
     "https://occ00486wsciae:8005", #NO SE BORRA LINK DEL SERVIDOR CORRIENDO
     "https://occ00486wsciae",
+    "https://11.1.11.62:8005",
 ]
 
 ORIGINS = ORIGINS_DESARROLLO + ORIGINS_PRODUCCION if AMBIENTE == "desarrollo" else ORIGINS_PRODUCCION

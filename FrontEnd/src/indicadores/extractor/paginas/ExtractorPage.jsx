@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
-import { getEstadoExtractor, subirArchivoMensualExtractor } from '../api/extractor';
+import { getEstadoExtractor, subirArchivoMensualExtractor, descargarExcelFamiliaExtractor } from '../api/extractor';
+import { descargarB64 } from '../../shared/utils/download';
 import iconoEH from '../../../assets/icono_eh.png';
 import iconoDM from '../../../assets/icono_dm.png';
 import './extractor.css';
@@ -95,6 +96,7 @@ const ExtractorPage = () => {
   const [archivoCruce, setArchivoCruce]         = useState(null);
   const [error, setError]         = useState('');
   const [resultado, setResultado] = useState(null);
+  const [descargando, setDescargando] = useState(false);
 
   useEffect(() => { document.title = 'Extractor | CIAE'; }, []);
 
@@ -132,6 +134,20 @@ const ExtractorPage = () => {
   };
 
   const corteInfo = corteActivo && estado ? estado[corteActivo] : null;
+
+  const descargar = async () => {
+    if (!corteInfo) return;
+    setDescargando(true);
+    setError('');
+    try {
+      const res = await descargarExcelFamiliaExtractor(corteInfo.anioCorte, corteInfo.mesCorte);
+      descargarB64(res.archivo_b64, res.nombre_archivo);
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Error al descargar el reporte.');
+    } finally {
+      setDescargando(false);
+    }
+  };
 
   const estadoTexto = (info) => {
     if (info.corteYaGenerado) return 'Completo';
@@ -222,6 +238,14 @@ const ExtractorPage = () => {
                   {corteInfo.mesesSubidos} de 12 meses subidos
                   {corteInfo.corteYaGenerado && ' — este corte ya fue generado'}
                 </p>
+                {corteInfo.corteYaGenerado && (
+                  <button className="ex-boton-descargar" onClick={descargar} disabled={descargando}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    {descargando ? 'Descargando…' : 'Descargar Excel (EH 03 + DM 04)'}
+                  </button>
+                )}
               </div>
               <AnilloProgreso subidos={corteInfo.mesesSubidos} total={corteInfo.mesesTotales} />
             </div>
@@ -231,8 +255,8 @@ const ExtractorPage = () => {
                 const clave = `${mes}-${anio}`;
                 const abierto = mesAbierto === clave;
                 return (
-                  <Fragment key={clave}>
-                    <li className={`ex-item-mes${subido ? ' ex-item-mes--subido' : ''}${abierto ? ' ex-item-mes--abierto' : ''}`}>
+                  <li key={clave} className={`ex-item-container${abierto ? ' ex-item-container--abierto' : ''}`}>
+                    <div className={`ex-item-mes${subido ? ' ex-item-mes--subido' : ''}${abierto ? ' ex-item-mes--abierto' : ''}`}>
                       <span className={`ex-item-check${subido ? ' ex-item-check--on' : ''}`}><CheckCircleIcon activo={subido} /></span>
                       <span className="ex-item-nombre">{mes} {anio}</span>
                       <span className="ex-item-estado">{subido ? 'Subido' : 'Pendiente'}</span>
@@ -241,10 +265,10 @@ const ExtractorPage = () => {
                           {abierto ? 'Cerrar' : 'Subir'}
                         </button>
                       )}
-                    </li>
+                    </div>
 
                     {abierto && (
-                      <li className="ex-uploader-wrap">
+                      <div className="ex-uploader-wrap">
                         <div className="ex-uploader">
                           <EstadoDropzone
                             etiqueta="SUI-13"
@@ -272,9 +296,9 @@ const ExtractorPage = () => {
                             </button>
                           </div>
                         </div>
-                      </li>
+                      </div>
                     )}
-                  </Fragment>
+                  </li>
                 );
               })}
             </ul>

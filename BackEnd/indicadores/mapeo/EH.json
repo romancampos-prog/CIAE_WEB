@@ -8,8 +8,10 @@
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Acumulado",
-        "mensual": false,
-        "mensualAcumulado": true,
+        "peridocidadGenerada": {
+            "mensual": false,
+            "mensualAcumulado": true
+        },
         "informacion": {
             "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más, con medición de tensión arterial en el primer nivel de atención, que permita la identificación temprana de hipertensión arterial y prehipertensión.",
@@ -154,8 +156,10 @@
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual - Mensual Acumulado",
-        "mensual": true,
-        "mensualAcumulado": false,
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": false
+        },
         "informacion": {
             "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
             "objetivo": "Medir el porcentaje de pacientes hipertensos mayores de 20 años, con cifras de tensión arterial en control adecuado (sistólica menor de 140 mmHg y diastólica menor de 90 mm Hg), que acudieron a consulta en el periodo de medición (mes, año), para conocer la eficiencia de la atención en este grupo de pacientes",
@@ -207,11 +211,14 @@
         "fechaModificacion": "10/09/2026",
         "imagen": "icono_eh.png",
         "color": "#4e1224",
-        "modulo": "",
+        "modulo": "Extractor",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Semestral Anualizado",
+        "peridocidadGenerada": {
+            "semstralAnualizado": true
+        },
         "informacion": {
             "titulo": "EH 03 - Tasa de hospitalizaciones evitables por hipertensión arterial en población derechohabiente de 20 a 74 años",
             "objetivo": "Medir el comportamiento de las hospitalizaciones potencialmente evitables por hipertensión arterial en derechohabientes de 20 a 74 años, con el propósito de conocer la magnitud de este problema de salud pública.",
@@ -227,25 +234,91 @@
                 "agrupacion": "undadAdscripcion",
                 "columnaLlaveCruce": "numeroAfiliacion",
                 "filtroColumna": {
-                    "I": { "tipo": "RANGO", "filtro": [20, 74], "nombreColumna": "edadAnios" },
-                    "K": { "tipo": "LISTA", "filtro": [1, 2], "nombreColumna": "tipoIngreso" },
-                    "L": { "tipo": "LISTA", "filtro": ["I10X", "I110", "I119", "I120", "I129", "I130", "I131", "I132", "I139"], "nombreColumna": "diagnosticoPrincipal" }
+                    "I": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            20,
+                            74
+                        ],
+                        "nombreColumna": "edadAnios"
+                    },
+                    "K": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            1,
+                            2
+                        ],
+                        "nombreColumna": "tipoIngreso"
+                    },
+                    "L": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            "I10X",
+                            "I110",
+                            "I119",
+                            "I120",
+                            "I129",
+                            "I130",
+                            "I131",
+                            "I132",
+                            "I139"
+                        ],
+                        "nombreColumna": "diagnosticoPrincipal"
+                    }
                 },
                 "cruce": {
                     "activa": true,
-                    "codigosCandidatos": ["I160", "I161", "I169", "N180", "N188", "N189", "N18X", "N19X"],
+                    "codigosCandidatos": [
+                        "I160",
+                        "I161",
+                        "I169",
+                        "N180",
+                        "N188",
+                        "N189",
+                        "N18X",
+                        "N19X"
+                    ],
                     "archivoCruce": "EGRESOS_PACIENTES_DIARIA",
                     "hoja": "Hoja1",
                     "encabezado": 1,
                     "columnaLlave": "AFILIACION",
-                    "columnasDiagnostico": ["AC", "AD", "AE", "AF", "AG", "AH"],
-                    "codigosValidos": ["I10X", "I110", "I119", "I120", "I129", "I130", "I131", "I132", "I139"]
+                    "columnasDiagnostico": [
+                        "AC",
+                        "AD",
+                        "AE",
+                        "AF",
+                        "AG",
+                        "AH"
+                    ],
+                    "codigosValidos": [
+                        "I10X",
+                        "I110",
+                        "I119",
+                        "I120",
+                        "I129",
+                        "I130",
+                        "I131",
+                        "I132",
+                        "I139"
+                    ]
                 }
             },
             "denominador": {
                 "fuente": "poblacionInfoSalud",
                 "sexo": {
-                    "Todos": ["20 a 24", "25  a 29", "30 a 34", "35 a 39", "40 a 44", "45 a 49", "50 a 54", "55 a 59", "60 a 64", "65 a 69", "70 a 74"]
+                    "Todos": [
+                        "20 a 24",
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59",
+                        "60 a 64",
+                        "65 a 69",
+                        "70 a 74"
+                    ]
                 }
             },
             "operacion": {

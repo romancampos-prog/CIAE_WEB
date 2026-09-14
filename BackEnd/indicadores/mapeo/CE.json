@@ -8,8 +8,10 @@
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual",
-        "mensual": true,
-        "mensualAcumulado": false,
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": false
+        },
         "informacion": {
             "titulo": "CE 01 - Promedio de atenciones preventivas por personal de enfermería.",
             "objetivo": "Medir la productividad diaria del personal auxiliar de enfermería en salud pública que proporciona atenciones preventivas (80).",
@@ -66,8 +68,10 @@
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual",
-        "mensual": true,
-        "mensualAcumulado": false,
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": false
+        },
         "informacion": {
             "titulo": "CE 02 - Promedio de atenciones integrales por personal de enfermería especialista en medicina de familia.",
             "objetivo": "Medir la productividad diaria del personal de enfermería especialista en medicina de familia que proporciona atenciones integrales.",

@@ -43,6 +43,18 @@ export const getEstadoExtractor = async (anio) => {
  * @param {File|null} archivoCruce - Excel de cruce (EGRESOS_PACIENTES_DIARIA_MM_AAAA.xlsx)
  * @returns {Promise<Object>} Resultado por indicador (numerador por unidad, si se generó el corte)
  */
+/**
+ * Descarga UN Excel con una pestaña por indicador del extractor (EH 03 + DM 04)
+ * para el corte dado -- "toda la familia" en un solo archivo.
+ * @param {string|number} anio - Año del corte
+ * @param {string} mesCorte - "Junio" o "Diciembre"
+ * @returns {Promise<{archivo_b64:string, nombre_archivo:string, completados:string[], errores:Object}>}
+ */
+export const descargarExcelFamiliaExtractor = async (anio, mesCorte) => {
+    const { data } = await api.get('/extractor/descargar-familia', { params: { anio, mesCorte } });
+    return data.data;
+};
+
 export const subirArchivoMensualExtractor = async (anio, mes, archivo, archivoCruce = null) => {
     const form = new FormData();
     form.append('anio', anio);

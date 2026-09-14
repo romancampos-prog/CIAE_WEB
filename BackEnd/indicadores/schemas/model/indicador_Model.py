@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import Literal, Dict
+from pydantic import BaseModel, Field, model_validator
+from typing import Literal, Dict, Any
 from shared.PERIODICIDAD import PERIODICIDAD
 
 
@@ -45,9 +45,26 @@ class InfoIndicador(BaseModel):
     previos: bool
     mensual: bool = False
     mensualAcumulado: bool = False
+    peridocidadGenerada: Dict[str, bool] | None = None
     periodicidad: str
     informacion: InformacionFicha
     semaforo: Dict[str,Semaforo] | Semaforo
+
+    @model_validator(mode="before")
+    @classmethod
+    def _desde_peridocidadGenerada(cls, datos: Any) -> Any:
+        """
+        mensual/mensualAcumulado ahora viven anidados dentro de
+        peridocidadGenerada en el mapeo (ver indicadores/mapeo/*.json) --
+        se replican sueltos aqui para no romper a quien ya lee
+        ficha.mensual / ficha.mensualAcumulado directo.
+        """
+        if isinstance(datos, dict):
+            anidado = datos.get("peridocidadGenerada")
+            if isinstance(anidado, dict):
+                datos.setdefault("mensual", anidado.get("mensual", False))
+                datos.setdefault("mensualAcumulado", anidado.get("mensualAcumulado", False))
+        return datos
     
 
 #---------------------------------------------------

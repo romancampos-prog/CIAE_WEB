@@ -8,8 +8,10 @@
         "mostrarGrafica": true,
         "previos": true,
         "periodicidad": "Mensual Acumulado",
-        "mensual": false,
-        "mensualAcumulado": true,
+        "peridocidadGenerada": {
+            "mensual": false,
+            "mensualAcumulado": true
+        },
         "informacion": {
             "titulo": "CACU 01 - Cobertura de tamizaje de primera vez de cáncer cérvico uterino en mujeres entre 25 y 64 años.",
             "objetivo": "Medir la proporción de mujeres entre 25 y 64 años, con tamizaje de cáncer cérvico uterino, a través de la prueba de papanicolaou, para identificar a derechohabientes con lesiones precancerosas y cáncer en etapa temprana.",
