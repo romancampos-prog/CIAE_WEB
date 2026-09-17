@@ -7,6 +7,7 @@ import indicadores
 from indicadores.schemas.model.indicador_Model import IndicesIndicadores
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from schemas.model.indicador_Model import InfoIndicador
+from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
 
 
 
@@ -101,6 +102,50 @@ def ObtenerFichaPorIndicador(payload: IndicadorRequest) -> InfoIndicador | None:
     #extraer info del indicador solicitado 
     datoIndicadorJson = data.get(payload.indicador)
     fichaIndicador = InfoIndicador.model_validate(datoIndicadorJson)
-    
+
     return fichaIndicador
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
+
+def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
+    """
+    Ficha técnica completa (para el panel compartido FichaTecnicaBoton, usado
+    en FTP/IAAS/Extractor): igual que ObtenerFichaPorIndicador pero además
+    incluye reporte.numerador/denominador/operacion -- lo que necesita la
+    pestaña "Cálculo" para explicar cómo se saca el indicador.
+    reporte queda en None cuando el indicador no está automatizado todavía
+    (mostrarGenerar=false, ej. CACU 02 -- su bloque "reporte" viene vacío {}
+    en el mapeo).
+    """
+    rutaMapeoIndicador = RutaMapeoExiste(indicador)
+    if not rutaMapeoIndicador:
+        return None
+
+    with open(rutaMapeoIndicador, "r", encoding="utf-8") as archivo:
+        data = json.load(archivo)
+
+    dato = data.get(indicador)
+    if not dato:
+        return None
+
+    repCrudo = dato.get("reporte") or {}
+    reporte = None
+    if repCrudo:
+        num = repCrudo["numerador"]
+        den = repCrudo["denominador"]
+        reporte = ReporteFicha(
+            numerador=FuenteCalculo(fuente=num.get("fuente", ""), modoExtraccion=num.get("modoExtraccion"), detalle=num),
+            denominador=FuenteCalculo(fuente=den.get("fuente", ""), modoExtraccion=den.get("modoExtraccion"), detalle=den),
+            operacion=repCrudo["operacion"],
+        )
+
+    return FichaTecnicaCompleta(
+        modulo=dato.get("modulo", ""),
+        fechaModificacion=dato["fechaModificacion"],
+        periodicidad=dato["periodicidad"],
+        automatizado=bool(repCrudo),
+        informacion=dato["informacion"],
+        reporte=reporte,
+        semaforo=dato["semaforo"],
+    )
 

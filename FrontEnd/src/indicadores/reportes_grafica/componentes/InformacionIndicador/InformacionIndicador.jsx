@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './informacionIndicador.css';
-import { parsearNumerador, parsearDenominador, parsearResultado, descripcionExtraccion, pct } from './operacionParser.js';
+import { parsearNumerador, parsearDenominador, parsearResultado, descripcionExtraccion, describirFuenteCalculo } from './operacionParser.js';
 
 // ── Tarjeta de fuente — colapsable ────────────────────────────────────────────
 const TarjetaFuente = ({ fuente }) => {
@@ -17,7 +17,7 @@ const TarjetaFuente = ({ fuente }) => {
           <span className="fc-id">{idVisual}</span>
           <span className="fc-sep">·</span>
           <span className="fc-hoja">{fuente.hoja}</span>
-          {fuente.cfg?.modo && <span className="fc-modo">{fuente.cfg.modo}</span>}
+          {fuente.cfg?.modoExtraccion && <span className="fc-modo">{fuente.cfg.modoExtraccion}</span>}
         </div>
         <div className="fc-toggle-right">
           {!abierta && numCols > 0 && (
@@ -56,42 +56,57 @@ const TarjetaFuente = ({ fuente }) => {
   );
 };
 
-// ── Bloque de un paso ─────────────────────────────────────────────────────────
-const BloquePaso = ({ num, titulo, descripcion, parsed }) => {
-  const { fuentes, hasPrev, operacion, resumen } = parsed.tipo === 'producto'
-    ? { fuentes: parsed.fuentes, hasPrev: false, operacion: parsed.operacion, resumen: parsed.resumen }
-    : parsed;
-
-  return (
-    <div className="paso">
-      <div className="paso-header">
-        <span className="paso-num">{num}</span>
-        <strong>{titulo}</strong>
+// ── Bloque "fórmula" (INTERSECCION_*/ULTIMA_FILA/población) ────────────────
+const BloqueFormula = ({ fuentes, operacion, resumen }) => (
+  <>
+    {fuentes?.length > 0 && (
+      <div className="fuentes-wrap">
+        {fuentes.map((f, i) => <TarjetaFuente key={i} fuente={f} />)}
       </div>
-      <p className="paso-desc">{descripcion}</p>
+    )}
+    {fuentes?.length > 0 && (
+      <div className="operacion-box">
+        <span className="op-lbl">Operación:</span>
+        <code>{operacion}</code>
+      </div>
+    )}
+    {resumen && <p className="resumen-op">{resumen}</p>}
+  </>
+);
 
-      {hasPrev && (
-        <p className="nota-prevalencia">
-          Antes de sumar, restar el porcentaje de prevalencia por grupo de edad.
-        </p>
-      )}
-
-      {fuentes?.length > 0 && (
-        <div className="fuentes-wrap">
-          {fuentes.map((f, i) => <TarjetaFuente key={i} fuente={f} />)}
+// ── Bloque "filtro" (FILTRO_CONTEO / FILTRO_CONTEO_ACUMULADO / FILTRO_UNIDAD_VALOR) ──
+const BloqueFiltro = ({ hoja, condiciones, cruce }) => (
+  <div className="fuentes-wrap">
+    <div className="fuente-card fuente-card--open">
+      <div className="fuente-card-toggle">
+        <div className="fc-labels">
+          <span className="fc-hoja">{hoja}</span>
         </div>
-      )}
-
-      {fuentes?.length > 0 && (
-        <div className="operacion-box">
-          <span className="op-lbl">Operación:</span>
-          <code>{operacion}</code>
-        </div>
-      )}
-      {resumen && <p className="resumen-op">{resumen}</p>}
+      </div>
+      <div className="fuente-card-body">
+        <p className="fc-extraccion">{condiciones}</p>
+        {cruce && <p className="nota-prevalencia">{cruce}</p>}
+      </div>
     </div>
-  );
-};
+  </div>
+);
+
+// ── Bloque de un paso (numerador o denominador) ─────────────────────────────
+const BloquePaso = ({ num, titulo, descripcion, resultado }) => (
+  <div className="paso">
+    <div className="paso-header">
+      <span className="paso-num">{num}</span>
+      <strong>{titulo}</strong>
+    </div>
+    <p className="paso-desc">{descripcion}</p>
+
+    {resultado.tipo === 'formula' && <BloqueFormula {...resultado.parsed} />}
+    {resultado.tipo === 'filtro' && <BloqueFiltro {...resultado} />}
+    {resultado.tipo === 'sin_desglose' && (
+      <p className="resumen-op">Valor de fuente "{resultado.fuente}" — sin desglose de extracción disponible.</p>
+    )}
+  </div>
+);
 
 // ── Helpers de umbral: soportan formato legado (numero puro) y explícito
 //    (texto con operador, ej. "<= 30") -- ver shared/semaforo_service.py ──────
@@ -101,8 +116,6 @@ const numeroDe = (valor) => {
   return m ? parseFloat(m[0]) : NaN;
 };
 
-// Si ya viene explícito ("<= 30") se muestra tal cual; si es legado (30), se
-// arma con el operador que el propio backend usaba de forma implícita.
 const textoUmbral = (valor, operadorLegado) =>
   typeof valor === 'string' ? valor : `${operadorLegado} ${valor}`;
 
@@ -110,9 +123,6 @@ const textoUmbral = (valor, operadorLegado) =>
 const SemaforoFijo = ({ semaforo }) => {
   const esDec = 'Alto' in semaforo;
   const critico = esDec ? semaforo.Alto : semaforo.Bajo;
-  // Cuando Esperado y el umbral crítico son el mismo número no existe franja
-  // "Medio" (ancho cero) -- el propio evaluar_color() nunca clasifica nada
-  // como Medio en ese caso, así que tampoco se dibuja.
   const sinMedio = numeroDe(semaforo.Esperado) === numeroDe(critico);
   return (
     <div className="metas-fijas-row">
@@ -163,31 +173,49 @@ const SemaforoMensual = ({ semaforo }) => (
   </div>
 );
 
+/**
+ * Arma lo que necesita BloquePaso para un lado (numerador/denominador) de
+ * reporte.ficha, según su forma real (ver operacionParser.js::describirFuenteCalculo).
+ * @param {boolean} esDenominador - cuál parser algebraico usar (difieren en
+ *   cómo agrupan la lista de la expresión, ver operacionParser.js).
+ */
+const resolverLado = (ladoFicha, expresionOperacion, esDenominador) => {
+  const resultado = describirFuenteCalculo(ladoFicha);
+  if (resultado.tipo !== 'formula') return resultado;
+
+  const reporte = ladoFicha.detalle.archivo ?? ladoFicha.detalle.sexo;
+  const parsed = esDenominador
+    ? parsearDenominador(expresionOperacion, reporte)
+    : parsearNumerador(expresionOperacion, reporte);
+  return { tipo: 'formula', parsed };
+};
+
 // ── Principal ─────────────────────────────────────────────────────────────────
 const InformacionIndicador = ({ data }) => {
   const [tab, setTab] = useState('calculo');
 
   if (!data) return <div className="loading-state">Seleccione un indicador...</div>;
 
-  const { titulo, fechaModificacion, descripcionNumerador, descripcionDenominador,
-          reporte, operacion, semaforo } = data;
+  const { informacion, fechaModificacion, reporte, semaforo, modulo, automatizado } = data;
+  const { titulo, descNum, descDen } = informacion;
 
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const esMensual  = MESES.some(mes => Object.prototype.hasOwnProperty.call(semaforo, mes));
-  const parsedNum  = parsearNumerador(operacion.numerador, reporte);
-  const parsedDen  = parsearDenominador(operacion.denominador, reporte);
-  const textoRes   = parsearResultado(operacion.resultado);
+  const esMensual = MESES.some(mes => Object.prototype.hasOwnProperty.call(semaforo, mes));
+
+  const numResultado = reporte ? resolverLado(reporte.numerador, reporte.operacion.numerador, false) : null;
+  const denResultado = reporte ? resolverLado(reporte.denominador, reporte.operacion.denominador, true) : null;
+  const textoRes      = reporte ? parsearResultado(reporte.operacion.resultado) : null;
 
   return (
     <div className="detalle-container">
 
-      {/* ── Título completo + fecha (reemplaza el header duplicado) ── */}
+      {/* ── Título completo + fecha ── */}
       <div className="det-top">
         <h1 className="det-titulo-full">{titulo}</h1>
         <div className="det-meta-row">
           <span className="fecha-ref">Última revisión: {fechaModificacion}</span>
-          <span className="ftp-badge">Fuente: FTP</span>
+          <span className="ftp-badge">Fuente: {modulo || 'FTP'}</span>
         </div>
       </div>
 
@@ -217,24 +245,23 @@ const InformacionIndicador = ({ data }) => {
       {/* ── Contenido por tab ── */}
       {tab === 'calculo' && (
         <div className="det-tab-body">
-          <div className="proceso-pasos">
-            <BloquePaso
-              num="1"
-              titulo="Numerador — ¿qué indica?"
-              descripcion={descripcionNumerador}
-              parsed={parsedNum}
-            />
-            <BloquePaso
-              num="2"
-              titulo="Denominador — ¿qué indica?"
-              descripcion={descripcionDenominador}
-              parsed={parsedDen}
-            />
-          </div>
-          <div className="formula-final-box">
-            <label>Resultado final:</label>
-            <code>{textoRes}</code>
-          </div>
+          {!automatizado ? (
+            <p className="resumen-op">
+              Este indicador todavía no está automatizado en la plataforma — se reporta/captura
+              por fuera del sistema, no hay un cálculo por extracción de Excel que mostrar aquí.
+            </p>
+          ) : (
+            <>
+              <div className="proceso-pasos">
+                <BloquePaso num="1" titulo="Numerador — ¿qué indica?" descripcion={descNum} resultado={numResultado} />
+                <BloquePaso num="2" titulo="Denominador — ¿qué indica?" descripcion={descDen} resultado={denResultado} />
+              </div>
+              <div className="formula-final-box">
+                <label>Resultado final:</label>
+                <code>{textoRes}</code>
+              </div>
+            </>
+          )}
         </div>
       )}
 

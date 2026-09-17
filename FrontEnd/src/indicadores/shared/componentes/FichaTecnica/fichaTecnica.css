@@ -1,0 +1,79 @@
+/* ── Botón ficha técnica -- mismo diseño que tenía IndicadoresPage.jsx (FTP) ── */
+.ficha-tec-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none;
+  border: 1.5px solid color-mix(in srgb, var(--fc, #0b5445) 30%, transparent);
+  border-radius: 100px; padding: 7px 16px;
+  font-size: 0.76rem; font-weight: 700;
+  color: var(--fc, #0b5445);
+  cursor: pointer; font-family: inherit;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.ficha-tec-btn:hover {
+  background: color-mix(in srgb, var(--fc, #0b5445) 8%, transparent);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--fc, #0b5445) 15%, transparent);
+}
+
+/* ── Drawer ── */
+@keyframes ficha-tec-fadeIn   { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ficha-tec-drawerIn { from { transform: translateX(100%) } to { transform: translateX(0) } }
+
+.ficha-tec-backdrop {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.32);
+  backdrop-filter: blur(3px);
+  animation: ficha-tec-fadeIn 0.2s ease both;
+}
+.ficha-tec-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 301;
+  width: 640px; max-width: 92vw;
+  background: white;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.14);
+  display: flex; flex-direction: column;
+  animation: ficha-tec-drawerIn 0.28s cubic-bezier(0.16,1,0.3,1) both;
+}
+.ficha-tec-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px; flex-shrink: 0;
+  background: color-mix(in srgb, var(--fc, #0b5445) 5%, white);
+  border-bottom: 1px solid rgba(226,232,240,0.9);
+  gap: 12px;
+}
+.ficha-tec-eyebrow {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: #94a3b8; margin: 0 0 3px;
+}
+.ficha-tec-title {
+  font-size: 1.05rem; font-weight: 800; margin: 0; letter-spacing: -0.3px;
+}
+.ficha-tec-close {
+  background: none; border: none; cursor: pointer;
+  color: #94a3b8; font-size: 18px; line-height: 1;
+  padding: 6px 8px; border-radius: 8px; font-family: inherit;
+  transition: color 0.15s, background 0.15s; flex-shrink: 0;
+}
+.ficha-tec-close:hover { color: #475569; background: rgba(0,0,0,0.05); }
+.ficha-tec-body {
+  flex: 1; overflow-y: auto; padding: 20px 22px;
+}
+.ficha-tec-body::-webkit-scrollbar { width: 4px; }
+.ficha-tec-body::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+/* ── Selector de indicador (cuando hay más de uno, ej. Extractor EH03/DM04,
+   IAAS 01-06) -- pestañas dentro del header, arriba del título ── */
+.ficha-tec-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  background: #f1f5f9; padding: 3px; border-radius: 9px;
+  margin-bottom: 8px;
+}
+.ficha-tec-tab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border: none; border-radius: 7px;
+  background: transparent; color: #64748b;
+  font-weight: 700; font-size: 0.72rem; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ficha-tec-tab img { width: 14px; height: 14px; object-fit: contain; }
+.ficha-tec-tab--activo { background: #fff; color: var(--fc, #0b5445); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+
+.ficha-tec-cargando { padding: 40px; text-align: center; color: #94a3b8; font-style: italic; font-size: 0.9rem; }

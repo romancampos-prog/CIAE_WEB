@@ -9,7 +9,11 @@ import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalUnidadTardia from '../componentes/modalUnidadTardia/ModalUnidadTardia';
 import IAASErrorToast from './IAASErrorToast';
 import IAASValidacionPanel from './IAASValidacionPanel';
+import FichaTecnicaBoton from '../../shared/componentes/FichaTecnica/FichaTecnicaBoton';
+import iconoIaas from '../../../assets/icono_iaas.png';
 import './iass.css';
+
+const TODOS_IAAS = ['IAAS 01', 'IAAS 02', 'IAAS 03', 'IAAS 04', 'IAAS 05', 'IAAS 06'];
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -169,10 +173,17 @@ const IAASPage = () => {
 
         <main className="ia-main">
           <div className="ia-hero">
-            <div className="ia-hero-title-row" title="Infecciones Asociadas a la Atención de la Salud">
-              <span className="ia-hero-label">IAAS</span>
-              <span className="ia-hero-sep">·</span>
-              <h1 className="ia-hero-title-main">Nuevo reporte</h1>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <div className="ia-hero-title-row" title="Infecciones Asociadas a la Atención de la Salud">
+                <span className="ia-hero-label">IAAS</span>
+                <span className="ia-hero-sep">·</span>
+                <h1 className="ia-hero-title-main">Nuevo reporte</h1>
+              </div>
+              <FichaTecnicaBoton
+                indicador={TODOS_IAAS}
+                color="#1a5276"
+                iconos={Object.fromEntries(TODOS_IAAS.map(ind => [ind, iconoIaas]))}
+              />
             </div>
           </div>
 

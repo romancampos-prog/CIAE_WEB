@@ -48,7 +48,10 @@
 .ex-hero {
   margin-bottom: 32px;
 }
-
+.ex-hero-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+}
 .ex-page-title {
   font-size: 1.5rem;
   font-weight: 800;

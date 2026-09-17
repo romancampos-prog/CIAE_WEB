@@ -1,70 +1,65 @@
 /**
  * operacionParser.js
+ *
+ * Traduce el bloque "reporte" del mapeo unificado (indicadores/mapeo/*.json)
+ * a texto en lenguaje natural para la ficha técnica. Cubre los 6
+ * modoExtraccion reales que existen hoy en el mapeo:
+ *   INTERSECCION_COLUMNA, INTERSECCION_FILA, ULTIMA_FILA  -- fórmula algebraica
+ *   FILTRO_CONTEO, FILTRO_CONTEO_ACUMULADO, FILTRO_UNIDAD_VALOR -- cuenta/filtra filas, sin fórmula
+ * Ver services/indicadorMapeo_Services.py::ObtenerFichaTecnicaCompleta para
+ * el lado del backend.
  */
 
 // ── Helpers base ─────────────────────────────────────────────────────────────
+// "reporte" aquí es el sub-objeto correcto ya elegido por describirFuenteCalculo:
+// detalle.archivo (fuente "ftp"/"extractor" con varios códigos de archivo) o
+// detalle.sexo (fuente "poblacionInfoSalud", uno o más grupos de edad).
 const getConfig = (reporte, id) => reporte[id] ?? null;
-const getHoja   = (reporte, id) => {
+
+const getHoja = (reporte, id) => {
   const f = reporte[id];
   if (!f) return id;
-  if (f.modo === 'JSON_POBLACION') return `Población ${f.grupo ?? ''}`;
+  if (Array.isArray(f)) return `Población — ${id}`; // sexo.Mujeres = ["20 a 24", ...] directo, ya no {modo, grupo, columnas}
   return f.hoja ?? id;
 };
 
 /**
  * Resuelve las columnas de datos de una fuente.
- * Maneja el caso especial donde columna_dato contiene claves de lookup dinámico
- * (ej. "MESES_CIP01"), resolviéndolas contra el mapa definido en el indicador raíz.
- *
- * @param {object} reporte  - El objeto "reporte" del indicador
- * @param {string} id       - Clave de la fuente (ej. "CIP01")
- * @param {object} [raiz]   - El objeto indicador completo, para buscar mapas de lookup
- * @param {number} [mes]    - Número de mes 1-12 (para resolver columnas dinámicas)
+ * @param {object} reporte  - detalle.archivo o detalle.sexo
+ * @param {string} id       - clave dentro de reporte (ej. "CP02", "Mujeres")
+ * @param {object} [raiz]   - el indicador completo, para mapas de lookup dinámico (ej. "MESES_CIP01")
+ * @param {number} [mes]    - mes 1-12 activo (para columnas dinámicas)
  */
 const getCols = (reporte, id, raiz = null, mes = null) => {
   const f = reporte[id];
   if (!f) return [];
 
-  // Para FINAL: las columnas de extracción vienen en columna_etiqueta (ej. ["F", "G"])
-  // Se toma el último valor numérico de cada una — igual que INTERSECCION en cuanto a nombres
-  if (f.modo === 'FINAL') {
-    return Array.isArray(f.columna_etiqueta) ? f.columna_etiqueta : [f.columna_etiqueta];
+  if (Array.isArray(f)) return f; // grupo de población: la lista de edades ES las columnas
+
+  if (f.modoExtraccion === 'ULTIMA_FILA') {
+    return Array.isArray(f.columna_dato) ? f.columna_dato : [f.columna_dato];
   }
 
-  // Para INTERSECCION_FILA: columna_etiqueta = columna(s), fila = números de fila
-  // Se combinan para producir referencias tipo "J65", "J69"
-  if (f.modo === 'INTERSECCION_FILA') {
-    const columnas = Array.isArray(f.columna_etiqueta) ? f.columna_etiqueta : [f.columna_etiqueta];
+  if (f.modoExtraccion === 'INTERSECCION_FILA') {
+    const columnas = Array.isArray(f.columna_dato) ? f.columna_dato : [f.columna_dato];
     const filas    = Array.isArray(f.fila) ? f.fila : [f.fila];
-    // Producto: cada columna con cada fila, en el orden que vienen
     const refs = [];
-    for (const fila of filas) {
-      for (const col of columnas) {
-        refs.push(`${col}${fila}`);
-      }
-    }
+    for (const fila of filas) for (const col of columnas) refs.push(`${col}${fila}`);
     return refs; // ej. ["J65", "J69"]
   }
 
-  if (f.modo === 'JSON_POBLACION') return f.columnas ?? [];
-
+  // INTERSECCION_COLUMNA (y default): columna_dato tal cual, con soporte de lookup dinámico
   const cols = f.columna_dato ?? [];
-
-  // Resuelve referencias a mapas de lookup dinámico (ej. "MESES_CIP01")
   return cols.map(c => {
-    if (/^[A-Z]{1,3}$/.test(c)) return c; // columna normal (A, BQ, etc.)
-    // Es una clave de lookup → buscarla en el indicador raíz
+    if (/^[A-Z]{1,3}$/.test(c)) return c;
     if (raiz && raiz[c]) {
       const mapa = raiz[c];
       const clave = mes != null ? String(mes) : null;
-      if (clave && mapa[clave]) return mapa[clave]; // columna resuelta según mes
-      // Si no hay mes, devolvemos una representación legible del mapa
-      const ejemplo = Object.entries(mapa)
-        .map(([m, col]) => `mes ${m}→${col}`)
-        .join(', ');
+      if (clave && mapa[clave]) return mapa[clave];
+      const ejemplo = Object.entries(mapa).map(([m, col]) => `mes ${m}→${col}`).join(', ');
       return `[dinámica: ${ejemplo}]`;
     }
-    return c; // fallback: devolver tal cual
+    return c;
   });
 };
 
@@ -75,67 +70,29 @@ const resolverRng = (rngStr, cols) => {
 };
 const pct = (f) => `${+(parseFloat(f) * 100).toFixed(2)}%`;
 
-// ── Descripción de extracción por modo ───────────────────────────────────────
-/**
- * @param {object} cfg      - Configuración de la fuente
- * @param {string[]} cols   - Columnas ya resueltas
- * @param {object} [raiz]   - Indicador raíz (para enriquecer descripción dinámica)
- * @param {number} [mes]    - Mes activo (para descripción dinámica)
- */
-const descripcionExtraccion = (cfg, cols, _raiz = null, mes = null) => {
+// ── Descripción de extracción por modo (rama "fórmula") ────────────────────
+const descripcionExtraccion = (cfg, cols) => {
   if (!cfg) return null;
 
-  switch (cfg.modo) {
-    case 'JSON_POBLACION': {
-      const grupo   = cfg.grupo ?? 'Todos';
-      const edades  = cols.length ? cols.join(', ') : 'por definir';
-      return `Fuente local — archivo de población delegacional (Guanajuato). Grupo: ${grupo}. Grupos de edad: ${edades}.`;
+  if (Array.isArray(cfg)) {
+    return `Fuente local — archivo de población delegacional (Guanajuato). Grupos de edad: ${cols.length ? cols.join(', ') : 'por definir'}.`;
+  }
+
+  switch (cfg.modoExtraccion) {
+    case 'INTERSECCION_COLUMNA': {
+      const colStr = cols.length === 1 ? `la columna ${cols[0]}` : `las columnas ${cols.join(', ')}`;
+      return `En la columna "${cfg.columna}" busca la fila "${cfg.buscar}" y extrae ${colStr}.`;
     }
-
-    case 'INTERSECCION': {
-      const etiq = Array.isArray(cfg.columna_etiqueta)
-        ? cfg.columna_etiqueta.join(', ')
-        : cfg.columna_etiqueta;
-      const colStr = cols.length === 1
-        ? `la columna ${cols[0]}`
-        : `las columnas ${cols.join(', ')}`;
-
-      // Detectar si alguna columna es dinámica (viene de un mapa de mes)
-      const hasDinamica = (cfg.columna_dato ?? []).some(
-        c => !/^[A-Z]{1,3}$/.test(c)
-      );
-      const sufijoDinamico = hasDinamica
-        ? mes != null
-          ? ` (columna del mes ${mes} según tabla de meses)`
-          : ` (columna variable según el mes del reporte)`
-        : '';
-
-      return `En la columna "${etiq}" busca la fila "${cfg.texto_buscar}" y extrae ${colStr}${sufijoDinamico}.`;
-    }
-
-    case 'INTERSECCION_FILA': {
-      // cols ya contiene referencias combinadas: ["J65", "J69"]
-      // cols[0] → numerador, cols[1] → denominador (según índice en la expresión)
-      const refsStr = cols.join(', ');
-      return `Extrae por posición fija (sin búsqueda de texto): ${refsStr}. `
-           + `Cada referencia combina la columna de extracción con el número de fila.`;
-    }
-
-    case 'FINAL': {
-      const colStr = cols.length === 1
-        ? `la columna ${cols[0]}`
-        : `las columnas ${cols.join(', ')}`;
-      return `Tomar el ultimo valor numerico de la "${colStr}".`;
-    }
-
-    default: {
-      const colStr = cols.join(', ');
-      return `Extrae la(s) columna(s) ${colStr}.`;
-    }
+    case 'INTERSECCION_FILA':
+      return `Extrae por posición fija (sin búsqueda de texto): ${cols.join(', ')}. Cada referencia combina la columna de extracción con el número de fila.`;
+    case 'ULTIMA_FILA':
+      return `Toma el último valor con dato de la columna ${cols.join(', ')} (a partir del encabezado en la fila ${cfg.encabezado}).`;
+    default:
+      return `Extrae la(s) columna(s) ${cols.join(', ')}.`;
   }
 };
 
-// ── Tokenizadores ─────────────────────────────────────────────────────────────
+// ── Tokenizadores (fórmulas tipo "CP02[0] + sum(CP03[0:2])") ───────────────
 const splitTop = (expr, sep) => {
   const out = []; let depth = 0, buf = '';
   for (const c of expr) {
@@ -160,19 +117,13 @@ const strip = (s) => {
   return s;
 };
 
-// ── Parsers de token ──────────────────────────────────────────────────────────
 const parseRef = (tok, reporte, raiz, mes) => {
   const m = tok.match(/^(\w+)\[(\d+(?::\d+)?)\]$/);
   if (!m) return null;
   const [, id, idx] = m;
   const cols = getCols(reporte, id, raiz, mes);
   const esR = idx.includes(':');
-  return {
-    id,
-    hoja: getHoja(reporte, id),
-    cfg: getConfig(reporte, id),
-    cols: esR ? resolverRng(idx, cols) : [resolverIdx(idx, cols)],
-  };
+  return { id, hoja: getHoja(reporte, id), cfg: getConfig(reporte, id), cols: esR ? resolverRng(idx, cols) : [resolverIdx(idx, cols)] };
 };
 
 const parseSum = (tok, reporte, raiz, mes) => {
@@ -235,8 +186,6 @@ const extraerListaSum = (expr) => {
   return splitTop(m[1].trim(), ',');
 };
 
-// ── Agrupación y Línea de Operación ──────────────────────────────────────────
-
 const tokenAFuente = (tok, reporte, raiz, mes) => {
   const t = strip(tok);
   const gp = parseGrupoPrev(t, reporte, raiz, mes);
@@ -253,11 +202,8 @@ const agruparPorFuente = (tokens, reporte, raiz, mes) => {
   for (const tok of tokens) {
     const f = tokenAFuente(tok, reporte, raiz, mes);
     if (!f) continue;
-    if (map.has(f.id)) {
-      map.get(f.id).grupos.push({ cols: f.cols, prev: f.prev });
-    } else {
-      map.set(f.id, { id: f.id, hoja: f.hoja, cfg: f.cfg, grupos: [{ cols: f.cols, prev: f.prev }] });
-    }
+    if (map.has(f.id)) map.get(f.id).grupos.push({ cols: f.cols, prev: f.prev });
+    else map.set(f.id, { id: f.id, hoja: f.hoja, cfg: f.cfg, grupos: [{ cols: f.cols, prev: f.prev }] });
   }
   return [...map.values()];
 };
@@ -274,19 +220,9 @@ const lineaOperacion = (fuentes) => {
   return bloques.join('  +  ');
 };
 
-const resumenFuentes = (fuentes) => {
-  const nombres = fuentes.map(f => `hoja "${f.hoja}"`).join(' y ');
-  return `Datos extraídos de ${nombres} para el cálculo final.`;
-};
+const resumenFuentes = (fuentes) => `Datos extraídos de ${fuentes.map(f => `hoja "${f.hoja}"`).join(' y ')} para el cálculo final.`;
 
-// ── EXPORTS ───────────────────────────────────────────────────────────────────
-
-/**
- * @param {string} expr
- * @param {object} reporte
- * @param {object} [raiz]   - Indicador completo (para mapas de lookup como MESES_CIP01)
- * @param {number} [mes]    - Mes 1-12 activo
- */
+/** @param {string} expr  @param {object} reporte  @param {object} [raiz]  @param {number} [mes] */
 export const parsearNumerador = (expr, reporte, raiz = null, mes = null) => {
   const clean = strip(expr.trim());
   const prod = parseProd(clean, reporte, raiz, mes);
@@ -305,5 +241,69 @@ export const parsearDenominador = (expr, reporte, raiz = null, mes = null) => {
 
 export const parsearResultado = (expr) =>
   expr.includes('* 100') ? '( Numerador ÷ Denominador ) × 100' : 'Numerador ÷ Denominador';
+
+// ── Rama "filtro" -- FILTRO_CONTEO / FILTRO_CONTEO_ACUMULADO / FILTRO_UNIDAD_VALOR ──
+// Estos no tienen fórmula que parsear (operacion.numerador/denominador es
+// literal "(numerador)"/"(denominador)") -- cuentan o filtran filas directo.
+
+const TIPO_FILTRO_TXT = {
+  RANGO: (f) => `entre ${f[0]} y ${f[1]}`,
+  LISTA: (f) => `uno de: ${f.join(', ')}`,
+};
+
+const descripcionFiltroColumna = (filtroColumna = {}) =>
+  Object.entries(filtroColumna)
+    .map(([col, cfg]) => `"${cfg.nombreColumna}" (columna ${col}) = ${TIPO_FILTRO_TXT[cfg.tipo]?.(cfg.filtro) ?? `"${cfg.filtro}"`}`)
+    .join('  Y  ');
+
+const descripcionCruce = (cruce) => {
+  if (!cruce?.activa) return null;
+  return `Si el diagnóstico es uno de los candidatos (${cruce.codigosCandidatos.join(', ')}), se valida cruzando con "${cruce.archivoCruce}" `
+       + `por "${cruce.columnaLlave}" — si ahí aparece alguno de los códigos válidos (${cruce.codigosValidos.join(', ')}), también se cuenta.`;
+};
+
+const descripcionFiltroUnidadValor = (detalle) => {
+  const [[colUnidad, cfgUnidad]] = Object.entries(detalle.columnaUnidad ?? {});
+  const condiciones = descripcionFiltroColumna(detalle.filtroColumna);
+  const [[colValor, nombreValor]] = Object.entries(detalle.tomarValor ?? {});
+  return `Ubica la fila de la unidad (columna ${colUnidad}, "${cfgUnidad?.nombreColumna}") donde ${condiciones}, `
+       + `y toma el valor de la columna ${colValor} ("${nombreValor}").`;
+};
+
+/**
+ * Describe en texto una fuente de tipo "filtro" (sin fórmula algebraica).
+ * @param {string} modoExtraccion
+ * @param {object} detalle - el bloque crudo (reporte.numerador o .denominador)
+ */
+export const descripcionFiltro = (modoExtraccion, detalle) => {
+  if (modoExtraccion === 'FILTRO_UNIDAD_VALOR') {
+    return { hoja: detalle.hoja, condiciones: descripcionFiltroUnidadValor(detalle), cruce: null };
+  }
+  return {
+    hoja: detalle.hoja,
+    condiciones: `Cuenta las filas donde ${descripcionFiltroColumna(detalle.filtroColumna)}.`,
+    cruce: modoExtraccion === 'FILTRO_CONTEO_ACUMULADO' ? descripcionCruce(detalle.cruce) : null,
+  };
+};
+
+const MODOS_FILTRO = ['FILTRO_CONTEO', 'FILTRO_CONTEO_ACUMULADO', 'FILTRO_UNIDAD_VALOR'];
+
+/**
+ * Decide cómo describir un lado (numerador/denominador) de reporte.ficha,
+ * según venga de la ficha técnica nueva (FuenteCalculo: {fuente, modoExtraccion, detalle}).
+ * @returns {{tipo:'filtro', hoja, condiciones, cruce} | {tipo:'formula'} | {tipo:'sin_desglose', fuente}}
+ */
+export const describirFuenteCalculo = ({ fuente, modoExtraccion, detalle }) => {
+  if (modoExtraccion && MODOS_FILTRO.includes(modoExtraccion)) {
+    return { tipo: 'filtro', ...descripcionFiltro(modoExtraccion, detalle) };
+  }
+  // archivo.{CODE}.modoExtraccion (INTERSECCION_COLUMNA/FILTRO/ULTIMA_FILA por código)
+  // o sexo.{Grupo} (población) -- ambos siguen el camino algebraico de siempre.
+  if (detalle?.archivo || detalle?.sexo) {
+    return { tipo: 'formula' };
+  }
+  // capturaWeb sin más detalle, u otra fuente sin desglose conocido.
+  return { tipo: 'sin_desglose', fuente };
+};
 
 export { descripcionExtraccion, pct };

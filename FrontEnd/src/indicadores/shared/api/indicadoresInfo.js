@@ -33,6 +33,18 @@ export const obtenerFichaIndicador = async (indicador, ano) => {
 };
 
 /**
+ * Ficha técnica completa de un indicador (título/objetivo/semáforo + cómo se
+ * calcula) -- para el panel compartido FichaTecnicaBoton, usado en las
+ * páginas de generar de FTP, IAAS y Extractor. Lee directo del mapeo
+ * unificado, sirve para cualquier módulo sin distinción.
+ * @param {string} indicador
+ */
+export const obtenerFichaTecnicaCompleta = async (indicador) => {
+  const { data } = await api.get(`/Indicadores/informacion/ficha-tecnica/${encodeURIComponent(indicador)}`);
+  return data;
+};
+
+/**
  * Reporte ya generado de un indicador (los datos reales para graficar).
  * @param {string} indicador
  * @param {string} ano

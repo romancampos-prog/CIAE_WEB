@@ -1,11 +1,17 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import { getEstadoExtractor, subirArchivoMensualExtractor, descargarExcelFamiliaExtractor } from '../api/extractor';
 import { descargarB64 } from '../../shared/utils/download';
+import FichaTecnicaBoton from '../../shared/componentes/FichaTecnica/FichaTecnicaBoton';
 import iconoEH from '../../../assets/icono_eh.png';
 import iconoDM from '../../../assets/icono_dm.png';
 import './extractor.css';
+
+const INDICADORES_EXTRACTOR = [
+  { clave: 'EH 03', icono: iconoEH },
+  { clave: 'DM 04', icono: iconoDM },
+];
 
 const RADIO = 30;
 const CIRCUNFERENCIA = 2 * Math.PI * RADIO;
@@ -172,12 +178,21 @@ const ExtractorPage = () => {
         </div>
 
         <div className="ex-hero">
-          <h1 className="ex-page-title">Extractor</h1>
-          <p className="ex-page-sub">
-            Cada mes se sube un solo Excel del SUI-13 (más su cruce con Egresos) y alimenta a
-            <strong> EH 03</strong> y <strong>DM 04</strong> a la vez. El corte semestral se calcula
-            solo cuando ya están los 12 meses de su ventana.
-          </p>
+          <div className="ex-hero-top">
+            <div>
+              <h1 className="ex-page-title">Extractor</h1>
+              <p className="ex-page-sub">
+                Cada mes se sube un solo Excel del SUI-13 (más su cruce con Egresos) y alimenta a
+                <strong> EH 03</strong> y <strong>DM 04</strong> a la vez. El corte semestral se calcula
+                solo cuando ya están los 12 meses de su ventana.
+              </p>
+            </div>
+            <FichaTecnicaBoton
+              indicador={INDICADORES_EXTRACTOR.map(i => i.clave)}
+              color="#0b5445"
+              iconos={Object.fromEntries(INDICADORES_EXTRACTOR.map(i => [i.clave, i.icono]))}
+            />
+          </div>
         </div>
 
         {!corteActivo && (

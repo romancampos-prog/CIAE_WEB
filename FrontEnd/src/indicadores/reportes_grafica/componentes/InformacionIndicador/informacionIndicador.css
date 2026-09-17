@@ -73,14 +73,47 @@
 }
 
 /* ── Pasos ── */
-.proceso-pasos { display: flex; flex-direction: column; gap: 20px; }
+.proceso-pasos { display: flex; flex-direction: column; gap: 16px; position: relative; }
 
 .paso {
-  border-left: 3px solid #e2e8f0;
-  padding-left: 18px;
-  transition: border-color 0.2s;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px 18px;
+  background: #fafbfc;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
-.paso:hover { border-left-color: var(--color-oro-institucional); }
+.paso:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.06); transform: translateY(-1px); }
+
+/* Numerador y denominador usan el mismo color del indicador (--fc, viene del
+   botón/drawer de ficha técnica) -- numerador de lleno, denominador en una
+   versión más suave del mismo tono, para que se note que son de la misma
+   familia pero sigan distinguiéndose entre sí. */
+.proceso-pasos > .paso:nth-child(1) {
+  border-left-color: var(--fc, var(--color-imss-primario));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fc, var(--color-imss-primario)) 8%, white) 0%, #fafbfc 55%);
+}
+.proceso-pasos > .paso:nth-child(1) .paso-num {
+  color: var(--fc, var(--color-imss-primario));
+  background: color-mix(in srgb, var(--fc, var(--color-imss-primario)) 12%, transparent);
+}
+.proceso-pasos > .paso:nth-child(2) {
+  border-left-color: color-mix(in srgb, var(--fc, var(--color-imss-primario)) 45%, white);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fc, var(--color-imss-primario)) 4%, white) 0%, #fafbfc 55%);
+}
+.proceso-pasos > .paso:nth-child(2) .paso-num {
+  color: color-mix(in srgb, var(--fc, var(--color-imss-primario)) 70%, #475569);
+  background: color-mix(in srgb, var(--fc, var(--color-imss-primario)) 7%, transparent);
+}
+
+/* Línea de fracción entre los dos bloques -- refuerza que uno divide al otro */
+.proceso-pasos > .paso:nth-child(2)::before {
+  content: '';
+  display: block;
+  width: 28px; height: 2px;
+  margin: -8px 0 12px 2px;
+  background: color-mix(in srgb, var(--fc, var(--color-imss-primario)) 40%, #cbd5e1);
+}
 
 .paso-header {
   display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
