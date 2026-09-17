@@ -20,10 +20,17 @@ def _adaptar_desde_mapeo_unificado(dato: dict, indicador: str) -> dict:
         "descripcionNumerador":   informacion.get("descNum"),
         "descripcionDenominador": informacion.get("descDen"),
         "nombreArchivoFinal":     indicador.replace(" ", "_"),
+        "fechaModificacion":      dato.get("fechaModificacion"),
         "semaforo":               dato.get("semaforo", {}),
         "decimales":              None,
         "periodicidad":           dato.get("periodicidad"),
         "modulo":                 dato.get("modulo"),
+        # El motor "Extractor" (FILTRO_CONTEO_ACUMULADO) no arma numerador/denominador
+        # por extraccion de columnas de Excel como el resto (ver reporte.numerador en
+        # indicadores/mapeo/EH.json y DM.json) -- no hay "reporte"/"operacion" en la
+        # forma plana vieja que espera operacionParser.js, por eso se omiten aqui;
+        # InformacionIndicador.jsx detecta su ausencia y muestra una descripcion
+        # simple en vez del desglose de fuentes por columna.
     }
 
 
@@ -56,6 +63,19 @@ def obtenerInformacionIndicador(indicador: str) -> dict:
     return {"error": f"No se encontró el indicador: {indicador}"}
 
 
+def _pasa_filtro_unificado(val: dict, campo_mostrar: str) -> bool:
+    """
+    El mapeo unificado (indicadores/mapeo/) no tiene el campo "generaFTP" del
+    mapeo viejo -- se traduce a mostrarGenerar + que tenga modulo asignado
+    (un indicador con mostrarGenerar=true pero sin modulo no está realmente
+    automatizado todavía). "mostrarGrafica" sí existe igual en ambos mapeos,
+    se usa tal cual.
+    """
+    if campo_mostrar == "generaFTP":
+        return bool(val.get("mostrarGenerar")) and bool(val.get("modulo"))
+    return val.get(campo_mostrar, True)
+
+
 def consultarTodosIndicadores(campo_mostrar: str = "mostrarGrafica") -> dict:
     """
     campo_mostrar: qué bandera del mapeo filtra la lista --
@@ -83,7 +103,7 @@ def consultarTodosIndicadores(campo_mostrar: str = "mostrarGrafica") -> dict:
             with open(RUTA_MAPEO_UNIFICADO / f"{tipo}.json", "r", encoding="utf-8") as f:
                 datos_uni = json.load(f)
             for key, val in datos_uni.items():
-                if key not in sub_indicadores and isinstance(val, dict) and val.get(campo_mostrar, True):
+                if key not in sub_indicadores and isinstance(val, dict) and _pasa_filtro_unificado(val, campo_mostrar):
                     sub_indicadores.append(key)
         except Exception:
             pass
