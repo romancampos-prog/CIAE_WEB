@@ -1,5 +1,6 @@
 {
   "S_Ob 01": {
+    "nombreArchivoFinal": "S_Ob 01",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",
@@ -122,6 +123,7 @@
     }
   },
   "S_Ob 02": {
+    "nombreArchivoFinal": "S_Ob 02",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",
@@ -183,6 +185,7 @@
     }
   },
   "S_Ob 03": {
+    "nombreArchivoFinal": "S_Ob 03",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",
@@ -205,6 +208,7 @@
     }
   },
   "S_Ob 04": {
+    "nombreArchivoFinal": "S_Ob 04",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",

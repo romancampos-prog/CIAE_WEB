@@ -3,9 +3,8 @@ Orquesta el pipeline completo para generar el Excel de un indicador FTP individu
 Usado en: ftp/controllers/reportes_controller.py
 """
 import json
-from ftp.services.ftp_service import obtenerInformacionIndicador
-from ftp.services.ftp_extraer import ExtraerInformacionPrevia
-from ftp.services.numerador_denominador import ObtenerNumDen
+from ftp.services.mapeo_ftp import cargar_ficha_ftp
+from ftp.services.ftp_extraer_unificado import ExtraerYCalcularIndicadorUnificado
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import ExcelFinalConPlantilla
 from ftp.services.datos_json_service import (
@@ -14,34 +13,18 @@ from ftp.services.datos_json_service import (
 
 
 def ExcelReporteFinal(indicador, ano, mes, semana):
-    informacionIndicador = obtenerInformacionIndicador(indicador)
+    ficha = cargar_ficha_ftp(indicador)
 
-    indicadorReportes  = informacionIndicador.get("reporte", {})
-    indicadorOperacion = informacionIndicador.get("operacion", {})
-    indicadorSemaforo  = informacionIndicador.get("semaforo", {})
-    indicadorTitulo    = informacionIndicador.get("titulo")
-    indicadordesNum    = informacionIndicador.get("descripcionNumerador")
-    indicadordesDen    = informacionIndicador.get("descripcionDenominador")
-    indicadoresArch    = informacionIndicador.get("nombreArchivoFinal")
-    indicadorDecimal   = informacionIndicador.get("decimales")
-    indicadorPeriodo   = informacionIndicador.get("periodicidad")
-    MESES_CIP01        = informacionIndicador.get("MESES_CIP01", {})
+    indicadorSemaforo  = ficha.semaforo
+    indicadorTitulo    = ficha.informacion.titulo
+    indicadordesNum    = ficha.informacion.descNum
+    indicadordesDen    = ficha.informacion.descDen
+    indicadoresArch    = ficha.nombreArchivoFinal
+    indicadorPeriodo   = ficha.periodicidad
 
-    diccionarioPrevio, diccionarioErrores = ExtraerInformacionPrevia(indicadorReportes, ano, mes, semana, MESES_CIP01)
-    print("////////////////////////////////////////////////////////////////////////")
-    print("INFORMACION PREVIA")
-    print(json.dumps(diccionarioPrevio, indent=4, ensure_ascii=False))
-
+    diccionarioPrevio, diccionarioErrores = ExtraerYCalcularIndicadorUnificado(indicador, ano, mes, semana)
     print("REPORTES DE ERRORES POR UNIDAD:")
     print(json.dumps(diccionarioErrores, indent=4, ensure_ascii=False))
-
-    diccionarioPrevio, errores_calculo = ObtenerNumDen(diccionarioPrevio, indicadorOperacion, indicadorDecimal)
-    if errores_calculo:
-        diccionarioErrores["CALCULO_FALLIDO"] = {
-            "nombreError": "Error de cálculo",
-            "descripcionError": "Falló la evaluación de la fórmula del indicador para estas unidades.",
-            "unidades": {u: [{"reportes": ["cálculo"], "ruta": msg}] for u, msg in errores_calculo.items()}
-        }
     print("////////////////////////////////////////////////////////////////////////")
     print("NUMERADOR Y DENOMINADOR")
     print(json.dumps(diccionarioPrevio, indent=4, ensure_ascii=False))
@@ -110,13 +93,13 @@ def ExcelReporteGuardado(indicador, ano, mes):
     guardado, no genera nada nuevo -- devuelve error. Así "ver/descargar" desde
     gráficas nunca puede cerrar un mes ni pisar el respaldo semanal.
     """
-    informacionIndicador = obtenerInformacionIndicador(indicador)
-    indicadorSemaforo  = informacionIndicador.get("semaforo", {})
-    indicadorTitulo    = informacionIndicador.get("titulo")
-    indicadordesNum    = informacionIndicador.get("descripcionNumerador")
-    indicadordesDen    = informacionIndicador.get("descripcionDenominador")
-    indicadoresArch    = informacionIndicador.get("nombreArchivoFinal")
-    indicadorPeriodo   = informacionIndicador.get("periodicidad")
+    ficha = cargar_ficha_ftp(indicador)
+    indicadorSemaforo  = ficha.semaforo
+    indicadorTitulo    = ficha.informacion.titulo
+    indicadordesNum    = ficha.informacion.descNum
+    indicadordesDen    = ficha.informacion.descDen
+    indicadoresArch    = ficha.nombreArchivoFinal
+    indicadorPeriodo   = ficha.periodicidad
 
     diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes)
     if diccionarioPrevio is None:

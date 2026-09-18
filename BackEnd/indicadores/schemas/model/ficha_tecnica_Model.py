@@ -1,9 +1,8 @@
 """
 Modelos de la "ficha técnica" completa de un indicador (título, objetivo,
 semáforo, y cómo se calcula), leída directamente del mapeo unificado
-(indicadores/mapeo/{familia}.json). Reemplaza al dict suelto que regresaba
-ftp_service.obtenerInformacionIndicador() -- usado por el componente
-compartido FichaTecnicaBoton (FTP / IAAS / Extractor).
+(indicadores/mapeo/{familia}.json) -- usado por el componente compartido
+FichaTecnicaBoton (FTP / IAAS / Extractor).
 Usado en: indicadores/services/ficha_tecnica_Services.py,
           indicadores/Controller/informacion_Controller.py
 """

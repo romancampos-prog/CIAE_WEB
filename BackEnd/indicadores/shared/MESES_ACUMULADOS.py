@@ -5,6 +5,7 @@ import json
 from schemas.model.indicador_Model import UnidadDatos
 from services.indicadorMapeo_Services import RutaMapeoExiste
 from shared.MESES import MESES_ESTANDAR
+from shared.color_service import es_inconsistente
 from shared.semaforizado_service import SemaforizarReporte
 
 #funciones permitidas dentro del eval de la formula de resultado -- mismo criterio que ftp/services/numerador_denominador.py
@@ -30,9 +31,12 @@ def MensualAcumulado(meses: Dict[str, Dict[str, UnidadDatos]], indicador: str) -
     'resultado' con la misma formula de 'operacion.resultado' del mapeo (nunca
     un multiplicador fijo, porque no todos los indicadores usan el mismo).
 
-    Si a una unidad le falta numerador o denominador en algun mes del rango
-    acumulado, esa unidad queda "Gris" ese corte -- no se inventa el dato.
-
+    Mismas reglas que el Excel y la generacion (ver shared/color_service.py):
+      - Si a una unidad le falta numerador o denominador en algun mes del rango,
+        queda "Gris" ese corte sin resultado, pero se muestran los acumulados que
+        si existan (numerador y/o denominador) -- no se inventa el dato faltante.
+      - Un mes en el que la unidad no existe simplemente no suma.
+      - Denominador 0 con numerador > 0 es inconsistente: Gris, sin resultado.
     El 'desempeno' de las unidades que si tienen resultado se clasifica al
     final con SemaforizarReporte(), contra el semaforo del mismo mapeo.
     """
@@ -51,26 +55,39 @@ def MensualAcumulado(meses: Dict[str, Dict[str, UnidadDatos]], indicador: str) -
 
         for unidad in todasLasUnidades:
             numeradorAcumulado, denominadorAcumulado = 0, 0
+            hayNumerador = hayDenominador = False
             completo = True
 
             for mes in mesesHastaAqui:
                 datoUnidad = meses[mes].get(unidad)
-                if datoUnidad is None or datoUnidad.numerador is None or datoUnidad.denominador is None:
+                if datoUnidad is None:
+                    continue
+                if datoUnidad.numerador is not None:
+                    numeradorAcumulado += datoUnidad.numerador
+                    hayNumerador = True
+                if datoUnidad.denominador is not None:
+                    denominadorAcumulado += datoUnidad.denominador
+                    hayDenominador = True
+                if datoUnidad.numerador is None or datoUnidad.denominador is None:
                     completo = False
-                    break
-                numeradorAcumulado   += datoUnidad.numerador
-                denominadorAcumulado += datoUnidad.denominador
 
-            if not completo:
+            if not hayNumerador and not hayDenominador:
                 filaMes[unidad] = UnidadDatos(desempeno="Gris")
                 continue
 
-            contexto  = {**_CONTEXTO_PERMITIDO, "numerador": numeradorAcumulado, "denominador": denominadorAcumulado}
-            resultado = round(eval(operacionResultado, {"__builtins__": None}, contexto), 2) if denominadorAcumulado else 0
+            numerador   = numeradorAcumulado   if hayNumerador   else None
+            denominador = denominadorAcumulado if hayDenominador else None
+
+            if not completo or es_inconsistente(numerador, denominador):
+                filaMes[unidad] = UnidadDatos(numerador=numerador, denominador=denominador, desempeno="Gris")
+                continue
+
+            contexto  = {**_CONTEXTO_PERMITIDO, "numerador": numerador, "denominador": denominador}
+            resultado = round(eval(operacionResultado, {"__builtins__": None}, contexto), 2) if denominador else 0
 
             filaMes[unidad] = UnidadDatos(**{
-                "numerador":   numeradorAcumulado,
-                "denominador": denominadorAcumulado,
+                "numerador":   numerador,
+                "denominador": denominador,
                 "desempeno":   "Gris",  # se clasifica de verdad abajo, con SemaforizarReporte
                 "%":           resultado,
             })

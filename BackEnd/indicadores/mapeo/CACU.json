@@ -1,5 +1,6 @@
 {
   "CACU 01": {
+    "nombreArchivoFinal": "CACU 01",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cacu.png",
     "color": "#0f766e",
@@ -118,6 +119,7 @@
     }
   },
   "CACU 02": {
+    "nombreArchivoFinal": "CACU 02",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cacu.png",
     "color": "#0f766e",
@@ -140,6 +142,7 @@
     }
   },
   "CACU 03": {
+    "nombreArchivoFinal": "CACU 03",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cacu.png",
     "color": "#0f766e",
@@ -162,6 +165,7 @@
     }
   },
   "CACU 04": {
+    "nombreArchivoFinal": "CACU 04",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cacu.png",
     "color": "#0f766e",

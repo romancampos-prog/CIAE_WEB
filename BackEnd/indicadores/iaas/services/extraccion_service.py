@@ -9,6 +9,10 @@ from openpyxl.utils import column_index_from_string
 from iaas.config import UNIDADES_HGS_IAAS01, ORDEN_IAAS01, ORDEN_DEMAS_IAAS, UNIDAD_TIPO_IAAS01
 from iaas.services.info_service import obtener_config_indicador
 from iaas.services.calculos_iaas import _alias_hgsz
+from iaas.services.semaforo_iaas import semaforizar_iaas
+from iaas.services.extraccion_unificada import (
+    obtener_numerador, obtener_denominador_IAAS01, obtener_denominador_IAAS01_unidad, validar_excel_unidad,
+)
 from shared.color_service import resolver_color
 
 # UNIDAD_TIPO_IAAS01 solo tiene los nombres canonicos (HGS/HGSMF); el dato crudo a veces
@@ -89,8 +93,8 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
     if indicador == "IAAS 01":
         if denominador is None:
             return {}
-        dens = _get_denominador_IAAS01(denominador)
-        nums = _get_numerador(numeradores, indicador)
+        dens = obtener_denominador_IAAS01(denominador)
+        nums = obtener_numerador(numeradores, indicador)
 
         # Se recorre la lista completa de unidades esperadas (no solo las que trajeron
         # numerador o denominador) para que ninguna quede fuera del JSON aunque no
@@ -102,10 +106,10 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
                 "numerador":   nums.get(u),
                 "denominador": dens.get(u)
             }
-        return _semaforo_IAAS01(resultado)
+        return semaforizar_iaas(resultado, indicador)
 
     else:
-        nums     = _get_numerador(numeradores, indicador)
+        nums     = obtener_numerador(numeradores, indicador)
         dens_raw = (denominador or {}).get(indicador, {})
         dens     = {u: int(v) for u, v in dens_raw.items() if v}
 
@@ -121,7 +125,7 @@ def calcular_IAAS(indicador: str, numeradores: dict, denominador=None) -> dict:
                 "numerador":   nums.get(u),
                 "denominador": dens.get(u)
             }
-        return _semaforo_general(resultado, indicador)
+        return semaforizar_iaas(resultado, indicador)
 
 
 def _get_numerador(lista_exceles: dict, indicador: str) -> dict:
@@ -296,10 +300,8 @@ def calcular_unidad_tardia(
     Si excel_unidad es None, reutiliza el numerador ya guardado en sesión.
     """
     if excel_unidad is not None:
-        config_num = obtener_config_indicador(indicadores_seleccionados[0]).get("Numerador", {}) if indicadores_seleccionados else {}
-        errs = _validar_encabezado_excel(excel_unidad, unidad, config_num)
-        if errs:
-            raise ValueError(json.dumps(errs))
+        if indicadores_seleccionados:
+            validar_excel_unidad(excel_unidad, unidad, indicadores_seleccionados[0])
         nums_unidad = {unidad: excel_unidad}
     else:
         nums_unidad = None
@@ -311,20 +313,20 @@ def calcular_unidad_tardia(
             if unidad not in ORDEN_IAAS01:
                 continue
             num = (
-                _get_numerador(nums_unidad, "IAAS 01").get(unidad)
+                obtener_numerador(nums_unidad, "IAAS 01").get(unidad)
                 if nums_unidad is not None
                 else (datos_sesion.get("IAAS 01", {}).get(unidad) or {}).get("numerador")
             )
             den = (
-                _get_denominador_IAAS01_unidad(excel_denominador_iaas01, unidad)
+                obtener_denominador_IAAS01_unidad(excel_denominador_iaas01, unidad)
                 if excel_denominador_iaas01 is not None
                 else (datos_sesion.get("IAAS 01", {}).get(unidad) or {}).get("denominador")
             )
             raw = {unidad: {"numerador": num, "denominador": den}}
-            resultado["IAAS 01"] = _semaforo_IAAS01(raw)
+            resultado["IAAS 01"] = semaforizar_iaas(raw, "IAAS 01")
         else:
             num = (
-                _get_numerador(nums_unidad, ind).get(unidad, 0)
+                obtener_numerador(nums_unidad, ind).get(unidad, 0)
                 if nums_unidad is not None
                 else (datos_sesion.get(ind, {}).get(unidad) or {}).get("numerador")
             )
@@ -336,7 +338,7 @@ def calcular_unidad_tardia(
                 den_v = str(denominadores_02_06.get(ind, "")).strip()
                 den = int(den_v) if den_v.isdigit() else (datos_sesion.get(ind, {}).get(unidad) or {}).get("denominador")
             raw = {unidad: {"numerador": num, "denominador": den}}
-            resultado[ind] = _semaforo_general(raw, ind)
+            resultado[ind] = semaforizar_iaas(raw, ind)
 
     return resultado
 

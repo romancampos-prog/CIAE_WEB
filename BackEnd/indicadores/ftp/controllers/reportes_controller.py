@@ -15,7 +15,8 @@ from fastapi import APIRouter, Query, Depends, HTTPException, Request
 from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
 from auth.services.auth_service import verificar_credenciales
-from ftp.services.ftp_service import obtenerInformacionIndicador, consultarTodosIndicadores
+from services.indicadorMapeo_Services import AllIndicadores
+from ftp.services.recalcular_poblacion_service import actualizar_historico_con_nueva_poblacion, usa_poblacion
 from ftp.services.reporte_final import ExcelReporteFinal, ExcelReporteGuardado
 from ftp.services.reporte_categoria import (
     preparar_datos_indicador, preparar_datos_guardados, escribir_hoja_indicador,
@@ -158,29 +159,18 @@ async def ftp_datos_grafica(
 
 @router.post("/recalcular-poblacion")
 async def recalcular_poblacion(request: Request, payload: dict = Depends(solo_roles(*ROLES_FTP_FULL))):
-    from ftp.services.recalcular_poblacion_service import actualizar_historico_con_nueva_poblacion
-
     body = await request.json()
     ano  = str(body.get("ano", "2026"))
 
-    todos        = consultarTodosIndicadores("generaFTP")
     recalculados = []
     errores      = []
 
-    for categoria, cat_data in todos.items():
-        for indicador in cat_data.get("indicadores", []):
-            info     = obtenerInformacionIndicador(indicador)
-            reportes = info.get("reporte", {}) if isinstance(info, dict) else {}
-
-            usa_poblacion = any(
-                isinstance(v, dict) and v.get("modo") == "JSON_POBLACION"
-                for v in reportes.values()
-            )
-            if not usa_poblacion:
-                continue
-
+    for categoria in AllIndicadores("mostrarGenerar", "ftp"):
+        for indicador in categoria.indicadores:
             try:
-                ok, detalle, n_meses = actualizar_historico_con_nueva_poblacion(indicador, ano, info)
+                if not usa_poblacion(indicador):
+                    continue
+                ok, detalle, n_meses = actualizar_historico_con_nueva_poblacion(indicador, ano)
                 if ok:
                     recalculados.append({"indicador": indicador, "meses": n_meses, "detalle": detalle})
                 else:
@@ -201,14 +191,11 @@ async def _generar_categoria_excel(categoria: str, ano: str, mes: str, semana):
     """Arma el Excel con una pestaña por indicador de la categoría. Compartido
     por /generar-categoria (primera generación) y /generar-categoria/regenerar
     (mes definitivo ya generado, requiere contraseña)."""
-    todos    = consultarTodosIndicadores("generaFTP")
-    cat_data = todos.get(categoria)
+    cat_data = next((c for c in AllIndicadores("mostrarGenerar", "ftp") if c.categoriaIndicador == categoria), None)
     if not cat_data:
         raise HTTPException(status_code=404, detail=f"Categoría '{categoria}' no encontrada")
 
-    indicadores = cat_data.get("indicadores", [])
-    if not indicadores:
-        raise HTTPException(status_code=404, detail="No hay indicadores habilitados en esta categoría")
+    indicadores = cat_data.indicadores
 
     es_semana = bool(semana and str(semana).strip() not in ("", "None", "none"))
     loop      = asyncio.get_running_loop()
@@ -309,14 +296,11 @@ async def generar_categoria_guardado(
     ano:       str = Query(...),
     payload:   dict = Depends(solo_roles(*ROLES_FTP_GRAF))
 ):
-    todos    = consultarTodosIndicadores()
-    cat_data = todos.get(categoria)
+    cat_data = next((c for c in AllIndicadores() if c.categoriaIndicador == categoria), None)
     if not cat_data:
         raise HTTPException(status_code=404, detail=f"Categoría '{categoria}' no encontrada")
 
-    indicadores = cat_data.get("indicadores", [])
-    if not indicadores:
-        raise HTTPException(status_code=404, detail="No hay indicadores habilitados en esta categoría")
+    indicadores = cat_data.indicadores
 
     loop  = asyncio.get_running_loop()
     pares = []

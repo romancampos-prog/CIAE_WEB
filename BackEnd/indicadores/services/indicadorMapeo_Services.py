@@ -43,7 +43,14 @@ def RutaMapeoExiste(indicador: str) -> str:
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-def AllIndicadores() -> list[IndicesIndicadores]:
+def AllIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None) -> list[IndicesIndicadores]:
+    """
+    campo: bandera del mapeo que decide que indicadores se listan -- "mostrarGrafica"
+           (gráficas/descargas, default) o "mostrarGenerar" (páginas de Generar).
+    modulo: si se manda ("ftp", "iaas", "Extractor"), solo los indicadores de ese módulo
+            (un indicador sin módulo asignado todavía no está automatizado).
+    Las categorías que quedan sin indicadores no se incluyen.
+    """
     #en la caporeta extarer nombre del idnciador y gacer arreglo 
     
     
@@ -68,7 +75,7 @@ def AllIndicadores() -> list[IndicesIndicadores]:
         color = ""
         #extraer los indicadores del json
         for indicador, info in data.items():
-            if info.get("mostrarGrafica", True):  # Solo incluir indicadores disponibles
+            if info.get(campo, True) and (modulo is None or str(info.get("modulo", "")).lower() == modulo.lower()):
                 indicadores.append(indicador)
             if not imagen:
                 imagen = info.get("imagen", "")
@@ -77,6 +84,9 @@ def AllIndicadores() -> list[IndicesIndicadores]:
 
 
         #crear objeto IndicesIndicadores
+        if not indicadores:
+            continue
+
         indice = IndicesIndicadores(
             categoriaIndicador=categoria,
             indicadores=indicadores,

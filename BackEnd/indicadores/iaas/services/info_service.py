@@ -1,5 +1,7 @@
-﻿from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01, UNIDAD_TIPO_IAAS01
+from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01, UNIDAD_TIPO_IAAS01
 from iaas.services.datos_json_service import leer_config_iaas
+from iaas.services.extraccion_unificada import cargar_mapeo_iaas
+from shared.semaforo_service import es_agrupado
 
 
 def obtener_config_indicador(indicador: str) -> dict:
@@ -8,22 +10,23 @@ def obtener_config_indicador(indicador: str) -> dict:
 
 
 def infoAllIAAS() -> dict:
+    """Titulo, descripciones y semaforo de cada indicador IAAS, del mapeo unificado (semaforo en texto con operadores)."""
     resultado = {}
-    datos = leer_config_iaas()
 
-    for indicador, info in datos.items():
-        if not info.get("mostrar", True):
+    for indicador, mapeo in cargar_mapeo_iaas().items():
+        if not mapeo.mostrarGrafica:
             continue
-        es_iaas01 = indicador == "IAAS 01"
-        entry = {
-            "titulo":                 info.get("titulo"),
-            "descripcionNumerador":   info.get("descripcionNumerador"),
-            "descripcionDenominador": info.get("descripcionDenominador"),
-            "semaforo":               info.get("Semaforo"),
-            "unidades_hgs":           UNIDADES_HGS_IAAS01 if es_iaas01 else [],
-            "unidad_tipo":            UNIDAD_TIPO_IAAS01   if es_iaas01 else {},
+        # Si el semaforo esta partido por grupo (IAAS 01: tipo de hospital) el front
+        # necesita saber a que grupo pertenece cada unidad.
+        agrupado = es_agrupado(mapeo.semaforo)
+        resultado[indicador] = {
+            "titulo":                 mapeo.informacion.titulo,
+            "descripcionNumerador":   mapeo.informacion.descNum,
+            "descripcionDenominador": mapeo.informacion.descDen,
+            "semaforo":               mapeo.semaforo,
+            "unidades_hgs":           UNIDADES_HGS_IAAS01 if agrupado else [],
+            "unidad_tipo":            UNIDAD_TIPO_IAAS01   if agrupado else {},
         }
-        resultado[indicador] = entry
 
     return resultado
 
@@ -33,5 +36,14 @@ def obtenerUnidadesIAAS() -> list:
 
 
 def obtenerIndicadoresIAAS() -> list:
-    datos = leer_config_iaas()
-    return [{"id": key, **val} for key, val in datos.items() if val.get("mostrar", True)]
+    """Indicadores IAAS que se generan, con los rotulos de sus columnas (del mapeo unificado)."""
+    return [
+        {
+            "id":                 indicador,
+            "titulo":             mapeo.informacion.titulo,
+            "columnaNumerador":   mapeo.excel.columnaNumerador,
+            "columnaDenominador": mapeo.excel.columnaDenominador,
+        }
+        for indicador, mapeo in cargar_mapeo_iaas().items()
+        if mapeo.mostrarGenerar
+    ]

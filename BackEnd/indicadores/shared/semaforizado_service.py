@@ -4,7 +4,7 @@ import json
 #mis archivos
 from schemas.model.indicador_Model import UnidadDatos
 from services.indicadorMapeo_Services import RutaMapeoExiste
-from shared.semaforo_service import evaluar_color
+from shared.semaforo_service import evaluar_color, umbrales_para
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 
 
@@ -58,13 +58,9 @@ def _semaforizarUnidades(
             resultado[unidad] = dato
             continue
 
-        if indicador == "IAAS 01":
-            tipo     = UNIDAD_TIPO_IAAS01.get(unidad, "OOAD")
-            umbrales = semaforo.get(tipo, semaforo.get("OOAD"))
-        elif mes and mes in semaforo:
-            umbrales = semaforo[mes]
-        else:
-            umbrales = semaforo
+        # UNIDAD_TIPO_IAAS01 es el unico agrupamiento de unidades que existe hoy;
+        # solo se consulta si el semaforo esta agrupado (ver umbrales_para).
+        umbrales = umbrales_para(semaforo, mes, UNIDAD_TIPO_IAAS01.get(unidad, "OOAD"))
 
         dato.desempeno = evaluar_color(dato.resultado, umbrales)
         resultado[unidad] = dato

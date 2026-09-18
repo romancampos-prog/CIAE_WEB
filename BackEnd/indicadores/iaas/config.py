@@ -2,9 +2,9 @@
 from pathlib import Path
 from configs.settings import DATA_INDICADORES
 
-_MAPEO = Path(__file__).parent / "mapeo"
+_MAPEO = Path(__file__).parent.parent / "mapeo"
 
-_u = json.loads((_MAPEO / "unidades.json").read_text(encoding="utf-8"))
+_u = json.loads((_MAPEO / "unidades" / "iaas.json").read_text(encoding="utf-8"))
 MESES               = _u["MESES"]
 ORDEN_IAAS01        = _u["ORDEN_IAAS01"]
 UNIDADES_HGS_IAAS01 = _u["UNIDADES_HGS_IAAS01"]
@@ -23,5 +23,5 @@ for _u_name in UNIDADES_HGO_IAAS01: _IAAS01_TIPO[_u_name] = "HGO"
 for _u_name in UNIDADES_HGP_IAAS01: _IAAS01_TIPO[_u_name] = "HGP"
 UNIDAD_TIPO_IAAS01 = _IAAS01_TIPO
 
-RUTA_IAAS_JSON = _MAPEO / "IAAS.json"
+RUTA_IAAS_JSON = Path(__file__).parent / "mapeo" / "IAAS.json"  # config VIEJO -- solo lo lee codigo sin uso (ver extraccion_service.py)
 RUTA_DATA_IAAS = DATA_INDICADORES  # {año}/IAAS/IAAS_0N.json

@@ -1,5 +1,6 @@
 {
     "DM 01": {
+        "nombreArchivoFinal": "DM 01",
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
@@ -148,6 +149,7 @@
         }
     },
     "DM 02": {
+        "nombreArchivoFinal": "DM 02",
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
@@ -206,6 +208,7 @@
         }
     },
     "DM 03": {
+        "nombreArchivoFinal": "DM 03",
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
@@ -228,6 +231,7 @@
         }
     },
     "DM 04": {
+        "nombreArchivoFinal": "DM_04",
         "fechaModificacion": "10/09/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
@@ -443,6 +447,7 @@
         }
     },
     "DM 06": {
+        "nombreArchivoFinal": "DM 06",
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",

@@ -9,7 +9,7 @@ import xlsxwriter
 import openpyxl
 from iaas.config import MESES
 from iaas.services.calculos_iaas import (
-    _CFG, UNIDADES_IAAS, UNIDADES_UCI,
+    UNIDADES_IAAS, UNIDADES_UCI,
     _filas_umbrales_iaas01, _rango_umbral_uci,
     _leer_historicos_IAAS,
     calcular_fila_iaas01, calcular_acumulado_iaas01, calcular_anual_iaas01,
@@ -263,14 +263,16 @@ def Estilos_IAAS01(libro):
     }
 
 
+from iaas.services.extraccion_unificada import cargar_indicador_iaas
+
 _IAAS_UCI_CONFIG = {
     num: {
         "indicador": f"IAAS {num}",
-        "codigo":   _CFG[f"IAAS {num}"]["Titulo2"],
-        "titulo":   _CFG[f"IAAS {num}"]["Titulo1"],
+        "codigo":   cargar_indicador_iaas(f"IAAS {num}").excel.codigo,
+        "titulo":   cargar_indicador_iaas(f"IAAS {num}").excel.titulo,
         "hoja":     f"IAAS {num}",
-        "sub_col1": _CFG[f"IAAS {num}"]["subT1"],
-        "sub_col2": _CFG[f"IAAS {num}"]["subT2"],
+        "sub_col1": cargar_indicador_iaas(f"IAAS {num}").excel.columnaNumerador,
+        "sub_col2": cargar_indicador_iaas(f"IAAS {num}").excel.columnaDenominador,
         "alto_sub": 48 if num == "04" else 30,
     }
     for num in ("02", "03", "04", "05", "06")

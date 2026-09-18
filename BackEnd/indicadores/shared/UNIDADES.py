@@ -46,3 +46,28 @@ UNIDAD_TIPO_IAAS01: dict[str, str] = {
     for clave, unidades in CLASIFICACION_HOSPITALES_IAAS_01.items()
     for unidad in unidades
 }
+
+def alias_hgsz(nombre: str) -> str | None:
+    """
+    En el dato crudo, algunas unidades HGS/HGSMF vienen guardadas como HGSZ/HGSZMF --
+    es la misma unidad, solo cambia el prefijo. Devuelve el nombre alterno a probar,
+    o None si el nombre no tiene ese prefijo.
+    """
+    if nombre.startswith("HGSMF "):
+        return "HGSZMF " + nombre[len("HGSMF "):]
+    if nombre.startswith("HGS "):
+        return "HGSZ " + nombre[len("HGS "):]
+    return None
+
+
+# alias (HGSZ 10 ..., HGSZMF 13 ...) -> nombre canonico del catalogo (HGS 10 ..., HGSMF 13 ...)
+_ALIAS_A_CANONICO_IAAS: dict[str, str] = {
+    alias: nombre
+    for nombre in {u for unidades in CLASIFICACION_HOSPITALES_IAAS_01.values() for u in unidades}
+    for alias in [alias_hgsz(nombre)] if alias
+}
+
+
+def nombre_canonico_iaas(unidad: str) -> str:
+    """El dato crudo de IAAS a veces trae el alias HGSZ/HGSZMF de una unidad HGS/HGSMF; devuelve el nombre del catalogo."""
+    return _ALIAS_A_CANONICO_IAAS.get(unidad, unidad)

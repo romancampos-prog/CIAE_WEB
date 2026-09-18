@@ -80,6 +80,36 @@ def numero_de_umbral(valor):
     return float(m.group(0)) if m else None
 
 
+def es_agrupado(semaforo: dict) -> bool:
+    """
+    True si el semaforo esta partido por grupo (ej. tipo de hospital en IAAS 01:
+    {"HGS": {...}, "HGZ": {...}, "OOAD": {...}}) y no por mes ni con metas directas.
+    No importa que significa cada grupo -- solo que sus valores son bloques de
+    metas y sus llaves no son meses.
+    """
+    from shared.MESES import MESES_ESTANDAR
+
+    return bool(semaforo) and all(isinstance(v, dict) for v in semaforo.values()) \
+        and not any(k in MESES_ESTANDAR for k in semaforo)
+
+
+def umbrales_para(semaforo: dict, mes: str | None = None, grupo: str | None = None) -> dict:
+    """
+    Elige el bloque de metas que aplica dentro del semaforo de un indicador,
+    segun su forma (las 3 que existen en indicadores/mapeo/):
+      - mensual  ({"Enero": metas, ...}): el del mes ("Enero".."Diciembre")
+      - agrupado ({"HGS": metas, ..., "OOAD": metas}): el del grupo; si el
+                 grupo no existe (ej. el total) se usa "OOAD"
+      - fijo     (metas directas): el mismo para todos
+    Un solo lugar para esta decision -- la usan FTP, IAAS y Extractor.
+    """
+    if mes and mes in semaforo:
+        return semaforo[mes]
+    if grupo is not None and es_agrupado(semaforo):
+        return semaforo.get(grupo, semaforo.get("OOAD"))
+    return semaforo
+
+
 def evaluar_color(resultado: float, metas: dict) -> str:
     """
     Devuelve "Esperado" / "Medio" / "Bajo" según el resultado y las metas.

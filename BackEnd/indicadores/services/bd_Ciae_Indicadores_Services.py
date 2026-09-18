@@ -8,6 +8,7 @@ from configs.settings import DATA_INDICADORES
 from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from shared.MESES_ACUMULADOS import MensualAcumulado
+from shared.UNIDADES import nombre_canonico_iaas
 
 #ruta  a la BD_CIAE 
 
@@ -62,8 +63,18 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
         logging.error(f"El json y reporte existen, pero no coincide con el indicador o año solicitado")
         return None
         
+    # IAAS: el dato guardado a veces trae el alias HGSZ de una unidad HGS -- se unifica al
+    # nombre del catalogo para que la unidad no aparezca duplicada ni "sin datos".
+    modulo = (payload.modulo or "").lower()  # la ficha trae "IAAS"/"Extractor", el front a veces manda "iaas"
+
+    if (modulo == "iaas"):
+        reporte.MESES = {
+            mes: {nombre_canonico_iaas(unidad): datos for unidad, datos in unidades.items()}
+            for mes, unidades in reporte.MESES.items()
+        }
+
     #si previos true, cuneta con reporte semanal y si es ftp al mismo timepo 
-    if (payload.previos and payload.modulo == "ftp"):
+    if (payload.previos and modulo == "ftp"):
         rutaIndicadorPrevio = IndicadorExiste(payload.indicador, payload.ano, payload.previos) #en payload previos si el indicador si contiene reportes semanales ´previos debria estar en true 
         if (not rutaIndicadorPrevio):return reporte #si no existe el reporte previo, retornamos el reporte normal sin previo
         with open(rutaIndicadorPrevio, "r", encoding = "utf-8") as archivoJsonPrevio:
@@ -79,7 +90,7 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
             
     
     # si el modulo tiene mensual acumualdo true y es del modulo de iaas
-    if (payload.mensualAcumulado and payload.modulo == "iaas"):
+    if (payload.mensualAcumulado and modulo == "iaas"):
         reporteAcumulado = MensualAcumulado(reporte.MESES, payload.indicador)
 
         if(not reporteAcumulado):
@@ -95,7 +106,7 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
     # se genero de verdad (el que si trae TOTAL_OOAD), para que la grafica
     # muestre el ultimo resultado oficial en vez de una linea plana en 0 que
     # salta al mes de corte.
-    if (payload.modulo == "Extractor"):
+    if (modulo == "extractor"):
         mesesConCorte = {mes: datos for mes, datos in reporte.MESES.items() if "TOTAL_OOAD" in datos}
         if not mesesConCorte:
             reporte.MESES = {}

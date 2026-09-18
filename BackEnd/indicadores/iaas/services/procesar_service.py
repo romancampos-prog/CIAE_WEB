@@ -125,7 +125,7 @@ def _recalcular_total_ooad(datos_ind: dict, ind: str) -> dict:
     - Unidad con numerador y denominador ambos 0 -- cero real, se cuenta normal
       (no afecta el total, aporta 0/0).
     """
-    from iaas.services.extraccion_service import _semaforo_IAAS01, _semaforo_general
+    from iaas.services.semaforo_iaas import semaforizar_iaas
 
     total_num  = 0
     total_den  = 0
@@ -148,7 +148,7 @@ def _recalcular_total_ooad(datos_ind: dict, ind: str) -> dict:
     # un cero real) -- eso es distinto de no haber contado ninguna unidad (Gris de
     # verdad). "total_den or None" convertiría un 0 real en None por error.
     raw = {"TOTAL_OOAD": {"numerador": total_num, "denominador": total_den if hay_alguna else None}}
-    result = _semaforo_IAAS01(raw) if ind == "IAAS 01" else _semaforo_general(raw, ind)
+    result = semaforizar_iaas(raw, ind)
     datos_ind["TOTAL_OOAD"] = result.get("TOTAL_OOAD", {})
     return datos_ind
 

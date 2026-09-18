@@ -4,7 +4,7 @@ mensual con su tasa/color, incluyendo la semana parcial cuando el mes no
 está cerrado todavía.
 Usado en: ftp/controllers/reportes_controller.py
 """
-from ftp.services.ftp_service import obtenerInformacionIndicador
+from ftp.services.mapeo_ftp import cargar_ficha_ftp
 from ftp.services.generar_excel import _calcular_color
 from ftp.services.datos_json_service import (
     leer_datos_indicador, leer_semana_indicador, MESES_NOMBRES as FTP_MESES_NOMBRES,
@@ -27,8 +27,7 @@ def calcular_datos_grafica_ftp(indicador: str, anio: str) -> dict:
 
 def _calcular_datos_grafica_ftp(indicador: str, anio: str) -> dict:
     """El cálculo real, sin caché — lo envuelve calcular_datos_grafica_ftp."""
-    info       = obtenerInformacionIndicador(indicador)
-    semaforo   = info.get("semaforo", {})
+    semaforo   = cargar_ficha_ftp(indicador).semaforo
     datos_json = leer_datos_indicador(indicador, anio)
 
     if not datos_json:

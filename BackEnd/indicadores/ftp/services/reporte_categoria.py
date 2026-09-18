@@ -7,9 +7,8 @@ Flujo optimizado:
   FASE 2 — Secuencial: escribir_hoja_indicador() acumula hojas en un único xlsxwriter.Workbook
 """
 import xlsxwriter
-from ftp.services.ftp_service import obtenerInformacionIndicador
-from ftp.services.ftp_extraer import ExtraerInformacionPrevia
-from ftp.services.numerador_denominador import ObtenerNumDen
+from ftp.services.mapeo_ftp import cargar_ficha_ftp
+from ftp.services.ftp_extraer_unificado import ExtraerYCalcularIndicadorUnificado
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import (
     obtener_estilos_excel, _leer_historicos, _calcular_color, _estilo_valor,
@@ -51,37 +50,23 @@ def _ultimo_corte_extractor(indicador: str, ano: str):
     return diccionarioPrevio, es_semana, semana, mes_str
 
 
+def _metadata_de(ficha) -> dict:
+    return {
+        "titulo":       ficha.informacion.titulo,
+        "desNum":       ficha.informacion.descNum,
+        "desDen":       ficha.informacion.descDen,
+        "arch":         ficha.nombreArchivoFinal,
+        "semaforo":     ficha.semaforo,
+        "decimales":    None,
+        "periodicidad": ficha.periodicidad,
+    }
+
+
 def preparar_datos_indicador(indicador: str, ano: str, mes: str, semana) -> dict:
     try:
-        info = obtenerInformacionIndicador(indicador)
+        metadata = _metadata_de(cargar_ficha_ftp(indicador))
 
-        metadata = {
-            "titulo":       info.get("titulo"),
-            "desNum":       info.get("descripcionNumerador"),
-            "desDen":       info.get("descripcionDenominador"),
-            "arch":         info.get("nombreArchivoFinal"),
-            "semaforo":     info.get("semaforo", {}),
-            "decimales":    info.get("decimales"),
-            "periodicidad": info.get("periodicidad"),
-        }
-
-        diccionarioPrevio, errores = ExtraerInformacionPrevia(
-            info.get("reporte", {}),
-            ano, mes, semana,
-            info.get("MESES_CIP01", {})
-        )
-
-        diccionarioPrevio, errores_calculo = ObtenerNumDen(
-            diccionarioPrevio,
-            info.get("operacion", {}),
-            metadata["decimales"]
-        )
-        if errores_calculo:
-            errores["CALCULO_FALLIDO"] = {
-                "nombreError": "Error de cálculo",
-                "descripcionError": "Falló la evaluación de la fórmula del indicador para estas unidades.",
-                "unidades": {u: [{"reportes": ["cálculo"], "ruta": msg}] for u, msg in errores_calculo.items()}
-            }
+        diccionarioPrevio, errores = ExtraerYCalcularIndicadorUnificado(indicador, ano, mes, semana)
         diccionarioPrevio = Semaforizado(diccionarioPrevio, metadata["semaforo"], mes)
 
         es_semana = bool(semana and str(semana).strip() not in ("", "None", "none"))
@@ -112,18 +97,10 @@ def preparar_datos_guardados(indicador: str, ano: str) -> dict:
     no hay absolutamente nada guardado ese año se devuelve status=error.
     """
     try:
-        info = obtenerInformacionIndicador(indicador)
-        metadata = {
-            "titulo":       info.get("titulo"),
-            "desNum":       info.get("descripcionNumerador"),
-            "desDen":       info.get("descripcionDenominador"),
-            "arch":         info.get("nombreArchivoFinal"),
-            "semaforo":     info.get("semaforo", {}),
-            "decimales":    info.get("decimales"),
-            "periodicidad": info.get("periodicidad"),
-        }
+        ficha    = cargar_ficha_ftp(indicador)
+        metadata = _metadata_de(ficha)
 
-        if info.get("modulo") == "Extractor":
+        if ficha.modulo == "Extractor":
             diccionarioPrevio, es_semana, semana, mes_real = _ultimo_corte_extractor(indicador, ano)
         else:
             diccionarioPrevio, es_semana, semana, mes_real = leer_ultimo_mes_guardado(indicador, ano)

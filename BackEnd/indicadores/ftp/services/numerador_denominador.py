@@ -8,16 +8,72 @@ import re
 from shared.color_service import es_gris, es_inconsistente
 
 
+CONTEXTO_BASE_EVAL = {'sum': sum, 'round': round, 'abs': abs, 'math': math}
+
+
+def redondeo_personalizado(valor, umbral_sube=0.60):
+    if valor is None:
+        return None
+    parte_decimal, parte_entera = math.modf(valor)
+    if abs(parte_decimal) >= umbral_sube:
+        return int(parte_entera + (1 if valor >= 0 else -1))
+    return int(parte_entera)
+
+
+def AgregarTotalOOAD(resultadosFinales, formula_resultado):
+    """
+    Suma numerador/denominador de las unidades y agrega la llave TOTAL_OOAD a
+    resultadosFinales (mismas 3 reglas que IAAS -- unidad incompleta (Gris) no
+    cuenta; numerador>0 con denominador=0 es inconsistencia (se notifica, no se
+    suma); ambos 0 es un cero real, sí cuenta). formula_resultado es la misma
+    del mapeo que usa cada unidad -- nunca un ×100 fijo, porque no todos los
+    indicadores multiplican por 100.
+    """
+    total_num  = 0
+    total_den  = 0
+    hay_alguna = False
+
+    for unidad, res in resultadosFinales.items():
+        num = res["numerador"]
+        den = res["denominador"]
+        if num is None or den is None:
+            continue
+        if den == 0 and num > 0:
+            print(f"[FTP] Inconsistencia en {unidad}: numerador={num} con denominador=0 -- no se incluye en el TOTAL_OOAD.")
+            continue
+        total_num += num
+        total_den += den
+        hay_alguna = True
+
+    if hay_alguna:
+        if total_den != 0:
+            ctx_total = CONTEXTO_BASE_EVAL.copy()
+            ctx_total['numerador']   = total_num
+            ctx_total['denominador'] = total_den
+            try:
+                resultado_total = round(eval(formula_resultado, {"__builtins__": None}, ctx_total), 2)
+            except Exception as e:
+                print(f"[FTP] Error evaluando resultado del TOTAL_OOAD: {e}")
+                resultado_total = None
+        else:
+            resultado_total = 0
+
+        resultadosFinales["TOTAL_OOAD"] = {
+            "numerador":   total_num,
+            "denominador": total_den,
+            "resultado":   resultado_total,
+        }
+    else:
+        resultadosFinales["TOTAL_OOAD"] = {
+            "numerador": total_num, "denominador": None, "resultado": None
+        }
+
+
 def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
     umbral_sube = float(inidicadorDecimal.get('sube', 0.60))
 
-    def redondeo_personalizado(valor):
-        if valor is None:
-            return None
-        parte_decimal, parte_entera = math.modf(valor)
-        if abs(parte_decimal) >= umbral_sube:
-            return int(parte_entera + (1 if valor >= 0 else -1))
-        return int(parte_entera)
+    def redondeo(valor):
+        return redondeo_personalizado(valor, umbral_sube)
 
     def repos_usados_en_expr(expresion):
         IGNORAR = {'sum', 'round', 'abs', 'math', 'numerador', 'denominador', 'None', 'True', 'False'}
@@ -32,7 +88,7 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
 
     resultadosFinales = {}
     errores_calculo   = {}
-    contexto_base = {'sum': sum, 'round': round, 'abs': abs, 'math': math}
+    contexto_base = CONTEXTO_BASE_EVAL
 
     repos_num = repos_usados_en_expr(indicadorOperacion['numerador'])
     repos_den = repos_usados_en_expr(indicadorOperacion['denominador'])
@@ -57,13 +113,13 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
                 numerador_final = None
             else:
                 numerador_raw   = eval(indicadorOperacion['numerador'], {"__builtins__": None}, contexto_unidad)
-                numerador_final = redondeo_personalizado(numerador_raw)
+                numerador_final = redondeo(numerador_raw)
 
             if todos_none(repos_den, reportes):
                 denominador_final = None
             else:
                 denominador_raw   = eval(indicadorOperacion['denominador'], {"__builtins__": None}, contexto_unidad)
-                denominador_final = redondeo_personalizado(denominador_raw)
+                denominador_final = redondeo(denominador_raw)
 
             if es_gris(numerador_final, denominador_final) or es_inconsistente(numerador_final, denominador_final):
                 # Gris: falta el dato, o hay numerador sin denominador (no se puede dividir).
@@ -86,50 +142,6 @@ def ObtenerNumDen(diccionarioPrevio, indicadorOperacion, inidicadorDecimal):
             resultadosFinales[unidad] = {"numerador": None, "denominador": None, "resultado": None}
             errores_calculo[unidad] = str(e)
 
-    # Total OOAD: suma numerador/denominador de las unidades, con las mismas 3 reglas
-    # que IAAS -- unidad incompleta (Gris) no cuenta; numerador>0 con denominador=0 es
-    # una inconsistencia (se notifica, no se suma); numerador y denominador ambos 0 es
-    # un cero real, sí cuenta (no afecta el total, aporta 0/0).
-    total_num  = 0
-    total_den  = 0
-    hay_alguna = False
-
-    for unidad, res in resultadosFinales.items():
-        num = res["numerador"]
-        den = res["denominador"]
-        if num is None or den is None:
-            continue
-        if den == 0 and num > 0:
-            print(f"[FTP] Inconsistencia en {unidad}: numerador={num} con denominador=0 -- no se incluye en el TOTAL_OOAD.")
-            continue
-        total_num += num
-        total_den += den
-        hay_alguna = True
-
-    if hay_alguna:
-        # La tasa del total usa la MISMA fórmula del mapeo que ya usa cada unidad
-        # (indicadorOperacion['resultado']) -- nunca un ×100 fijo, porque no todos
-        # los indicadores multiplican por 100 en su fórmula.
-        if total_den != 0:
-            ctx_total = contexto_base.copy()
-            ctx_total['numerador']   = total_num
-            ctx_total['denominador'] = total_den
-            try:
-                resultado_total = round(eval(indicadorOperacion['resultado'], {"__builtins__": None}, ctx_total), 2)
-            except Exception as e:
-                print(f"[FTP] Error evaluando resultado del TOTAL_OOAD: {e}")
-                resultado_total = None
-        else:
-            resultado_total = 0
-
-        resultadosFinales["TOTAL_OOAD"] = {
-            "numerador":   total_num,
-            "denominador": total_den,
-            "resultado":   resultado_total,
-        }
-    else:
-        resultadosFinales["TOTAL_OOAD"] = {
-            "numerador": total_num, "denominador": None, "resultado": None
-        }
+    AgregarTotalOOAD(resultadosFinales, indicadorOperacion['resultado'])
 
     return resultadosFinales, errores_calculo

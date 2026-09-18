@@ -12,13 +12,14 @@ from ftp.config import ruta_poblacion
 from ftp.services.ftp_conectar import conectar_ftp, desconectar_ftp
 
 
-def ExtraerInformacionPrevia(informacionReportes, ano, mes, semana, meses_mapeo=None):
-    if not isinstance(informacionReportes, dict):
-        return {}, {}
+SUBCARPETA_POR_PREFIJO = {
+    "CP": "Salud Pública", "CI": "Salud Pública", "IA": "Salud Pública",
+    "IN": "Indicadores", "MT": "Salud Materna", "PU": "Productividad",
+}
 
-    diccionarioPrevio = {nombre: {} for nombre in NOMBREUNIDADESARCHIVO}
 
-    logErrores = {
+def crear_log_errores():
+    return {
         "RUTA_INVALIDA":           {"nombreError": "Ruta de acceso incorrecta",      "descripcionError": "La carpeta en el FTP no existe o está mal nombrada.", "unidades": {}},
         "ARCHIVO_NO_ENCONTRADO":   {"nombreError": "Archivo no encontrado",           "descripcionError": "El archivo no se encontró en la ubicación esperada.", "unidades": {}},
         "ARCHIVO_DUPLICADO":       {"nombreError": "Archivo duplicado",               "descripcionError": "Se encontró más de un archivo con el mismo prefijo. Se usó el primero encontrado.", "unidades": {}},
@@ -30,6 +31,14 @@ def ExtraerInformacionPrevia(informacionReportes, ano, mes, semana, meses_mapeo=
         "DESCARGA_FALLIDA":        {"nombreError": "Error al descargar archivo",      "descripcionError": "El archivo existe en el FTP pero no pudo descargarse (error de red, permisos o archivo corrupto).", "unidades": {}},
         "PB_JSON_ERROR":           {"nombreError": "Error en población JSON",         "descripcionError": "La unidad o columna solicitada no existe en POBLACION.json.", "unidades": {}},
     }
+
+
+def ExtraerInformacionPrevia(informacionReportes, ano, mes, semana, meses_mapeo=None):
+    if not isinstance(informacionReportes, dict):
+        return {}, {}
+
+    diccionarioPrevio = {nombre: {} for nombre in NOMBREUNIDADESARCHIVO}
+    logErrores = crear_log_errores()
 
     ftp = conectar_ftp()
     if not ftp:
@@ -164,7 +173,11 @@ def _navegar_ruta(ftp, carpeta_remota: str):
     return True, None, None
 
 
-def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionarioGlobal, logErrores, subcarpeta_base, meses_mapeo=None):
+def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionarioGlobal, logErrores, subcarpeta_base, meses_mapeo=None,
+                            extractor=None, unidades_sin_servicio_indicador=None):
+    # extractor: por defecto el viejo (ExtraerDatosDelExcel); el camino nuevo
+    # (ftp_extraer_unificado.py) inyecta el suyo y reusa este mismo crawl de FTP.
+    extractor       = extractor or ExtraerDatosDelExcel
     unidades_ruta   = UNIDADES_PREVIOS if semana is not None else UNIDADES_FINALES
     nombres_destino = list(diccionarioGlobal.keys())
 
@@ -204,12 +217,12 @@ def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionari
                 buf = io.BytesIO()
                 ftp.retrbinary(f"RETR {nombre_archivo}", buf.write, blocksize=65536)
                 buf.seek(0)
-                datos, id_falla, detalle_falla = ExtraerDatosDelExcel(buf, infoReporte, mes, meses_mapeo)
+                datos, id_falla, detalle_falla = extractor(buf, infoReporte, mes, meses_mapeo)
                 diccionarioGlobal[nombre_final][repo] = datos
                 if id_falla:
                     # Si la unidad está en la lista de "no maneja este servicio" del
                     # indicador, la etiqueta faltante es esperada, no un error real.
-                    unidades_sin_servicio = infoReporte.get('unidades_sin_servicio') or []
+                    unidades_sin_servicio = infoReporte.get('unidades_sin_servicio') or unidades_sin_servicio_indicador or []
                     if id_falla == "ETIQUETA_NO_ENCONTRADA" and nombre_final in unidades_sin_servicio:
                         id_falla = "SERVICIO_NO_APLICA"
                     ruta_log = detalle_falla if detalle_falla else carpeta_remota

@@ -1,5 +1,6 @@
 {
   "CAMA 01": {
+    "nombreArchivoFinal": "CAMA 01",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
@@ -125,6 +126,7 @@
     }
   },
   "CAMA 40-49": {
+    "nombreArchivoFinal": "CAMA 40_49",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
@@ -237,6 +239,7 @@
     }
   },
   "CAMA 50-69": {
+    "nombreArchivoFinal": "CAMA 50_69",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
@@ -351,6 +354,7 @@
     }
   },
   "CAMA 02": {
+    "nombreArchivoFinal": "CAMA 02",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
@@ -373,6 +377,7 @@
     }
   },
   "CAMA 03": {
+    "nombreArchivoFinal": "CAMA 03",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
@@ -395,6 +400,7 @@
     }
   },
   "CAMA 04": {
+    "nombreArchivoFinal": "CAMA 04",
     "fechaModificacion": "19/08/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",

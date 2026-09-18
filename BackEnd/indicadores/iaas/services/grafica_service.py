@@ -8,7 +8,7 @@ Usado en: iaas/controllers/reportes_controller.py
 """
 from iaas.config import RUTA_DATA_IAAS
 from iaas.services.calculos_iaas import UNIDADES_UCI, _alias_hgsz, _acumular_unidad
-from iaas.services.extraccion_service import _semaforo_general, _semaforo_IAAS01
+from iaas.services.semaforo_iaas import semaforizar_iaas
 from iaas.services.datos_json_service import leer_indicador_anio
 from shared.cache_service import obtener_o_calcular
 
@@ -82,7 +82,7 @@ def _calcular_indicador_iaas(anio: str, ind_n: int) -> dict:
                 )
                 continue
             raw = {unidad: {"numerador": acum_num, "denominador": acum_den}}
-            calc = (_semaforo_IAAS01(raw) if ind_key == "IAAS 01" else _semaforo_general(raw, ind_key))[unidad]
+            calc = semaforizar_iaas(raw, ind_key)[unidad]
             reg.update(
                 numerador_acum=acum_num, denominador_acum=acum_den,
                 tasa_acum=calc["tasa"], color_acum=calc["color"],

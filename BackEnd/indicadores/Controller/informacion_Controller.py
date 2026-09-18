@@ -10,9 +10,9 @@ from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta
 
 
 @informacionApi.get("/AllIndicadores")
-def IndiceIndicadores():
+def IndiceIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None):
     try:
-        indice_indicadores = AllIndicadores()
+        indice_indicadores = AllIndicadores(campo, modulo)
         if (not indice_indicadores):
             raise HTTPException(
                 status_code = status.HTTP_400_BAD_REQUEST,

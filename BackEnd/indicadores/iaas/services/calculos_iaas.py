@@ -5,12 +5,10 @@ Excel. Nada de este archivo depende de xlsxwriter — quien escribe el Excel
 (generar_iaas.py) solo pide estos valores y decide en qué celda van.
 Usado en: iaas/services/generar_iaas.py, extraccion_service.py, grafica_service.py
 """
-import json
-from iaas.config import RUTA_IAAS_JSON, ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01
+from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01
 from iaas.services.datos_json_service import leer_indicador_anio
-
-with open(RUTA_IAAS_JSON, encoding="utf-8") as _f:
-    _CFG = json.load(_f)
+from iaas.services.semaforo_iaas import calcular_tasa, color_de_tasa, leyenda_agrupada, leyenda_fija
+from shared.UNIDADES import alias_hgsz
 
 # Mismo orden y mismas 11 unidades que usan IAAS 02-06 (ORDEN_DEMAS_IAAS) — solo cambia que
 # IAAS 01 le agrega el renglón de OOAD al final de su propia lista de unidades.
@@ -19,17 +17,7 @@ UNIDADES_UCI      = ORDEN_DEMAS_IAAS
 _UNIDADES_HGS_SET = set(UNIDADES_HGS_IAAS01)
 
 
-def _alias_hgsz(nombre):
-    """
-    En el dato crudo, algunas unidades HGS/HGSMF vienen guardadas como HGSZ/HGSZMF —
-    es la misma unidad, solo cambia el prefijo. Devuelve el nombre alterno a probar,
-    o None si el nombre no tiene ese prefijo.
-    """
-    if nombre.startswith("HGSMF "):
-        return "HGSZMF " + nombre[len("HGSMF "):]
-    if nombre.startswith("HGS "):
-        return "HGSZ " + nombre[len("HGS "):]
-    return None
+_alias_hgsz = alias_hgsz
 
 
 def _dato_unidad(datos, unidad):
@@ -47,73 +35,19 @@ def _dato_unidad(datos, unidad):
 
 
 def _color_tasa_01(tasa, unidad):
-    sem      = _CFG["IAAS 01"]["Semaforo"]
-    umbrales = sem.get("HGS") if unidad in _UNIDADES_HGS_SET else sem.get("HGZ", sem.get("OOAD"))
-    if not umbrales or tasa is None:
-        return "Bajo"
-    esp = umbrales.get("Esperado", {})
-    med = umbrales.get("Medio", {})
-    if esp.get("Mayor", 0) <= tasa <= esp.get("Menor", 0):
-        return "Esperado"
-    elif med.get("Mayor", 0) <= tasa < med.get("Menor", 0):
-        return "Medio"
-    return "Bajo"
+    return color_de_tasa(tasa, "IAAS 01", unidad)
 
 
 def _color_tasa_uci(tasa, indicador):
-    sem = _CFG[indicador].get("Semaforo", {})
-    if tasa is None:
-        return "Bajo"
-    esp = sem.get("Esperado", {})
-    med = sem.get("Medio", {})
-    if tasa > esp.get("Menor", 0):
-        return "Bajo"
-    elif tasa >= esp.get("Mayor", 0):
-        return "Esperado"
-    elif tasa >= med.get("Mayor", 0):
-        return "Medio"
-    return "Bajo"
+    return color_de_tasa(tasa, indicador)
 
 
 def _filas_umbrales_iaas01():
-    """
-    Agrupa los tipos de unidad de IAAS 01 (HGS/HGZ/HGR/HGO/HGP/OOAD) por umbral idéntico.
-    Dinámico: si dos tipos comparten los mismos valores de Esperado/Medio quedan en una sola
-    fila; si algún tipo cambia sus valores en el JSON, se separa solo automáticamente.
-    """
-    sem    = _CFG["IAAS 01"]["Semaforo"]
-    grupos = {}
-    for nombre in ("HGS", "HGZ", "HGR", "HGO", "HGP", "OOAD"):
-        umbral = sem.get(nombre)
-        if not umbral:
-            continue
-        esp   = umbral.get("Esperado", {})
-        med   = umbral.get("Medio", {})
-        clave = (esp.get("Mayor"), esp.get("Menor"), med.get("Mayor"), med.get("Menor"))
-        grupos.setdefault(clave, []).append(nombre)
-
-    filas = []
-    for (esp_mayor, esp_menor, med_mayor, med_menor), nombres in grupos.items():
-        filas.append({
-            "etiqueta": "/".join(nombres),
-            "esperado": f"{esp_mayor} – {esp_menor}",
-            "medio":    f"> {med_mayor} – < {esp_mayor}",
-            "bajo":     f"< {med_mayor}  ó  > {esp_menor}",
-        })
-    return filas
+    return leyenda_agrupada("IAAS 01")
 
 
 def _rango_umbral_uci(indicador):
-    """Umbral fijo de un indicador IAAS 02-06 (uno solo, no varía por unidad ni por mes) —
-    mismo criterio de comparación que usa _color_tasa_uci, en formato de texto."""
-    sem = _CFG[indicador].get("Semaforo", {})
-    esp = sem.get("Esperado", {})
-    med = sem.get("Medio", {})
-    return {
-        "esperado": f"{esp.get('Mayor', '?')} – {esp.get('Menor', '?')}",
-        "medio":    f"≥ {med.get('Mayor', '?')} – < {esp.get('Mayor', '?')}",
-        "bajo":     f"< {med.get('Mayor', '?')}  ó  > {esp.get('Menor', '?')}",
-    }
+    return leyenda_fija(indicador)
 
 
 _NOMBRE_A_NUM = {
@@ -203,7 +137,7 @@ def calcular_fila_iaas01(datos: dict) -> dict:
         if v and (v.get("color") or "Gris") != "Gris":
             sum_num += v.get("numerador") or 0
             sum_den += v.get("denominador") or 0
-    tasa_deleg = round((sum_num / sum_den) * 1000, 2) if sum_den else 0
+    tasa_deleg = calcular_tasa("IAAS 01")(sum_num, sum_den) if sum_den else 0
 
     resultado = {}
     for unidad in UNIDADES_IAAS:
@@ -270,13 +204,13 @@ def calcular_acumulado_iaas01(all_months: dict) -> dict:
                     "tasa": "", "color_tasa": "Gris",
                 }
                 continue
-            tasa  = round((acum_num / acum_den) * 1000, 2) if acum_den else 0
+            tasa  = calcular_tasa("IAAS 01")(acum_num, acum_den) if acum_den else 0
             color = _color_tasa_01(tasa, unidad)
             fila_mes[unidad] = {"numerador": acum_num, "denominador": acum_den, "tasa": tasa, "color_tasa": color}
             sum_del_n += acum_num
             sum_del_d += acum_den
 
-        tasa_del = round((sum_del_n / sum_del_d) * 1000, 2) if sum_del_d else 0
+        tasa_del = calcular_tasa("IAAS 01")(sum_del_n, sum_del_d) if sum_del_d else 0
         fila_mes["TOTAL_OOAD"] = {
             "numerador": sum_del_n, "denominador": sum_del_d,
             "tasa": tasa_del, "color_tasa": _color_tasa_01(tasa_del, "TOTAL_OOAD"),
@@ -306,13 +240,13 @@ def calcular_anual_iaas01(all_months: dict):
                 "tasa": "", "color_tasa": "Gris",
             }
             continue
-        tasa  = round((num / den) * 1000, 2) if den else 0
+        tasa  = calcular_tasa("IAAS 01")(num, den) if den else 0
         color = _color_tasa_01(tasa, unidad)
         resultado[unidad] = {"numerador": num, "denominador": den, "tasa": tasa, "color_tasa": color}
         sum_n += num
         sum_d += den
 
-    tasa_del = round((sum_n / sum_d) * 1000, 2) if sum_d else 0
+    tasa_del = calcular_tasa("IAAS 01")(sum_n, sum_d) if sum_d else 0
     resultado["TOTAL_OOAD"] = {
         "numerador": sum_n, "denominador": sum_d,
         "tasa": tasa_del, "color_tasa": _color_tasa_01(tasa_del, "TOTAL_OOAD"),
@@ -326,8 +260,7 @@ def calcular_fila_iaas_uci(datos: dict, indicador: str) -> dict:
     escribir. A diferencia de IAAS 01, aquí toda unidad se escribe siempre
     (Gris si no hay dato), nunca se omite una fila.
     """
-    sem       = _CFG[indicador].get("Semaforo", {})
-    tasa_mult = sem.get("Tasa", 1000)
+    tasa_de   = calcular_tasa(indicador)
     resultado = {}
     sum_n, sum_d = 0, 0
 
@@ -350,7 +283,7 @@ def calcular_fila_iaas_uci(datos: dict, indicador: str) -> dict:
         sum_n += num or 0
         sum_d += den or 0
 
-    tasa_ooad = round((sum_n / sum_d) * tasa_mult, 2) if sum_d else 0
+    tasa_ooad = tasa_de(sum_n, sum_d) if sum_d else 0
     resultado["OOAD"] = {
         "numerador": sum_n, "denominador": sum_d,
         "tasa": tasa_ooad, "color_tasa": _color_tasa_uci(tasa_ooad, indicador),
@@ -362,8 +295,7 @@ def calcular_acumulado_iaas_uci(all_months: dict, indicador: str) -> dict:
     """Bloque MENSUAL ACUMULADO de IAAS 02-06: por mes (feb-dic presentes) y
     unidad + 'OOAD', el acumulado Ene→ese mes. None si la unidad no tiene nada
     acumulado todavía ese mes."""
-    sem       = _CFG[indicador].get("Semaforo", {})
-    tasa_mult = sem.get("Tasa", 1000)
+    tasa_de   = calcular_tasa(indicador)
     resultado = {}
 
     for mes_target in range(2, 13):
@@ -384,13 +316,13 @@ def calcular_acumulado_iaas_uci(all_months: dict, indicador: str) -> dict:
                     "tasa": "", "color_tasa": "Gris",
                 }
                 continue
-            tasa  = round((acum_num / acum_den) * tasa_mult, 2) if acum_den else 0
+            tasa  = tasa_de(acum_num, acum_den) if acum_den else 0
             color = _color_tasa_uci(tasa, indicador)
             fila_mes[unidad] = {"numerador": acum_num, "denominador": acum_den, "tasa": tasa, "color_tasa": color}
             sum_del_n += acum_num
             sum_del_d += acum_den
 
-        tasa_del = round((sum_del_n / sum_del_d) * tasa_mult, 2) if sum_del_d else 0
+        tasa_del = tasa_de(sum_del_n, sum_del_d) if sum_del_d else 0
         fila_mes["OOAD"] = {
             "numerador": sum_del_n, "denominador": sum_del_d,
             "tasa": tasa_del, "color_tasa": _color_tasa_uci(tasa_del, indicador),
@@ -404,8 +336,7 @@ def calcular_anual_iaas_uci(all_months: dict, indicador: str):
     if not all_months:
         return None
     hasta_mes = max(all_months.keys())
-    sem       = _CFG[indicador].get("Semaforo", {})
-    tasa_mult = sem.get("Tasa", 1000)
+    tasa_de   = calcular_tasa(indicador)
     resultado = {}
     sum_n, sum_d = 0, 0
 
@@ -421,13 +352,13 @@ def calcular_anual_iaas_uci(all_months: dict, indicador: str):
                 "tasa": "", "color_tasa": "Gris",
             }
             continue
-        tasa  = round((num / den) * tasa_mult, 2) if den else 0
+        tasa  = tasa_de(num, den) if den else 0
         color = _color_tasa_uci(tasa, indicador)
         resultado[unidad] = {"numerador": num, "denominador": den, "tasa": tasa, "color_tasa": color}
         sum_n += num
         sum_d += den
 
-    tasa_del = round((sum_n / sum_d) * tasa_mult, 2) if sum_d else 0
+    tasa_del = tasa_de(sum_n, sum_d) if sum_d else 0
     resultado["OOAD"] = {
         "numerador": sum_n, "denominador": sum_d,
         "tasa": tasa_del, "color_tasa": _color_tasa_uci(tasa_del, indicador),

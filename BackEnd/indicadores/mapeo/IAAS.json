@@ -1,5 +1,11 @@
 {
     "IAAS 01": {
+                "excel": {
+            "codigo": "DELEGACION GUANAJUATO",
+            "titulo": "INFORMES DE INFECCIONES NOSOCOMIALES",
+            "columnaNumerador": "INFECCIONES",
+            "columnaDenominador": "DIAS ESTANCIA"
+        },
         "fechaModificacion": "",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
@@ -96,6 +102,12 @@
         }
     },
     "IAAS 02": {
+                "excel": {
+            "codigo": "INOSO 10",
+            "titulo": "IN_NOS 02 TASA DE INFECCIÓN DE SITIO QUIRURGICO EN CIRUGIAS LIMPIAS Y LIMPIAS CON IMPLANTE.",
+            "columnaNumerador": "Infecciones cirugias",
+            "columnaDenominador": "Total de cirugias"
+        },
         "fechaModificacion": "",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
@@ -151,6 +163,12 @@
         }
     },
     "IAAS 03": {
+                "excel": {
+            "codigo": "INOSO 7",
+            "titulo": "IN_NOS 03 TASA DE NEUMONIA ASOCIADA A VENTILACIÓN MECANICA POR 1000 DIAS VENTILADOR",
+            "columnaNumerador": "NAVM",
+            "columnaDenominador": "Días Ventilador"
+        },
         "fechaModificacion": "",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
@@ -206,6 +224,12 @@
         }
     },
     "IAAS 04": {
+                "excel": {
+            "codigo": "INOSO 9",
+            "titulo": "IN_INO 04 TASA DE BACTERIEMIA RELACIONADA A CATETER VENOSO CENTRAL",
+            "columnaNumerador": "Its relacionadas a CVC",
+            "columnaDenominador": "Total de días CVC"
+        },
         "fechaModificacion": "",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
@@ -261,6 +285,12 @@
         }
     },
     "IAAS 05": {
+                "excel": {
+            "codigo": "INOSO 8",
+            "titulo": "IN_NOS 05 TASA DE INFECCION DE VIAS URINARIAS ASOCIADA A SONDA VESICAL",
+            "columnaNumerador": "Total de IVU",
+            "columnaDenominador": "Total de días sonda"
+        },
         "fechaModificacion": "",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
@@ -311,10 +341,17 @@
         },
         "semaforo": {
             "Esperado": ">= 5 a <= 14",
-            "Medio": ">= 1 a < 5"
+            "Medio": ">= 1 a < 5",
+            "Bajo": "< 1 o > 14"
         }
     },
     "IAAS 06": {
+                "excel": {
+            "codigo": "INOSO 1.1",
+            "titulo": "IN_06 TASA DE INFECCION NOSOCOMIAL POR 100 DÍAS ESTANCIA EN UCI",
+            "columnaNumerador": "Infecciones en UCI",
+            "columnaDenominador": "Total de días estancia en UCI"
+        },
         "fechaModificacion": "",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",

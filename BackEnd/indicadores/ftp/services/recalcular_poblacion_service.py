@@ -1,108 +1,61 @@
-﻿"""
-Recalcula el denominador de los indicadores que usan POBLACION.json
-leyendo el numerador del JSON histórico ya guardado.
-NO accede al FTP — solo lee NUM del JSON y recomputa DEN desde el
-POBLACION.json actualizado. Escribe DEN y % de vuelta al JSON.
+"""
+Recalcula el denominador de los indicadores cuyo denominador sale de la
+poblacion InfoSalud (fuente "poblacionInfoSalud" en el mapeo unificado),
+usando el numerador ya guardado en el JSON historico y el POBLACION_{anio}.json
+actualizado. NO accede al FTP. Guarda de vuelta numerador, denominador,
+resultado, color y TOTAL_OOAD de cada mes ya cerrado, con las mismas reglas que
+la generacion normal.
 Usado en: ftp/controllers/reportes_controller.py  (/recalcular-poblacion)
 """
-import math
-from ftp.services.ftp_extraer import ExtraerPBDesdeJSON
-from ftp.config import UNIDADES_FINALES
-from ftp.services.datos_json_service import (
-    leer_numeradores_todos_meses,
-    actualizar_denominadores_en_json,
-)
+from ftp.config import NOMBREUNIDADESARCHIVO
+from ftp.services.datos_json_service import guardar_datos_en_json, leer_numeradores_todos_meses
+from ftp.services.ftp_extraer import crear_log_errores
+from ftp.services.ftp_extraer_unificado import extraer_poblacion
+from ftp.services.mapeo_ftp import cargar_indicador_mapeo
+from ftp.services.numerador_denominador import AgregarTotalOOAD
+from ftp.services.numerador_denominador_unificado import calcular_resultado, evaluar_lado
+from ftp.services.semaforizado import Semaforizado
+from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
+
+UMBRAL_SUBE_REDONDEO = 0.60
 
 
-def _redondeo(v, umbral_sube: float):
-    if v is None:
-        return None
-    parte_decimal, parte_entera = math.modf(v)
-    if abs(parte_decimal) >= umbral_sube:
-        return int(parte_entera + (1 if v >= 0 else -1))
-    return int(parte_entera)
+def usa_poblacion(indicador: str) -> bool:
+    return isinstance(cargar_indicador_mapeo(indicador).reporte.denominador, FuentePoblacionInfoSalud)
 
 
-def actualizar_historico_con_nueva_poblacion(indicador: str, ano: str, info: dict) -> tuple:
-    """
-    Lee el numerador del JSON histórico y recalcula denominador + resultado
-    usando el POBLACION.json actualizado. No toca el FTP.
+def actualizar_historico_con_nueva_poblacion(indicador: str, ano: str) -> tuple:
+    """Retorna: (exito: bool, detalle: str, meses_actualizados: int)."""
+    mapeo       = cargar_indicador_mapeo(indicador)
+    denominador = mapeo.reporte.denominador
+    operacion   = mapeo.reporte.operacion
 
-    Retorna: (éxito: bool, detalle: str, meses_actualizados: int)
-    """
-    operacion   = info.get("operacion", {})
-    decimales   = info.get("decimales") or {}
-    umbral_sube = float(decimales.get("sube", 0.60))
-
-    formula_den = operacion.get("denominador", "")
-    formula_res = operacion.get("resultado", "round((numerador / denominador) * 100, 2)")
-    ctx_base    = {"sum": sum, "round": round, "abs": abs, "math": math}
+    if not isinstance(denominador, FuentePoblacionInfoSalud):
+        return False, "El denominador de este indicador no sale de la población", 0
 
     meses_nums = leer_numeradores_todos_meses(indicador, ano)
-
     if not meses_nums:
         return False, "Sin meses con datos en el JSON histórico", 0
 
-    diccionarioPB = {u: {} for u in UNIDADES_FINALES}
-    repos_pb = {
-        r: v for r, v in info.get("reporte", {}).items()
-        if isinstance(v, dict) and v.get("modo") == "JSON_POBLACION"
-    }
-    for repo, repo_info in repos_pb.items():
-        ExtraerPBDesdeJSON(repo, repo_info, diccionarioPB, anio=ano)
+    poblacion = {unidad: {"denominador": {}} for unidad in NOMBREUNIDADESARCHIVO}
+    extraer_poblacion(denominador.sexo, ano, poblacion, crear_log_errores())
 
     nuevos_den = {}
-    for unidad in UNIDADES_FINALES:
-        ctx      = ctx_base.copy()
-        all_none = True
-        for repo, vals in diccionarioPB.get(unidad, {}).items():
-            if vals is not None:
-                ctx[repo]  = vals if isinstance(vals, list) else [vals]
-                all_none   = False
-            else:
-                ctx[repo] = [0] * 30
-
-        if all_none:
+    for unidad in NOMBREUNIDADESARCHIVO:
+        try:
+            nuevos_den[unidad] = evaluar_lado(operacion.denominador, poblacion[unidad]["denominador"], UMBRAL_SUBE_REDONDEO)
+        except Exception as e:
+            print(f"[RecalcPob] Error evaluando denominador para {unidad}: {e}")
             nuevos_den[unidad] = None
-        else:
-            try:
-                den_raw            = eval(formula_den, {"__builtins__": None}, ctx)
-                nuevos_den[unidad] = _redondeo(den_raw, umbral_sube)
-            except Exception as e:
-                print(f"[RecalcPob] Error evaluando denominador para {unidad}: {e}")
-                nuevos_den[unidad] = None
 
-    datos_por_mes = {}
-
-    for idx_mes, nums_mes in meses_nums.items():
-        unidades_actualizadas = {}
-
-        for unidad in UNIDADES_FINALES:
+    for mes_str, nums_mes in meses_nums.items():
+        resultados = {}
+        for unidad in NOMBREUNIDADESARCHIVO:
             num = nums_mes.get(unidad)
-            den = nuevos_den.get(unidad)
-
-            if num is not None and den and den != 0:
-                ctx = ctx_base.copy()
-                ctx["numerador"]   = num
-                ctx["denominador"] = den
-                try:
-                    res = eval(formula_res, {"__builtins__": None}, ctx)
-                    res = round(float(res), 2)
-                except Exception as e:
-                    print(f"[RecalcPob] Error evaluando resultado para {unidad}: {e}")
-                    res = None
-            else:
-                res = None
-
-            unidades_actualizadas[unidad] = {
-                "denominador": den,
-                "resultado":   res,
-            }
-
-        datos_por_mes[idx_mes] = unidades_actualizadas
-
-    ok = actualizar_denominadores_en_json(indicador, ano, datos_por_mes)
-    if not ok:
-        return False, "Error escribiendo al JSON histórico", 0
+            den = nuevos_den[unidad]
+            resultados[unidad] = {"numerador": num, "denominador": den, "resultado": calcular_resultado(num, den, operacion.resultado)}
+        AgregarTotalOOAD(resultados, operacion.resultado)
+        Semaforizado(resultados, mapeo.semaforo, mes_str)
+        guardar_datos_en_json(indicador, ano, mes_str, resultados)
 
     return True, f"{len(meses_nums)} mes(es) actualizados", len(meses_nums)
