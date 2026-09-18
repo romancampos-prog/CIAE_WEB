@@ -259,7 +259,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                         <span className="mut-den-wrap">
                           <input
                             type="number" min="0" className="mut-den-input"
-                            placeholder={info?.subT2 ? info.subT2.slice(0, 16) : 'Denominador'}
+                            placeholder={info?.columnaDenominador ? info.columnaDenominador.slice(0, 16) : 'Denominador'}
                             value={denoms[ind] ?? ''}
                             disabled={sinDato.has(ind)}
                             onChange={e => setDenoms(p => ({ ...p, [ind]: e.target.value }))}

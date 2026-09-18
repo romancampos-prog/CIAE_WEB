@@ -47,7 +47,7 @@ const IndicadoresPage = () => {
   const { user } = useAuth();
   const { puedeGenFTP } = useRol();
   const {
-    allIndicadores, cargandoLista, categoria, setCategoria,
+    categorias, cargandoLista, categoria, setCategoria,
     indicadorSel, setIndicadorSel,
     tipo, setTipo, datos, setDatos,
     infoIndicador, mesesFaltantes, confirmandoFaltantes,
@@ -141,7 +141,7 @@ const IndicadoresPage = () => {
       <main className="ind-hub-main">
 
         <SidebarCategorias
-          allIndicadores={allIndicadores}
+          categorias={categorias}
           cargandoLista={cargandoLista}
           categoria={categoria}
           indicadorSel={indicadorSel}
@@ -166,8 +166,8 @@ const IndicadoresPage = () => {
                   {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
                   <p className="ind-sel-eyebrow">Indicador</p>
                   <h2 className="ind-sel-name" style={{ color: catColor }}>{indicadorSel}</h2>
-                  {infoIndicador?.titulo && (
-                    <p className="ind-sel-desc">{infoIndicador.titulo}</p>
+                  {infoIndicador?.informacion?.titulo && (
+                    <p className="ind-sel-desc">{infoIndicador.informacion.titulo}</p>
                   )}
                   {infoIndicador && (
                     <div style={{ marginTop: 14 }}>

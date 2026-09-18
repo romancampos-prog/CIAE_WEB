@@ -7,7 +7,6 @@ Descarga datos del servidor FTP y genera reportes Excel por indicador, categorí
 ```
 ftp/
 ├── api/
-│   ├── indicadores.js    — getAllIndicadores, getIndicadoresFTP, getCategorias
 │   └── poblacion.js      — getPoblacion, actualizarPoblacion
 ├── componentes/
 │   ├── graficasFTP/
@@ -47,11 +46,10 @@ ftp/
 
 ## Agregar un indicador FTP
 
-Los indicadores llegan del backend automáticamente vía `getAllIndicadores()`. Para añadir uno:
+Los indicadores llegan del backend automáticamente vía `obtenerTodosLosIndicadores()` (shared/api/indicadoresInfo.js, que lee el mapeo unificado). Para añadir uno:
 
-1. Crear `BackEnd/indicadores/ftp/mapeo/NUEVO.json` con la estructura de los existentes (CACU, CAMA, etc.)
-2. Registrar la categoría en `BackEnd/indicadores/ftp/config.py`
-3. Añadir el color en `constantes/colores.js → CAT_COLOR` si es categoría nueva
+1. Agregar el bloque del indicador en `BackEnd/indicadores/mapeo/{FAMILIA}.json` (ver `mapeo/README.md`); `modulo: "ftp"` y `mostrarGenerar: true` lo hacen aparecer en Generar FTP.
+2. Añadir el color en `constantes/colores.js → CAT_COLOR` si es categoría nueva
 
 No se necesita cambiar código del frontend si la categoría ya tiene color.
 

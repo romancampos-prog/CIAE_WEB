@@ -1,4 +1,4 @@
-import { MESES_CORTOS } from '../../shared/constantes/meses';
+import { MESES_CORTOS, MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 
 export const TOTAL_KEY = 'TOTAL OOAD';
 
@@ -6,23 +6,9 @@ export const TOTAL_KEY = 'TOTAL OOAD';
 // (numerador, denominador, tasa y color) — el front solo lo muestra, no lo recalcula.
 const TOTAL_OOAD_KEY = 'TOTAL_OOAD';
 
-/**
- * Construye el objeto de rangos de semáforo para IAAS 01 a partir de los umbrales de un tipo.
- * @param {Object|undefined} umbrales - Umbrales del tipo (OOAD, HGS, HGZ, HGR) con Esperado y Medio
- * @param {string} label - Etiqueta a mostrar en la UI (ej. 'OOAD', 'HGS')
- * @returns {{_label:string, Esperado:string, Medio:string, Bajo:string}|null} Rangos formateados o null si no hay datos
- */
-export function calcularRangos01(umbrales, label) {
-  if (!umbrales?.Esperado) return null;
-  const esp = umbrales.Esperado;
-  const med = umbrales.Medio ?? {};
-  return {
-    _label:   label,
-    Esperado: `${esp.Mayor} – ${esp.Menor}`,
-    Medio:    `> ${med.Mayor ?? '?'} – < ${esp.Mayor}`,
-    Bajo:     `< ${med.Mayor ?? '?'}  ó  > ${esp.Menor}`,
-  };
-}
+/** De dónde se leen los datos dentro del reporte: el mes tal cual, o su acumulado Ene→mes (lo calcula el backend). */
+export const FUENTE_MENSUAL   = 'MESES';
+export const FUENTE_ACUMULADO = 'MENSUAL_ACUMULADO';
 
 /**
  * Verifica si un mes está disponible para selección según el año y la fecha actual.
@@ -59,66 +45,66 @@ export function calcularFaltantes(numeradores, unidades, archivosUnidad, denomin
 }
 
 /**
- * Devuelve los puntos de la gráfica de tendencia mensual para una unidad específica (o TOTAL OOAD).
- * TOTAL OOAD usa directamente el registro "TOTAL_OOAD" que ya manda el backend calculado —
- * el front nunca suma ni decide el color, solo lo muestra.
- * @param {Object} datos - Datos crudos de la API
- * @param {string} unidadSel - Unidad seleccionada o TOTAL_KEY
- * @param {string} indSel - Indicador seleccionado
- * @returns {Array<{mes:string, tasa:number, numerador:number, denominador:number, color:string}>}
+ * Meses ("01".."12", ordenados) que tienen al menos un dato en el reporte.
+ * @param {Object|null} reporte - Respuesta de /Indicadores/reportes/{indicador}
+ * @returns {string[]}
  */
-export function buildChartDataUnidad(datos, unidadSel, indSel) {
-  if (!datos || !unidadSel || !datos.meses_con_datos?.length) return [];
+export function mesesConDatosDeReporte(reporte) {
+  if (!reporte?.MESES) return [];
+  return Object.entries(reporte.MESES)
+    .filter(([, unidades]) => Object.values(unidades).some(d => d?.numerador != null || d?.denominador != null || d?.['%'] != null))
+    .map(([nombre]) => MESES_LARGOS_ARR.indexOf(nombre) + 1)
+    .filter(n => n > 0)
+    .sort((a, b) => a - b)
+    .map(n => String(n).padStart(2, '0'));
+}
 
-  const clave = unidadSel === TOTAL_KEY ? TOTAL_OOAD_KEY : unidadSel;
-  const arr = datos.datos?.[indSel]?.[clave] ?? [];
-  return datos.meses_con_datos.map(mes => {
-    const reg = arr.find(r => r.mes === mes);
-    return {
-      mes:         MESES_CORTOS[parseInt(mes) - 1],
-      // tasa en 0 para que la barra se vea vacía; numerador/denominador se dejan en null
-      // (no en 0) cuando no hay dato, para que la tarjetita muestre "sin dato" real.
-      tasa:        reg?.tasa        ?? 0,
-      numerador:   reg?.numerador   ?? null,
-      denominador: reg?.denominador ?? null,
-      color:       reg?.color       ?? 'Gris',
-    };
-  });
+// tasa en 0 para que la barra se vea vacía; numerador/denominador se dejan en null
+// (no en 0) cuando no hay dato, para que la tarjetita muestre "sin dato" real.
+function puntoDe(dato) {
+  return {
+    tasa:        dato?.['%']       ?? 0,
+    numerador:   dato?.numerador   ?? null,
+    denominador: dato?.denominador ?? null,
+    color:       dato?.desempeno   ?? 'Gris',
+  };
 }
 
 /**
- * Devuelve los puntos de la gráfica de todas las unidades en un mes específico + TOTAL OOAD.
- * TOTAL OOAD usa directamente el registro "TOTAL_OOAD" del backend, sin sumar por unidad.
- * @param {Object} datos - Datos crudos de la API
- * @param {string} mesSel - Mes seleccionado en formato "MM"
- * @param {string} indSel - Indicador seleccionado
- * @returns {Array<{unidad:string, tasa:number, numerador:number, denominador:number, color:string}>}
+ * Puntos de la gráfica de tendencia mensual para una unidad (o TOTAL OOAD).
+ * TOTAL OOAD usa directamente el registro "TOTAL_OOAD" que ya manda el backend —
+ * el front nunca suma ni decide el color, solo lo muestra.
+ * @param {Object|null} reporte - Respuesta de /Indicadores/reportes/{indicador}
+ * @param {string} unidadSel - Unidad seleccionada o TOTAL_KEY
+ * @param {string[]} mesesConDatos - Meses "MM" a graficar
+ * @param {string} [fuente] - FUENTE_MENSUAL (default) o FUENTE_ACUMULADO
+ * @returns {Array<{mes:string, tasa:number, numerador:number|null, denominador:number|null, color:string}>}
  */
-export function buildChartDataMes(datos, mesSel, indSel) {
-  if (!datos?.unidades || !mesSel) return [];
+export function buildChartDataUnidad(reporte, unidadSel, mesesConDatos, fuente = FUENTE_MENSUAL) {
+  if (!reporte || !unidadSel || !mesesConDatos?.length) return [];
 
-  const porUnidad = datos.unidades.map(u => {
-    const arr = datos.datos?.[indSel]?.[u] ?? [];
-    const reg = arr.find(r => r.mes === mesSel);
-    return {
-      unidad:      u,
-      tasa:        reg?.tasa        ?? 0,
-      numerador:   reg?.numerador   ?? null,
-      denominador: reg?.denominador ?? null,
-      color:       reg?.color       ?? 'Gris',
-    };
-  });
+  const clave = unidadSel === TOTAL_KEY ? TOTAL_OOAD_KEY : unidadSel;
+  return mesesConDatos.map(mes => ({
+    mes: MESES_CORTOS[parseInt(mes) - 1],
+    ...puntoDe(reporte[fuente]?.[MESES_LARGOS_ARR[parseInt(mes) - 1]]?.[clave]),
+  }));
+}
 
-  const arrTotal = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
-  const regTotal = arrTotal.find(r => r.mes === mesSel);
+/**
+ * Puntos de la gráfica de todas las unidades en un mes + TOTAL OOAD al final
+ * (registro "TOTAL_OOAD" del backend, sin sumar por unidad).
+ * @param {Object|null} reporte - Respuesta de /Indicadores/reportes/{indicador}
+ * @param {string[]} unidades - Catálogo de unidades, en el orden a mostrar
+ * @param {string} mesSel - Mes seleccionado en formato "MM"
+ * @param {string} [fuente] - FUENTE_MENSUAL (default) o FUENTE_ACUMULADO
+ * @returns {Array<{unidad:string, tasa:number, numerador:number|null, denominador:number|null, color:string}>}
+ */
+export function buildChartDataMes(reporte, unidades, mesSel, fuente = FUENTE_MENSUAL) {
+  if (!reporte || !mesSel) return [];
+
+  const delMes = reporte[fuente]?.[MESES_LARGOS_ARR[parseInt(mesSel) - 1]] ?? {};
   return [
-    ...porUnidad,
-    {
-      unidad:      TOTAL_KEY,
-      tasa:        regTotal?.tasa        ?? 0,
-      numerador:   regTotal?.numerador   ?? null,
-      denominador: regTotal?.denominador ?? null,
-      color:       regTotal?.color       ?? 'Gris',
-    },
+    ...unidades.map(unidad => ({ unidad, ...puntoDe(delMes[unidad]) })),
+    { unidad: TOTAL_KEY, ...puntoDe(delMes[TOTAL_OOAD_KEY]) },
   ];
 }

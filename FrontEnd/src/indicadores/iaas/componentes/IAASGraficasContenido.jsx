@@ -23,7 +23,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
   const [pagina, setPagina]           = useState(0);
 
   const {
-    anio, datos, indSel,
+    anio, mesesConDatos, indSel,
     unidadSel, setUnidadSel,  
     cargando, descargando, handleDescargar, handleDescargarInd,
     vistaGrafica, setVistaGrafica,
@@ -154,7 +154,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
               <div className="ig-unit-panel ig-unit-panel--mes">
                 <p className="ig-unit-list-title">Mes</p>
                 <div className="ig-unit-list">
-                  {datos?.meses_con_datos?.map(m => (
+                  {mesesConDatos.map(m => (
                     <button
                       key={m}
                       className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}

@@ -71,6 +71,19 @@ const resolverRng = (rngStr, cols) => {
 const pct = (f) => `${+(parseFloat(f) * 100).toFixed(2)}%`;
 
 // ── Descripción de extracción por modo (rama "fórmula") ────────────────────
+// Un descriptor por cada modoExtraccion real -- agregar un modo nuevo es
+// agregar una entrada aquí, no tocar la función de abajo.
+const DESCRIPTORES_FORMULA = {
+  INTERSECCION_COLUMNA: (cfg, cols) => {
+    const colStr = cols.length === 1 ? `la columna ${cols[0]}` : `las columnas ${cols.join(', ')}`;
+    return `En la columna "${cfg.columna}" busca la fila "${cfg.buscar}" y extrae ${colStr}.`;
+  },
+  INTERSECCION_FILA: (cfg, cols) =>
+    `Extrae por posición fija (sin búsqueda de texto): ${cols.join(', ')}. Cada referencia combina la columna de extracción con el número de fila.`,
+  ULTIMA_FILA: (cfg, cols) =>
+    `Toma el último valor con dato de la columna ${cols.join(', ')} (a partir del encabezado en la fila ${cfg.encabezado}).`,
+};
+
 const descripcionExtraccion = (cfg, cols) => {
   if (!cfg) return null;
 
@@ -78,18 +91,10 @@ const descripcionExtraccion = (cfg, cols) => {
     return `Fuente local — archivo de población delegacional (Guanajuato). Grupos de edad: ${cols.length ? cols.join(', ') : 'por definir'}.`;
   }
 
-  switch (cfg.modoExtraccion) {
-    case 'INTERSECCION_COLUMNA': {
-      const colStr = cols.length === 1 ? `la columna ${cols[0]}` : `las columnas ${cols.join(', ')}`;
-      return `En la columna "${cfg.columna}" busca la fila "${cfg.buscar}" y extrae ${colStr}.`;
-    }
-    case 'INTERSECCION_FILA':
-      return `Extrae por posición fija (sin búsqueda de texto): ${cols.join(', ')}. Cada referencia combina la columna de extracción con el número de fila.`;
-    case 'ULTIMA_FILA':
-      return `Toma el último valor con dato de la columna ${cols.join(', ')} (a partir del encabezado en la fila ${cfg.encabezado}).`;
-    default:
-      return `Extrae la(s) columna(s) ${cols.join(', ')}.`;
-  }
+  const descriptor = DESCRIPTORES_FORMULA[cfg.modoExtraccion];
+  return descriptor
+    ? descriptor(cfg, cols)
+    : `Extrae la(s) columna(s) ${cols.join(', ')} (modo "${cfg.modoExtraccion}" sin descripción todavía).`;
 };
 
 // ── Tokenizadores (fórmulas tipo "CP02[0] + sum(CP03[0:2])") ───────────────
@@ -246,44 +251,75 @@ export const parsearResultado = (expr) =>
 // Estos no tienen fórmula que parsear (operacion.numerador/denominador es
 // literal "(numerador)"/"(denominador)") -- cuentan o filtran filas directo.
 
-const TIPO_FILTRO_TXT = {
-  RANGO: (f) => `entre ${f[0]} y ${f[1]}`,
-  LISTA: (f) => `uno de: ${f.join(', ')}`,
+// Un "segmento" de descripción es texto plano (string) o un grupo de códigos
+// ({ codigos: [...] }) -- el front decide cómo pintar cada uno (texto vs.
+// chips), aquí solo se arma el contenido, nunca el markup.
+const descripcionCondicion = (col, cfg) => {
+  const base = `"${cfg.nombreColumna}" (columna ${col}) = `;
+  if (cfg.tipo === 'LISTA') return [`${base}uno de: `, { codigos: cfg.filtro }];
+  if (cfg.tipo === 'RANGO') return [`${base}entre ${cfg.filtro[0]} y ${cfg.filtro[1]}`];
+  return [`${base}"${cfg.filtro}"`];
 };
 
-const descripcionFiltroColumna = (filtroColumna = {}) =>
-  Object.entries(filtroColumna)
-    .map(([col, cfg]) => `"${cfg.nombreColumna}" (columna ${col}) = ${TIPO_FILTRO_TXT[cfg.tipo]?.(cfg.filtro) ?? `"${cfg.filtro}"`}`)
-    .join('  Y  ');
+const segmentosFiltroColumna = (filtroColumna = {}) => {
+  const segmentos = [];
+  Object.entries(filtroColumna).forEach(([col, cfg], i) => {
+    if (i > 0) segmentos.push('  Y  ');
+    segmentos.push(...descripcionCondicion(col, cfg));
+  });
+  return segmentos;
+};
 
 const descripcionCruce = (cruce) => {
   if (!cruce?.activa) return null;
-  return `Si el diagnóstico es uno de los candidatos (${cruce.codigosCandidatos.join(', ')}), se valida cruzando con "${cruce.archivoCruce}" `
-       + `por "${cruce.columnaLlave}" — si ahí aparece alguno de los códigos válidos (${cruce.codigosValidos.join(', ')}), también se cuenta.`;
+  return [
+    'Si el diagnóstico es uno de los candidatos (', { codigos: cruce.codigosCandidatos },
+    `), se valida cruzando con "${cruce.archivoCruce}" por "${cruce.columnaLlave}" — si ahí aparece alguno de los códigos válidos (`,
+    { codigos: cruce.codigosValidos }, '), también se cuenta.',
+  ];
 };
 
 const descripcionFiltroUnidadValor = (detalle) => {
   const [[colUnidad, cfgUnidad]] = Object.entries(detalle.columnaUnidad ?? {});
-  const condiciones = descripcionFiltroColumna(detalle.filtroColumna);
   const [[colValor, nombreValor]] = Object.entries(detalle.tomarValor ?? {});
-  return `Ubica la fila de la unidad (columna ${colUnidad}, "${cfgUnidad?.nombreColumna}") donde ${condiciones}, `
-       + `y toma el valor de la columna ${colValor} ("${nombreValor}").`;
+  return [
+    `Ubica la fila de la unidad (columna ${colUnidad}, "${cfgUnidad?.nombreColumna}") donde `,
+    ...segmentosFiltroColumna(detalle.filtroColumna),
+    `, y toma el valor de la columna ${colValor} ("${nombreValor}").`,
+  ];
+};
+
+// Un descriptor por cada modoExtraccion de tipo "filtro" -- cada uno devuelve
+// { condiciones, cruce }; agregar un modo nuevo es agregar una entrada aquí.
+const DESCRIPTORES_FILTRO = {
+  FILTRO_CONTEO: (detalle) => ({
+    condiciones: ['Cuenta las filas donde ', ...segmentosFiltroColumna(detalle.filtroColumna), '.'],
+    cruce: null,
+  }),
+  FILTRO_CONTEO_ACUMULADO: (detalle) => ({
+    condiciones: ['Cuenta las filas donde ', ...segmentosFiltroColumna(detalle.filtroColumna), '.'],
+    cruce: descripcionCruce(detalle.cruce),
+  }),
+  FILTRO_UNIDAD_VALOR: (detalle) => ({
+    condiciones: descripcionFiltroUnidadValor(detalle),
+    cruce: null,
+  }),
 };
 
 /**
- * Describe en texto una fuente de tipo "filtro" (sin fórmula algebraica).
+ * Describe una fuente de tipo "filtro" (sin fórmula algebraica) como una
+ * lista de segmentos (string = texto plano, {codigos} = lista para mostrar
+ * como chips) -- nunca un string ya armado, para que el front pueda pintar
+ * los códigos (de diagnóstico, columna, etc.) distinto del resto del texto.
  * @param {string} modoExtraccion
  * @param {object} detalle - el bloque crudo (reporte.numerador o .denominador)
  */
 export const descripcionFiltro = (modoExtraccion, detalle) => {
-  if (modoExtraccion === 'FILTRO_UNIDAD_VALOR') {
-    return { hoja: detalle.hoja, condiciones: descripcionFiltroUnidadValor(detalle), cruce: null };
-  }
-  return {
-    hoja: detalle.hoja,
-    condiciones: `Cuenta las filas donde ${descripcionFiltroColumna(detalle.filtroColumna)}.`,
-    cruce: modoExtraccion === 'FILTRO_CONTEO_ACUMULADO' ? descripcionCruce(detalle.cruce) : null,
-  };
+  const descriptor = DESCRIPTORES_FILTRO[modoExtraccion];
+  const partes = descriptor
+    ? descriptor(detalle)
+    : { condiciones: [`Modo de extracción "${modoExtraccion}" sin descripción todavía.`], cruce: null };
+  return { hoja: detalle.hoja, ...partes };
 };
 
 const MODOS_FILTRO = ['FILTRO_CONTEO', 'FILTRO_CONTEO_ACUMULADO', 'FILTRO_UNIDAD_VALOR'];

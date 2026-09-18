@@ -1,17 +1,20 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { getIAASDatosGrafica, descargarIAASGuardado, infoBasicaInAass } from '../api/IAAS';
+import { getUnidadesIAAS, descargarIAASGuardado, infoBasicaInAass } from '../api/IAAS';
+import { obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_CORTOS } from '../../shared/constantes/meses';
 import { COLOR_IND, HGS_COLOR, HGS_BG } from '../constantes/colores';
 import { COLOR_SEMAFORO } from '../../shared/constantes/semaforo';
 import {
   TOTAL_KEY,
-  calcularRangos01,
+  FUENTE_ACUMULADO,
+  mesesConDatosDeReporte,
   buildChartDataUnidad,
   buildChartDataMes,
 } from '../utils/calculos';
 import { contarSemaforo } from '../../shared/utils/contarSemaforo';
 import { techoEscala } from '../../shared/utils/escala';
+import { esSemaforoAgrupado, rangosDeMetas, agruparRangos } from '../../shared/utils/rangosSemaforo';
 
 // Clave real bajo la que el backend manda el total OOAD ya calculado.
 const TOTAL_OOAD_KEY = 'TOTAL_OOAD';
@@ -33,7 +36,8 @@ export { TOTAL_KEY };
 export function useIAASGrafica(extIndSel, onExtChange) {
   const controlled = extIndSel !== undefined;
   const [anio]                            = useState('2026');
-  const [datos, setDatos]                 = useState(null);
+  const [reporte, setReporte]             = useState(null);
+  const [unidades, setUnidades]           = useState([]);
   const [unidadSel, setUnidadSel]         = useState('');
   const [localIndSel, setLocalIndSel]     = useState('IAAS 02');
 
@@ -46,27 +50,39 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   const [acumulado, setAcumulado]         = useState(false);
   const [mesSel, setMesSel]               = useState('');
 
+  /** Catálogo de unidades (orden en que se muestran) e info de semáforo por indicador */
   useEffect(() => {
-    const cargar = async () => {
-      try {
-        setCargando(true);
-        setDatos(null);
-        setUnidadSel('');
-        const d = await getIAASDatosGrafica(anio);
-        setDatos(d);
-        if (d.unidades?.length > 0) setUnidadSel(d.unidades[0]);
-        if (d.meses_con_datos?.length > 0)
-          setMesSel(d.meses_con_datos[d.meses_con_datos.length - 1]);
-        const respuestaInfo = await infoBasicaInAass();
-        setInfoIAAS(respuestaInfo.data);
-      } catch (error) {
-        console.error('Error cargando datos IAAS:', error);
-      } finally {
-        setCargando(false);
-      }
-    };
-    cargar();
-  }, [anio]);
+    Promise.all([getUnidadesIAAS(), infoBasicaInAass()])
+      .then(([unids, info]) => {
+        setUnidades(unids);
+        setInfoIAAS(info.data);
+        if (unids.length > 0) setUnidadSel(actual => actual || unids[0]);
+      })
+      .catch(error => console.error('Error cargando catálogo IAAS:', error));
+  }, []);
+
+  /**
+   * Reporte del indicador activo. La ficha se pide primero porque trae el módulo
+   * y si el indicador tiene mensual acumulado (el backend arma MENSUAL_ACUMULADO
+   * solo si se lo piden). No limpia `reporte` de inmediato para que el cambio de
+   * indicador no haga parpadear el panel.
+   */
+  useEffect(() => {
+    if (!indSel) return undefined;
+    let vigente = true;
+    setCargando(true);
+    obtenerFichaIndicador(indSel, anio)
+      .then(ficha => obtenerReporteIndicador(indSel, anio, { modulo: ficha.modulo, mensualAcumulado: ficha.mensualAcumulado }))
+      .then(r => {
+        if (!vigente) return;
+        setReporte(r);
+        const meses = mesesConDatosDeReporte(r);
+        setMesSel(meses.length > 0 ? meses[meses.length - 1] : '');
+      })
+      .catch(error => console.error('Error cargando datos IAAS:', error))
+      .finally(() => { if (vigente) setCargando(false); });
+    return () => { vigente = false; };
+  }, [indSel, anio]);
 
   /**
    * Descarga el Excel guardado para el año actual, opcionalmente filtrado por indicador.
@@ -91,10 +107,12 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   const hgsSet        = useMemo(() => new Set(indInfo?.unidades_hgs ?? []), [indInfo]);
   const unidadTipoMap = useMemo(() => indInfo?.unidad_tipo ?? {}, [indInfo]);
 
+  const mesesConDatos = useMemo(() => mesesConDatosDeReporte(reporte), [reporte]);
+
   /** Tendencia mensual de la unidad seleccionada (o TOTAL OOAD) */
   const chartData = useMemo(
-    () => buildChartDataUnidad(datos, unidadSel, indSel),
-    [datos, unidadSel, indSel]
+    () => buildChartDataUnidad(reporte, unidadSel, mesesConDatos),
+    [reporte, unidadSel, mesesConDatos]
   );
 
   const maxTasa = useMemo(
@@ -104,8 +122,8 @@ export function useIAASGrafica(extIndSel, onExtChange) {
 
   /** Todas las unidades en el mes seleccionado + TOTAL OOAD por separado */
   const chartDataMesConTotal = useMemo(
-    () => buildChartDataMes(datos, mesSel, indSel),
-    [datos, indSel, mesSel]
+    () => buildChartDataMes(reporte, unidades, mesSel),
+    [reporte, unidades, mesSel]
   );
 
   /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
@@ -125,38 +143,12 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   );
 
   /** Tasa acumulada (Ene→mesSel) por unidad + TOTAL OOAD por separado — para "Por mes" + Acumulado.
-   *  El acumulado ya viene resuelto del backend (numerador_acum/denominador_acum/tasa_acum/
-   *  color_acum) — el front solo busca el registro del mes y lo muestra. */
-  const chartDataAcumuladoConTotal = useMemo(() => {
-    if (!datos?.unidades || !mesSel) return [];
+   *  El acumulado ya viene resuelto del backend (MENSUAL_ACUMULADO) — el front solo lo muestra. */
+  const chartDataAcumuladoConTotal = useMemo(
+    () => buildChartDataMes(reporte, unidades, mesSel, FUENTE_ACUMULADO),
+    [reporte, unidades, mesSel]
+  );
 
-    const porUnidad = datos.unidades.map(u => {
-      const arr = datos.datos?.[indSel]?.[u] ?? [];
-      const reg = arr.find(r => r.mes === mesSel);
-      return {
-        unidad:      u,
-        tasa:        reg?.tasa_acum        ?? 0,
-        numerador:   reg?.numerador_acum   ?? null,
-        denominador: reg?.denominador_acum ?? null,
-        color:       reg?.color_acum       ?? 'Gris',
-      };
-    });
-
-    const arrTotal = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
-    const regTotal = arrTotal.find(r => r.mes === mesSel);
-    return [
-      ...porUnidad,
-      {
-        unidad:      TOTAL_KEY,
-        tasa:        regTotal?.tasa_acum        ?? 0,
-        numerador:   regTotal?.numerador_acum   ?? null,
-        denominador: regTotal?.denominador_acum ?? null,
-        color:       regTotal?.color_acum       ?? 'Gris',
-      },
-    ];
-  }, [datos, indSel, mesSel]);
-
-  /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
   const totalAcumulado = useMemo(
     () => chartDataAcumuladoConTotal.find(d => d.unidad === TOTAL_KEY) ?? null,
     [chartDataAcumuladoConTotal]
@@ -177,22 +169,9 @@ export function useIAASGrafica(extIndSel, onExtChange) {
 
   /** Color de semáforo de cada unidad en el último mes disponible (tal cual lo manda el backend) */
   const unidadesStatus = useMemo(() => {
-    if (!datos?.unidades) return [];
-    const ultimoMes = datos.meses_con_datos?.[datos.meses_con_datos.length - 1];
-
-    const porUnidad = datos.unidades.map(u => {
-      const arr = datos.datos?.[indSel]?.[u] ?? [];
-      const reg = arr.find(r => r.mes === ultimoMes);
-      return { unidad: u, color: reg?.color ?? 'Gris' };
-    });
-
-    const arrTotal  = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
-    const regTotal  = arrTotal.find(r => r.mes === ultimoMes);
-    return [
-      ...porUnidad,
-      { unidad: TOTAL_KEY, color: regTotal?.color ?? 'Gris' },
-    ];
-  }, [datos, indSel]);
+    const ultimoMes = mesesConDatos[mesesConDatos.length - 1];
+    return buildChartDataMes(reporte, unidades, ultimoMes).map(({ unidad, color }) => ({ unidad, color }));
+  }, [reporte, unidades, mesesConDatos]);
 
   /** Conteo Esperado/Medio/Bajo/Gris del mes seleccionado — para la vista "Por mes" */
   const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
@@ -203,48 +182,22 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     [unidadesStatus]
   );
 
-  /** Evolución acumulada mes a mes de la unidad seleccionada — siempre el rango completo disponible.
-   *  Lee directo numerador_acum/denominador_acum/tasa_acum/color_acum que ya manda el backend. */
-  const chartDataAcumuladoUnidad = useMemo(() => {
-    if (!datos?.unidades || !unidadSel || unidadSel === TOTAL_KEY) return [];
-    const mesesHasta = datos.meses_con_datos ?? [];
-    const arr = datos.datos?.[indSel]?.[unidadSel] ?? [];
-
-    return mesesHasta.map(mes => {
-      const reg = arr.find(r => r.mes === mes);
-      return {
-        mes:         MESES_CORTOS[parseInt(mes) - 1],
-        tasa:        reg?.tasa_acum        ?? 0,
-        numerador:   reg?.numerador_acum   ?? null,
-        denominador: reg?.denominador_acum ?? null,
-        color:       reg?.color_acum       ?? 'Gris',
-      };
-    });
-  }, [datos, indSel, unidadSel]);
+  /** Evolución acumulada mes a mes de la unidad seleccionada — siempre el rango completo disponible. */
+  const chartDataAcumuladoUnidad = useMemo(
+    () => (unidadSel === TOTAL_KEY ? [] : buildChartDataUnidad(reporte, unidadSel, mesesConDatos, FUENTE_ACUMULADO)),
+    [reporte, unidadSel, mesesConDatos]
+  );
 
   const maxTasaAcumuladoUnidad = useMemo(
     () => techoEscala(chartDataAcumuladoUnidad.map(d => d.tasa)),
     [chartDataAcumuladoUnidad]
   );
 
-  /** Evolución del TOTAL OOAD acumulado mes a mes — siempre el rango completo disponible.
-   *  Usa directamente los registros "TOTAL_OOAD" (ya acumulados) que manda el backend. */
-  const chartDataAcumuladoTotal = useMemo(() => {
-    if (!datos?.unidades) return [];
-    const mesesHasta = datos.meses_con_datos ?? [];
-    const arr = datos.datos?.[indSel]?.[TOTAL_OOAD_KEY] ?? [];
-
-    return mesesHasta.map(mes => {
-      const reg = arr.find(r => r.mes === mes);
-      return {
-        mes:         MESES_CORTOS[parseInt(mes) - 1],
-        tasa:        reg?.tasa_acum        ?? 0,
-        numerador:   reg?.numerador_acum   ?? null,
-        denominador: reg?.denominador_acum ?? null,
-        color:       reg?.color_acum       ?? 'Gris',
-      };
-    });
-  }, [datos, indSel]);
+  /** Evolución del TOTAL OOAD acumulado mes a mes — siempre el rango completo disponible. */
+  const chartDataAcumuladoTotal = useMemo(
+    () => buildChartDataUnidad(reporte, TOTAL_KEY, mesesConDatos, FUENTE_ACUMULADO),
+    [reporte, mesesConDatos]
+  );
 
   const maxTasaAcumuladoTotal = useMemo(
     () => techoEscala(chartDataAcumuladoTotal.map(d => d.tasa)),
@@ -261,35 +214,28 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     return unidadesStatus.map(u => ({ ...u, color: map[u.unidad] ?? u.color }));
   }, [vistaGrafica, acumulado, unidadesStatus, chartDataAcumuladoConTotal]);
 
-  /** Rangos de semáforo formateados para mostrar en la UI según indicador y vista activa */
+  /** Rangos de semáforo (texto del mapeo) para mostrar en la UI según indicador y vista activa */
   let rangosSem      = null;
   let rangosSemExtra = null;
   if (sem) {
-    if (indSel === 'IAAS 01') {
-      if (unidadSel === TOTAL_KEY) {
-        rangosSem = calcularRangos01(sem.OOAD ?? sem.HGZ ?? sem.HGR, 'OOAD');
-      } else if (vistaGrafica === 'mes') {
-        rangosSem      = calcularRangos01(sem.HGS, 'HGS');
-        rangosSemExtra = calcularRangos01(sem.HGZ ?? sem.HGR ?? sem.OOAD, 'HGZ/HGR');
-      } else {
-        const tipo = unidadTipoMap?.[unidadSel] ?? 'OOAD';
-        rangosSem  = calcularRangos01(sem[tipo], tipo);
-      }
-    } else if (sem.Esperado) {
-      rangosSem = {
-        Esperado: `${sem.Esperado.Mayor} – ${sem.Esperado.Menor}`,
-        Medio:    `> ${sem.Esperado.Menor} – ≤ ${sem.Medio?.Menor ?? '?'}`,
-        Bajo:     `< ${sem.Esperado.Mayor}  ó  > ${sem.Medio?.Menor ?? '?'}`,
-      };
+    if (!esSemaforoAgrupado(sem)) {
+      rangosSem = rangosDeMetas(sem);
+    } else if (unidadSel === TOTAL_KEY) {
+      rangosSem = rangosDeMetas(sem.OOAD, 'OOAD');
+    } else if (vistaGrafica === 'mes') {
+      [rangosSem, rangosSemExtra] = agruparRangos(sem);
+    } else {
+      const tipo = unidadTipoMap?.[unidadSel] ?? 'OOAD';
+      rangosSem  = rangosDeMetas(sem[tipo], tipo);
     }
   }
 
   const indColor = COLOR_IND[indSel];
-  const sinDatos = !cargando && (!datos || datos.meses_con_datos?.length === 0);
-  const hayDatos = !cargando && datos?.meses_con_datos?.length > 0;
+  const sinDatos = !cargando && mesesConDatos.length === 0;
+  const hayDatos = !cargando && mesesConDatos.length > 0;
 
   return {
-    anio, datos, indSel, setIndSel,
+    anio, indSel, setIndSel, mesesConDatos,
     unidadSel, setUnidadSel,
     cargando, descargando, handleDescargar, handleDescargarInd,
     vistaGrafica, setVistaGrafica,

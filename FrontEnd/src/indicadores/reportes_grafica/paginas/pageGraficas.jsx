@@ -5,7 +5,7 @@ import FilterPanel from '../../ftp/componentes/graficasFTP/FilterPanel';
 import logo_imss from '../../../assets/logo_imms.png';
 import './pageGrafica.css';
 import InformacionIndicador from '../componentes/InformacionIndicador/InformacionIndicador';
-import { getIndicador } from '../../ftp/api/indicadores';
+import { obtenerFichaTecnicaCompleta } from '../../shared/api/indicadoresInfo';
 import { numeroDeUmbral, textoDeUmbral } from '../../ftp/utils/calculos';
 
 export default function PageGrafica() {
@@ -26,7 +26,7 @@ export default function PageGrafica() {
   useEffect(() => {
     document.title = `Gráficas | ${Indicador || 'CIAE'}`;
     if (!Indicador) { navigate('/CIAE/IndicadoresMedicos'); return; }
-    getIndicador(Indicador).then(res => setInfoIndicador(res.data)).catch(console.error);
+    obtenerFichaTecnicaCompleta(Indicador).then(setInfoIndicador).catch(console.error);
   }, [Indicador, navigate]);
 
   const handleFilterChange = useCallback((nuevosDatos) => {

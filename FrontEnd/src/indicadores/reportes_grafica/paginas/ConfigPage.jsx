@@ -1,7 +1,7 @@
 import './config.css';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getIndicador } from '../../ftp/api/indicadores';
+import { obtenerFichaTecnicaCompleta } from '../../shared/api/indicadoresInfo';
 import { getReporte, getMesesGenerados } from '../api/reportes';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import ModalExito from '../componentes/modal/ModalExito';
@@ -60,7 +60,7 @@ const ConfiguracionReporte = () => {
   useEffect(() => {
     document.title = `${indicadorSel || 'Configuración'} | CIAE`;
     if (indicadorSel) {
-      getIndicador(indicadorSel).then(res => setInfoIndicador(res.data)).catch(console.error);
+      obtenerFichaTecnicaCompleta(indicadorSel).then(setInfoIndicador).catch(console.error);
     }
   }, [indicadorSel]);
 
@@ -308,7 +308,7 @@ const ConfiguracionReporte = () => {
 
             {infoIndicador ? (
               <div className="cfg-info-body">
-                <p className="cfg-ind-titulo">{infoIndicador.titulo}</p>
+                <p className="cfg-ind-titulo">{infoIndicador.informacion.titulo}</p>
                 <span className="cfg-fecha-mod">Última revisión: {infoIndicador.fechaModificacion}</span>
 
                 <div className="cfg-sem-section">

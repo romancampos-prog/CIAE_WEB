@@ -10,10 +10,14 @@ import api from '../../../shared/api/axiosInstance';
 
 /**
  * Índice de categorías de indicadores, para el selector/menú.
+ * @param {{campo?:string, modulo?:string}} [filtros]
+ *   campo: bandera del mapeo que decide qué se lista -- "mostrarGrafica" (default,
+ *          páginas de gráficas) o "mostrarGenerar" (páginas de Generar).
+ *   modulo: solo los indicadores de ese módulo ("ftp", "iaas", "Extractor").
  * @returns {Promise<Array<{categoriaIndicador:string, indicadores:string[], imagen:string, color:string}>>}
  */
-export const obtenerTodosLosIndicadores = async () => {
-  const { data } = await api.get('/Indicadores/informacion/AllIndicadores');
+export const obtenerTodosLosIndicadores = async ({ campo, modulo } = {}) => {
+  const { data } = await api.get('/Indicadores/informacion/AllIndicadores', { params: { campo, modulo } });
   return data;
 };
 

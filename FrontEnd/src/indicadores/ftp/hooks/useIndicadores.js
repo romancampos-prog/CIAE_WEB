@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { getAllIndicadores, getIndicador } from '../api/indicadores';
+import { obtenerTodosLosIndicadores, obtenerFichaIndicador } from '../../shared/api/indicadoresInfo';
 import { getReporte, getMesesGenerados, generarCategoria, regenerarReporteFinal, regenerarCategoria } from '../../reportes_grafica/api/reportes';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
@@ -22,7 +22,7 @@ export function useIndicadores(user) {
   const mesActualNum = fechaHoy.getMonth() + 1;
   const diaActual    = fechaHoy.getDate();
 
-  const [allIndicadores, setAllIndicadores] = useState({});
+  const [categorias, setCategorias]       = useState([]);
   const [cargandoLista, setCargandoLista]   = useState(true);
   const [categoria, setCategoria]           = useState(
     () => sessionStorage.getItem('categoria_actual') || 'CAMA'
@@ -46,20 +46,20 @@ export function useIndicadores(user) {
   const [regenerando, setRegenerando] = useState(false);
   const [errorRegenerar, setErrorRegenerar] = useState('');
 
-  const catData     = allIndicadores[categoria];
+  const catData     = categorias.find(c => c.categoriaIndicador === categoria);
   const indicadores = catData?.indicadores ?? [];
 
-  /** Carga inicial de todos los indicadores agrupados por categoría -- solo
-   *  los que corren por el pipeline automático (generaFTP), ya que esta es
-   *  la página de Generar FTP, no la de gráficas. */
+  /** Carga inicial de las categorías con los indicadores que se pueden generar
+   *  por FTP (mostrarGenerar + módulo ftp) -- esta es la página de Generar FTP,
+   *  no la de gráficas. */
   useEffect(() => {
-    getAllIndicadores('generaFTP')
-      .then(res => {
-        const data = res?.data ?? {};
-        setAllIndicadores(data);
-        if (!data[categoria] && Object.keys(data).length > 0)
-          setCategoria(Object.keys(data)[0]);
+    obtenerTodosLosIndicadores({ campo: 'mostrarGenerar', modulo: 'ftp' })
+      .then(lista => {
+        setCategorias(lista);
+        if (!lista.some(c => c.categoriaIndicador === categoria) && lista.length > 0)
+          setCategoria(lista[0].categoriaIndicador);
       })
+      .catch(console.error)
       .finally(() => setCargandoLista(false));
   }, []);
 
@@ -74,7 +74,7 @@ export function useIndicadores(user) {
   /** Carga la ficha tÃ©cnica del indicador seleccionado */
   useEffect(() => {
     if (!indicadorSel) { setInfoIndicador(null); return; }
-    getIndicador(indicadorSel).then(res => setInfoIndicador(res.data)).catch(console.error);
+    obtenerFichaIndicador(indicadorSel, datos.ano).then(setInfoIndicador).catch(console.error);
   }, [indicadorSel]);
 
   /** Trae qué meses ya tienen reporte "final" generado para el indicador/año activos */
@@ -243,7 +243,7 @@ export function useIndicadores(user) {
   }
 
   return {
-    allIndicadores, cargandoLista,
+    categorias, cargandoLista,
     categoria, setCategoria,
     indicadorSel, setIndicadorSel,
     tipo, setTipo,

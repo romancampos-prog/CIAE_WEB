@@ -8,10 +8,10 @@
  * @param {{ collapsed: boolean, onToggleCollapse: Function }} props
  */
 const SidebarCategorias = ({
-  allIndicadores, cargandoLista, categoria, indicadorSel, abiertas,
+  categorias, cargandoLista, categoria, indicadorSel, abiertas,
   onToggle, onSelectIndicador, collapsed, onToggleCollapse,
 }) => {
-  const colorActiva = allIndicadores[categoria]?.color
+  const colorActiva = categorias.find(c => c.categoriaIndicador === categoria)?.color
 
   const seleccionar = (cat, ind) => {
     onSelectIndicador(cat, ind)
@@ -69,11 +69,9 @@ const SidebarCategorias = ({
         <div className="ind-cat-list">
           {cargandoLista
             ? [1,2,3,4,5].map(i => <div key={i} className="ind-cat-shimmer" />)
-            : Object.keys(allIndicadores).map(cat => {
+            : categorias.map(({ categoriaIndicador: cat, color: cc, indicadores: catInds }) => {
                 const abierto  = abiertas.has(cat)
                 const esActiva = categoria === cat
-                const cc       = allIndicadores[cat]?.color
-                const catInds  = allIndicadores[cat]?.indicadores ?? []
                 return (
                   <div key={cat} className="ind-cat-group">
                     <button

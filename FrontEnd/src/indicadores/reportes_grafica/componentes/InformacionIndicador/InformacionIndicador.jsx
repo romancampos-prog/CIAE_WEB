@@ -74,6 +74,22 @@ const BloqueFormula = ({ fuentes, operacion, resumen }) => (
   </>
 );
 
+// ── Segmentos de descripción -- texto plano intercalado con chips de código
+//    (ej. diagnósticos CIE-10), en vez de una lista corrida separada por comas ──
+const Segmentos = ({ segmentos }) => (
+  <>
+    {segmentos.map((seg, i) =>
+      typeof seg === 'string' ? (
+        <span key={i}>{seg}</span>
+      ) : (
+        <span key={i} className="tags-flex-inline">
+          {seg.codigos.map((c, j) => <span key={j} className="col-tag">{c}</span>)}
+        </span>
+      )
+    )}
+  </>
+);
+
 // ── Bloque "filtro" (FILTRO_CONTEO / FILTRO_CONTEO_ACUMULADO / FILTRO_UNIDAD_VALOR) ──
 const BloqueFiltro = ({ hoja, condiciones, cruce }) => (
   <div className="fuentes-wrap">
@@ -84,8 +100,8 @@ const BloqueFiltro = ({ hoja, condiciones, cruce }) => (
         </div>
       </div>
       <div className="fuente-card-body">
-        <p className="fc-extraccion">{condiciones}</p>
-        {cruce && <p className="nota-prevalencia">{cruce}</p>}
+        <p className="fc-extraccion"><Segmentos segmentos={condiciones} /></p>
+        {cruce && <p className="nota-prevalencia"><Segmentos segmentos={cruce} /></p>}
       </div>
     </div>
   </div>
@@ -119,33 +135,52 @@ const numeroDe = (valor) => {
 const textoUmbral = (valor, operadorLegado) =>
   typeof valor === 'string' ? valor : `${operadorLegado} ${valor}`;
 
-// ── Semáforo fijo ─────────────────────────────────────────────────────────────
-const SemaforoFijo = ({ semaforo }) => {
-  const esDec = 'Alto' in semaforo;
-  const critico = esDec ? semaforo.Alto : semaforo.Bajo;
-  const sinMedio = numeroDe(semaforo.Esperado) === numeroDe(critico);
+// ── Bloque de metas (Esperado/Medio/Bajo|Alto) -- genérico: no asume que las
+//    3 siempre existen (ej. IAAS 05 no trae "Bajo"), y usa el texto de "Medio"
+//    tal cual viene del mapeo en vez de calcularlo, porque ya viene explícito
+//    -- necesario para rangos compuestos (ej. IAAS: ">= 4 a <= 7") que no se
+//    pueden reconstruir sacando solo un número con numeroDe(). ─────────────────
+const BloqueMetas = ({ metas }) => {
+  const esDec  = metas.Alto != null;
+  const critico = esDec ? metas.Alto : metas.Bajo;
+  const sinMedio = metas.Medio == null && numeroDe(metas.Esperado) === numeroDe(critico);
+
+  const bEsperado = metas.Esperado != null && (
+    <div className="meta-blk meta-verde"><span className="meta-lbl">Esperado</span><span className="meta-val">{textoUmbral(metas.Esperado, esDec ? '≤' : '≥')}</span></div>
+  );
+  const bMedio = !sinMedio && metas.Medio != null && (
+    <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span><span className="meta-val">{textoUmbral(metas.Medio, '')}</span></div>
+  );
+  const bCritico = critico != null && (
+    <div className={`meta-blk ${esDec ? 'meta-rojo' : 'meta-rojo'}`}>
+      <span className="meta-lbl">{esDec ? 'Alto' : 'Bajo'}</span>
+      <span className="meta-val">{textoUmbral(critico, esDec ? (sinMedio ? '>' : '≥') : (sinMedio ? '<' : '≤'))}</span>
+    </div>
+  );
+
   return (
     <div className="metas-fijas-row">
-      {esDec ? (
-        <>
-          <div className="meta-blk meta-verde">   <span className="meta-lbl">Esperado</span><span className="meta-val">{textoUmbral(semaforo.Esperado, '≤')}</span></div>
-          {!sinMedio && (
-            <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span>   <span className="meta-val">&gt; {numeroDe(semaforo.Esperado)} — &lt; {numeroDe(semaforo.Alto)}</span></div>
-          )}
-          <div className="meta-blk meta-rojo">    <span className="meta-lbl">Alto</span>    <span className="meta-val">{textoUmbral(semaforo.Alto, sinMedio ? '>' : '≥')}</span></div>
-        </>
-      ) : (
-        <>
-          <div className="meta-blk meta-rojo">    <span className="meta-lbl">Bajo</span>    <span className="meta-val">{textoUmbral(semaforo.Bajo, sinMedio ? '<' : '≤')}</span></div>
-          {!sinMedio && (
-            <div className="meta-blk meta-amarillo"><span className="meta-lbl">Medio</span>   <span className="meta-val">&gt; {numeroDe(semaforo.Bajo)} — &lt; {numeroDe(semaforo.Esperado)}</span></div>
-          )}
-          <div className="meta-blk meta-verde">   <span className="meta-lbl">Esperado</span><span className="meta-val">{textoUmbral(semaforo.Esperado, '≥')}</span></div>
-        </>
-      )}
+      {esDec ? <>{bEsperado}{bMedio}{bCritico}</> : <>{bCritico}{bMedio}{bEsperado}</>}
     </div>
   );
 };
+
+// ── Semáforo fijo: una sola meta para todos los cortes ──────────────────────
+const SemaforoFijo = ({ semaforo }) => <BloqueMetas metas={semaforo} />;
+
+// ── Semáforo agrupado: la meta cambia según un grupo que NO es mes (ej. tipo
+//    de hospital en IAAS 01) -- genérico, no le importa cuáles son los grupos
+//    ni cuántos hay, solo que cada valor sea a su vez un bloque de metas. ────
+const SemaforoAgrupado = ({ semaforo }) => (
+  <div className="grupos-semaforo">
+    {Object.entries(semaforo).map(([grupo, metas]) => (
+      <div key={grupo} className="grupo-semaforo-item">
+        <p className="grupo-semaforo-nombre">{grupo}</p>
+        <BloqueMetas metas={metas} />
+      </div>
+    ))}
+  </div>
+);
 
 // ── Semáforo mensual ──────────────────────────────────────────────────────────
 const SemaforoMensual = ({ semaforo }) => (
@@ -201,7 +236,12 @@ const InformacionIndicador = ({ data }) => {
 
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const esMensual = MESES.some(mes => Object.prototype.hasOwnProperty.call(semaforo, mes));
+  const esMensual  = MESES.some(mes => Object.prototype.hasOwnProperty.call(semaforo, mes));
+  // Fijo: el semaforo YA es un bloque de metas (Esperado/Medio/Bajo/Alto) al
+  // nivel raiz. Si no, y tampoco es mensual, es agrupado por otra cosa (ej.
+  // tipo de hospital en IAAS 01) -- generico, no importa cual sea el grupo.
+  const esFijo     = ['Esperado', 'Medio', 'Bajo', 'Alto'].some(k => k in semaforo);
+  const esAgrupado = !esFijo && !esMensual;
 
   const numResultado = reporte ? resolverLado(reporte.numerador, reporte.operacion.numerador, false) : null;
   const denResultado = reporte ? resolverLado(reporte.denominador, reporte.operacion.denominador, true) : null;
@@ -268,11 +308,17 @@ const InformacionIndicador = ({ data }) => {
       {tab === 'semaforo' && (
         <div className="det-tab-body">
           <p className="det-sem-tipo">
-            {esMensual ? 'Las metas varían cada mes del año.' : 'Meta fija para todos los meses.'}
+            {esMensual
+              ? 'Las metas varían cada mes del año.'
+              : esAgrupado
+                ? 'Las metas varían según el grupo.'
+                : 'Meta fija para todos los meses.'}
           </p>
           {esMensual
-            ? <SemaforoMensual semaforo={semaforo} />
-            : <SemaforoFijo   semaforo={semaforo} />
+            ? <SemaforoMensual  semaforo={semaforo} />
+            : esAgrupado
+              ? <SemaforoAgrupado semaforo={semaforo} />
+              : <SemaforoFijo     semaforo={semaforo} />
           }
         </div>
       )}

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import './filterPanel.css';
+import { COLOR_SEMAFORO_CLARO } from '../../../shared/constantes/semaforo';
 
 export default function FilterPanel({ datos, onFilterChange, esDescendente }) {
     const unidades = useMemo(() => Object.entries(datos || {}), [datos]);
@@ -50,9 +51,9 @@ export default function FilterPanel({ datos, onFilterChange, esDescendente }) {
         if (!sel.length) return { avg: 0, v: 0, a: 0, r: 0 };
         return {
             avg: (sel.reduce((s, v) => s + (v.resultado ?? 0), 0) / sel.length).toFixed(1),
-            v: sel.filter(v => v.color === 'Verde').length,
-            a: sel.filter(v => v.color === 'Amarillo').length,
-            r: sel.filter(v => v.color === 'Rojo').length,
+            v: sel.filter(v => v.color === 'Esperado').length,
+            a: sel.filter(v => v.color === 'Medio').length,
+            r: sel.filter(v => v.color === 'Bajo').length,
         };
     }, [selected, unidades]);
 
@@ -82,9 +83,9 @@ export default function FilterPanel({ datos, onFilterChange, esDescendente }) {
                     onChange={e => setSearch(e.target.value)}
                 />
                 <div className="fp-color-filters">
-                    <button className="fp-color-btn v" onClick={() => selectByColor('Verde')}>Esperado</button>
-                    <button className="fp-color-btn a" onClick={() => selectByColor('Amarillo')}>Medio</button>
-                    <button className="fp-color-btn r" onClick={() => selectByColor('Rojo')}>
+                    <button className="fp-color-btn v" onClick={() => selectByColor('Esperado')}>Esperado</button>
+                    <button className="fp-color-btn a" onClick={() => selectByColor('Medio')}>Medio</button>
+                    <button className="fp-color-btn r" onClick={() => selectByColor('Bajo')}>
                         {esDescendente ? 'Alto (Crítico)' : 'Bajo'}
                     </button>
                 </div>
@@ -98,7 +99,7 @@ export default function FilterPanel({ datos, onFilterChange, esDescendente }) {
                         onClick={() => toggle(key)}
                     >
                         <div className={`fp-checkbox ${selected.has(key) ? 'checked' : ''}`} />
-                        <span className="fp-unit-dot" style={{ background: val.color === 'Verde' ? '#28a745' : val.color === 'Rojo' ? '#dc3545' : '#ffc107' }} />
+                        <span className="fp-unit-dot" style={{ background: COLOR_SEMAFORO_CLARO[val.color] ?? COLOR_SEMAFORO_CLARO.Gris }} />
                         <span className="fp-unit-name">{key}</span>
                         <span className="fp-unit-val">{val.resultado}%</span>
                     </div>

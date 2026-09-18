@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import './gBarras.css';
 import { numeroDeUmbral } from '../../utils/calculos';
+import { COLOR_SEMAFORO_CLARO } from '../../../shared/constantes/semaforo';
 
 /* ─────────────────────────────────────────
     Tooltip personalizado (2 decimales)
@@ -71,10 +72,7 @@ const GBarras = ({ datos, config }) => {
             resultado: info.resultado ?? 0,
             numerador: info.numerador ?? 0,
             denominador: info.denominador ?? 0,
-            color:
-                info.color === 'Verde'    ? '#28a745' :
-                info.color === 'Rojo'     ? '#dc3545' :
-                info.color === 'Amarillo' ? '#ffc107' : '#adb5bd',
+            color: COLOR_SEMAFORO_CLARO[info.color] ?? COLOR_SEMAFORO_CLARO.Gris,
         }));
     }, [datos]);
 

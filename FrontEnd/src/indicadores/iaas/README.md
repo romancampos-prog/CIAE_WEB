@@ -9,7 +9,7 @@ iaas/
 ├── api/
 │   └── IAAS.js           — getUnidadesIAAS, getIndicadoresIAAS, generarIAAS,
 │                            getSesionIAAS, descargarIAASGuardado, getIAASMesesGuardados,
-│                            getIAASDatosGrafica, completarUnidadTardia, infoBasicaInAass
+│                            completarUnidadTardia, infoBasicaInAass
 ├── componentes/
 │   ├── graficas/
 │   │   └── TickMesUnidad.jsx     — tick personalizado en eje X con etiqueta HGS/Otros
@@ -19,7 +19,7 @@ iaas/
 ├── constantes/
 │   └── colores.js        — INDICADORES = ['IAAS 01'…'IAAS 06'], COLOR_IND, HGS_COLOR
 ├── hooks/
-│   └── useIAASGrafica.js — carga datos históricos, calcula chartData por vista
+│   └── useIAASGrafica.js — carga el reporte unificado del indicador (ficha + reporte), calcula chartData por vista
 │                            (unidad / mes / acumulado), maneja descargas
 ├── paginas/
 │   ├── IAASLanding.jsx        — menú: "Ver datos" / "Nuevo reporte"
@@ -31,7 +31,8 @@ iaas/
 │   └── IAASRoutes.jsx
 └── utils/
     └── calculos.js       — mesDisponible, calcularFaltantes, calcularColorIAAS,
-                             calcularRangos01, buildChartDataUnidad, buildChartDataMes
+                             buildChartDataUnidad, buildChartDataMes
+                             (leyendas de semáforo: shared/utils/rangosSemaforo.js)
 ```
 
 ## Flujo de navegación
@@ -47,13 +48,13 @@ iaas/
 La lista canónica vive en `constantes/colores.js → INDICADORES`. Para agregar un indicador:
 
 1. Añadir su ID en `INDICADORES` y su color en `COLOR_IND`
-2. Registrar su semáforo y metadatos en `BackEnd/indicadores/iaas/mapeo/IAAS.json`
+2. Registrar su semáforo, extracción, textos de Excel (`excel`) y metadatos en `BackEnd/indicadores/mapeo/IAAS.json`
 3. Agregar la función generadora en `BackEnd/indicadores/iaas/services/generar_iaas.py`
 4. Registrar en `_EXCEL_POR_IND` de `BackEnd/indicadores/iaas/controllers/reportes_controller.py`
 
 ## IAAS 01 es especial
 
-IAAS 01 tiene umbrales de semáforo distintos por **tipo de unidad** (HGS / HGZ / HGR / HGO / HGP). El mapa unidad→tipo vive en `BackEnd/indicadores/iaas/config.py → UNIDAD_TIPO_IAAS01` y se alimenta de `mapeo/unidades.json`.
+IAAS 01 tiene umbrales de semáforo distintos por **tipo de unidad** (HGS / HGZ / HGR / HGO / HGP). El mapa unidad→tipo vive en `BackEnd/indicadores/iaas/config.py → UNIDAD_TIPO_IAAS01` y se alimenta de `BackEnd/indicadores/mapeo/unidades/iaas.json`.
 
 En el frontend, `calcularColorIAAS()` en `utils/calculos.js` recibe el mapa `unidadTipoMap` para aplicar el umbral correcto por unidad.
 

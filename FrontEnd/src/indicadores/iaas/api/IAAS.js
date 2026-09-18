@@ -72,20 +72,6 @@ export const generarIAAS = async (anio, mes, numerador, denominador, excel_denom
 };
 
 /**
- * Obtiene los datos históricos para graficar las tasas de todos los indicadores IAAS.
- * @param {string} anio - Año a consultar
- * @returns {Promise<{unidades: string[], meses_con_datos: string[], datos: Object}>}
- */
-export const getIAASDatosGrafica = async (anio) => {
-    try {
-        const { data } = await api.get('/reportes/IAAS/datos-grafica', { params: { anio } });
-        return data.data ?? { unidades: [], meses_con_datos: [], datos: {} };
-    } catch {
-        return { unidades: [], meses_con_datos: [], datos: {} };
-    }
-};
-
-/**
  * Descarga el reporte IAAS guardado en el servidor para el año indicado.
  * @param {string} anio - Año del reporte
  * @param {string|null} indicador - Si se especifica, descarga solo ese indicador; si es null descarga todos

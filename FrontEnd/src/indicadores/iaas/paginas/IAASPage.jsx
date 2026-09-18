@@ -247,12 +247,12 @@ const IAASPage = () => {
                     <tr>
                       <th className="ia-col-denom ia-col-denom--global">
                         <span className="ia-th-ind">IAAS 01</span>
-                        <small>{infoIaas01?.subT3}</small>
+                        <small>{infoIaas01?.columnaDenominador}</small>
                       </th>
                       {indicadores.map((d) => (
                         <th key={d.id} className="ia-col-denom">
                           <span className="ia-th-ind">{d.id}</span>
-                          <small>{d.subT2}</small>
+                          <small>{d.columnaDenominador}</small>
                         </th>
                       ))}
                     </tr>
@@ -440,7 +440,7 @@ const IAASPage = () => {
                     <div className="ia-mcard-denoms">
                       {indicadores.map(d => (
                         <label key={d.id} className="ia-mcard-denom-field">
-                          <span className="ia-mcard-denom-label" title={d.subT2}>{d.id}</span>
+                          <span className="ia-mcard-denom-label" title={d.columnaDenominador}>{d.id}</span>
                           <input
                             type="number"
                             className={`ia-num ${(denominadores[u]?.[d.id] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
