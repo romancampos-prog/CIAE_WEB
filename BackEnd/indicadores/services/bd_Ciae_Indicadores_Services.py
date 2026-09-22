@@ -50,12 +50,34 @@ def IndicadorExiste(indicador: str, ano: str, rutaprevio: bool) -> str:
     return rutaArchivo
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
+def _normalizar_semaforo(bloque_meses: dict) -> dict:
+    """
+    El pipeline de FTP guarda el semaforo de cada unidad como "color" (ver
+    ftp/services/semaforizado.py); IAAS y Extractor ya lo guardan como
+    "desempeno" (shared/semaforizado_service.py). El modelo unificado
+    (UnidadDatos) siempre exige "desempeno" -- se traduce aqui, en la
+    lectura, para no tener que igualar el formato de guardado en cada modulo.
+    """
+    return {
+        mes: {
+            unidad: (
+                {**vals, "desempeno": vals["color"]}
+                if isinstance(vals, dict) and "color" in vals and "desempeno" not in vals
+                else vals
+            )
+            for unidad, vals in unidades.items()
+        }
+        for mes, unidades in bloque_meses.items()
+    }
+
+
 def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
     rutaIndicador = IndicadorExiste(payload.indicador, payload.ano, False)
-    if (not rutaIndicador): return None    
-    
+    if (not rutaIndicador): return None
+
     with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
-        datosJson = json.load(archivoJson) #todo el json leido 
+        datosJson = json.load(archivoJson) #todo el json leido
+        datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
         reporte = ReporteIndicador.model_validate(datosJson)
     
     if (not reporte): return None
@@ -78,7 +100,8 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
         rutaIndicadorPrevio = IndicadorExiste(payload.indicador, payload.ano, payload.previos) #en payload previos si el indicador si contiene reportes semanales ´previos debria estar en true 
         if (not rutaIndicadorPrevio):return reporte #si no existe el reporte previo, retornamos el reporte normal sin previo
         with open(rutaIndicadorPrevio, "r", encoding = "utf-8") as archivoJsonPrevio:
-            datosJsonPrevio = json.load(archivoJsonPrevio) #todo el json leido 
+            datosJsonPrevio = json.load(archivoJsonPrevio) #todo el json leido
+            datosJsonPrevio["MES"] = _normalizar_semaforo(datosJsonPrevio.get("MES", {}))
             reportePrevio = ReportePrevio.model_validate(datosJsonPrevio)
             
         ultimoMesReporte = MESES_ESTANDAR.index(list(reporte.MESES.keys())[-1]) + 1

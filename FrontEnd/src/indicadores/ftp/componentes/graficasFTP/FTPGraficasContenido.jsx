@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useFTPGrafica } from '../../hooks/useFTPGrafica';
 import GraficaBarras  from '../../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../../shared/componentes/graficas/PanelUnidades';
+import PanelSelector  from '../../../shared/componentes/graficas/PanelSelector';
 import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
 import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
 import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 import { etiquetaMesLarga, etiquetaMesCorta } from '../../utils/calculos';
+import { useEsMovil } from '../../../shared/utils/useEsMovil';
 
 const VISTAS_FTP = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
@@ -58,8 +60,14 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
     ? chartDataMes.filter(d => d.color === colorFiltro)
     : chartDataMes;
 
+  // En mobile no hay páginas -- se ve todo el listado de una vez, deslizable
+  // horizontal (ver el min-width por barra en GraficaBarras); en desktop
+  // sigue paginado de POR_PAGINA en POR_PAGINA como siempre.
+  const esMovil = useEsMovil();
   const totalPaginas = Math.ceil(chartDataMesFiltrado.length / POR_PAGINA);
-  const dataPaginada = chartDataMesFiltrado.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
+  const dataPaginada = esMovil
+    ? chartDataMesFiltrado
+    : chartDataMesFiltrado.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
 
   return (
     <main className="ig-main">
@@ -143,21 +151,28 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
           <div className="ig-body">
             {/* Panel izquierdo */}
             {vistaGrafica === 'mes' ? (
-              <div className="ig-unit-panel ig-unit-panel--mes">
-                <p className="ig-unit-list-title">Mes</p>
-                <div className="ig-unit-list">
-                  {mesesDisponibles.map(m => (
-                    <button
-                      key={m}
-                      className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
-                      style={mesSel === m ? { borderLeftColor: indColor } : {}}
-                      onClick={() => setMesSel(m)}
-                    >
-                      <span className="ig-unit-name">{conAnioChico(etiquetaMesLarga(parseInt(m), indInfo, anio))}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <PanelSelector
+                triggerLabel="Mes"
+                triggerValue={mesSel ? etiquetaMesLarga(parseInt(mesSel), indInfo, anio) : ''}
+                panelTitle="Mes"
+                indColor={indColor}
+                extraClass="ig-unit-panel--mes"
+              >
+                {(cerrar) => (
+                  <div className="ig-unit-list">
+                    {mesesDisponibles.map(m => (
+                      <button
+                        key={m}
+                        className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
+                        style={mesSel === m ? { borderLeftColor: indColor } : {}}
+                        onClick={() => { setMesSel(m); cerrar(); }}
+                      >
+                        <span className="ig-unit-name">{conAnioChico(etiquetaMesLarga(parseInt(m), indInfo, anio))}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </PanelSelector>
             ) : (
               <PanelUnidades
                 unidades={unidadesParaPanel}
@@ -228,8 +243,8 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               )}
 
               {vistaGrafica === 'mes' && (
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="ig-mes-chart-row">
+                  <div className="ig-mes-chart-col">
                     <GraficaBarras
                       chartKey={`m-${indSel}-${mesSel}-p${pagina}`}
                       data={dataPaginada}
@@ -241,7 +256,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       bottomMargin={64}
                       labelSize="9px"
                     />
-                    {totalPaginas > 1 && (
+                    {!esMovil && totalPaginas > 1 && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
                         <button
                           className="ig-btn-dl ig-btn-dl--secondary"
@@ -265,7 +280,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
+                  <div className="ig-mes-total-col">
                     <TotalTile total={totalMes} indColor={indColor} />
                   </div>
                 </div>

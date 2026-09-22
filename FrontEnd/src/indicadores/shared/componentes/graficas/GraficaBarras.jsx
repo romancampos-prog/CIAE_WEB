@@ -84,63 +84,75 @@ const GraficaBarras = ({
   const ticksY = ticksEscala(maxTasa);
   const techoY = ticksY[ticksY.length - 1];
 
+  // Ancho mínimo por barra -- más grande en "unidad" (nombres largos,
+  // rotados) que en "mes" (solo el mes abreviado). Si el contenedor real ya
+  // es más ancho que data.length * este mínimo, no hace nada (la gráfica
+  // ocupa el 100% de siempre); si es más angosto -- celular con muchas
+  // barras -- la gráfica se vuelve scrolleable en vez de apachurrar las
+  // barras y las etiquetas hasta volverlas ilegibles.
+  const anchoMinimoPorBarra = xKey === 'mes' ? 42 : 52;
+
   return (
-    <ResponsiveContainer width="100%" height={440}>
-      <ComposedChart
-        key={chartKey}
-        data={data}
-        margin={{ top: 28, right: 16, left: -10, bottom: bottomMargin }}
-      >
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-        <XAxis dataKey={xKey} axisLine={false} tickLine={false} {...xTickProps} />
-        <YAxis
-          tick={{ fontSize: 10, fill: '#94a3b8' }}
-          axisLine={false} tickLine={false} width={40}
-          domain={[0, techoY]}
-          ticks={ticksY}
-        />
-        <Tooltip content={<ChartTooltip indSel={indSel} />} cursor={{ fill: 'rgba(0,0,0,0.025)' }} />
+    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div style={{ minWidth: data.length * anchoMinimoPorBarra }}>
+        <ResponsiveContainer width="100%" height={440}>
+          <ComposedChart
+            key={chartKey}
+            data={data}
+            margin={{ top: 28, right: 16, left: -10, bottom: bottomMargin }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+            <XAxis dataKey={xKey} axisLine={false} tickLine={false} {...xTickProps} />
+            <YAxis
+              tick={{ fontSize: 10, fill: '#94a3b8' }}
+              axisLine={false} tickLine={false} width={40}
+              domain={[0, techoY]}
+              ticks={ticksY}
+            />
+            <Tooltip content={<ChartTooltip indSel={indSel} />} cursor={{ fill: 'rgba(0,0,0,0.025)' }} />
 
-        <Bar
-          dataKey="tasa"
-          maxBarSize={maxBarSize}
-          radius={barRadius}
-          isAnimationActive
-          animationBegin={0}
-          animationDuration={700}
-          animationEasing="ease-out"
-          onMouseEnter={onBarHover ? (d) => onBarHover(d.mesNum) : undefined}
-          onMouseLeave={onBarLeave ?? undefined}
-        >
-          {data.map((d, i) => (
-            <Cell key={i} fill={COLOR_SEMAFORO[d.color] ?? '#aaa'} fillOpacity={0.9} />
-          ))}
-          <LabelList
-            dataKey="tasa"
-            position="top"
-            formatter={v => v > 0 ? Number(v).toFixed(2) : ''}
-            style={{ fontSize: labelSize, fontWeight: 700, fill: '#475569' }}
-          />
-        </Bar>
+            <Bar
+              dataKey="tasa"
+              maxBarSize={maxBarSize}
+              radius={barRadius}
+              isAnimationActive
+              animationBegin={0}
+              animationDuration={700}
+              animationEasing="ease-out"
+              onMouseEnter={onBarHover ? (d) => onBarHover(d.mesNum) : undefined}
+              onMouseLeave={onBarLeave ?? undefined}
+            >
+              {data.map((d, i) => (
+                <Cell key={i} fill={COLOR_SEMAFORO[d.color] ?? '#aaa'} fillOpacity={0.9} />
+              ))}
+              <LabelList
+                dataKey="tasa"
+                position="top"
+                formatter={v => v > 0 ? Number(v).toFixed(2) : ''}
+                style={{ fontSize: labelSize, fontWeight: 700, fill: '#475569' }}
+              />
+            </Bar>
 
-        {conLinea && (
-          <Line
-            dataKey="tasa"
-            type="monotone"
-            stroke="#94a3b8"
-            strokeWidth={2}
-            strokeDasharray="5 3"
-            dot={{ r: 3, fill: '#94a3b8', strokeWidth: 0 }}
-            activeDot={{ r: 5 }}
-            connectNulls
-            isAnimationActive
-            animationBegin={300}
-            animationDuration={900}
-            animationEasing="ease-out"
-          />
-        )}
-      </ComposedChart>
-    </ResponsiveContainer>
+            {conLinea && (
+              <Line
+                dataKey="tasa"
+                type="monotone"
+                stroke="#94a3b8"
+                strokeWidth={2}
+                strokeDasharray="5 3"
+                dot={{ r: 3, fill: '#94a3b8', strokeWidth: 0 }}
+                activeDot={{ r: 5 }}
+                connectNulls
+                isAnimationActive
+                animationBegin={300}
+                animationDuration={900}
+                animationEasing="ease-out"
+              />
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 };
 

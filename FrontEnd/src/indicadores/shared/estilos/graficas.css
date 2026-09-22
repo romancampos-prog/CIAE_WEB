@@ -312,6 +312,13 @@
 }
 .ig-badge--neutral { background: #f1f5f9; color: #64748b; font-size: 0.72rem; }
 
+/* ── Fila de la vista "Por mes": gráfica + tarjeta TOTAL a un lado ──
+   En mobile se apilan (ver media query) -- la tarjeta tiene ancho fijo
+   (168px) y, en fila, dejaba a la gráfica sin espacio para respirar. */
+.ig-mes-chart-row { display: flex; gap: 16px; align-items: stretch; }
+.ig-mes-chart-col { flex: 1; min-width: 0; }
+.ig-mes-total-col { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+
 /* ── Tarjeta KPI del TOTAL (separada de la escala de las unidades) ── */
 .ig-total-tile {
   flex-shrink: 0; width: 168px; height: 100%;
@@ -618,7 +625,7 @@
 
 /* ── Drawer lateral de indicadores ── */
 .ig-drawer-backdrop {
-  position: fixed; inset: 0; top: 64px; z-index: 199;
+  position: fixed; inset: 0; z-index: 199;
   background: rgba(0,0,0,0.22);
   backdrop-filter: blur(4px);
   animation: ig-fade-in 0.18s ease;
@@ -626,7 +633,11 @@
 @keyframes ig-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 .ig-drawer {
-  position: fixed; right: 0; top: 64px; bottom: 0; z-index: 200;
+  /* top:0, no el alto del TopBar -- el TopBar no es fixed/sticky (se
+     desplaza con la página), así que un offset fijo solo cuadraba con
+     scroll en 0; en cuanto se abre el drawer con la página desplazada,
+     ese hueco dejaba ver lo que hubiera quedado ahí en vez del header. */
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 200;
   width: 300px;
   background: white;
   border-left: 1px solid rgba(226,232,240,0.9);
@@ -887,9 +898,9 @@
     animation: ig-fade-in 0.18s ease;
   }
 
-  /* Panel selector de unidad = hoja inferior, oculto hasta que se abre.
-     Solo afecta a .ig-unit-panel--selector — la variante "Por mes"
-     (.ig-unit-panel--mes) no lleva chip/hoja y se queda como lista simple. */
+  /* Panel selector = chip + hoja inferior, oculto hasta que se abre.
+     Afecta a cualquier .ig-unit-panel--selector -- unidades y meses (estos
+     últimos llevan además .ig-unit-panel--mes, solo para el tamaño de fuente). */
   .ig-unit-panel--selector {
     display: none;
   }
@@ -919,10 +930,67 @@
     color: #94a3b8; cursor: pointer;
   }
 
-  .ig-unit-panel--open .ig-unit-search-wrap { padding: 0 16px; margin: 0 0 8px; }
+  /* margin, no padding: el ícono/botón de limpiar están posicionados con
+     "absolute" respecto a este contenedor y no respetan su padding (se
+     miden desde el borde real) -- con margin, todo el contenedor (icono
+     incluido) se recorre junto, así se queda alineado con la barra. */
+  .ig-unit-panel--open .ig-unit-search-wrap { margin: 0 16px 8px; }
   .ig-unit-panel--open .ig-unit-list {
     padding: 0 16px 16px;
     max-height: none; flex: 1; overflow-y: auto;
     margin: 0;
+    gap: 9px;
   }
+
+  /* En la hoja inferior el dedo, no el mouse, es el que toca -- cada fila
+     necesita más aire, un alto mínimo cómodo para no picar la vecina, y un
+     divisor que de verdad se note (a diferencia del panel de escritorio,
+     donde el mouse no tiene ese problema de precisión). */
+  .ig-unit-panel--open .ig-unit-item {
+    padding: 12px 10px;
+    min-height: 44px;
+    border-bottom: 1px solid rgba(15,23,42,0.12);
+  }
+  .ig-unit-panel--open .ig-unit-item:last-child { border-bottom: none; }
+  .ig-unit-panel--open .ig-unit-total-sep { margin: 6px 4px 9px; }
+
+  /* La tarjeta TOTAL (168px fijos) se apila debajo de la gráfica en vez de
+     ir a un lado -- en fila no dejaba casi nada de ancho para la gráfica. */
+  .ig-mes-chart-row { flex-direction: column; }
+  .ig-mes-total-col { align-items: center; }
+
+  /* La tarjeta estaba pensada para una columna angosta y ALTA (168px) al
+     lado de la gráfica -- apilada, se reacomoda a lo ancho en vez de a lo
+     alto: arriba la etiqueta, abajo el valor+estado a la izquierda y
+     Num/Den a la derecha (separados por una línea vertical, no horizontal).
+     Reusa las mismas clases del componente (TotalTile.jsx no cambia), solo
+     se reordenan con grid -- por eso los "grid-area" en vez de reescribir
+     el marcado. align-self (no align-items del padre) para el ancho. */
+  .ig-mes-total-col .ig-total-tile {
+    align-self: stretch;
+    width: 100%; height: auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "label label" "mid meta";
+    align-items: center; justify-items: start;
+    padding: 8px 14px; gap: 2px 14px;
+    text-align: left;
+  }
+  .ig-mes-total-col .ig-total-tile-label { grid-area: label; font-size: 0.6rem; }
+  .ig-mes-total-col .ig-total-tile-mid {
+    grid-area: mid;
+    flex-direction: row; justify-content: flex-start; gap: 8px;
+  }
+  .ig-mes-total-col .ig-total-tile-value { font-size: 1.15rem; }
+  .ig-mes-total-col .ig-total-tile-status { padding: 2px 8px; font-size: 0.64rem; }
+  .ig-mes-total-col .ig-total-tile-dot { width: 6px; height: 6px; }
+  .ig-mes-total-col .ig-total-tile-meta {
+    grid-area: meta;
+    width: auto; padding: 0 0 0 12px; margin: 0; gap: 1px;
+    border-top: none;
+    border-left: 1px solid color-mix(in srgb, var(--status, #94a3b8) 22%, transparent);
+  }
+  .ig-mes-total-col .ig-total-tile-meta-row { gap: 6px; }
+  .ig-mes-total-col .ig-total-tile-meta-row span { font-size: 0.56rem; }
+  .ig-mes-total-col .ig-total-tile-meta-row strong { font-size: 0.68rem; }
 }

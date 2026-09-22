@@ -3,11 +3,13 @@ import { useIAASGrafica } from '../hooks/useIAASGrafica';
 import TickMesUnidad  from './graficas/TickMesUnidad';
 import GraficaBarras  from '../../shared/componentes/graficas/GraficaBarras';
 import PanelUnidades  from '../../shared/componentes/graficas/PanelUnidades';
+import PanelSelector  from '../../shared/componentes/graficas/PanelSelector';
 import VistaToggle    from '../../shared/componentes/graficas/VistaToggle';
 import TotalTile        from '../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../shared/componentes/graficas/CumplimientoTile';
 import MenuDescarga     from '../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../shared/constantes/meses';
+import { useEsMovil } from '../../shared/utils/useEsMovil';
 
 const VISTAS_IAAS = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
@@ -61,9 +63,15 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
     ? chartDataAcumulado.filter(d => d.color === colorFiltro)
     : chartDataAcumulado;
 
+  // En mobile no hay páginas -- se ve todo el listado de una vez, deslizable
+  // horizontal (ver el min-width por barra en GraficaBarras); en desktop
+  // sigue paginado de POR_PAGINA en POR_PAGINA como siempre.
+  const esMovil          = useEsMovil();
   const datosMesActivo   = acumulado ? chartDataAcumuladoFiltrado : chartDataMesFiltrado;
   const totalPaginas     = Math.ceil(datosMesActivo.length / POR_PAGINA) || 1;
-  const dataMesPaginada  = datosMesActivo.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
+  const dataMesPaginada  = esMovil
+    ? datosMesActivo
+    : datosMesActivo.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
 
   return (
     <main className="ig-main">
@@ -151,21 +159,28 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
           <div className="ig-body">
             {/* Panel izquierdo: meses en "Por mes", unidades en el resto */}
             {vistaGrafica === 'mes' ? (
-              <div className="ig-unit-panel ig-unit-panel--mes">
-                <p className="ig-unit-list-title">Mes</p>
-                <div className="ig-unit-list">
-                  {mesesConDatos.map(m => (
-                    <button
-                      key={m}
-                      className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
-                      style={mesSel === m ? { borderLeftColor: indColor } : {}}
-                      onClick={() => setMesSel(m)}
-                    >
-                      <span className="ig-unit-name">{MESES_LARGOS[m]}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <PanelSelector
+                triggerLabel="Mes"
+                triggerValue={mesSel ? MESES_LARGOS[mesSel] : ''}
+                panelTitle="Mes"
+                indColor={indColor}
+                extraClass="ig-unit-panel--mes"
+              >
+                {(cerrar) => (
+                  <div className="ig-unit-list">
+                    {mesesConDatos.map(m => (
+                      <button
+                        key={m}
+                        className={`ig-unit-item${mesSel === m ? ' ig-unit-item--active' : ''}`}
+                        style={mesSel === m ? { borderLeftColor: indColor } : {}}
+                        onClick={() => { setMesSel(m); cerrar(); }}
+                      >
+                        <span className="ig-unit-name">{MESES_LARGOS[m]}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </PanelSelector>
             ) : (
               <PanelUnidades
                 unidades={unidadesParaPanel}
@@ -271,8 +286,8 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
               )}
 
               {vistaGrafica === 'mes' && (
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="ig-mes-chart-row">
+                  <div className="ig-mes-chart-col">
                     <GraficaBarras
                       chartKey={`m-${indSel}-${mesSel}-${acumulado ? 'a' : 'n'}-p${pagina}`}
                       data={dataMesPaginada}
@@ -284,7 +299,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                       labelSize="9px"
                       tickEl={<TickMesUnidad hgsSet={hgsSet} indSel={indSel} />}
                     />
-                    {totalPaginas > 1 && (
+                    {!esMovil && totalPaginas > 1 && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '8px' }}>
                         <button
                           className="ig-btn-dl ig-btn-dl--secondary"
@@ -308,7 +323,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'stretch' }}>
+                  <div className="ig-mes-total-col">
                     <TotalTile total={acumulado ? totalAcumulado : totalMes} indColor={indColor} />
                   </div>
                 </div>
