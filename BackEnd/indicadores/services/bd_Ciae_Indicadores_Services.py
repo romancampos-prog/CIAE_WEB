@@ -71,25 +71,41 @@ def _normalizar_semaforo(bloque_meses: dict) -> dict:
     }
 
 
-def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
-    rutaIndicador = IndicadorExiste(payload.indicador, payload.ano, False)
+def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, dict[str, dict[str, UnidadDatos]]] | None:
+    """
+    Lee y valida el JSON de un indicador/año: regresa (reporte, cortes) o None si no existe.
+    cortes es CORTES.MESES ya tipado -- solo Extractor lo trae (ver
+    extractor_service.intentar_generar_corte); en los demas queda {}.
+    Usado en: IndicadorConsultarReporte (graficas) y services/excel_Services.py (Excel).
+    """
+    rutaIndicador = IndicadorExiste(indicador, ano, False)
     if (not rutaIndicador): return None
 
     with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
         datosJson = json.load(archivoJson) #todo el json leido
         datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
-        # Extractor guarda el corte ya cerrado aparte, en CORTES.MESES (ver
-        # extractor_service.intentar_generar_corte) -- MESES ahi solo trae el
-        # numerador crudo de cada mes, nunca el acumulado. Se guarda aparte
-        # porque model_validate no lo valida (no es parte de ReporteIndicador).
-        cortesMes = _normalizar_semaforo(datosJson.get("CORTES", {}).get("MESES", {}))
+        # MESES en Extractor solo trae el numerador crudo de cada mes; el corte ya
+        # cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
+        cortesCrudos = _normalizar_semaforo(datosJson.get("CORTES", {}).get("MESES", {}))
         reporte = ReporteIndicador.model_validate(datosJson)
-    
+
     if (not reporte): return None
-    if ((not reporte.INDICADOR == payload.indicador) and (not reporte.ANIO == payload.ano)): 
+    if ((not reporte.INDICADOR == indicador) and (not reporte.ANIO == ano)):
         logging.error(f"El json y reporte existen, pero no coincide con el indicador o año solicitado")
         return None
-        
+
+    cortes = {
+        mes: {unidad: UnidadDatos.model_validate(datos) for unidad, datos in unidades.items()}
+        for mes, unidades in cortesCrudos.items()
+    }
+    return reporte, cortes
+
+
+def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
+    cargado = CargarReporteIndicador(payload.indicador, payload.ano)
+    if (not cargado): return None
+    reporte, cortesMes = cargado
+
     # IAAS: el dato guardado a veces trae el alias HGSZ de una unidad HGS -- se unifica al
     # nombre del catalogo para que la unidad no aparezca duplicada ni "sin datos".
     modulo = (payload.modulo or "").lower()  # la ficha trae "IAAS"/"Extractor", el front a veces manda "iaas"
@@ -138,12 +154,7 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
             reporte.MESES = {}
             return reporte
         ultimoMesCorte = max(cortesMes, key=lambda m: MESES_ESTANDAR.index(m))
-        reporte.MESES = {
-            ultimoMesCorte: {
-                unidad: UnidadDatos.model_validate(datos)
-                for unidad, datos in cortesMes[ultimoMesCorte].items()
-            }
-        }
+        reporte.MESES = {ultimoMesCorte: cortesMes[ultimoMesCorte]}
         return reporte
 
     return reporte

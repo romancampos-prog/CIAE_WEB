@@ -3,6 +3,7 @@ import { useRol } from '../../../auth/hooks/useRol';
 import TopBar from '../../../shared/componentes/TopBar';
 import { getUnidadesIAAS, getIndicadoresIAAS, generarIAAS, getSesionIAAS, getIAASMesesGuardados } from '../api/IAAS';
 import { descargarB64 } from '../../shared/utils/download';
+import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { mesDisponible, calcularFaltantes } from '../utils/calculos';
 import { UploadIcon, CheckIcon, XIcon } from '../../shared/componentes/Icons';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
@@ -116,6 +117,14 @@ const IAASPage = () => {
   const rowOk         = (u) => !!archivosUnidad[u] && indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
   const completos     = unidades.filter(rowOk).length;
 
+  /** Excel del año con lo que ya quedo guardado (sale de la BD, no de la respuesta de generar) */
+  const descargarExcelGuardado = async () => {
+    try {
+      const excel = await descargarExcelIndicadores(indicadores.map(d => d.id), anio);
+      descargarB64(excel.archivo_b64, excel.nombre_archivo);
+    } catch { /* la generacion ya quedo guardada; solo fallo la descarga */ }
+  };
+
   /**
    * Valida los datos y dispara la generación de reportes.
    * Si hay faltantes y el usuario no ha confirmado, muestra advertencias en lugar de proceder.
@@ -127,10 +136,8 @@ const IAASPage = () => {
     setAdvertencias(null);
     setGenerando(true);
     generarIAAS(anio, mes, archivosUnidad, denominadores, numeradores)
-      .then(res => {
-        if (res.success && res.data?.archivo_b64) {
-          descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
-        }
+      .then(async res => {
+        if (res.success) await descargarExcelGuardado();
         setGenerando(false);
         limpiarCampos();
         cargarSesion();
@@ -568,7 +575,7 @@ const IAASPage = () => {
         numeradoresGuardados={sesion?.numeradores_guardados ?? {}}
         indicadoresInfo={indicadores}
         onSuccess={(data) => {
-          if (data?.archivo_b64) descargarB64(data.archivo_b64, data.nombre_archivo);
+          descargarExcelGuardado();
           cargarSesion();
         }}
       />

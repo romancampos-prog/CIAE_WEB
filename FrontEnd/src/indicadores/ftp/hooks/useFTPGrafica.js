@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { obtenerTodosLosIndicadores, obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
-import { getReporteGuardado, generarCategoriaGuardada } from '../../reportes_grafica/api/reportes';
+import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
 import { CAT_COLOR } from '../constantes/colores';
@@ -94,8 +94,8 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** Tendencia mensual de la unidad seleccionada */
   const chartData = useMemo(
-    () => buildFTPChartDataUnidad(reporte, unidadSel, indInfo, anio),
-    [reporte, unidadSel, indInfo, anio]
+    () => buildFTPChartDataUnidad(reporte, unidadSel),
+    [reporte, unidadSel]
   );
 
   const maxTasa = useMemo(
@@ -191,12 +191,12 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
    * un mes desde gráficas.
    * @param {string} mes - Mes en formato "MM"
    */
-  const descargarIndicador = async (mes) => {
-    if (!indSel || !mes || descargando) return;
+  const descargarIndicador = async () => {
+    if (!indSel || descargando) return;
     setDescargando(true);
     try {
-      const res = await getReporteGuardado(indSel, { ano: anio, mes });
-      if (res.success) descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
+      const res = await descargarExcelIndicadores([indSel], anio);
+      descargarB64(res.archivo_b64, res.nombre_archivo);
     } catch { /* silencioso */ }
     finally { setDescargando(false); }
   };
@@ -206,12 +206,13 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
    * Solo lectura, mismo criterio que descargarIndicador.
    * @param {string} mes - Mes en formato "MM"
    */
-  const descargarCategoria = async (mes) => {
-    if (!categoria || !mes || descargando) return;
+  const descargarCategoria = async () => {
+    const indicadoresCategoria = listaIndicadores.find(cat => cat.categoriaIndicador === categoria)?.indicadores ?? [];
+    if (!indicadoresCategoria.length || descargando) return;
     setDescargando(true);
     try {
-      const res = await generarCategoriaGuardada(categoria, { ano: anio, mes });
-      if (res.success) descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
+      const res = await descargarExcelIndicadores(indicadoresCategoria, anio);
+      descargarB64(res.archivo_b64, res.nombre_archivo);
     } catch { /* silencioso */ }
     finally { setDescargando(false); }
   };

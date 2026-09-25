@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
-import { getEstadoExtractor, subirArchivoMensualExtractor, descargarExcelFamiliaExtractor } from '../api/extractor';
+import { getEstadoExtractor, subirArchivoMensualExtractor } from '../api/extractor';
+import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { descargarB64 } from '../../shared/utils/download';
 import FichaTecnicaBoton from '../../shared/componentes/FichaTecnica/FichaTecnicaBoton';
 import iconoEH from '../../../assets/icono_eh.png';
@@ -146,8 +147,10 @@ const ExtractorPage = () => {
     setDescargando(true);
     setError('');
     try {
-      const res = await descargarExcelFamiliaExtractor(corteInfo.anioCorte, corteInfo.mesCorte);
+      const res = await descargarExcelIndicadores(INDICADORES_EXTRACTOR.map(i => i.clave), corteInfo.anioCorte, corteInfo.mesCorte);
       descargarB64(res.archivo_b64, res.nombre_archivo);
+      const faltantes = Object.values(res.errores ?? {});
+      if (faltantes.length) setError(faltantes.join(' '));
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al descargar el reporte.');
     } finally {

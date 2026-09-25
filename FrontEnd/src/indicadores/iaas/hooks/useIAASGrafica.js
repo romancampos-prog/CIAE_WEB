@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { getUnidadesIAAS, descargarIAASGuardado, infoBasicaInAass } from '../api/IAAS';
+import { getUnidadesIAAS, infoBasicaInAass } from '../api/IAAS';
+import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_CORTOS } from '../../shared/constantes/meses';
@@ -15,6 +16,8 @@ import {
 import { contarSemaforo } from '../../shared/utils/contarSemaforo';
 import { techoEscala } from '../../shared/utils/escala';
 import { esSemaforoAgrupado, rangosDeMetas, agruparRangos } from '../../shared/utils/rangosSemaforo';
+
+const IDS_IAAS = ['IAAS 01', 'IAAS 02', 'IAAS 03', 'IAAS 04', 'IAAS 05', 'IAAS 06'];
 
 // Clave real bajo la que el backend manda el total OOAD ya calculado.
 const TOTAL_OOAD_KEY = 'TOTAL_OOAD';
@@ -90,7 +93,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
    */
   const _descargar = (indicador = null) => {
     setDescargando(true);
-    descargarIAASGuardado(anio, indicador)
+    descargarExcelIndicadores(indicador ? [indicador] : IDS_IAAS, anio)
       .then(res => descargarB64(res.archivo_b64, res.nombre_archivo))
       .catch(() => {})
       .finally(() => setDescargando(false));

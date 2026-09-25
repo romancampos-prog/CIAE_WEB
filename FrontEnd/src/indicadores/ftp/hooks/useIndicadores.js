@@ -2,6 +2,7 @@
 import { obtenerTodosLosIndicadores, obtenerFichaIndicador } from '../../shared/api/indicadoresInfo';
 import { getReporte, getMesesGenerados, generarCategoria, regenerarReporteFinal, regenerarCategoria } from '../../reportes_grafica/api/reportes';
 import { descargarB64 } from '../../shared/utils/download';
+import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
 import { COLORS } from '../constantes/colores';
 import { calcularMesesDisponibles, calcularSemDataFTP } from '../utils/calculos';
@@ -162,7 +163,8 @@ export function useIndicadores(user) {
     try {
       const res = await getReporte(indicadorSel, datos);
       if (res.success) {
-        descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
+        const excel = await descargarExcelIndicadores([indicadorSel], datos.ano, datos.mes);
+        descargarB64(excel.archivo_b64, excel.nombre_archivo);
         const restr = res.data.restricciones;
         if (restr && Object.keys(restr).length > 0) {
           setRestriccionesData(restr);
@@ -188,7 +190,10 @@ export function useIndicadores(user) {
         ? await regenerarCategoria(categoria, datos, password)
         : await regenerarReporteFinal(indicadorSel, datos, password);
       if (res.success) {
-        descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
+        const excel = await descargarExcelIndicadores(
+          regenerarModo === 'batch' ? indicadores : [indicadorSel], datos.ano, datos.mes,
+        );
+        descargarB64(excel.archivo_b64, excel.nombre_archivo);
         setMostrarConfirmarRegenerar(false);
         if (regenerarModo === 'batch') {
           setResultadoBatch({ completados: res.data.completados, errores: res.data.errores });
@@ -228,7 +233,8 @@ export function useIndicadores(user) {
     try {
       const res = await generarCategoria(categoria, datos);
       if (res.success) {
-        descargarB64(res.data.archivo_b64, res.data.nombre_archivo);
+        const excel = await descargarExcelIndicadores(indicadores, datos.ano, datos.mes);
+        descargarB64(excel.archivo_b64, excel.nombre_archivo);
         setResultadoBatch({ completados: res.data.completados, errores: res.data.errores });
         const restr = res.data.restricciones;
         if (restr && Object.keys(restr).length > 0) {

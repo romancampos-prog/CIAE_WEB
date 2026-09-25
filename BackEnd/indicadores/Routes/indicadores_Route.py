@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from ..Controller import ftp_Controller
 from ..Controller import iaas_Controller
+from ..Controller import excel_Controller
 from ..Controller import informacion_Controller
 from ..Controller import reportes_Controller
 
@@ -19,3 +20,6 @@ routesIndicadores.include_router(reportes_Controller.reportesApi, prefix="/repor
 
 #EndPoints INFORMACION (JSON MAPEOS - INFORMACION DEL INDICADOR)
 routesIndicadores.include_router(informacion_Controller.informacionApi, prefix="/informacion")
+
+#EndPoints EXCEL (EXCEL GENERICO DE UNO O VARIOS INDICADORES, SALE DE LA BD_CIAE)
+routesIndicadores.include_router(excel_Controller.excelApi, prefix="/excel")
