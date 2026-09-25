@@ -263,6 +263,17 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                             value={denoms[ind] ?? ''}
                             disabled={sinDato.has(ind)}
                             onChange={e => setDenoms(p => ({ ...p, [ind]: e.target.value }))}
+                            onKeyDown={e => {
+                              // Arriba/abajo entre denominadores -- una sola columna, así que se
+                              // busca la posición real entre los visibles (IAAS 01 no tiene este
+                              // campo, puede quedar en medio de los seleccionados).
+                              if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+                              e.preventDefault();
+                              const inputs = document.querySelectorAll('.mut-den-input');
+                              const pos    = Array.prototype.indexOf.call(inputs, e.target);
+                              const next   = e.key === 'ArrowDown' ? pos + 1 : pos - 1;
+                              inputs[next]?.focus();
+                            }}
                           />
                           <label className="mut-sindato" title="Marca si esta unidad no tiene dato para este indicador (queda en Gris)">
                             <input type="checkbox" checked={sinDato.has(ind)} onChange={() => toggleSinDato(ind)} />

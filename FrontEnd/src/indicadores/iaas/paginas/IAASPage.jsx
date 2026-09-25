@@ -335,20 +335,36 @@ const IAASPage = () => {
                           {indicadores.map((d, j) => (
                             <td key={d.id} className="ia-td-denom">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 className={`ia-num ${(denominadores[u]?.[d.id] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
                                 placeholder="—"
-                                min="0"
                                 value={denominadores[u]?.[d.id] ?? ''}
-                                onChange={e => setDenom(u, d.id, e.target.value)}
+                                onChange={e => {
+                                  // type="number" del navegador no bloqueaba letras en todos los
+                                  // casos -- se valida aquí: solo dígitos y un punto decimal.
+                                  const v = e.target.value;
+                                  if (v === '' || /^\d*\.?\d*$/.test(v)) setDenom(u, d.id, v);
+                                }}
                                 onKeyDown={e => {
-                                  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                                    e.preventDefault();
-                                    const inputs = document.querySelectorAll('.ia-num');
-                                    const idx  = i * indicadores.length + j;
-                                    const next = e.key === 'ArrowDown' ? idx + indicadores.length : idx - indicadores.length;
-                                    inputs[next]?.focus();
-                                  }
+                                  // Flechas para moverse por la cuadrícula sin soltar el teclado --
+                                  // arriba/abajo saltan de columna en columna (mismo indicador, unidad
+                                  // siguiente/anterior); izquierda/derecha se quedan en la misma unidad
+                                  // (no brincan a la fila de al lado en los extremos de la fila).
+                                  const esVertical   = e.key === 'ArrowDown' || e.key === 'ArrowUp';
+                                  const esHorizontal = e.key === 'ArrowLeft' || e.key === 'ArrowRight';
+                                  if (!esVertical && !esHorizontal) return;
+                                  if (esHorizontal && e.key === 'ArrowRight' && j >= indicadores.length - 1) return;
+                                  if (esHorizontal && e.key === 'ArrowLeft'  && j <= 0) return;
+
+                                  e.preventDefault();
+                                  const inputs = document.querySelectorAll('.ia-num');
+                                  const idx  = i * indicadores.length + j;
+                                  const next = e.key === 'ArrowDown'  ? idx + indicadores.length
+                                             : e.key === 'ArrowUp'    ? idx - indicadores.length
+                                             : e.key === 'ArrowRight' ? idx + 1
+                                             :                          idx - 1;
+                                  inputs[next]?.focus();
                                 }}
                               />
                             </td>
