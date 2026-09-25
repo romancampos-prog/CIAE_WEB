@@ -15,7 +15,7 @@ from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
 from extractor.config import INDICADORES_EXTRACTOR, MESES_CORTE_SEMESTRAL
 from extractor.services.extractor_service import (
-    procesar_archivo_mensual, estado_ventanas, generar_excel_corte, generar_excel_familia,
+    procesar_archivo_mensual, estado_ventanas, generar_excel_familia,
 )
 
 router = APIRouter()
@@ -45,29 +45,6 @@ async def estado_meses_subidos(
         raise HTTPException(status_code=422, detail=str(exc))
 
     return ApiResponse(success=True, message="Estado de meses subidos", data=estado)
-
-
-@router.get("/descargar")
-async def descargar_excel_corte(
-    indicador: str,
-    anio: int,
-    mesCorte: str,
-    payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")),
-):
-    """Descarga el Excel de un corte ya generado (Junio o Diciembre), mismo estilo que FTP."""
-    if mesCorte not in MESES_CORTE_SEMESTRAL:
-        raise HTTPException(status_code=400, detail=f"mesCorte invalido: '{mesCorte}' -- debe ser Junio o Diciembre")
-
-    resultado = generar_excel_corte(indicador, anio, mesCorte)
-    if resultado["status"] != "success":
-        raise HTTPException(status_code=404, detail=resultado["mensaje"])
-
-    excel_b64 = base64.b64encode(resultado["stream"].getvalue()).decode("utf-8")
-    return ApiResponse(
-        success=True,
-        message=resultado["mensaje"],
-        data={"archivo_b64": excel_b64, "nombre_archivo": resultado["nombre_archivo"]},
-    )
 
 
 @router.get("/descargar-familia")
@@ -131,14 +108,22 @@ async def subir_archivo_mensual(
         raise HTTPException(status_code=422, detail=str(exc))
 
     algun_corte = any(r["corte_generado"] for r in resultados.values())
+    cortes_recalc = sorted({c for r in resultados.values() for c in r.get("cortes_recalculados", [])})
     registrar(
         "SUBIDA_ARCHIVO",
         usuario=payload.get("sub"),
-        detalle=f"archivo=extractor({mes} {anio}, {archivo.filename}) bytes={len(contenido)} indicadores={list(resultados.keys())}",
+        detalle=f"archivo=extractor({mes} {anio}, {archivo.filename}) bytes={len(contenido)} indicadores={list(resultados.keys())}"
+                + (f" cortes_recalculados={cortes_recalc}" if cortes_recalc else ""),
     )
+
+    mensaje = f"{mes} {anio} procesado para {', '.join(resultados.keys())}"
+    if algun_corte:
+        mensaje += " (corte generado)"
+    if cortes_recalc:
+        mensaje += f" -- se recalculó también el corte de {', '.join(cortes_recalc)}, que ya estaba cerrado"
 
     return ApiResponse(
         success=True,
-        message=f"{mes} {anio} procesado para {', '.join(resultados.keys())}" + (" (corte generado)" if algun_corte else ""),
+        message=mensaje,
         data=resultados,
     )

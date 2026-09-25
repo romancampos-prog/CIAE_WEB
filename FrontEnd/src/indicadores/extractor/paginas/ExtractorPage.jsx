@@ -275,16 +275,23 @@ const ExtractorPage = () => {
                       <span className={`ex-item-check${subido ? ' ex-item-check--on' : ''}`}><CheckCircleIcon activo={subido} /></span>
                       <span className="ex-item-nombre">{mes} {anio}</span>
                       <span className="ex-item-estado">{subido ? 'Subido' : 'Pendiente'}</span>
-                      {!subido && (
-                        <button className={`ex-boton-subir${abierto ? ' ex-boton-subir--activo' : ''}`} onClick={() => abrirMes(clave)}>
-                          {abierto ? 'Cerrar' : 'Subir'}
-                        </button>
-                      )}
+                      <button
+                        className={`ex-boton-subir${abierto ? ' ex-boton-subir--activo' : subido ? ' ex-boton-subir--resubir' : ''}`}
+                        onClick={() => abrirMes(clave)}
+                      >
+                        {abierto ? 'Cerrar' : subido ? 'Volver a subir' : 'Subir'}
+                      </button>
                     </div>
 
                     {abierto && (
                       <div className="ex-uploader-wrap">
                         <div className="ex-uploader">
+                          {subido && (
+                            <p className="ex-aviso-reemplazo">
+                              {mes} {anio} ya está subido. Al confirmar se reemplazan sus datos y se recalculan
+                              los cortes cerrados que incluyan este mes.
+                            </p>
+                          )}
                           <EstadoDropzone
                             etiqueta="SUI-13"
                             sugerido={`SUI_13_${mes}_${anio}`}
@@ -307,7 +314,7 @@ const ExtractorPage = () => {
                               onClick={() => subirMes(mes, anio)}
                               disabled={!archivoPrincipal}
                             >
-                              Confirmar {mes} {anio}
+                              {subido ? 'Reemplazar' : 'Confirmar'} {mes} {anio}
                             </button>
                           </div>
                         </div>
@@ -329,6 +336,9 @@ const ExtractorPage = () => {
                 <p key={indicador} className="ex-resultado-fila">
                   <strong>{indicador}</strong> — {total} casos
                   {r.corte_generado && <span className="ex-badge ex-badge--completo">Corte generado</span>}
+                  {(r.cortes_recalculados || []).map(c => (
+                    <span key={c} className="ex-badge ex-badge--completo">Corte {c} recalculado</span>
+                  ))}
                 </p>
               );
             })}

@@ -216,6 +216,13 @@ def guardar_numerador_mes(indicador: str, anio: int, mes_nombre: str, conteo_por
     Guarda (o reemplaza, si se re-sube el mismo mes) el numerador crudo de un
     mes -- siempre con las 46 unidades (mismo orden que NOMBREUNIDADESARCHIVO),
     las que no tuvieron ningun caso ese mes quedan en 0, no ausentes.
+
+    "MESES" es SIEMPRE el dato crudo del mes, incluso para un mes de corte
+    (Junio/Diciembre) -- el corte calculado se guarda aparte en "CORTES.MESES"
+    (ver intentar_generar_corte), nunca sobreescribe esto. Asi un mes de
+    corte (ej. Junio) puede seguir siendo parte de la ventana del SIGUIENTE
+    corte (Diciembre del mismo año) sin arrastrar un acumulado disfrazado de
+    mes suelto.
     """
     reporte = _leer_reporte(indicador, anio)
     reporte["MESES"][mes_nombre] = {
@@ -263,6 +270,9 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
     for mes, anio_mes in ventana:
         if anio_mes not in reportes_cache:
             reportes_cache[anio_mes] = _leer_reporte(indicador, anio_mes)
+        # MESES siempre es el dato crudo (ver guardar_numerador_mes) -- nunca lo
+        # sobreescribe un cierre de corte, ni siquiera para el propio mes de
+        # corte, asi que sirve igual si "mes" es Junio/Diciembre o cualquier otro.
         datos_mes = reportes_cache[anio_mes]["MESES"].get(mes)
         if datos_mes is None:
             return None  # todavia no esta completa la ventana de 12 meses
@@ -302,13 +312,16 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
 
     bloque_semaforizado = SemaforizarReporte(bloque_corte, indicador, mes=mes_nombre)
 
+    # El corte se guarda en CORTES.MESES, no en MESES -- ver guardar_numerador_mes.
+    # En un indicador "Semestral Anualizado" como este, CORTES.MESES solo tiene
+    # (a lo mas) las llaves "Junio" y "Diciembre", nunca los otros 10 meses.
     reporte_anio_corte = reportes_cache[anio]
-    reporte_anio_corte["MESES"][mes_nombre] = {
+    reporte_anio_corte.setdefault("CORTES", {}).setdefault("MESES", {})[mes_nombre] = {
         unidad: dato.model_dump(by_alias=True) for unidad, dato in bloque_semaforizado.items()
     }
     _guardar_reporte(indicador, anio, reporte_anio_corte)
 
-    return reporte_anio_corte["MESES"][mes_nombre]
+    return reporte_anio_corte["CORTES"]["MESES"][mes_nombre]
 
 
 # --------------------------------------------------------------------------- #
@@ -360,7 +373,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
 
         clave = f"{mes_corte} {anio_corte}"
         ya_generado = all(
-            "TOTAL_OOAD" in (cache[(indicador, anio_corte)]["MESES"].get(mes_corte) or {})
+            "TOTAL_OOAD" in (cache[(indicador, anio_corte)].get("CORTES", {}).get("MESES", {}).get(mes_corte) or {})
             for indicador in indicadores
         )
         resultado[clave] = {
@@ -375,6 +388,17 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
         anterior_generado = ya_generado
 
     return resultado
+
+
+def _ventanas_de_mes(mes_nombre: str, anio: int) -> list[tuple[str, int]]:
+    """
+    Los cortes (mes_corte, anio_corte) cuya ventana de 12 meses "Semestral
+    Anualizado" incluye a mes_nombre/anio -- Diciembre(anio) siempre, y
+    Junio(anio) o Junio(anio+1) segun si mes_nombre cae en Ene-Jun o Jul-Dic.
+    Sirve para saber que cortes hay que revisar si se corrige este mes.
+    """
+    anio_junio = anio if MESES_ESTANDAR.index(mes_nombre) < 6 else anio + 1
+    return [("Junio", anio_junio), ("Diciembre", anio)]
 
 
 def _procesar_archivo_mensual_indicador(indicador: str, anio: int, mes_nombre: str, contenido_excel, contenido_excel_cruce=None) -> dict:
@@ -395,6 +419,19 @@ def _procesar_archivo_mensual_indicador(indicador: str, anio: int, mes_nombre: s
 
     corte = intentar_generar_corte(indicador, anio, mes_nombre)
 
+    # Si este mes ya pertenece a algun corte que YA estaba cerrado (ej. se
+    # corrige Marzo despues de que el corte de Junio ya se genero), se
+    # recalcula tambien -- intentar_generar_corte siempre relee los 12 meses
+    # guardados y sobreescribe, asi que llamarlo de nuevo sobre un corte ya
+    # cerrado simplemente lo actualiza con el dato corregido; si la ventana
+    # de ese otro corte todavia no esta completa, no hace nada (regresa None).
+    cortes_recalculados = []
+    for mes_c, anio_c in _ventanas_de_mes(mes_nombre, anio):
+        if (mes_c, anio_c) == (mes_nombre, anio):
+            continue  # ese es el que ya se intento arriba
+        if intentar_generar_corte(indicador, anio_c, mes_c) is not None:
+            cortes_recalculados.append(f"{mes_c} {anio_c}")
+
     return {
         "indicador": indicador,
         "anio": anio,
@@ -404,6 +441,7 @@ def _procesar_archivo_mensual_indicador(indicador: str, anio: int, mes_nombre: s
         "validados_via2": sum(validados.values()) if validados else 0,
         "corte_generado": corte is not None,
         "corte": corte,
+        "cortes_recalculados": cortes_recalculados,
     }
 
 
@@ -427,56 +465,9 @@ def procesar_archivo_mensual(anio: int, mes_nombre: str, contenido_bytes: bytes,
 # 5) Excel del corte -- reusa el mismo motor que FTP (generar_excel.py)
 # --------------------------------------------------------------------------- #
 
-def generar_excel_corte(indicador: str, anio: int, mes_corte: str) -> dict:
-    """
-    Arma el Excel de un corte ya generado (Junio o Diciembre), con el mismo
-    motor y estilo que usa FTP (Excel_final/ExcelFinalConPlantilla) -- no se
-    escribe un generador aparte. El mapeo nuevo (indicadores/mapeo/) tiene
-    otra forma que el viejo de ftp/mapeo/ (informacion.titulo en vez de
-    titulo suelto, etc.), asi que aqui se adapta el nombre de los campos;
-    _checkpoints_y_etiquetas ya sabe mostrar solo Junio/Diciembre para la
-    periodicidad "Semestral Anualizado" (ver generar_excel.py).
-    """
-    if mes_corte not in MESES_CORTE_SEMESTRAL:
-        return {"status": "error", "mensaje": f"'{mes_corte}' no es un mes de corte valido -- debe ser Junio o Diciembre."}
-
-    mapeo = leer_mapeo_indicador(indicador)
-    informacion = mapeo.get("informacion", {})
-    mes_num = str(MESES_CORTE_SEMESTRAL.index(mes_corte) * 6 + 6).zfill(2)  # Junio->06, Diciembre->12
-
-    diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, str(anio), mes_num)
-    if diccionarioPrevio is None:
-        return {"status": "error", "mensaje": f"{indicador} no tiene el corte de {mes_corte} {anio} generado todavia."}
-
-    archivo_descargable = ExcelFinalConPlantilla(
-        diccionarioPrevio,
-        informacion.get("titulo", indicador),
-        informacion.get("descNum", ""),
-        informacion.get("descDen", ""),
-        indicador.replace(" ", "_"),
-        str(anio),
-        mes_num,
-        semana,
-        mapeo.get("semaforo", {}),
-        indicador,
-        es_semana=es_semana,
-        periodicidad=mapeo.get("periodicidad"),
-    )
-
-    if not archivo_descargable:
-        return {"status": "error", "mensaje": "No se pudo generar el archivo Excel"}
-
-    return {
-        "status": "success",
-        "mensaje": f"Reporte {indicador} -- corte {mes_corte} {anio} obtenido correctamente",
-        "stream": archivo_descargable,
-        "nombre_archivo": f"{indicador.replace(' ', '_')}_{anio}_{mes_corte}.xlsx",
-    }
-
-
 def generar_excel_familia(anio: int, mes_corte: str, indicadores: list[str] | None = None) -> dict:
     """
-    Igual que generar_excel_corte, pero arma UN solo Excel con una pestaña por
+    Arma UN solo Excel con una pestaña por
     indicador del extractor (EH 03, DM 04) -- "toda la familia" del corte,
     mismo criterio que /generar-categoria/guardado usa para FTP (una pestana
     por indicador con escribir_hoja_indicador, reutilizado tal cual).

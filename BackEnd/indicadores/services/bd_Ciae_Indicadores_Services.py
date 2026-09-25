@@ -3,7 +3,7 @@ import logging
 import json
 
 #mis archivos
-from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePrevio 
+from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePrevio,UnidadDatos
 from configs.settings import DATA_INDICADORES
 from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
@@ -78,6 +78,11 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
     with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
         datosJson = json.load(archivoJson) #todo el json leido
         datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
+        # Extractor guarda el corte ya cerrado aparte, en CORTES.MESES (ver
+        # extractor_service.intentar_generar_corte) -- MESES ahi solo trae el
+        # numerador crudo de cada mes, nunca el acumulado. Se guarda aparte
+        # porque model_validate no lo valida (no es parte de ReporteIndicador).
+        cortesMes = _normalizar_semaforo(datosJson.get("CORTES", {}).get("MESES", {}))
         reporte = ReporteIndicador.model_validate(datosJson)
     
     if (not reporte): return None
@@ -123,19 +128,22 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
         return reporte
 
     # Modulo Extractor (EH 03, DM 04, periodicidad "Semestral Anualizado"):
-    # la mayoria de los meses de MESES solo traen el numerador crudo mientras
-    # se junta la ventana del corte (desempeno "Gris", sin TOTAL_OOAD) -- no
-    # sirven para graficar. Se filtra para dejar solo el ultimo corte que ya
-    # se genero de verdad (el que si trae TOTAL_OOAD), para que la grafica
-    # muestre el ultimo resultado oficial en vez de una linea plana en 0 que
-    # salta al mes de corte.
+    # MESES siempre trae solo el numerador crudo de cada mes (nunca se
+    # sobreescribe al cerrar un corte); los cortes ya generados (con
+    # TOTAL_OOAD) viven aparte en CORTES.MESES. Se muestra solo el ultimo corte
+    # cerrado, para que la grafica muestre el ultimo resultado oficial en vez
+    # de una linea plana en 0 o los numeradores crudos sueltos.
     if (modulo == "extractor"):
-        mesesConCorte = {mes: datos for mes, datos in reporte.MESES.items() if "TOTAL_OOAD" in datos}
-        if not mesesConCorte:
+        if not cortesMes:
             reporte.MESES = {}
             return reporte
-        ultimoMesCorte = max(mesesConCorte, key=lambda m: MESES_ESTANDAR.index(m))
-        reporte.MESES = {ultimoMesCorte: mesesConCorte[ultimoMesCorte]}
+        ultimoMesCorte = max(cortesMes, key=lambda m: MESES_ESTANDAR.index(m))
+        reporte.MESES = {
+            ultimoMesCorte: {
+                unidad: UnidadDatos.model_validate(datos)
+                for unidad, datos in cortesMes[ultimoMesCorte].items()
+            }
+        }
         return reporte
 
     return reporte

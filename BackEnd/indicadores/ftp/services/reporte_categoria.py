@@ -30,15 +30,15 @@ MESES_LISTA = [
 def _ultimo_corte_extractor(indicador: str, ano: str):
     """
     Igual que leer_ultimo_mes_guardado, pero solo cuenta meses que ya tienen
-    TOTAL_OOAD (un corte real generado) -- para indicadores del modulo
-    Extractor (EH 03, DM 04), donde la mayoria de los meses en MESES solo
-    traen el numerador crudo (desempeno "Gris", sin cerrar) mientras se junta
-    la ventana del corte semestral. Tomar literal el ultimo mes ahi metería
-    un mes sin resultado real en la descarga.
+    un corte cerrado (CORTES.MESES, ver extractor_service.intentar_generar_corte)
+    -- para indicadores del modulo Extractor (EH 03, DM 04), donde MESES trae
+    el numerador crudo de cada mes (desempeno "Gris", sin cerrar) mientras se
+    junta la ventana del corte semestral. Tomar literal el ultimo mes de MESES
+    metería un mes sin resultado real en la descarga.
     """
     datos_json = leer_datos_indicador(indicador, ano)
     meses_con_corte = [
-        mes for mes, unidades in datos_json.get("MESES", {}).items()
+        mes for mes, unidades in datos_json.get("CORTES", {}).get("MESES", {}).items()
         if mes in MESES_LISTA and isinstance(unidades, dict) and "TOTAL_OOAD" in unidades
     ]
     if not meses_con_corte:

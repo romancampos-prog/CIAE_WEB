@@ -95,6 +95,14 @@ def leer_mes_guardado(indicador: str, ano: str, mes: str):
     mes_nombre = MESES_NOMBRES[idx]
 
     definitivo = leer_datos_indicador(indicador, ano)
+
+    # Extractor guarda el corte cerrado aparte en CORTES.MESES (ver
+    # extractor_service.intentar_generar_corte) -- FTP no tiene esta llave,
+    # asi que este check nunca aplica para sus archivos, sigue igual que antes.
+    corte = definitivo.get("CORTES", {}).get("MESES", {}).get(mes_nombre)
+    if corte is not None:
+        return _normalizar_para_leer(corte), False, None
+
     if mes_nombre in definitivo.get("MESES", {}):
         return _normalizar_para_leer(definitivo["MESES"][mes_nombre]), False, None
 
