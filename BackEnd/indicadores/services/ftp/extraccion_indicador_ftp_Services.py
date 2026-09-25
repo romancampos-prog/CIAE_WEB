@@ -14,8 +14,9 @@ from schemas.model.reporte_mapeo_Model import FuenteArchivosFTP, FuentePoblacion
 from services.indicadorMapeo_Services import cargar_indicador_mapeo
 from services.ftp.conexion_ftp_Services import conectar_ftp, desconectar_ftp
 from services.ftp.lectura_reporte_ftp_Services import extraer_lados_del_excel
+from services.ftp.catalogo_reportes_ftp_Services import subcarpeta_de_reporte
 from services.ftp.navegacion_ftp_Services import (
-    SUBCARPETA_POR_PREFIJO, descargar_archivo, listar_reportes, navegar_ruta, ruta_reportes_unidad,
+    descargar_archivo, listar_reportes, navegar_ruta, ruta_reportes_unidad,
 )
 from services.ftp.registro_errores_ftp_Services import (
     crear_log_errores, error_de_conexion, registrar_error, solo_con_errores,
@@ -32,7 +33,7 @@ def extraer_reporte_de_unidades(
     se pudo}; un fallo en una unidad no detiene a las demas (queda None y se registra).
     """
     unidades_ruta = UNIDADES_PREVIOS if semana is not None else UNIDADES_FINALES
-    subcarpeta    = SUBCARPETA_POR_PREFIJO[reporte[:2]]
+    subcarpeta    = subcarpeta_de_reporte(reporte)
     valores_por_unidad: dict[str, dict[str, list[float] | None] | None] = {}
 
     for unidad_ruta, unidad in zip(unidades_ruta, NOMBREUNIDADESARCHIVO):

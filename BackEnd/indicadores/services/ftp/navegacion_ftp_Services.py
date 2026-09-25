@@ -9,12 +9,6 @@ import io
 from ftplib import FTP
 from typing import NamedTuple
 
-# Subcarpeta de 1.SIAIS_Reportes segun el prefijo del codigo de reporte.
-SUBCARPETA_POR_PREFIJO = {
-    "CP": "Salud Pública", "CI": "Salud Pública", "IA": "Salud Pública",
-    "IN": "Indicadores", "MT": "Salud Materna", "PU": "Productividad",
-}
-
 _EXTENSIONES_EXCEL = (".XLS", ".XLSX")
 
 
