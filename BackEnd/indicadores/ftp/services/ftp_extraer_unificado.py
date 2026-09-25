@@ -5,7 +5,7 @@ hasta comprobar este camino con archivos reales).
 
 Capa 1 (bajar el archivo de cada unidad del FTP) se reusa tal cual de
 ftp_extraer.procesar_extraccion_ftp; capa 2 (leer el valor del Excel segun
-modoExtraccion) la hace shared/extraccion_service.py.
+modoExtraccion) la hace services/metodos_extraccion_excel.py.
 
 A diferencia del viejo, numerador y denominador se extraen por separado (un
 mismo repo puede aportar columnas distintas a cada lado, ej. CUPN 07 con PU01),
@@ -26,7 +26,7 @@ from schemas.model.reporte_mapeo_Model import (
     IndicadorFTPMapeo, FuenteArchivosFTP, FuentePoblacionInfoSalud,
 )
 from ftp.services.numerador_denominador_unificado import ObtenerNumDenUnificado
-from shared.extraccion_service import extraer
+from services.metodos_extraccion_excel import extraer
 
 
 def _leer_hoja(buf, hoja: str):

@@ -190,10 +190,3 @@ def procesar_extraccion_ftp(ftp, repo, ano, mes, semana, infoReporte, diccionari
         except Exception as exc:
             registrar_error(logErrores, "DESCARGA_FALLIDA", nombre_final, repo, f"{carpeta_remota} · {exc}")
             diccionarioGlobal[nombre_final][repo] = None
-
-
-def letra_a_numero(letra):
-    numero = 0
-    for c in letra.upper():
-        numero = numero * 26 + (ord(c) - ord('A') + 1)
-    return numero - 1

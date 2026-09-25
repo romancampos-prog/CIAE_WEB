@@ -7,7 +7,7 @@ archivos reales.
 
 Capa 1 (leer la hoja del Excel subido, validar que sea el archivo correcto)
 vive aqui; capa 2 (contar filas / tomar el valor de la unidad) la hace
-shared/extraccion_service.py. Los mensajes de error son los mismos que ya
+services/metodos_extraccion_excel.py. Los mensajes de error son los mismos que ya
 mostraba IAAS, y las funciones siguen levantando ValueError(json de lista de
 mensajes) para que procesar_service no note la diferencia.
 Usado en: iaas/services/extraccion_service.py (calcular_IAAS, calcular_unidad_tardia)
@@ -21,8 +21,8 @@ import pandas as pd
 
 from iaas.config import ORDEN_IAAS01
 from schemas.model.reporte_mapeo_Model import FuenteExcelWeb, IndicadorIAASMapeo
-from shared.extraccion_service import (
-    ERRORES, _coincide_unidad, columnas_esperadas, extraer, letra_a_numero,
+from services.metodos_extraccion_excel import (
+    ERRORES, coincide_unidad, columnas_esperadas, extraer, letra_a_numero,
 )
 from shared.validarArchivo_service import ejecutar_validaciones, validar_columnas_esperadas
 
@@ -161,7 +161,7 @@ def obtener_denominador_IAAS01(excel_bytes: bytes) -> dict:
 
     if not errores:
         col_unidad = df.iloc[:, letra_a_numero(next(iter(detalle["columnaUnidad"])))].astype(str)
-        if not any(col_unidad.map(lambda v, u=u: _coincide_unidad(v, u)).any() for u in ORDEN_IAAS01):
+        if not any(col_unidad.map(lambda v, u=u: coincide_unidad(v, u)).any() for u in ORDEN_IAAS01):
             errores.append("[Denominador global] No se encontraron las unidades de IAAS 01 en la columna de unidades.")
 
     if errores:

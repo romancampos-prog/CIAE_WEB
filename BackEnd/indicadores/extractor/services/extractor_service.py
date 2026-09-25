@@ -13,27 +13,22 @@ viene descrito en su propio mapeo.
 """
 import io
 import json
-import xlsxwriter
 import pandas as pd
-from pathlib import Path
 
 from ftp.config import CLAVE_UNIDADES_F, NOMBREUNIDADESARCHIVO, ruta_poblacion
-from ftp.services.ftp_extraer import letra_a_numero
-from ftp.services.datos_json_service import leer_mes_guardado
-from ftp.services.generar_excel import ExcelFinalConPlantilla, obtener_estilos_excel
-from ftp.services.reporte_categoria import escribir_hoja_indicador
 from extractor.config import (
     ruta_indicador_json, leer_mapeo_indicador, MESES_ESTANDAR,
     MESES_CORTE_SEMESTRAL, ventana_corte, INDICADORES_EXTRACTOR,
 )
-from schemas.model.indicador_Model import ReporteIndicador, UnidadDatos
+from schemas.model.indicador_Model import UnidadDatos
 from shared.semaforizado_service import SemaforizarReporte
 from shared.validarArchivo_service import ejecutar_validaciones, validar_columnas_esperadas
-from shared.extraccion_service import (
+from services.metodos_extraccion_excel import (
     columnas_esperadas,
     CondicionFiltro,
-    _cumple_condicion as _cumple_condicion_compartida,
-    _fila_cumple as _fila_cumple_compartida,
+    cumple_condicion as _cumple_condicion_compartida,
+    fila_cumple as _fila_cumple_compartida,
+    letra_a_numero,
 )
 
 _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
@@ -43,7 +38,7 @@ _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
 # 1) Filtrado / conteo del Excel crudo del mes
 #
 # El chequeo celda-por-celda (LISTA/RANGO/match simple) vive ahora en
-# shared/extraccion_service.py (lo usan tambien FILTRO_CONTEO de IAAS y
+# services/metodos_extraccion_excel.py (lo usan tambien FILTRO_CONTEO de IAAS y
 # FILTRO_UNIDAD_VALOR) -- aqui solo se tipa el filtroColumna crudo del mapeo
 # (dict/str) a CondicionFiltro antes de llamar a la version compartida.
 # --------------------------------------------------------------------------- #
@@ -464,63 +459,3 @@ def procesar_archivo_mensual(anio: int, mes_nombre: str, contenido_bytes: bytes,
 # --------------------------------------------------------------------------- #
 # 5) Excel del corte -- reusa el mismo motor que FTP (generar_excel.py)
 # --------------------------------------------------------------------------- #
-
-def generar_excel_familia(anio: int, mes_corte: str, indicadores: list[str] | None = None) -> dict:
-    """
-    Arma UN solo Excel con una pestaña por
-    indicador del extractor (EH 03, DM 04) -- "toda la familia" del corte,
-    mismo criterio que /generar-categoria/guardado usa para FTP (una pestana
-    por indicador con escribir_hoja_indicador, reutilizado tal cual).
-    """
-    if mes_corte not in MESES_CORTE_SEMESTRAL:
-        return {"status": "error", "mensaje": f"'{mes_corte}' no es un mes de corte valido -- debe ser Junio o Diciembre."}
-
-    indicadores = indicadores or INDICADORES_EXTRACTOR
-    mes_num = str(MESES_CORTE_SEMESTRAL.index(mes_corte) * 6 + 6).zfill(2)  # Junio->06, Diciembre->12
-
-    output = io.BytesIO()
-    wb = xlsxwriter.Workbook(output)
-    wb.set_properties({'author': 'Web CIAE'})
-    fmt = obtener_estilos_excel(wb)
-
-    completados = []
-    errores = {}
-
-    for indicador in indicadores:
-        mapeo = leer_mapeo_indicador(indicador)
-        informacion = mapeo.get("informacion", {})
-
-        diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, str(anio), mes_num)
-        if diccionarioPrevio is None:
-            errores[indicador] = f"{indicador} no tiene el corte de {mes_corte} {anio} generado todavia."
-            continue
-
-        metadata = {
-            "titulo":       informacion.get("titulo"),
-            "desNum":       informacion.get("descNum"),
-            "desDen":       informacion.get("descDen"),
-            "arch":         indicador.replace(" ", "_"),
-            "semaforo":     mapeo.get("semaforo", {}),
-            "decimales":    None,
-            "periodicidad": mapeo.get("periodicidad"),
-        }
-        try:
-            escribir_hoja_indicador(wb, fmt, indicador, diccionarioPrevio, metadata, str(anio), mes_num, semana, es_semana)
-            completados.append(indicador)
-        except Exception as exc:
-            errores[indicador] = str(exc)
-
-    wb.close()
-
-    if not completados:
-        return {"status": "error", "mensaje": "Ningun indicador tiene el corte generado todavia.", "errores": errores}
-
-    output.seek(0)
-    return {
-        "status": "success",
-        "mensaje": f"Corte {mes_corte} {anio} obtenido correctamente",
-        "stream": output,
-        "nombre_archivo": f"Extractor_{anio}_{mes_corte}.xlsx",
-        "completados": completados,
-        "errores": errores,
-    }

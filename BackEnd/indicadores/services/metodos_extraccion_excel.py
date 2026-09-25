@@ -1,15 +1,15 @@
 """
-Servicio compartido de extraccion (capa 2): dado un DataFrame YA CARGADO y el
+Metodos generales de extraccion de Excel (capa 2): dado un DataFrame YA CARGADO y el
 bloque "detalle" de reporte.numerador/denominador del mapeo unificado
-(indicadores/mapeo/*.json), lee el valor segun su modoExtraccion.
+(indicadores/mapeo/*.json), lee el valor segun su modoExtraccion. Lo comparten
+FTP, IAAS y Extractor.
 
 No le importa de donde salio el DataFrame (FTP, archivo subido, SUI-13) --
-eso lo resuelve cada modulo en su propia capa 1 (ftp_extraer.py,
-iaas/services/extraccion_service.py, extractor_service.py). Ellos siguen
-con sus propios errores de "como llego el archivo" (ruta invalida, archivo
-corrupto, mes declarado no coincide, etc.); este servicio solo reporta
-errores de "que esta mal en el contenido", con el mismo catalogo que ya
-usaba ftp_extraer.py.
+eso lo resuelve cada modulo en su propia capa 1 (recorrido del FTP, Excel
+subido por el usuario, SUI-13). Ellos siguen con sus propios errores de "como
+llego el archivo" (ruta invalida, archivo corrupto, mes declarado no
+coincide, etc.); este servicio solo reporta errores de "que esta mal en el
+contenido".
 
 El "detalle" crudo del mapeo se valida contra un BaseModel por modo antes de
 extraer -- si el mapeo trae un dato mal formado, se sabe de inmediato en vez
@@ -17,20 +17,18 @@ de tronar a medio pandas. Cubre los 6 modoExtraccion reales de hoy -- agregar
 uno nuevo es agregar su modelo + funcion + entrada en los dos diccionarios,
 no tocar el resto del archivo.
 
-Conectado: extractor_service.py (chequeo de condiciones),
-ftp/services/ftp_extraer_unificado.py e iaas/services/extraccion_unificada.py
-(los caminos viejos de FTP e IAAS se conservan hasta probar con archivos reales).
+Usado en: extractor_service.py, ftp_extraer_unificado.py, iaas/extraccion_unificada.py,
+          shared/validarArchivo_service.py
 """
 import inspect
 import re
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-# Mismo catalogo que ftp/services/ftp_extraer.py, sin las entradas que son de
-# capa 1 (RUTA_INVALIDA, ARCHIVO_NO_ENCONTRADO, ARCHIVO_DUPLICADO,
-# DESCARGA_FALLIDA, PB_JSON_ERROR -- esas dependen de como se consiguio el
-# archivo, no del contenido).
+# Errores de CONTENIDO del Excel. Los de capa 1 (RUTA_INVALIDA, ARCHIVO_NO_ENCONTRADO,
+# ARCHIVO_DUPLICADO, DESCARGA_FALLIDA, PB_JSON_ERROR) dependen de como se consiguio
+# el archivo y los maneja cada modulo.
 ERRORES = {
     "HOJA_NO_ENCONTRADA":     "El archivo existe pero no contiene la hoja especificada.",
     "ETIQUETA_NO_ENCONTRADA": "El texto que se buscaba como etiqueta de fila no existe en esa columna de la hoja indicada.",
@@ -42,14 +40,19 @@ ERRORES = {
 }
 
 
+class ResultadoExtraccion(NamedTuple):
+    """Lo que devuelve cada extraccion. Se sigue pudiendo desempacar como (valor, id_error, mensaje)."""
+    valor:    Any
+    id_error: str | None
+    mensaje:  str | None
+
+
 def letra_a_numero(letra: str) -> int:
+    """Letra de columna de Excel a indice 0-based ("A" -> 0, "AA" -> 26)."""
     numero = 0
     for c in letra.upper():
         numero = numero * 26 + (ord(c) - ord('A') + 1)
     return numero - 1
-
-
-_letra_a_numero = letra_a_numero
 
 
 def _a_numero(valor):
@@ -129,7 +132,7 @@ def _interseccion_columna(
     cualquier indicador puede declarar su propio marcador mientras lo pase
     aqui en meses_dinamicos={"NOMBRE_MARCADOR": {"1": "D", "2": "F", ...}}.
     """
-    col_etiqueta = _letra_a_numero(detalle.columna)
+    col_etiqueta = letra_a_numero(detalle.columna)
     texto_buscar = detalle.buscar
     letras_dato  = detalle.columna_dato
 
@@ -147,9 +150,9 @@ def _interseccion_columna(
             letra_real = meses_dinamicos[letra].get(str(int(mes)))
             if not letra_real:
                 return None, "VALOR_NULO", f"Mes {mes} sin columna definida en '{letra}'"
-            valores.append(_a_numero(fila.iloc[_letra_a_numero(letra_real)]))
+            valores.append(_a_numero(fila.iloc[letra_a_numero(letra_real)]))
         else:
-            valores.append(_a_numero(fila.iloc[_letra_a_numero(letra)]))
+            valores.append(_a_numero(fila.iloc[letra_a_numero(letra)]))
 
     if all(v is None for v in valores):
         return None, "ARCHIVO_VACIO", f"Fila con '{texto_buscar}' encontrada pero celdas vacias en {letras_dato}"
@@ -163,7 +166,7 @@ def _interseccion_fila(df, detalle: DetalleInterseccionFila):
     for f in detalle.fila:
         idx_fila = f - 1
         for letra in detalle.columna_dato:
-            idx_col = _letra_a_numero(letra)
+            idx_col = letra_a_numero(letra)
             try:
                 valores.append(_a_numero(df.iloc[idx_fila, idx_col]) or 0.0)
             except IndexError:
@@ -177,7 +180,7 @@ def _interseccion_fila(df, detalle: DetalleInterseccionFila):
 
 
 def _ultima_fila(df, detalle: DetalleUltimaFila):
-    indices = [_letra_a_numero(l) for l in detalle.columna_dato]
+    indices = [letra_a_numero(l) for l in detalle.columna_dato]
     bloque  = df.iloc[detalle.encabezado:, indices]
 
     valores = []
@@ -193,7 +196,7 @@ def _ultima_fila(df, detalle: DetalleUltimaFila):
 
 
 # --------------------------------------------------------------------------- #
-# Modos "filtro" -- basados en _cumple_condicion de extractor_service.py, que
+# Modos "filtro" -- basados en cumple_condicion de extractor_service.py, que
 # ya entiende filtroColumna con tipo LISTA/RANGO del mapeo nuevo, con
 # fallback al formato simple (match exacto o "^prefijo") que ya usaba IAAS.
 # --------------------------------------------------------------------------- #
@@ -202,7 +205,7 @@ def _es_vacio(valor) -> bool:
     return valor is None or (not isinstance(valor, str) and pd.isna(valor))
 
 
-def _cumple_condicion(valor, cfg: CondicionFiltro) -> bool:
+def cumple_condicion(valor, cfg: CondicionFiltro) -> bool:
     if _es_vacio(valor):
         valor = None
 
@@ -230,10 +233,10 @@ def _cumple_condicion(valor, cfg: CondicionFiltro) -> bool:
     return valor_texto.strip().upper() == texto.strip().upper()
 
 
-def _fila_cumple(fila, filtro_columna: dict[str, CondicionFiltro]) -> bool:
+def fila_cumple(fila, filtro_columna: dict[str, CondicionFiltro]) -> bool:
     for letra, cfg in filtro_columna.items():
-        idx = _letra_a_numero(letra)
-        if idx >= len(fila) or not _cumple_condicion(fila.iloc[idx], cfg):
+        idx = letra_a_numero(letra)
+        if idx >= len(fila) or not cumple_condicion(fila.iloc[idx], cfg):
             return False
     return True
 
@@ -241,14 +244,14 @@ def _fila_cumple(fila, filtro_columna: dict[str, CondicionFiltro]) -> bool:
 def _filtro_conteo(df, detalle: DetalleFiltroConteo):
     mascara = pd.Series(True, index=df.index)
     for letra, cfg in detalle.filtroColumna.items():
-        idx = _letra_a_numero(letra)
+        idx = letra_a_numero(letra)
         if idx >= df.shape[1]:
             return None, "COLUMNA_NO_ENCONTRADA", f"La columna {letra} no existe en la hoja"
-        mascara &= df.iloc[:, idx].map(lambda v, c=cfg: _cumple_condicion(v, c)).astype(bool)
+        mascara &= df.iloc[:, idx].map(lambda v, c=cfg: cumple_condicion(v, c)).astype(bool)
     return int(mascara.sum()), None, None
 
 
-def _coincide_unidad(valor, nombre_unidad: str) -> bool:
+def coincide_unidad(valor, nombre_unidad: str) -> bool:
     """
     Busca la unidad por su NUMERO (segundo token del nombre, ej. "HGZ 2 X" -> 2)
     como palabra completa -- el Excel a veces trae otra variante del nombre de
@@ -266,18 +269,18 @@ def _filtro_unidad_valor(df, detalle: DetalleFiltroUnidadValor, nombre_unidad_bu
     nombre_unidad_buscada (la unidad que se esta pidiendo en esa llamada).
     """
     col_unidad_letra, cfg_unidad = next(iter(detalle.columnaUnidad.items()))
-    idx_unidad = _letra_a_numero(col_unidad_letra)
+    idx_unidad = letra_a_numero(col_unidad_letra)
     col_valor_letra = next(iter(detalle.tomarValor))
-    idx_valor  = _letra_a_numero(col_valor_letra)
+    idx_valor  = letra_a_numero(col_valor_letra)
 
     for _, fila in df.iterrows():
         valor_unidad = fila.iloc[idx_unidad]
         if cfg_unidad.filtro == "UNIDADES_IAAS":
-            if nombre_unidad_buscada is None or not _coincide_unidad(valor_unidad, nombre_unidad_buscada):
+            if nombre_unidad_buscada is None or not coincide_unidad(valor_unidad, nombre_unidad_buscada):
                 continue
-        elif not _cumple_condicion(valor_unidad, cfg_unidad):
+        elif not cumple_condicion(valor_unidad, cfg_unidad):
             continue
-        if detalle.filtroColumna and not _fila_cumple(fila, detalle.filtroColumna):
+        if detalle.filtroColumna and not fila_cumple(fila, detalle.filtroColumna):
             continue
         return _a_numero(fila.iloc[idx_valor]), None, None
 
@@ -320,23 +323,23 @@ def columnas_esperadas(modo_extraccion: str, detalle: dict) -> dict[str, str]:
     return esperadas
 
 
-def extraer(df, modo_extraccion: str, detalle: dict, **kwargs):
+def extraer(df, modo_extraccion: str, detalle: dict, **kwargs) -> ResultadoExtraccion:
     """
     Punto de entrada unico de la capa 2.
     @param df               - DataFrame ya cargado (sin importar su origen)
     @param modo_extraccion  - detalle.modoExtraccion del mapeo
     @param detalle          - el bloque crudo (dict) de reporte.numerador/denominador
-    @returns (valor, id_error, mensaje_error) -- mismo contrato que ya usaba ftp_extraer.py
+    @returns ResultadoExtraccion(valor, id_error, mensaje) -- se puede desempacar como tupla
     """
     funcion = EXTRACTORES.get(modo_extraccion)
     modelo  = MODELOS_DETALLE.get(modo_extraccion)
     if not funcion or not modelo:
-        return None, "MODO_DESCONOCIDO", f"Modo de extraccion '{modo_extraccion}' sin implementacion."
+        return ResultadoExtraccion(None, "MODO_DESCONOCIDO", f"Modo de extraccion '{modo_extraccion}' sin implementacion.")
 
     try:
         detalle_tipado = modelo.model_validate(detalle)
     except ValidationError as e:
-        return None, "DETALLE_INVALIDO", str(e)
+        return ResultadoExtraccion(None, "DETALLE_INVALIDO", str(e))
 
     # cada modo solo recibe los parametros de contexto que declara (mes,
     # meses_dinamicos, nombre_unidad_buscada...) -- el llamador puede pasar
@@ -345,6 +348,6 @@ def extraer(df, modo_extraccion: str, detalle: dict, **kwargs):
     kwargs_modo = {k: v for k, v in kwargs.items() if k in aceptados}
 
     try:
-        return funcion(df, detalle_tipado, **kwargs_modo)
+        return ResultadoExtraccion(*funcion(df, detalle_tipado, **kwargs_modo))
     except (KeyError, IndexError) as e:
-        return None, "COLUMNA_NO_ENCONTRADA", str(e)
+        return ResultadoExtraccion(None, "COLUMNA_NO_ENCONTRADA", str(e))

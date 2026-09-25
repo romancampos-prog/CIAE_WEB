@@ -41,9 +41,9 @@ def ejecutar_validaciones(validadores: list[Callable[[], str | list[str] | None]
 def validar_columnas_esperadas(nombres_reales: list, esperadas: dict[str, str], prefijo: str = "") -> list[str]:
     """
     Compara los encabezados reales del Excel contra {letra: nombre esperado}
-    (sin distinguir mayusculas) -- ver shared.extraccion_service.columnas_esperadas.
+    (sin distinguir mayusculas) -- ver services.metodos_extraccion_excel.columnas_esperadas.
     """
-    from shared.extraccion_service import letra_a_numero
+    from services.metodos_extraccion_excel import letra_a_numero
 
     errores = []
     for letra, esperado in esperadas.items():
