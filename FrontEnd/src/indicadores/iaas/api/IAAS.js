@@ -72,18 +72,6 @@ export const generarIAAS = async (anio, mes, numerador, denominador, excel_denom
 };
 
 /**
- * Descarga el reporte IAAS guardado en el servidor para el año indicado.
- * @param {string} anio - Año del reporte
- * @param {string|null} indicador - Si se especifica, descarga solo ese indicador; si es null descarga todos
- * @returns {Promise<{archivo_b64: string, nombre_archivo: string}>}
- */
-export const descargarIAASGuardado = async (anio, indicador = null) => {
-    const params = indicador ? { anio, indicador } : { anio };
-    const { data } = await api.get('/reportes/IAAS/descargar', { params });
-    return data.data ?? data;
-};
-
-/**
  * Obtiene el estado de la sesión IAAS del período: unidades pendientes, denominadores guardados, etc.
  * @param {string} anio - Año
  * @param {string} mes - Mes en formato "MM"

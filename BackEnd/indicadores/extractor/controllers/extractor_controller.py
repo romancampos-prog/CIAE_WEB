@@ -5,7 +5,6 @@ Un solo Excel del mes (+ su cruce con Egresos) alimenta a TODOS los
 indicadores del extractor a la vez -- ver INDICADORES_EXTRACTOR en config.py.
 Usado en: extractor/__init__.py (prefix /extractor)
 """
-import base64
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 
 from auth.services.jwt_utils import solo_roles
@@ -13,9 +12,9 @@ from configs.response import ApiResponse
 from shared.validarArchivo_service import validarPeso_Archivo
 from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
-from extractor.config import INDICADORES_EXTRACTOR, MESES_CORTE_SEMESTRAL
+from extractor.config import INDICADORES_EXTRACTOR
 from extractor.services.extractor_service import (
-    procesar_archivo_mensual, estado_ventanas, generar_excel_familia,
+    procesar_archivo_mensual, estado_ventanas,
 )
 
 router = APIRouter()
@@ -45,33 +44,6 @@ async def estado_meses_subidos(
         raise HTTPException(status_code=422, detail=str(exc))
 
     return ApiResponse(success=True, message="Estado de meses subidos", data=estado)
-
-
-@router.get("/descargar-familia")
-async def descargar_excel_familia(
-    anio: int,
-    mesCorte: str,
-    payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")),
-):
-    """Descarga UN Excel con una pestaña por indicador del extractor (EH 03 + DM 04) para un corte."""
-    if mesCorte not in MESES_CORTE_SEMESTRAL:
-        raise HTTPException(status_code=400, detail=f"mesCorte invalido: '{mesCorte}' -- debe ser Junio o Diciembre")
-
-    resultado = generar_excel_familia(anio, mesCorte)
-    if resultado["status"] != "success":
-        raise HTTPException(status_code=404, detail=resultado["mensaje"])
-
-    excel_b64 = base64.b64encode(resultado["stream"].getvalue()).decode("utf-8")
-    return ApiResponse(
-        success=True,
-        message=resultado["mensaje"],
-        data={
-            "archivo_b64": excel_b64,
-            "nombre_archivo": resultado["nombre_archivo"],
-            "completados": resultado["completados"],
-            "errores": resultado["errores"],
-        },
-    )
 
 
 @router.post("/subir")

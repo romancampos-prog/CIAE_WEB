@@ -2,8 +2,6 @@
 Endpoints de reportes IAAS (generar, descargar, datos para gráfica).
 Usado en: iass/__init__.py expuesto en main.py (prefix /reportes)
 """
-import base64
-import io
 import json
 import traceback
 from typing import Optional, List
@@ -13,15 +11,8 @@ from fastapi import APIRouter, Query, Depends, HTTPException, UploadFile, File, 
 from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
 from iaas.services.procesar_service import procesar_IAAS as ProcesarIAAS
-from iaas.services.generar_iaas import (
-    Excel_IAAS01, Excel_IAAS02, Excel_IAAS03,
-    Excel_IAAS04, Excel_IAAS05, Excel_IAAS06,
-)
 from iaas.services.datos_json_service import leer_indicador_anio
-from iaas.services.grafica_service import (
-    calcular_datos_grafica_iaas,
-    NOMBRE_A_NUM_IAAS as _NOMBRE_A_NUM_IAAS,
-)
+from iaas.services.grafica_service import NOMBRE_A_NUM_IAAS as _NOMBRE_A_NUM_IAAS
 from shared.validarArchivo_service import validarPeso_Archivo
 from shared.auditoria_service import registrar
 
@@ -46,48 +37,6 @@ async def IAAS_meses_guardados(
         if nombre in meses_guardados
     )
     return ApiResponse(success=True, message="Meses guardados obtenidos", data={"meses": meses})
-
-
-_EXCEL_POR_IND = {
-    "IAAS 01": Excel_IAAS01, "IAAS 02": Excel_IAAS02,
-    "IAAS 03": Excel_IAAS03, "IAAS 04": Excel_IAAS04,
-    "IAAS 05": Excel_IAAS05, "IAAS 06": Excel_IAAS06,
-}
-
-@router.get("/IAAS/descargar")
-async def IAAS_descargar(
-    anio:      str           = Query(...),
-    indicador: Optional[str] = Query(None),
-    payload:   dict          = Depends(solo_roles(*ROLES_IAAS))
-):
-    from iaas.services.generar_iaas import Excel_IAAS_Completo
-
-    if indicador and indicador in _EXCEL_POR_IND:
-        num       = indicador.replace("IAAS ", "").zfill(2)
-        stream    = _EXCEL_POR_IND[indicador](anio)
-        nombre    = f"IAAS_{num}_{anio}.xlsx"
-        contenido = stream.read()
-    else:
-        # Siempre se genera al momento, nunca se sirve un archivo guardado de antes.
-        stream    = Excel_IAAS_Completo(anio, "0", {})
-        contenido = stream.read()
-        nombre    = f"IAAS_{anio}.xlsx"
-
-    return ApiResponse(success=True, message=nombre, data={
-        "archivo_b64":    base64.b64encode(contenido).decode("utf-8"),
-        "nombre_archivo": nombre,
-    })
-
-
-@router.get("/IAAS/datos-grafica")
-async def IAAS_datos_grafica(
-    anio:    str = Query(...),
-    payload: dict = Depends(solo_roles(*ROLES_IAAS_GRAF))
-):
-    return ApiResponse(
-        success=True, message="Datos de gráfica IAAS obtenidos",
-        data=calcular_datos_grafica_iaas(anio),
-    )
 
 
 @router.post("/IAAS/Generar")
