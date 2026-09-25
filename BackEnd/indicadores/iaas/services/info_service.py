@@ -1,6 +1,7 @@
 from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01, UNIDAD_TIPO_IAAS01
 from iaas.services.extraccion_unificada import cargar_mapeo_iaas
 from shared.semaforo_service import es_agrupado
+from shared.reglas_periodicidad import descripcion_periodicidad
 
 
 def infoAllIAAS() -> dict:
@@ -17,6 +18,7 @@ def infoAllIAAS() -> dict:
             "titulo":                 mapeo.informacion.titulo,
             "descripcionNumerador":   mapeo.informacion.descNum,
             "descripcionDenominador": mapeo.informacion.descDen,
+            "descripcionPeriodicidad": descripcion_periodicidad(mapeo.periodicidad),
             "semaforo":               mapeo.semaforo,
             "unidades_hgs":           UNIDADES_HGS_IAAS01 if agrupado else [],
             "unidad_tipo":            UNIDAD_TIPO_IAAS01   if agrupado else {},

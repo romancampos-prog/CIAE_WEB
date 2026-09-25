@@ -5,7 +5,7 @@ extraccion, distinta de ficha_tecnica_Model.py (que es la forma de SALIDA
 hacia el front).
 
 El "detalle" de cada archivo se deja como dict porque su forma depende del
-modoExtraccion y la valida shared/extraccion_service.py con su propio modelo
+modoExtraccion y la valida services/metodos_extraccion_excel.py con su propio modelo
 por modo -- aqui solo se tipa lo que siempre existe.
 Usado en: ftp/services/ftp_extraer_unificado.py
 """
@@ -36,7 +36,7 @@ class FuenteExcelWeb(BaseModel):
     Excel subido por el usuario (IAAS). Solo se tipa lo que necesita quien
     carga el archivo (hoja, encabezado, modo); el resto del detalle
     (filtroColumna, columnaUnidad, ...) se conserva tal cual (extra="allow") y
-    lo valida shared/extraccion_service.py segun modoExtraccion.
+    lo valida services/metodos_extraccion_excel.py segun modoExtraccion.
     """
     model_config = ConfigDict(extra="allow")
 
@@ -71,6 +71,7 @@ class IndicadorIAASMapeo(BaseModel):
     semaforo:      dict[str, Any]
     informacion:   InformacionFicha
     excel:         ExcelIAAS
+    periodicidad:  str | None = None
     mostrarGenerar: bool = True
     mostrarGrafica: bool = True
 

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 from typing import Literal, Dict, Any
 from shared.PERIODICIDAD import PERIODICIDAD
+from shared.reglas_periodicidad import descripcion_periodicidad
 
 
 class UnidadDatos(BaseModel):
@@ -47,6 +48,7 @@ class InfoIndicador(BaseModel):
     mensualAcumulado: bool = False
     peridocidadGenerada: Dict[str, bool] | None = None
     periodicidad: str
+    descripcionPeriodicidad: str | None = None
     informacion: InformacionFicha
     semaforo: Dict[str,Semaforo] | Semaforo
 
@@ -64,6 +66,7 @@ class InfoIndicador(BaseModel):
             if isinstance(anidado, dict):
                 datos.setdefault("mensual", anidado.get("mensual", False))
                 datos.setdefault("mensualAcumulado", anidado.get("mensualAcumulado", False))
+            datos.setdefault("descripcionPeriodicidad", descripcion_periodicidad(datos.get("periodicidad")))
         return datos
     
 

@@ -7,6 +7,7 @@ import xlsxwriter
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
 from ftp.services.datos_json_service import leer_historicos_para_excel
 from shared.semaforo_service import evaluar_color, numero_de_umbral
+from shared.reglas_periodicidad import indices_de_meses
 
 
 def _es_descendente(limites: dict) -> bool:
@@ -50,68 +51,6 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
         return 'Gris'
 
 
-_MESES_CORTAS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun",
-                 "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-
-
-def _inicio_ventana_movil(mes_num, ventana):
-    """Índice 0-based (en _MESES_CORTAS) del mes de inicio de la ventana móvil
-    de `ventana` meses que termina en mes_num (1-indexed), y si esa ventana
-    cruza al año anterior (ej. Enero con ventana de 6 necesita Agosto previo)."""
-    idx = mes_num - ventana
-    if idx >= 0:
-        return idx, False
-    return idx + 12, True
-
-
-def _checkpoints_y_etiquetas(periodicidad, ano=None):
-    """
-    El mapeo (campo periodicidad) tiene tres formas de acumulación, mismo
-    criterio que ya usa la gráfica del front (ver calculos.js):
-      - "Trimestral - Acumulado" (CACU 04, CAMA 04, DM 06, EH 04): solo 4
-        cortes reales al año (Mar/Jun/Sep/Dic), acumulado desde enero. En vez
-        de armar las 12 columnas mensuales de siempre (la mayoría vacías), se
-        arman solo esas 4, con etiqueta "Ene - Mar" en vez de "Marzo".
-      - "Mensual - Trimestralizado" (DM 03): dato cada mes, pero cada uno es
-        una ventana móvil de 3 meses -- se mantienen las 12 columnas, solo
-        cambia la etiqueta ("Feb - Abr" para abril).
-      - "Mensual - Semestralizado" (CACU 02/03, CAMA 02/03): igual que arriba
-        pero con ventana de 6 meses ("Ago - Ene" para enero).
-    Cualquier otra periodicidad usa las 12 columnas y etiquetas de siempre.
-    Devuelve (lista de índices de mes 0-based a mostrar, dict índice->etiqueta o None).
-    """
-    texto = (periodicidad or "").lower()
-
-    anio_act = str(ano)[-2:] if ano else ""
-    anio_ant = str(int(ano) - 1)[-2:] if ano else ""
-    sufA_act = f" {anio_act}" if anio_act else ""
-    sufA_ant = f" {anio_ant}" if anio_ant else ""
-
-    if "trimestral" in texto and "acumulado" in texto:
-        idxs = [2, 5, 8, 11]  # Marzo, Junio, Septiembre, Diciembre
-        etiquetas = {i: f"Ene{sufA_act} - {_MESES_CORTAS[i]}{sufA_act}" for i in idxs}
-        return idxs, etiquetas
-
-    if "semestral" in texto and "anualizado" in texto:
-        # EH 03, DM 04 (modulo Extractor): solo hay dato real en los 2 cortes
-        # del año (Junio = Jul(ano-1)-Jun(ano), Diciembre = Ene(ano)-Dic(ano)),
-        # el resto de los meses solo tienen numerador crudo sin semaforo --
-        # se muestran solo esas 2 columnas, igual que Trimestral Acumulado
-        # muestra solo sus 4 cortes en vez de las 12 columnas de siempre.
-        return [5, 11], None  # Junio, Diciembre
-
-    ventana = 3 if "trimestralizado" in texto else 6 if "semestralizado" in texto else None
-    if ventana:
-        etiquetas = {}
-        for idx in range(12):
-            idx_inicio, cruza = _inicio_ventana_movil(idx + 1, ventana)
-            sufA = sufA_ant if cruza else sufA_act
-            etiquetas[idx] = f"{_MESES_CORTAS[idx_inicio]}{sufA} - {_MESES_CORTAS[idx]}{sufA_act}"
-        return list(range(12)), etiquetas
-
-    return list(range(12)), None
-
-
 def _estilo_valor(fmt, clave_base, valor):
     """Formato de una celda de numerador/denominador dentro de una fila Gris.
     Si el valor sí existe (no None/""), usa la variante gris RGB(49,134,155)
@@ -139,7 +78,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         idx_mes_activo = int(mes) - 1
         nombre_mes_act = MESES_LISTA[idx_mes_activo]
 
-        checkpoints, etiquetas_especiales = _checkpoints_y_etiquetas(periodicidad, ano)
+        checkpoints = indices_de_meses(periodicidad)
         ultima_col = len(checkpoints) * 3
 
         limites       = indicadorSemaforo.get(nombre_mes_act, indicadorSemaforo)
@@ -161,7 +100,7 @@ def Excel_final(diccionarioPrevio, indicadorTitulo, indicadordesNum, indicadorde
         worksheet.merge_range(5, 0, 9, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
 
         for pos, idx_real in enumerate(checkpoints):
-            nombre_m = etiquetas_especiales[idx_real] if etiquetas_especiales else MESES_LISTA[idx_real]
+            nombre_m = MESES_LISTA[idx_real]
             sc = pos * 3 + 1
             worksheet.merge_range(5, sc, 5, sc + 2, nombre_m.upper(), fmt['subtitulo'])
 

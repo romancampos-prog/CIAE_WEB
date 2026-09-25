@@ -1,4 +1,4 @@
-﻿"""
+"""
 Pipeline paralelo para generar todos los indicadores de una categoría en un solo Excel.
 Usado en: ftp/controllers/reportes_controller.py
 
@@ -11,43 +11,20 @@ from ftp.services.mapeo_ftp import cargar_ficha_ftp
 from ftp.services.ftp_extraer_unificado import ExtraerYCalcularIndicadorUnificado
 from ftp.services.semaforizado import Semaforizado
 from ftp.services.generar_excel import (
-    obtener_estilos_excel, _leer_historicos, _calcular_color, _estilo_valor,
-    _checkpoints_y_etiquetas, _es_descendente, _texto_medio,
+    _leer_historicos, _calcular_color, _estilo_valor,
+    _es_descendente, _texto_medio,
 )
 from shared.semaforo_service import numero_de_umbral
+from shared.reglas_periodicidad import indices_de_meses, descripcion_periodicidad
 from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
 from ftp.services.datos_json_service import (
     guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes,
-    leer_ultimo_mes_guardado, leer_datos_indicador, leer_mes_guardado,
 )
 
 MESES_LISTA = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ]
-
-
-def _ultimo_corte_extractor(indicador: str, ano: str):
-    """
-    Igual que leer_ultimo_mes_guardado, pero solo cuenta meses que ya tienen
-    un corte cerrado (CORTES.MESES, ver extractor_service.intentar_generar_corte)
-    -- para indicadores del modulo Extractor (EH 03, DM 04), donde MESES trae
-    el numerador crudo de cada mes (desempeno "Gris", sin cerrar) mientras se
-    junta la ventana del corte semestral. Tomar literal el ultimo mes de MESES
-    metería un mes sin resultado real en la descarga.
-    """
-    datos_json = leer_datos_indicador(indicador, ano)
-    meses_con_corte = [
-        mes for mes, unidades in datos_json.get("CORTES", {}).get("MESES", {}).items()
-        if mes in MESES_LISTA and isinstance(unidades, dict) and "TOTAL_OOAD" in unidades
-    ]
-    if not meses_con_corte:
-        return None, False, None, None
-
-    mes_reciente = max(meses_con_corte, key=lambda m: MESES_LISTA.index(m))
-    mes_str = str(MESES_LISTA.index(mes_reciente) + 1).zfill(2)
-    diccionarioPrevio, es_semana, semana = leer_mes_guardado(indicador, ano, mes_str)
-    return diccionarioPrevio, es_semana, semana, mes_str
 
 
 def _metadata_de(ficha) -> dict:
@@ -86,44 +63,10 @@ def preparar_datos_indicador(indicador: str, ano: str, mes: str, semana) -> dict
         return {"status": "error", "mensaje": str(exc)}
 
 
-def preparar_datos_guardados(indicador: str, ano: str) -> dict:
-    """
-    Variante de solo lectura de preparar_datos_indicador -- usada al descargar
-    "todos" desde gráficas. Nunca extrae de FTP ni guarda nada: siempre trae
-    el mes MÁS RECIENTE que el indicador tenga guardado (definitivo o
-    semanal, ver leer_ultimo_mes_guardado) -- no se recorta al mes de otro
-    indicador de la misma descarga, cada uno muestra todo lo que tiene.
-    "mes_real" indica cuál se usó para que la hoja lo etiquete bien. Solo si
-    no hay absolutamente nada guardado ese año se devuelve status=error.
-    """
-    try:
-        ficha    = cargar_ficha_ftp(indicador)
-        metadata = _metadata_de(ficha)
-
-        if ficha.modulo == "Extractor":
-            diccionarioPrevio, es_semana, semana, mes_real = _ultimo_corte_extractor(indicador, ano)
-        else:
-            diccionarioPrevio, es_semana, semana, mes_real = leer_ultimo_mes_guardado(indicador, ano)
-        if diccionarioPrevio is None:
-            return {"status": "error", "mensaje": f"{indicador} no tiene ningún dato guardado todavía."}
-
-        return {
-            "status":            "success",
-            "diccionarioPrevio": diccionarioPrevio,
-            "errores":           {},
-            "metadata":          metadata,
-            "es_semana":         es_semana,
-            "semana":            semana,
-            "mes_real":          mes_real,
-        }
-    except Exception as exc:
-        return {"status": "error", "mensaje": str(exc)}
-
-
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
-                             semana, es_semana: bool):
+                             semana, es_semana: bool, historicos: dict | None = None):
     titulo       = metadata["titulo"] or ""
     desNum       = metadata["desNum"] or ""
     desDen       = metadata["desDen"] or ""
@@ -133,11 +76,12 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
 
     idx_mes_activo = int(mes) - 1
 
-    historicos, leyendas = _leer_historicos(
-        indicador, ano, idx_mes_activo, list(diccionarioPrevio.keys())
-    )
+    if historicos is None:
+        historicos, _ = _leer_historicos(
+            indicador, ano, idx_mes_activo, list(diccionarioPrevio.keys())
+        )
 
-    checkpoints, etiquetas_especiales = _checkpoints_y_etiquetas(periodicidad, ano)
+    checkpoints = indices_de_meses(periodicidad)
     ultima_col = len(checkpoints) * 3
 
     nombre_mes_act = MESES_LISTA[idx_mes_activo]
@@ -167,22 +111,30 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     ws.merge_range(3, 1, 3, ultima_col, f"  {desNum.upper()}", fmt['descripcion'])
     ws.write(4, 0, "  DENOMINADOR", fmt['etiqueta_bold'])
     ws.merge_range(4, 1, 4, ultima_col, f"  {desDen.upper()}", fmt['descripcion'])
-    ws.merge_range(5, 0, 9, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
+
+    # Con periodicidad se agrega una fila mas (igual que NUMERADOR/DENOMINADOR);
+    # r es la fila del encabezado de meses, todo lo de abajo se recorre con ella.
+    texto_periodicidad = descripcion_periodicidad(periodicidad)
+    r = 6 if texto_periodicidad else 5
+    if texto_periodicidad:
+        ws.write(5, 0, "  PERIODICIDAD", fmt['etiqueta_bold'])
+        ws.merge_range(5, 1, 5, ultima_col, f"  {texto_periodicidad.upper()}", fmt['descripcion'])
+    ws.merge_range(r, 0, r + 4, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
 
     for pos, idx_real in enumerate(checkpoints):
-        nombre_m = etiquetas_especiales[idx_real] if etiquetas_especiales else MESES_LISTA[idx_real]
+        nombre_m = MESES_LISTA[idx_real]
         sc = pos * 3 + 1
-        ws.merge_range(5, sc, 5, sc + 2, nombre_m.upper(), fmt['subtitulo'])
+        ws.merge_range(r, sc, r, sc + 2, nombre_m.upper(), fmt['subtitulo'])
 
         if idx_real == idx_mes_activo:
             if tiene_alto:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_esp}", fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_esp, v_critico, True), fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"{clave_critica.upper()}: >= {v_critico}", fmt['Bajo_Leyenda'])
+                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: <= {v_esp}", fmt['Esperado_Leyenda'])
+                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_esp, v_critico, True), fmt['Medio_Leyenda'])
+                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"{clave_critica.upper()}: >= {v_critico}", fmt['Bajo_Leyenda'])
             else:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_esp}", fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_esp, v_critico, False), fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {v_critico}", fmt['Bajo_Leyenda'])
+                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: >= {v_esp}", fmt['Esperado_Leyenda'])
+                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_esp, v_critico, False), fmt['Medio_Leyenda'])
+                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"BAJO: <= {v_critico}", fmt['Bajo_Leyenda'])
         else:
             lim_h         = semaforo.get(MESES_LISTA[idx_real], semaforo)
             v_h           = numero_de_umbral(lim_h.get("Esperado", 0))
@@ -190,24 +142,24 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
             clave_crit_h  = "Alto" if "Alto" in lim_h else "Bajo"
             crit_h        = numero_de_umbral(lim_h.get(clave_crit_h, 0))
             if alt_h:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: <= {v_h}", fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_h, crit_h, True), fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"{clave_crit_h.upper()}: >= {crit_h}", fmt['Bajo_Leyenda'])
+                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: <= {v_h}", fmt['Esperado_Leyenda'])
+                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_h, crit_h, True), fmt['Medio_Leyenda'])
+                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"{clave_crit_h.upper()}: >= {crit_h}", fmt['Bajo_Leyenda'])
             else:
-                ws.merge_range(6, sc, 6, sc + 2, f"ESPERADO: >= {v_h}", fmt['Esperado_Leyenda'])
-                ws.merge_range(7, sc, 7, sc + 2, _texto_medio(v_h, crit_h, False), fmt['Medio_Leyenda'])
-                ws.merge_range(8, sc, 8, sc + 2, f"BAJO: <= {crit_h}", fmt['Bajo_Leyenda'])
+                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: >= {v_h}", fmt['Esperado_Leyenda'])
+                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_h, crit_h, False), fmt['Medio_Leyenda'])
+                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"BAJO: <= {crit_h}", fmt['Bajo_Leyenda'])
 
-        ws.write(9, sc,     "NUM", fmt['header_sub'])
-        ws.write(9, sc + 1, "DEN", fmt['header_sub'])
-        ws.write(9, sc + 2, "%",   fmt['header_sub'])
+        ws.write(r + 4, sc,     "NUM", fmt['header_sub'])
+        ws.write(r + 4, sc + 1, "DEN", fmt['header_sub'])
+        ws.write(r + 4, sc + 2, "%",   fmt['header_sub'])
 
-    ultima_fila   = 10 + len(diccionarioPrevio) - 1
+    ultima_fila   = r + 5 + len(diccionarioPrevio) - 1
     lista_tecnica = UNIDADES_PREVIOS if es_semana else UNIDADES_FINALES
-    ws.autofilter(9, 0, ultima_fila, 0)
+    ws.autofilter(r + 4, 0, ultima_fila, 0)
 
     for idx_fila, unidad_id in enumerate(diccionarioPrevio.keys()):
-        fila_excel = idx_fila + 10
+        fila_excel = idx_fila + r + 5
         es_total   = (unidad_id == "TOTAL_OOAD")
 
         fmt_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']

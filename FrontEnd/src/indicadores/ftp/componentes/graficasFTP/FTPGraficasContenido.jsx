@@ -11,6 +11,8 @@ import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 import { etiquetaMesLarga, etiquetaMesCorta } from '../../utils/calculos';
 import { useEsMovil } from '../../../shared/utils/useEsMovil';
 
+
+
 const VISTAS_FTP = [
   { id: 'unidad', label: 'Por unidad', path: <><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/></> },
   { id: 'mes',    label: 'Por mes',    path: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
@@ -97,6 +99,9 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               <div className="ig-desc-meta">
                 <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.informacion.descNum}</span>
                 <span className="ig-desc-row"><span className="ig-desc-label">Den</span>{indInfo.informacion.descDen}</span>
+                {indInfo.descripcionPeriodicidad && (
+                  <span className="ig-desc-row"><span className="ig-desc-label">Per</span>{indInfo.descripcionPeriodicidad}</span>
+                )}
               </div>
             </div>
           )}
@@ -153,7 +158,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
             {vistaGrafica === 'mes' ? (
               <PanelSelector
                 triggerLabel="Mes"
-                triggerValue={mesSel ? etiquetaMesLarga(parseInt(mesSel), indInfo, anio) : ''}
+                triggerValue={mesSel ? etiquetaMesLarga(parseInt(mesSel)) : ''}
                 panelTitle="Mes"
                 indColor={indColor}
                 extraClass="ig-unit-panel--mes"
@@ -167,7 +172,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                         style={mesSel === m ? { borderLeftColor: indColor } : {}}
                         onClick={() => { setMesSel(m); cerrar(); }}
                       >
-                        <span className="ig-unit-name">{conAnioChico(etiquetaMesLarga(parseInt(m), indInfo, anio))}</span>
+                        <span className="ig-unit-name">{conAnioChico(etiquetaMesLarga(parseInt(m)))}</span>
                       </button>
                     ))}
                   </div>
@@ -199,7 +204,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                     )}
                     {vistaGrafica === 'mes' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {etiquetaMesCorta(parseInt(mesSel), indInfo, anio)}
+                        {etiquetaMesCorta(parseInt(mesSel))}
                       </span>
                     )}
                   </div>
@@ -213,11 +218,11 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                       opciones={[
                         {
                           label: `Descargar ${indSel}`,
-                          onClick: () => descargarIndicador(mesSel),
+                          onClick: () => descargarIndicador(),
                         },
                         {
                           label: `Descargar todo ${categoria}`,
-                          onClick: () => descargarCategoria(mesSel),
+                          onClick: () => descargarCategoria(),
                           multiple: true,
                         },
                       ]}
@@ -283,6 +288,14 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                   <div className="ig-mes-total-col">
                     <TotalTile total={totalMes} indColor={indColor} />
                   </div>
+                </div>
+              )}
+
+              {indInfo?.descripcionPeriodicidad && (
+                <div className="ig-periodicidad-pie">
+                  <span className="ig-periodicidad-pildora" style={{ background: `${indColor}14`, color: indColor }}>
+                    {indInfo.descripcionPeriodicidad}
+                  </span>
                 </div>
               )}
             </div>

@@ -304,7 +304,7 @@
   background: color-mix(in srgb, var(--ic, #0b5445) 10%, white);
 }
 
-.ig-chart-badges { display: flex; align-items: center; gap: 8px; }
+.ig-chart-badges { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .ig-badge {
   font-size: 0.77rem; font-weight: 700;
   border-radius: 100px; padding: 4px 14px;
@@ -993,4 +993,21 @@
   .ig-mes-total-col .ig-total-tile-meta-row { gap: 6px; }
   .ig-mes-total-col .ig-total-tile-meta-row span { font-size: 0.56rem; }
   .ig-mes-total-col .ig-total-tile-meta-row strong { font-size: 0.68rem; }
+}
+
+/* Periodicidad del indicador, centrada debajo de la grafica */
+.ig-periodicidad-pie {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+.ig-periodicidad-pildora {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
 }
