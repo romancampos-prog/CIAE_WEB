@@ -6,7 +6,7 @@ Usado en: generar_iaas.py, procesar_service.py, info_service.py,
 """
 import json
 import re
-from iaas.config import RUTA_DATA_IAAS, RUTA_IAAS_JSON
+from iaas.config import RUTA_DATA_IAAS
 
 _RE_ANIO = re.compile(r"20\d{2}")
 
@@ -41,9 +41,3 @@ def escribir_indicador_anio(anio: str, ind_n: int, data: dict) -> None:
     ruta.mkdir(parents=True, exist_ok=True)
     with open(ruta / f"IAAS_0{ind_n}.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def leer_config_iaas() -> dict:
-    """JSON estático con título, descripciones y umbrales de cada indicador."""
-    with open(RUTA_IAAS_JSON, "r", encoding="utf-8") as f:
-        return json.load(f)

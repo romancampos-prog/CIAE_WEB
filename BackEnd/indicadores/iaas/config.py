@@ -23,5 +23,4 @@ for _u_name in UNIDADES_HGO_IAAS01: _IAAS01_TIPO[_u_name] = "HGO"
 for _u_name in UNIDADES_HGP_IAAS01: _IAAS01_TIPO[_u_name] = "HGP"
 UNIDAD_TIPO_IAAS01 = _IAAS01_TIPO
 
-RUTA_IAAS_JSON = Path(__file__).parent / "mapeo" / "IAAS.json"  # config VIEJO -- solo lo lee codigo sin uso (ver extraccion_service.py)
 RUTA_DATA_IAAS = DATA_INDICADORES  # {año}/IAAS/IAAS_0N.json

@@ -87,11 +87,6 @@ def _leer_sesion_mes(anio: str, mes_nombre: str) -> dict:
     return datos
 
 
-def _get_pendientes(anio: str, mes_nombre: str) -> list:
-    pendientes, _ = _get_pendientes_info(anio, mes_nombre)
-    return pendientes
-
-
 def _get_pendientes_info(anio: str, mes_nombre: str) -> tuple[list, dict]:
     datos_por_ind: dict[str, dict] = {}
     for ind_n in range(1, 7):

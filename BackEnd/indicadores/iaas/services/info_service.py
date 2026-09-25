@@ -1,12 +1,6 @@
 from iaas.config import ORDEN_DEMAS_IAAS, UNIDADES_HGS_IAAS01, UNIDAD_TIPO_IAAS01
-from iaas.services.datos_json_service import leer_config_iaas
 from iaas.services.extraccion_unificada import cargar_mapeo_iaas
 from shared.semaforo_service import es_agrupado
-
-
-def obtener_config_indicador(indicador: str) -> dict:
-    datos = leer_config_iaas()
-    return datos.get(indicador, {})
 
 
 def infoAllIAAS() -> dict:
