@@ -2,7 +2,7 @@ import api from '../../../shared/api/axiosInstance';
 
 export const getMesesGenerados = async (indicador, ano) => {
     try {
-        const respuesta = await api.get('/reportes/meses-generados', {
+        const respuesta = await api.get('/Indicadores/ftp/meses-generados', {
             params: { indicador, ano }
         });
         return respuesta.data.data?.meses ?? [];
@@ -13,7 +13,7 @@ export const getMesesGenerados = async (indicador, ano) => {
 
 export const generarCategoria = async (categoria, datos) => {
     try {
-        const respuesta = await api.post('/reportes/generar-categoria', {
+        const respuesta = await api.post('/Indicadores/ftp/generar-categoria', {
             categoria,
             ano:    datos.ano,
             mes:    datos.mes,
@@ -28,7 +28,7 @@ export const generarCategoria = async (categoria, datos) => {
 
 export const getReporte = async (indicador, datos) => {
     try {
-        const respuesta = await api.get('/reportes/Indicadores', {
+        const respuesta = await api.get('/Indicadores/ftp/generar', {
             params: {
                 indicador,
                 ano:    datos.ano,
@@ -45,7 +45,7 @@ export const getReporte = async (indicador, datos) => {
 
 /** Regenera un mes definitivo que ya tiene reporte guardado (requiere contraseña). */
 export const regenerarReporteFinal = async (indicador, datos, password) => {
-    const respuesta = await api.post('/reportes/Indicadores/regenerar', {
+    const respuesta = await api.post('/Indicadores/ftp/regenerar', {
         indicador,
         ano: datos.ano,
         mes: datos.mes,
@@ -56,7 +56,7 @@ export const regenerarReporteFinal = async (indicador, datos, password) => {
 
 /** Regenera toda una categoría cuyo mes definitivo ya fue generado (requiere contraseña). */
 export const regenerarCategoria = async (categoria, datos, password) => {
-    const respuesta = await api.post('/reportes/generar-categoria/regenerar', {
+    const respuesta = await api.post('/Indicadores/ftp/regenerar-categoria', {
         categoria,
         ano: datos.ano,
         mes: datos.mes,
