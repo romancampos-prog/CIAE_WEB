@@ -1,51 +1,32 @@
-HOSPITALES_IAAS = [
-    "HGZMF 2 IRAPUATO",
-    "HGZMF 3 SALAMANCA",
-    "HGZ 4 CELAYA",
-    "HGS 10 GUANAJUATO",
-    "HGSMF 13 ACAMBARO",
-    "HGZMF 21 LEON SUR",
-    "HGS 54 SILAO",
-    "HGR 58 LEÓN",
-    "HGSMF 7 SAN FCO. DEL R.",
-    "HGSMF 15 MOROLEON",
-    "HGSMF 20 SAN LUIS DE"
-]
+"""
+Unidades de IAAS (hospitales) y su clasificacion por tipo. Unica fuente: mapeo/unidades/iaas.json.
+Usado en: services/iaas/*, services/bd_Ciae_Indicadores_Services.py, shared/semaforizado_service.py
+"""
+import json
+from pathlib import Path
 
-CLASIFICACION_HOSPITALES_IAAS_01 = {
-    "UNIDADES_HGS_IAAS01": [
-        "HGSMF 13 ACAMBARO",
-        "HGS 54 SILAO",
-        "HGSMF 7 SAN FCO. DEL R.",
-        "HGSMF 15 MOROLEON",
-        "HGS 10 GUANAJUATO",
-        "HGSMF 20 SAN LUIS DE"
-    ],
-    "UNIDADES_HGZ_IAAS01": [
-        "HGZMF 2 IRAPUATO",
-        "HGZMF 3 SALAMANCA",
-        "HGZ 4 CELAYA",
-        "HGZMF 21 LEON SUR"
-    ],
-    "UNIDADES_HGR_IAAS01": [
-        "HGR 58 LEÓN"
-    ],
-    "UNIDADES_HGO_IAAS01": [
-    
-    ],
-     "UNIDADES_HGP_IAAS01": [
+_unidades = json.loads((Path(__file__).parent.parent / "mapeo" / "unidades" / "iaas.json").read_text(encoding="utf-8"))
 
-    ],
-}
+MESES               = _unidades["MESES"]
+ORDEN_IAAS01        = _unidades["ORDEN_IAAS01"]
+ORDEN_DEMAS_IAAS    = _unidades["ORDEN_DEMAS_IAAS"]
+UNIDADES_HGS_IAAS01 = _unidades["UNIDADES_HGS_IAAS01"]
+UNIDADES_HGZ_IAAS01 = _unidades["UNIDADES_HGZ_IAAS01"]
+UNIDADES_HGR_IAAS01 = _unidades["UNIDADES_HGR_IAAS01"]
+UNIDADES_HGO_IAAS01 = _unidades.get("UNIDADES_HGO_IAAS01", [])
+UNIDADES_HGP_IAAS01 = _unidades.get("UNIDADES_HGP_IAAS01", [])
 
-# Mapa inverso unidad -> tipo de semaforo, para no recorrer las 5 listas en cada
-# consulta. Cualquier unidad que no aparezca aqui (ej. "TOTAL_OOAD") se toma
-# como "OOAD" en donde se use este mapa.
+# Mapa unidad -> tipo de semaforo de IAAS 01. Cualquier unidad que no aparezca aqui
+# (ej. "TOTAL_OOAD") se toma como "OOAD" en donde se use este mapa.
 UNIDAD_TIPO_IAAS01: dict[str, str] = {
-    unidad: clave.removeprefix("UNIDADES_").removesuffix("_IAAS01")
-    for clave, unidades in CLASIFICACION_HOSPITALES_IAAS_01.items()
+    unidad: tipo
+    for tipo, unidades in (
+        ("HGS", UNIDADES_HGS_IAAS01), ("HGZ", UNIDADES_HGZ_IAAS01), ("HGR", UNIDADES_HGR_IAAS01),
+        ("HGO", UNIDADES_HGO_IAAS01), ("HGP", UNIDADES_HGP_IAAS01),
+    )
     for unidad in unidades
 }
+
 
 def alias_hgsz(nombre: str) -> str | None:
     """
@@ -63,7 +44,7 @@ def alias_hgsz(nombre: str) -> str | None:
 # alias (HGSZ 10 ..., HGSZMF 13 ...) -> nombre canonico del catalogo (HGS 10 ..., HGSMF 13 ...)
 _ALIAS_A_CANONICO_IAAS: dict[str, str] = {
     alias: nombre
-    for nombre in {u for unidades in CLASIFICACION_HOSPITALES_IAAS_01.values() for u in unidades}
+    for nombre in UNIDADES_HGS_IAAS01
     for alias in [alias_hgsz(nombre)] if alias
 }
 

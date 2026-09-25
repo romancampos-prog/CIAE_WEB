@@ -2,7 +2,7 @@
 Calculo de un indicador a partir de lo ya extraido: evalua las formulas del mapeo
 (numerador, denominador, resultado), agrega el TOTAL_OOAD y asigna el semaforo.
 No sabe de donde salieron los datos (FTP, poblacion, archivos subidos).
-Usado en: services/ftp/generacion_indicador_ftp_Services.py, ftp/services/recalcular_poblacion_service.py
+Usado en: services/ftp/generacion_indicador_ftp_Services.py, services/iaas/*, ftp/services/recalcular_poblacion_service.py
 """
 import math
 import re
@@ -75,7 +75,7 @@ def agregar_total_ooad(unidades: dict[str, ResultadoUnidad], formula_resultado: 
         if num is None or den is None:
             continue
         if den == 0 and num > 0:
-            print(f"[FTP] Inconsistencia en {nombre}: numerador={num} con denominador=0 -- no se incluye en el TOTAL_OOAD.")
+            print(f"[Total OOAD] Inconsistencia en {nombre}: numerador={num} con denominador=0 -- no se incluye en el TOTAL_OOAD.")
             continue
         total_num += num
         total_den += den
@@ -90,7 +90,7 @@ def agregar_total_ooad(unidades: dict[str, ResultadoUnidad], formula_resultado: 
     try:
         resultado_total = round(eval(formula_resultado, {"__builtins__": None}, {**_CONTEXTO_BASE_EVAL, "numerador": total_num, "denominador": total_den}), 2)
     except Exception as error:
-        print(f"[FTP] Error evaluando resultado del TOTAL_OOAD: {error}")
+        print(f"[Total OOAD] Error evaluando el resultado: {error}")
         resultado_total = None
     return ResultadoUnidad(numerador=total_num, denominador=total_den, resultado=resultado_total)
 

@@ -7,6 +7,7 @@ Usado en: services/ftp/generacion_indicador_ftp_Services.py, services/excel_Serv
           ftp/services/recalcular_poblacion_service.py, ftp/controllers/reportes_controller.py
 """
 import json
+import re
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -15,12 +16,25 @@ from schemas.model.generacion_ftp_Model import ResultadoUnidad
 from shared.MESES import MESES_ESTANDAR
 
 
+def validar_ano(ano: str) -> str:
+    """El año llega del usuario y arma rutas de archivo: solo se aceptan 4 digitos."""
+    if not re.fullmatch(r"\d{4}", str(ano)):
+        raise ValueError(f"Año inválido: {ano!r}")
+    return str(ano)
+
+
+def existe_carpeta_anio(ano: str) -> bool:
+    return (DATA_INDICADORES / validar_ano(ano)).exists()
+
+
 def _ruta_definitivo(indicador: str, ano: str) -> Path:
+    validar_ano(ano)
     familia = indicador.split()[0] if indicador.split() else indicador
     return DATA_INDICADORES / ano / familia / (indicador.replace(" ", "_") + ".json")
 
 
 def _ruta_semanal(indicador: str, ano: str) -> Path:
+    validar_ano(ano)
     return DATA_INDICADORES / ano / "SEMANAL" / (indicador.replace(" ", "_") + f"_{ano}_semana.json")
 
 
@@ -104,7 +118,7 @@ def leer_numeradores_todos_meses(indicador: str, ano: str) -> dict[str, dict[str
 
 def guardar_mes_definitivo(indicador: str, ano: str, mes: str, unidades: Mapping[str, ResultadoUnidad]) -> None:
     ruta = _ruta_definitivo(indicador, ano)
-    contenido = _leer_json_para_actualizar(ruta, {"INDICADOR": indicador, "ANO": ano, "MESES": {}})
+    contenido = _leer_json_para_actualizar(ruta, {"INDICADOR": indicador, "ANIO": ano, "MESES": {}})
 
     nombre_mes = _nombre_del_mes(mes)
     if nombre_mes:

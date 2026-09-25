@@ -1,5 +1,6 @@
 import logging
 import json
+from functools import lru_cache
 from pathlib import Path
 
 #mis archivos
@@ -9,7 +10,7 @@ from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from schemas.model.indicador_Model import InfoIndicador
 from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
 # Mismo modulo con el que FTP hace isinstance de las fuentes (si se importara por otra ruta seria otra clase).
-from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo
+from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo, IndicadorIAASMapeo
 
 
 
@@ -183,3 +184,18 @@ def cargar_ficha_ftp(indicador: str) -> FichaFTPMapeo:
 def cargar_indicador_mapeo(indicador: str) -> IndicadorFTPMapeo:
     """Lo que necesita la extraccion de un indicador FTP: reportes, formulas y semaforo."""
     return IndicadorFTPMapeo.model_validate(_bloque_crudo(indicador))
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
+# Mapeo tipado para los indicadores de IAAS
+
+@lru_cache(maxsize=None)
+def cargar_mapeo_iaas() -> dict[str, IndicadorIAASMapeo]:
+    """Los 6 indicadores IAAS del mapeo (se lee una sola vez)."""
+    with open(_RUTA_MAPEO / "IAAS.json", encoding="utf-8") as archivo:
+        crudo = json.load(archivo)
+    return {indicador: IndicadorIAASMapeo.model_validate(dato) for indicador, dato in crudo.items()}
+
+
+def cargar_indicador_iaas(indicador: str) -> IndicadorIAASMapeo:
+    return cargar_mapeo_iaas()[indicador]
