@@ -7,7 +7,7 @@ hacia el front).
 El "detalle" de cada archivo se deja como dict porque su forma depende del
 modoExtraccion y la valida services/metodos_extraccion_excel.py con su propio modelo
 por modo -- aqui solo se tipa lo que siempre existe.
-Usado en: ftp/services/ftp_extraer_unificado.py
+Usado en: services/ftp/extraccion_indicador_ftp_Services.py
 """
 from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field

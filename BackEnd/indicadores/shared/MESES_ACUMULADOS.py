@@ -8,7 +8,7 @@ from shared.MESES import MESES_ESTANDAR
 from shared.color_service import es_inconsistente
 from shared.semaforizado_service import SemaforizarReporte
 
-#funciones permitidas dentro del eval de la formula de resultado -- mismo criterio que ftp/services/numerador_denominador.py
+#funciones permitidas dentro del eval de la formula de resultado -- mismo criterio que services/calculo_indicador_Services.py
 _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
 
 

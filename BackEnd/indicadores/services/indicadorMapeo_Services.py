@@ -8,6 +8,8 @@ from indicadores.schemas.model.indicador_Model import IndicesIndicadores
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from schemas.model.indicador_Model import InfoIndicador
 from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
+# Mismo modulo con el que FTP hace isinstance de las fuentes (si se importara por otra ruta seria otra clase).
+from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo
 
 
 
@@ -159,3 +161,25 @@ def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
         semaforo=dato["semaforo"],
     )
 
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
+# Mapeo tipado para los indicadores de FTP (ficha y lo que necesita la extraccion)
+
+def ruta_familia(indicador: str) -> Path:
+    """indicadores/mapeo/{familia}.json de un indicador ("CAMA 01" -> CAMA.json)."""
+    return _RUTA_MAPEO / f"{indicador.split()[0]}.json"
+
+
+def _bloque_crudo(indicador: str) -> dict:
+    with open(ruta_familia(indicador), encoding="utf-8") as archivo:
+        return json.load(archivo)[indicador]
+
+
+def cargar_ficha_ftp(indicador: str) -> FichaFTPMapeo:
+    """Titulo, semaforo, periodicidad y nombre de archivo de un indicador FTP."""
+    return FichaFTPMapeo.model_validate(_bloque_crudo(indicador))
+
+
+def cargar_indicador_mapeo(indicador: str) -> IndicadorFTPMapeo:
+    """Lo que necesita la extraccion de un indicador FTP: reportes, formulas y semaforo."""
+    return IndicadorFTPMapeo.model_validate(_bloque_crudo(indicador))

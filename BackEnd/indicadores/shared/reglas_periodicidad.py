@@ -3,7 +3,7 @@ Reglas por periodicidad del mapeo (campo "periodicidad" de cada indicador):
 que meses muestran el Excel y la grafica, y el texto que explica el periodo.
 Solo hay dos formas: "mensual" (los 12 meses) y "de corte" (solo los meses de
 corte); lo que cambia entre periodicidades mensuales es el dato, no las columnas.
-Usado en: ftp/services/reporte_categoria.py, generar_excel.py, schemas/model/indicador_Model.py,
+Usado en: services/excel_dibujante_Services.py, schemas/model/indicador_Model.py,
           iaas/services/info_service.py
 """
 

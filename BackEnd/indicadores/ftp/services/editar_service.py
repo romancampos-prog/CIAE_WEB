@@ -6,7 +6,7 @@ Usado en: ftp/controllers/edicion_controller.py
 """
 import json
 
-from ftp.services.mapeo_ftp import ruta_familia
+from services.indicadorMapeo_Services import ruta_familia
 
 
 def _editar_bloque(indicador: str, cambios) -> dict:

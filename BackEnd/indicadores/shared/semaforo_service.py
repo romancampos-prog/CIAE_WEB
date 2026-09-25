@@ -14,7 +14,7 @@ indicador por indicador sin romper a los que todavía no se tocaron:
     El sentido de la comparación viene escrito en el propio valor, no hay
     que adivinarlo por el nombre de la clave.
 
-Usado en: ftp/services/semaforizado.py, ftp/services/generar_excel.py
+Usado en: services/calculo_indicador_Services.py, services/excel_dibujante_Services.py
 """
 import re
 import operator

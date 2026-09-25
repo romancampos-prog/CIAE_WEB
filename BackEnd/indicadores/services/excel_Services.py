@@ -12,14 +12,13 @@ import json
 
 import xlsxwriter
 
-from ftp.services.datos_json_service import leer_semana_indicador
-from ftp.services.generar_excel import obtener_estilos_excel
-from ftp.services.reporte_categoria import escribir_hoja_indicador
 from indicadores.schemas.model.excel_Model import (
     ExcelGenerado, HojaIndicador, MetadataHoja, SolicitudExcel,
 )
 from indicadores.schemas.model.indicador_Model import ReportePrevio, UnidadDatos
+from indicadores.services.bd_Ciae_Guardado_Services import leer_semanal_indicador
 from indicadores.services.bd_Ciae_Indicadores_Services import CargarReporteIndicador, _normalizar_semaforo
+from indicadores.services.excel_dibujante_Services import escribir_hoja_indicador, obtener_estilos_excel
 from indicadores.services.indicadorMapeo_Services import RutaMapeoExiste
 from shared.MESES import MESES_ESTANDAR
 
@@ -64,7 +63,7 @@ def _cargar_metadata(indicador: str) -> tuple[str, MetadataHoja]:
 
 
 def _cargar_semanal(indicador: str, ano: str) -> ReportePrevio | None:
-    crudo = leer_semana_indicador(indicador, ano)
+    crudo = leer_semanal_indicador(indicador, ano)
     if not crudo.get("MES"):
         return None
     crudo["MES"] = _normalizar_semaforo(crudo["MES"])

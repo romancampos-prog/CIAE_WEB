@@ -15,7 +15,7 @@ import io
 import json
 import pandas as pd
 
-from ftp.config import CLAVE_UNIDADES_F, NOMBREUNIDADESARCHIVO, ruta_poblacion
+from shared.unidades_ftp import CLAVE_UNIDADES_F, NOMBREUNIDADESARCHIVO, ruta_poblacion
 from extractor.config import (
     ruta_indicador_json, leer_mapeo_indicador, MESES_ESTANDAR,
     MESES_CORTE_SEMESTRAL, ventana_corte, INDICADORES_EXTRACTOR,
@@ -457,5 +457,5 @@ def procesar_archivo_mensual(anio: int, mes_nombre: str, contenido_bytes: bytes,
 
 
 # --------------------------------------------------------------------------- #
-# 5) Excel del corte -- reusa el mismo motor que FTP (generar_excel.py)
+# 5) Excel del corte -- reusa el dibujante estandar (services/excel_dibujante_Services.py)
 # --------------------------------------------------------------------------- #

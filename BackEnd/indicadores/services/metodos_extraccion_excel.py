@@ -113,7 +113,7 @@ class DetalleFiltroUnidadValor(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
-# Modos "formula" -- mismo algoritmo que ya probo ftp_extraer.py, solo se
+# Modos "formula" -- mismo algoritmo que ya probo la extraccion de FTP, solo se
 # renombran para que coincidan con el modoExtraccion real del mapeo (antes
 # "INTERSECCION"/"FINAL", ahora "INTERSECCION_COLUMNA"/"ULTIMA_FILA").
 # --------------------------------------------------------------------------- #

@@ -6,8 +6,7 @@ import io
 import re
 import json
 import pandas as pd
-from ftp.config import NOMBREUNIDADESARCHIVO
-from ftp.config import ruta_poblacion, RUTA_MAPEO_POBLACION
+from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, ruta_poblacion, RUTA_MAPEO_POBLACION
 
 DELEGACION_FILTRO = "Guanajuato"
 

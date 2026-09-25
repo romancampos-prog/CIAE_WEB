@@ -53,7 +53,7 @@ def IndicadorExiste(indicador: str, ano: str, rutaprevio: bool) -> str:
 def _normalizar_semaforo(bloque_meses: dict) -> dict:
     """
     El pipeline de FTP guarda el semaforo de cada unidad como "color" (ver
-    ftp/services/semaforizado.py); IAAS y Extractor ya lo guardan como
+    services/calculo_indicador_Services.py); IAAS y Extractor ya lo guardan como
     "desempeno" (shared/semaforizado_service.py). El modelo unificado
     (UnidadDatos) siempre exige "desempeno" -- se traduce aqui, en la
     lectura, para no tener que igualar el formato de guardado en cada modulo.

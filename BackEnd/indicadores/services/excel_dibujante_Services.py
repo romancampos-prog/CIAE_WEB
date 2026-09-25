@@ -1,72 +1,112 @@
 """
-Pipeline paralelo para generar todos los indicadores de una categoría en un solo Excel.
-Usado en: ftp/controllers/reportes_controller.py
-
-Flujo optimizado:
-  FASE 1 — Paralela  : preparar_datos_indicador() por cada indicador (FTP + cálculos con caché)
-  FASE 2 — Secuencial: escribir_hoja_indicador() acumula hojas en un único xlsxwriter.Workbook
+Dibujante estandar de la hoja de un indicador (FTP y Extractor): estilos del libro y
+la pestana con encabezado, leyendas del semaforo y una fila por unidad. Recibe los
+datos ya leidos (incluido el historico de meses); no lee la BD.
+Usado en: services/excel_Services.py
 """
 import xlsxwriter
-from ftp.services.mapeo_ftp import cargar_ficha_ftp
-from ftp.services.ftp_extraer_unificado import ExtraerYCalcularIndicadorUnificado
-from ftp.services.semaforizado import Semaforizado
-from ftp.services.generar_excel import (
-    _leer_historicos, _calcular_color, _estilo_valor,
-    _es_descendente, _texto_medio,
-)
-from shared.semaforo_service import numero_de_umbral
-from shared.reglas_periodicidad import indices_de_meses, descripcion_periodicidad
-from ftp.config import UNIDADES_PREVIOS, UNIDADES_FINALES, NOMBREUNIDADESARCHIVO
-from ftp.services.datos_json_service import (
-    guardar_datos_en_json, guardar_semana_en_json, borrar_semana_del_mes,
-)
 
-MESES_LISTA = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-]
+from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS
+from shared.MESES import MESES_ESTANDAR as MESES_LISTA
+from shared.reglas_periodicidad import descripcion_periodicidad, indices_de_meses
+from shared.semaforo_service import evaluar_color, numero_de_umbral
 
 
-def _metadata_de(ficha) -> dict:
-    return {
-        "titulo":       ficha.informacion.titulo,
-        "desNum":       ficha.informacion.descNum,
-        "desDen":       ficha.informacion.descDen,
-        "arch":         ficha.nombreArchivoFinal,
-        "semaforo":     ficha.semaforo,
-        "decimales":    None,
-        "periodicidad": ficha.periodicidad,
+def _es_descendente(limites: dict) -> bool:
+    """
+    True si "menor es mejor" para este semaforo (hay que compararlo contra el
+    umbral con <=, no >=). Dos formatos posibles:
+      - Legado: clave "Alto" presente (ej. IAAS) en vez de "Bajo".
+      - Explicito (EH 03, DM 04, etc.): el valor de "Esperado" ya trae el
+        operador como texto, ej. "<= 17.38" -- ahi se lee el operador
+        directo, sin necesidad de la clave "Alto".
+    """
+    if "Alto" in limites:
+        return True
+    esperado = limites.get("Esperado")
+    return isinstance(esperado, str) and esperado.strip().startswith(("<=", "<"))
+
+
+def _texto_medio(v_esp, v_critico, descendente) -> str:
+    """
+    Texto de la leyenda MEDIO -- vacio si Esperado y el umbral critico son el
+    mismo numero (semaforo binario, sin nivel Medio real -- ej. "Medio": null
+    en el mapeo, como EH 03/DM 04). Sin esto se imprimia un rango vacio/
+    imposible (ej. "MEDIO: > 67.53 y < 67.53") que da a entender que existe
+    un nivel Medio aunque nunca se use.
+    """
+    if v_esp == v_critico:
+        return ""
+    return f"MEDIO: > {v_esp} y < {v_critico}" if descendente else f"MEDIO: < {v_esp} y > {v_critico}"
+
+
+def _calcular_color(valor, idx_mes, indicadorSemaforo):
+    MESES_LISTA = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    if valor == "" or valor is None:
+        return 'Gris'
+    try:
+        val     = float(valor)
+        limites = indicadorSemaforo.get(MESES_LISTA[idx_mes], indicadorSemaforo)
+        return evaluar_color(val, limites)
+    except Exception:
+        return 'Gris'
+
+
+def _estilo_valor(fmt, clave_base, valor):
+    """Formato de una celda de numerador/denominador dentro de una fila Gris.
+    Si el valor sí existe (no None/""), usa la variante gris RGB(49,134,155)
+    bold del mismo formato base -- mismo fondo/borde, solo marca que no se
+    contó en el total."""
+    if valor not in (None, ""):
+        return fmt.get(f"{clave_base}_incompleto", fmt[clave_base])
+    return fmt[clave_base]
+
+
+def obtener_estilos_excel(workbook):
+    C_VERDE       = '#0B5445'
+    C_DORADO      = '#9A7026'
+    C_ROJO        = "#7E0808"
+    C_GRIS_FONDOS = '#F2F2F2'
+    C_GRIS_TOTAL  = '#808080'
+    C_BORDE       = '#D1D1D1'
+
+    base = {
+        'font_name': 'Calibri', 'font_size': 11, 'valign': 'vcenter',
+        'border': 1, 'border_color': C_BORDE, 'align': 'center'
     }
 
-
-def preparar_datos_indicador(indicador: str, ano: str, mes: str, semana) -> dict:
-    try:
-        metadata = _metadata_de(cargar_ficha_ftp(indicador))
-
-        diccionarioPrevio, errores = ExtraerYCalcularIndicadorUnificado(indicador, ano, mes, semana)
-        diccionarioPrevio = Semaforizado(diccionarioPrevio, metadata["semaforo"], mes)
-
-        es_semana = bool(semana and str(semana).strip() not in ("", "None", "none"))
-        if not es_semana:
-            guardar_datos_en_json(indicador, ano, mes, diccionarioPrevio)
-            borrar_semana_del_mes(indicador, ano, mes)
-        else:
-            guardar_semana_en_json(indicador, ano, mes, semana, diccionarioPrevio)
-
-        return {
-            "status":            "success",
-            "diccionarioPrevio": diccionarioPrevio,
-            "errores":           errores,
-            "metadata":          metadata,
-        }
-    except Exception as exc:
-        return {"status": "error", "mensaje": str(exc)}
+    return {
+        'titulo_izq':            workbook.add_format({**base, 'bold': True, 'font_size': 16, 'font_color': C_VERDE, 'border': 0, 'align': 'left'}),
+        'nota_completas':        workbook.add_format({'font_name': 'Calibri', 'font_size': 14, 'bold': True, 'align': 'center'}),
+        'etiqueta_bold':         workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS, 'align': 'left'}),
+        'descripcion':           workbook.add_format({**base, 'text_wrap': True, 'font_color': '#444444', 'align': 'left'}),
+        'columna_unidad_header': workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS}),
+        'columna_unidad_dato':   workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS}),
+        'subtitulo':             workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS, 'font_color': '#444444'}),
+        'header_sub':            workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_FONDOS, 'font_size': 9}),
+        'Esperado_Leyenda':      workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_VERDE,  'bold': True}),
+        'Medio_Leyenda':         workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_DORADO, 'bold': True}),
+        'Bajo_Leyenda':          workbook.add_format({**base, 'bg_color': C_GRIS_FONDOS, 'font_color': C_ROJO,   'bold': True}),
+        'dato_normal':           workbook.add_format({**base, 'num_format': '#,##0'}),
+        'fila_par':              workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0'}),
+        # Idénticos a dato_normal/fila_par -- solo cambia font_color a gris
+        # RGB(49,134,155) bold: un numerador o denominador que sí existe en una
+        # fila Gris, pero que no se contó en el total (mismo criterio que IAAS).
+        'dato_normal_incompleto': workbook.add_format({**base, 'num_format': '#,##0', 'font_color': '#31869B', 'bold': True}),
+        'fila_par_incompleto':    workbook.add_format({**base, 'bg_color': '#F9F9F9', 'num_format': '#,##0', 'font_color': '#31869B', 'bold': True}),
+        'total_gris_80':         workbook.add_format({**base, 'bold': True, 'bg_color': C_GRIS_TOTAL, 'font_color': 'white', 'num_format': '#,##0'}),
+        'Esperado_Capsula':      workbook.add_format({**base, 'bg_color': C_VERDE,   'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
+        'Medio_Capsula':         workbook.add_format({**base, 'bg_color': C_DORADO,  'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
+        'Bajo_Capsula':          workbook.add_format({**base, 'bg_color': C_ROJO,    'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
+        'Gris_Capsula':          workbook.add_format({**base, 'bg_color': '#CCCCCC', 'font_color': 'black', 'bold': True, 'num_format': '0.00'}),
+    }
 
 
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
-                             semana, es_semana: bool, historicos: dict | None = None):
+                             semana, es_semana: bool, historicos: dict):
     titulo       = metadata["titulo"] or ""
     desNum       = metadata["desNum"] or ""
     desDen       = metadata["desDen"] or ""
@@ -75,11 +115,6 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     periodicidad = metadata.get("periodicidad")
 
     idx_mes_activo = int(mes) - 1
-
-    if historicos is None:
-        historicos, _ = _leer_historicos(
-            indicador, ano, idx_mes_activo, list(diccionarioPrevio.keys())
-        )
 
     checkpoints = indices_de_meses(periodicidad)
     ultima_col = len(checkpoints) * 3

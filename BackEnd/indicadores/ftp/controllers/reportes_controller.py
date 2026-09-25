@@ -1,32 +1,39 @@
 """
 Endpoints de reportes FTP (indicadores, categoría, recálculo población).
+Generar termina al guardar en BD_CIAE; el Excel se pide aparte a /Indicadores/excel.
 Usado en: ftp/__init__.py (prefix /reportes)
 """
 import asyncio
-import base64
-import io
 from typing import Optional
 
-import xlsxwriter
 from fastapi import APIRouter, Query, Depends, HTTPException, Request
 
 from configs.response import ApiResponse
 from auth.services.jwt_utils import solo_roles
 from auth.services.auth_service import verificar_credenciales
+from schemas.model.generacion_ftp_Model import LogErrores, ResultadoGeneracion
 from services.indicadorMapeo_Services import AllIndicadores
+from services.bd_Ciae_Guardado_Services import meses_con_datos
+from services.ftp.generacion_indicador_ftp_Services import consolidar_categoria, generar_indicador_ftp
 from ftp.services.recalcular_poblacion_service import actualizar_historico_con_nueva_poblacion, usa_poblacion
-from ftp.services.reporte_final import ExcelReporteFinal
-from ftp.services.reporte_categoria import (
-    preparar_datos_indicador, escribir_hoja_indicador,
-)
-from ftp.services.generar_excel import obtener_estilos_excel
-from ftp.services.datos_json_service import meses_con_datos as ftp_meses_con_datos
 
 router = APIRouter()
 
 ROLES_FTP_FULL = ("admin", "trabajador_ftp")
 ROLES_TODOS    = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 ROLES_FTP_GRAF = ROLES_TODOS
+
+
+def _restricciones(errores: LogErrores) -> dict:
+    return {tipo: error.model_dump() for tipo, error in errores.items()}
+
+
+async def _generar_un_indicador(indicador: str, ano: str, mes: str, semana, mensaje: str) -> ApiResponse:
+    # La extraccion baja archivos del FTP: va en un hilo para no bloquear el servidor.
+    resultado: ResultadoGeneracion = await asyncio.to_thread(generar_indicador_ftp, indicador, ano, mes, semana)
+    return ApiResponse(success=True, message=f"Reporte {indicador} {mensaje}", data={
+        "restricciones": _restricciones(resultado.errores),
+    })
 
 
 # ─── /meses-generados ────────────────────────────────────────────────────────
@@ -37,7 +44,7 @@ async def meses_generados(
     ano:       str = Query(...),
     payload:   dict = Depends(solo_roles(*ROLES_FTP_FULL))
 ):
-    meses = ftp_meses_con_datos(indicador, ano)
+    meses = meses_con_datos(indicador, ano)
     return ApiResponse(success=True, message="Meses con datos obtenidos", data={"meses": meses})
 
 
@@ -53,21 +60,7 @@ async def reporte(
 ):
     # ROLES_FTP_FULL = ("admin", "trabajador_ftp") -- ambos pueden generar previos
     # y definitivos por igual, no solo admin.
-    resultado = ExcelReporteFinal(indicador, ano, mes, semana)
-
-    if resultado["status"] == "success":
-        archivo_buffer = resultado["stream"]
-        excel_b64      = base64.b64encode(archivo_buffer.getvalue()).decode("utf-8")
-        return ApiResponse(success=True, message=resultado.get("mensaje", "Reporte generado"), data={
-            "archivo_b64":    excel_b64,
-            "nombre_archivo": resultado["nombre_archivo"],
-            "datos_grafica":  resultado.get("graficar", {}),
-            "restricciones":  resultado.get("restricciones", {}),
-        })
-    else:
-        return ApiResponse(success=False, message=resultado.get("mensaje", "Error desconocido"), data={
-            "restricciones": resultado.get("restricciones"),
-        })
+    return await _generar_un_indicador(indicador, ano, mes, semana, "generado correctamente")
 
 
 # ─── /Indicadores/regenerar ────────────────────────────────────────────────────
@@ -92,21 +85,7 @@ async def regenerar_reporte(request: Request, payload: dict = Depends(solo_roles
     if not verificar_credenciales(usuario, password):
         raise HTTPException(status_code=401, detail="Contraseña incorrecta")
 
-    resultado = ExcelReporteFinal(indicador, ano, mes, None)
-
-    if resultado["status"] == "success":
-        archivo_buffer = resultado["stream"]
-        excel_b64      = base64.b64encode(archivo_buffer.getvalue()).decode("utf-8")
-        return ApiResponse(success=True, message=resultado.get("mensaje", "Reporte regenerado"), data={
-            "archivo_b64":    excel_b64,
-            "nombre_archivo": resultado["nombre_archivo"],
-            "datos_grafica":  resultado.get("graficar", {}),
-            "restricciones":  resultado.get("restricciones", {}),
-        })
-    else:
-        return ApiResponse(success=False, message=resultado.get("mensaje", "Error desconocido"), data={
-            "restricciones": resultado.get("restricciones"),
-        })
+    return await _generar_un_indicador(indicador, ano, mes, None, "regenerado correctamente")
 
 
 # ─── /recalcular-poblacion ────────────────────────────────────────────────────
@@ -141,79 +120,29 @@ async def recalcular_poblacion(request: Request, payload: dict = Depends(solo_ro
 
 # ─── /generar-categoria ───────────────────────────────────────────────────────
 
-async def _generar_categoria_excel(categoria: str, ano: str, mes: str, semana):
-    """Arma el Excel con una pestaña por indicador de la categoría. Compartido
-    por /generar-categoria (primera generación) y /generar-categoria/regenerar
+async def _generar_categoria(categoria: str, ano: str, mes: str, semana) -> ApiResponse:
+    """Genera todos los indicadores de la categoría, uno tras otro. Compartido por
+    /generar-categoria (primera generación) y /generar-categoria/regenerar
     (mes definitivo ya generado, requiere contraseña)."""
     cat_data = next((c for c in AllIndicadores("mostrarGenerar", "ftp") if c.categoriaIndicador == categoria), None)
     if not cat_data:
         raise HTTPException(status_code=404, detail=f"Categoría '{categoria}' no encontrada")
 
-    indicadores = cat_data.indicadores
-
-    es_semana = bool(semana and str(semana).strip() not in ("", "None", "none"))
-    loop      = asyncio.get_running_loop()
-
-    pares = []
-    for ind in indicadores:
-        resultado = await loop.run_in_executor(None, preparar_datos_indicador, ind, ano, mes, semana)
-        pares.append((ind, resultado))
-
-    output = io.BytesIO()
-    wb     = xlsxwriter.Workbook(output)
-    wb.set_properties({'author': 'Web CIAE'})
-    fmt    = obtener_estilos_excel(wb)
-
-    completados   = []
-    errores       = {}
-    restricciones = {}
-
-    for indicador, resultado in pares:
-        if resultado["status"] != "success":
-            errores[indicador] = resultado.get("mensaje", "Error desconocido")
-            continue
+    resultados: dict[str, ResultadoGeneracion | str] = {}
+    for indicador in cat_data.indicadores:
         try:
-            escribir_hoja_indicador(
-                wb, fmt, indicador,
-                resultado["diccionarioPrevio"],
-                resultado["metadata"],
-                ano, mes, semana, es_semana
-            )
-            completados.append(indicador)
-            log_ftp = resultado.get("errores") or {}
-            if log_ftp:
-                errores[indicador] = log_ftp
-                for tipo, val in log_ftp.items():
-                    if tipo not in restricciones:
-                        restricciones[tipo] = {
-                            "nombreError":      val["nombreError"],
-                            "descripcionError": val["descripcionError"],
-                            "unidades":         {},
-                        }
-                    for unidad, paths in val.get("unidades", {}).items():
-                        clave = f"{indicador} / {unidad}"
-                        restricciones[tipo]["unidades"][clave] = paths
-        except Exception as exc:
-            errores[indicador] = str(exc)
+            resultados[indicador] = await asyncio.to_thread(generar_indicador_ftp, indicador, ano, mes, semana)
+        except Exception as error:
+            resultados[indicador] = str(error)
 
-    wb.close()
-
-    if not completados:
-        return ApiResponse(success=False, message="Ningún indicador pudo generarse", data={"errores": errores})
-
-    output.seek(0)
-    excel_b64 = base64.b64encode(output.getvalue()).decode("utf-8")
-    mes_fmt   = str(mes).zfill(2)
-    # La semana ya va marcada en el nombre de cada pestaña (ver escribir_hoja_indicador),
-    # así que el nombre del archivo no la necesita.
-    nombre    = f"{categoria}_{ano}_{mes_fmt}.xlsx"
+    categoria_generada = consolidar_categoria(resultados)
+    if not categoria_generada.completados:
+        return ApiResponse(success=False, message="Ningún indicador pudo generarse", data={"errores": categoria_generada.errores})
 
     return ApiResponse(success=True, message="Categoría generada", data={
-        "archivo_b64":    excel_b64,
-        "nombre_archivo": nombre,
-        "completados":    completados,
-        "errores":        errores,
-        "restricciones":  restricciones,
+        "completados":   categoria_generada.completados,
+        "errores":       {ind: (_restricciones(e) if isinstance(e, dict) else e) for ind, e in categoria_generada.errores.items()},
+        "restricciones": _restricciones(categoria_generada.restricciones),
     })
 
 
@@ -228,7 +157,7 @@ async def generar_categoria(request: Request, payload: dict = Depends(solo_roles
     if not all([categoria, ano, mes]):
         raise HTTPException(status_code=400, detail="Faltan parámetros: categoria, ano, mes")
 
-    return await _generar_categoria_excel(categoria, ano, mes, semana)
+    return await _generar_categoria(categoria, ano, mes, semana)
 
 
 # ─── /generar-categoria/regenerar ──────────────────────────────────────────────
@@ -252,4 +181,4 @@ async def regenerar_categoria(request: Request, payload: dict = Depends(solo_rol
     if not verificar_credenciales(usuario, password):
         raise HTTPException(status_code=401, detail="Contraseña incorrecta")
 
-    return await _generar_categoria_excel(categoria, ano, mes, None)
+    return await _generar_categoria(categoria, ano, mes, None)

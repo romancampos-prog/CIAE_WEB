@@ -6,7 +6,7 @@ Regla común de color/estado para indicadores (IAAS y FTP):
   - numerador == 0 (con denominador válido, sea 0 o no)    -> es un cero real, se
     evalúa normal contra el semáforo, no se fuerza ningún color
 Usado en: iaas/services/extraccion_service.py,
-          ftp/services/numerador_denominador.py
+          services/calculo_indicador_Services.py
 """
 
 
