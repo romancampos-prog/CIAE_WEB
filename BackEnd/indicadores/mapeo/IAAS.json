@@ -1,12 +1,13 @@
 {
     "IAAS 01": {
-                "excel": {
+        "nombreArchivoFinal": "IAAS 01",
+        "excel": {
             "codigo": "DELEGACION GUANAJUATO",
             "titulo": "INFORMES DE INFECCIONES NOSOCOMIALES",
             "columnaNumerador": "INFECCIONES",
             "columnaDenominador": "DIAS ESTANCIA"
         },
-        "fechaModificacion": "",
+        "fechaModificacion": "10/09/2026",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
         "modulo": "IAAS",
@@ -102,7 +103,8 @@
         }
     },
     "IAAS 02": {
-                "excel": {
+        "nombreArchivoFinal": "IAAS 02",
+        "excel": {
             "codigo": "INOSO 10",
             "titulo": "IN_NOS 02 TASA DE INFECCIÓN DE SITIO QUIRURGICO EN CIRUGIAS LIMPIAS Y LIMPIAS CON IMPLANTE.",
             "columnaNumerador": "Infecciones cirugias",
@@ -163,7 +165,8 @@
         }
     },
     "IAAS 03": {
-                "excel": {
+        "nombreArchivoFinal": "IAAS 03",
+        "excel": {
             "codigo": "INOSO 7",
             "titulo": "IN_NOS 03 TASA DE NEUMONIA ASOCIADA A VENTILACIÓN MECANICA POR 1000 DIAS VENTILADOR",
             "columnaNumerador": "NAVM",
@@ -224,7 +227,8 @@
         }
     },
     "IAAS 04": {
-                "excel": {
+        "nombreArchivoFinal": "IAAS 04",
+        "excel": {
             "codigo": "INOSO 9",
             "titulo": "IN_INO 04 TASA DE BACTERIEMIA RELACIONADA A CATETER VENOSO CENTRAL",
             "columnaNumerador": "Its relacionadas a CVC",
@@ -285,7 +289,8 @@
         }
     },
     "IAAS 05": {
-                "excel": {
+        "nombreArchivoFinal": "IAAS 05",
+        "excel": {
             "codigo": "INOSO 8",
             "titulo": "IN_NOS 05 TASA DE INFECCION DE VIAS URINARIAS ASOCIADA A SONDA VESICAL",
             "columnaNumerador": "Total de IVU",
@@ -346,7 +351,8 @@
         }
     },
     "IAAS 06": {
-                "excel": {
+        "nombreArchivoFinal": "IAAS 06",
+        "excel": {
             "codigo": "INOSO 1.1",
             "titulo": "IN_06 TASA DE INFECCION NOSOCOMIAL POR 100 DÍAS ESTANCIA EN UCI",
             "columnaNumerador": "Infecciones en UCI",

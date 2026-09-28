@@ -67,6 +67,7 @@ class ExcelIAAS(BaseModel):
 class IndicadorIAASMapeo(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
+    nombreArchivoFinal: str
     reporte:       ReporteIAASMapeo
     semaforo:      dict[str, Any]
     informacion:   InformacionFicha
