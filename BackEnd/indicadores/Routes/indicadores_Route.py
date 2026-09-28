@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from ..Controller import ftp_Controller
 from ..Controller import iaas_Controller
+from ..Controller import extractor_Controller
 from ..Controller import excel_Controller
 from ..Controller import informacion_Controller
 from ..Controller import reportes_Controller
@@ -14,6 +15,9 @@ routesIndicadores.include_router(ftp_Controller.ftpApi, prefix="/ftp")
 
 #EndPoints IASS (GENERACION DE IAAS)
 routesIndicadores.include_router(iaas_Controller.iaasApi, prefix="/iaas")
+
+#EndPoints EXTRACTOR (GENERACION DE EH 03 / DM 04 MEDIANTE EXCEL CRUDO MENSUAL)
+routesIndicadores.include_router(extractor_Controller.extractorApi, prefix="/extractor")
 
 #EndPoints REPORTES (BD_CIAE CONSULTAS DATOS DE LOS INDICADORES)
 routesIndicadores.include_router(reportes_Controller.reportesApi, prefix="/reportes")

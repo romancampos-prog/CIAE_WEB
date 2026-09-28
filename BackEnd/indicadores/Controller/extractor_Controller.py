@@ -1,9 +1,9 @@
 """
-Recibe y procesa el Excel mensual crudo de los indicadores del modulo Extractor
-(EH 03, DM 04 por ahora -- fuente "extractor" en indicadores/mapeo/).
-Un solo Excel del mes (+ su cruce con Egresos) alimenta a TODOS los
-indicadores del extractor a la vez -- ver INDICADORES_EXTRACTOR en config.py.
-Usado en: extractor/__init__.py (prefix /extractor)
+Recibe y procesa el Excel mensual crudo de los indicadores del motor Extractor
+(EH 03, DM 04 por ahora -- fuente "extractor" en indicadores/mapeo/). Un solo
+Excel del mes (+ su cruce con Egresos) alimenta a TODOS los indicadores del
+extractor a la vez -- ver corte_extractor_Services.INDICADORES_EXTRACTOR.
+Usado en: Routes/indicadores_Route.py (prefix /extractor)
 """
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 
@@ -12,22 +12,20 @@ from configs.response import ApiResponse
 from shared.validarArchivo_service import validarPeso_Archivo
 from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
-from extractor.config import INDICADORES_EXTRACTOR
-from extractor.services.extractor_service import (
-    procesar_archivo_mensual, estado_ventanas,
-)
+from services.extractor.corte_extractor_Services import INDICADORES_EXTRACTOR, estado_ventanas
+from services.extractor.generacion_extractor_Services import procesar_archivo_mensual
 
-router = APIRouter()
+extractorApi = APIRouter()
 
 
-@router.get("/indicadores")
+@extractorApi.get("/indicadores")
 async def listar_indicadores_extractor(
     payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "visitante")),
 ):
     return ApiResponse(success=True, message="Indicadores del modulo Extractor", data=INDICADORES_EXTRACTOR)
 
 
-@router.get("/estado")
+@extractorApi.get("/estado")
 async def estado_meses_subidos(
     anio: int,
     payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "visitante")),
@@ -46,7 +44,7 @@ async def estado_meses_subidos(
     return ApiResponse(success=True, message="Estado de meses subidos", data=estado)
 
 
-@router.post("/subir")
+@extractorApi.post("/subir")
 async def subir_archivo_mensual(
     anio:           int          = Form(...),
     mes:            str          = Form(...),   # "Enero".."Diciembre"

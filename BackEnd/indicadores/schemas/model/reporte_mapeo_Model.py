@@ -77,6 +77,28 @@ class IndicadorIAASMapeo(BaseModel):
     mostrarGrafica: bool = True
 
 
+class FuenteExtractor(BaseModel):
+    """
+    Excel crudo mensual (SUI-13) del motor Extractor (EH 03, DM 04). filtroColumna
+    y cruce se conservan tal cual (extra="allow") -- los valida
+    services/extractor/extraccion_extractor_Services.py, no un modelo aqui.
+    """
+    model_config = ConfigDict(extra="allow")
+
+    fuente:            Literal["extractor"]
+    hoja:               str
+    modoExtraccion:     ModoExtraccion
+    encabezado:         int = 1
+    agrupacion:         str
+    columnaLlaveCruce:  str | None = None
+
+
+class ReporteExtractorMapeo(BaseModel):
+    numerador:   FuenteExtractor
+    denominador: FuentePoblacionInfoSalud
+    operacion:   Operacion
+
+
 class FichaFTPMapeo(BaseModel):
     """
     Lo que cualquier pantalla o Excel de FTP necesita de un indicador (titulo,
@@ -98,3 +120,8 @@ class IndicadorFTPMapeo(FichaFTPMapeo):
     reporte:             ReporteFTPMapeo
     MESES_CIP01:         dict[str, str] = {}
     unidadesSinServicio: list[str] = []
+
+
+class IndicadorExtractorMapeo(FichaFTPMapeo):
+    """Indicador del motor Extractor (EH 03, DM 04): la ficha mas lo que la extraccion necesita."""
+    reporte: ReporteExtractorMapeo

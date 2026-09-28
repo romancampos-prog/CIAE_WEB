@@ -7,7 +7,7 @@ import api from '../../../shared/api/axiosInstance';
  */
 export const getIndicadoresExtractor = async () => {
     try {
-        const { data } = await api.get('/extractor/indicadores');
+        const { data } = await api.get('/Indicadores/extractor/indicadores');
         return data.data ?? [];
     } catch (error) {
         console.error('Error al obtener indicadores del extractor:', error);
@@ -25,7 +25,7 @@ export const getIndicadoresExtractor = async () => {
  */
 export const getEstadoExtractor = async (anio) => {
     try {
-        const { data } = await api.get('/extractor/estado', { params: { anio } });
+        const { data } = await api.get('/Indicadores/extractor/estado', { params: { anio } });
         return data.data ?? null;
     } catch (error) {
         console.error('Error al obtener el estado del extractor:', error);
@@ -53,6 +53,6 @@ export const subirArchivoMensualExtractor = async (anio, mes, archivo, archivoCr
         form.append('archivoCruce', archivoCruce);
         form.append('pesoArchivoCruce', archivoCruce.size);
     }
-    const { data } = await api.post('/extractor/subir', form);
+    const { data } = await api.post('/Indicadores/extractor/subir', form);
     return data;
 };

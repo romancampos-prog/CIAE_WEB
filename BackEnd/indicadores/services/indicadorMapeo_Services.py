@@ -10,7 +10,7 @@ from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from schemas.model.indicador_Model import InfoIndicador
 from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
 # Mismo modulo con el que FTP hace isinstance de las fuentes (si se importara por otra ruta seria otra clase).
-from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo, IndicadorIAASMapeo
+from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo, IndicadorIAASMapeo, IndicadorExtractorMapeo
 from shared.semaforo_service import es_agrupado
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 
@@ -211,3 +211,12 @@ def cargar_mapeo_iaas() -> dict[str, IndicadorIAASMapeo]:
 
 def cargar_indicador_iaas(indicador: str) -> IndicadorIAASMapeo:
     return cargar_mapeo_iaas()[indicador]
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------#
+# Mapeo tipado para los indicadores del motor Extractor (EH 03, DM 04 -- viven en el
+# mismo archivo de familia que sus hermanos FTP, ej. EH.json, distinguidos por "modulo")
+
+def cargar_indicador_extractor(indicador: str) -> IndicadorExtractorMapeo:
+    """Lo que necesita el motor Extractor de un indicador: reportes, formulas y semaforo."""
+    return IndicadorExtractorMapeo.model_validate(_bloque_crudo(indicador))
