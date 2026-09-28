@@ -29,15 +29,6 @@ export const getUnidadesIAAS = async () => {
 };
 
 /**
- * Obtiene metadatos de todos los indicadores IAAS (semáforo, fórmula, etc.).
- * @returns {Promise<Object>} Objeto indexado por id de indicador
- */
-export const infoBasicaInAass = async () => {
-    const { data } = await api.get('/Indicadores/iaas/info');
-    return data;
-};
-
-/**
  * Envía los archivos y denominadores para generar los 6 reportes IAAS del período.
  * @param {string} anio - Año del reporte (ej. "2026")
  * @param {string} mes - Mes en formato "MM" (ej. "03")

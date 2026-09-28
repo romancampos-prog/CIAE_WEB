@@ -99,10 +99,10 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
           )}
           {indInfo && infoAbierta && (
             <div className="ig-desc-panel" style={{ '--ic': indColor }}>
-              <p className="ig-desc-titulo">{indInfo.titulo}</p>
+              <p className="ig-desc-titulo">{indInfo.informacion.titulo}</p>
               <div className="ig-desc-meta">
-                <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.descripcionNumerador}</span>
-                <span className="ig-desc-row"><span className="ig-desc-label">Den</span>{indInfo.descripcionDenominador}</span>
+                <span className="ig-desc-row"><span className="ig-desc-label">Num</span>{indInfo.informacion.descNum}</span>
+                <span className="ig-desc-row"><span className="ig-desc-label">Den</span>{indInfo.informacion.descDen}</span>
                 {indInfo.descripcionPeriodicidad && (
                   <span className="ig-desc-row"><span className="ig-desc-label">Per</span>{indInfo.descripcionPeriodicidad}</span>
                 )}

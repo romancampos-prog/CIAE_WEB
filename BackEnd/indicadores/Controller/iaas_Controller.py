@@ -12,7 +12,7 @@ from shared.auditoria_service import registrar
 from shared.validarArchivo_service import validarPeso_Archivo
 from services.iaas.extraccion_excel_iaas_Services import ErroresValidacionExcel
 from services.iaas.generacion_iaas_Services import SesionIAASVaciaError, completar_unidad_tardia, generar_iaas
-from services.iaas.info_iaas_Services import indicadores_para_generar, info_todos_iaas, unidades_iaas
+from services.iaas.info_iaas_Services import indicadores_para_generar, unidades_iaas
 from services.iaas.sesion_iaas_Services import armar_sesion, meses_guardados_iaas, nombre_del_mes
 
 #/Indicadores/iaas  (INFORMACION Y GENERACION DE IAAS: al terminar queda guardado en BD_CIAE;
@@ -32,13 +32,6 @@ async def _leer_archivo_validado(archivo: UploadFile, peso: int, etiqueta: str) 
 
 def _detalle_de(error: ErroresValidacionExcel) -> list[str]:
     return error.mensajes
-
-
-#Get Indicadores/iaas/info
-@iaasApi.get("/info")
-async def InfoTodosIAAS(payload: dict = Depends(solo_roles(*ROLES_IAAS_VISTA))):
-    resultado = info_todos_iaas()
-    return ApiResponse(success=True, message="Información de indicadores IAAS obtenida", data=resultado)
 
 
 #Get Indicadores/iaas/unidades

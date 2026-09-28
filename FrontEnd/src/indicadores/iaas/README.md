@@ -9,7 +9,7 @@ iaas/
 ├── api/
 │   └── IAAS.js           — getUnidadesIAAS, getIndicadoresIAAS, generarIAAS,
 │                            getSesionIAAS, descargarIAASGuardado, getIAASMesesGuardados,
-│                            completarUnidadTardia, infoBasicaInAass
+│                            completarUnidadTardia
 ├── componentes/
 │   ├── graficas/
 │   │   └── TickMesUnidad.jsx     — tick personalizado en eje X con etiqueta HGS/Otros

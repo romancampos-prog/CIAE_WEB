@@ -51,6 +51,10 @@ class InfoIndicador(BaseModel):
     descripcionPeriodicidad: str | None = None
     informacion: InformacionFicha
     semaforo: Dict[str,Semaforo] | Semaforo
+    # Solo cuando el semaforo esta agrupado (ej. IAAS 01: por tipo de hospital) --
+    # {unidad: nombre del grupo, ej. "HGS"} para que el front sepa que bloque de
+    # umbrales le toca a cada unidad. None si el semaforo no esta agrupado.
+    grupoDeUnidad: Dict[str, str] | None = None
 
     @model_validator(mode="before")
     @classmethod

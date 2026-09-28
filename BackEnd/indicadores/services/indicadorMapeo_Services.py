@@ -11,6 +11,8 @@ from schemas.model.indicador_Model import InfoIndicador
 from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
 # Mismo modulo con el que FTP hace isinstance de las fuentes (si se importara por otra ruta seria otra clase).
 from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo, IndicadorIAASMapeo
+from shared.semaforo_service import es_agrupado
+from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 
 
 
@@ -112,9 +114,19 @@ def ObtenerFichaPorIndicador(payload: IndicadorRequest) -> InfoIndicador | None:
     with open(rutaMapeoIndicador, "r", encoding="utf-8") as archivo:
         data = json.load(archivo)
         
-    #extraer info del indicador solicitado 
+    #extraer info del indicador solicitado
     datoIndicadorJson = data.get(payload.indicador)
     fichaIndicador = InfoIndicador.model_validate(datoIndicadorJson)
+
+    # Semaforo agrupado (hoy solo IAAS 01, por tipo de hospital) -- el front necesita
+    # saber a que grupo pertenece cada unidad para pintar el umbral que le toca.
+    # es_agrupado necesita el dict CRUDO (fichaIndicador.semaforo ya viene tipado a
+    # Semaforo, sus valores dejaron de ser dict). UNIDAD_TIPO_IAAS01 es el unico
+    # catalogo de grupos que existe por ahora; si algun dia otro indicador usa un
+    # semaforo agrupado con otras unidades, esto hay que generalizarlo a un catalogo
+    # por indicador.
+    if es_agrupado(datoIndicadorJson.get("semaforo", {})):
+        fichaIndicador.grupoDeUnidad = UNIDAD_TIPO_IAAS01
 
     return fichaIndicador
 

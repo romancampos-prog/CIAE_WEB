@@ -4,22 +4,9 @@ unidad, denominadores capturados, sesion del mes y resultados). Los valores por
 unidad son los mismos de FTP: ResultadoUnidad / UnidadSemaforizada (resultado = la tasa).
 Usado en: services/iaas/*, Controller/iaas_Controller.py
 """
-from typing import Any
-
 from pydantic import BaseModel, Field
 
 from schemas.model.generacion_ftp_Model import UnidadSemaforizada
-
-
-class InfoIndicadorIAAS(BaseModel):
-    """Titulo, descripciones y semaforo de un indicador IAAS, para la grafica."""
-    titulo:                   str
-    descripcionNumerador:     str
-    descripcionDenominador:   str
-    descripcionPeriodicidad:  str | None = None
-    semaforo:                 dict[str, Any]
-    unidades_hgs:              list[str]       = Field(default_factory=list)
-    unidad_tipo:                dict[str, str] = Field(default_factory=dict)
 
 
 class IndicadorGenerarIAAS(BaseModel):

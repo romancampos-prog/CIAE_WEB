@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { getUnidadesIAAS, infoBasicaInAass } from '../api/IAAS';
+import { getUnidadesIAAS } from '../api/IAAS';
 import { descargarExcelIndicadores } from '../../shared/api/excel';
-import { obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
+import { obtenerTodosLosIndicadores, obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_CORTOS } from '../../shared/constantes/meses';
 import { COLOR_IND, HGS_COLOR, HGS_BG } from '../constantes/colores';
@@ -16,8 +16,6 @@ import {
 import { contarSemaforo } from '../../shared/utils/contarSemaforo';
 import { techoEscala } from '../../shared/utils/escala';
 import { esSemaforoAgrupado, rangosDeMetas, agruparRangos } from '../../shared/utils/rangosSemaforo';
-
-const IDS_IAAS = ['IAAS 01', 'IAAS 02', 'IAAS 03', 'IAAS 04', 'IAAS 05', 'IAAS 06'];
 
 // Clave real bajo la que el backend manda el total OOAD ya calculado.
 const TOTAL_OOAD_KEY = 'TOTAL_OOAD';
@@ -48,37 +46,47 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   const setIndSel = controlled ? (onExtChange ?? (() => {})) : setLocalIndSel;
   const [cargando, setCargando]           = useState(false);
   const [descargando, setDescargando]     = useState(false);
-  const [infoAllInAass, setInfoIAAS]      = useState({});
+  const [listaIndicadores, setLista]      = useState([]);
+  const [indInfo, setIndInfo]             = useState(null);
   const [vistaGrafica, setVistaGrafica]   = useState('unidad');
   const [acumulado, setAcumulado]         = useState(false);
   const [mesSel, setMesSel]               = useState('');
 
-  /** Catálogo de unidades (orden en que se muestran) e info de semáforo por indicador */
+  /** Catálogo de unidades (orden en que se muestran) e índice de indicadores IAAS */
   useEffect(() => {
-    Promise.all([getUnidadesIAAS(), infoBasicaInAass()])
-      .then(([unids, info]) => {
+    Promise.all([getUnidadesIAAS(), obtenerTodosLosIndicadores({ modulo: 'iaas' })])
+      .then(([unids, lista]) => {
         setUnidades(unids);
-        setInfoIAAS(info.data);
+        setLista(lista ?? []);
         if (unids.length > 0) setUnidadSel(actual => actual || unids[0]);
       })
       .catch(error => console.error('Error cargando catálogo IAAS:', error));
   }, []);
 
+  /** Lista plana de todos los indicadores IAAS (para descargar "todos") */
+  const todosLosIndicadores = useMemo(() => {
+    const acc = [];
+    listaIndicadores.forEach(cat => (cat.indicadores ?? []).forEach(ind => acc.push(ind)));
+    return acc;
+  }, [listaIndicadores]);
+
   /**
-   * Reporte del indicador activo. La ficha se pide primero porque trae el módulo
-   * y si el indicador tiene mensual acumulado (el backend arma MENSUAL_ACUMULADO
-   * solo si se lo piden). No limpia `reporte` de inmediato para que el cambio de
-   * indicador no haga parpadear el panel.
+   * Ficha y reporte del indicador activo -- mismos 3 pasos que FTP (catálogo, ficha, reporte).
+   * La ficha se pide primero porque trae el módulo y si el indicador tiene mensual
+   * acumulado (el backend arma MENSUAL_ACUMULADO solo si se lo piden). No limpia
+   * `reporte`/`indInfo` de inmediato para que el cambio de indicador no haga
+   * parpadear el panel.
    */
   useEffect(() => {
     if (!indSel) return undefined;
     let vigente = true;
     setCargando(true);
     obtenerFichaIndicador(indSel, anio)
-      .then(ficha => obtenerReporteIndicador(indSel, anio, { modulo: ficha.modulo, mensualAcumulado: ficha.mensualAcumulado }))
-      .then(r => {
+      .then(ficha => obtenerReporteIndicador(indSel, anio, { modulo: ficha.modulo, mensualAcumulado: ficha.mensualAcumulado }).then(r => [r, ficha]))
+      .then(([r, ficha]) => {
         if (!vigente) return;
         setReporte(r);
+        setIndInfo(ficha);
         const meses = mesesConDatosDeReporte(r);
         setMesSel(meses.length > 0 ? meses[meses.length - 1] : '');
       })
@@ -93,7 +101,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
    */
   const _descargar = (indicador = null) => {
     setDescargando(true);
-    descargarExcelIndicadores(indicador ? [indicador] : IDS_IAAS, anio)
+    descargarExcelIndicadores(indicador ? [indicador] : todosLosIndicadores, anio)
       .then(res => descargarB64(res.archivo_b64, res.nombre_archivo))
       .catch(() => {})
       .finally(() => setDescargando(false));
@@ -105,10 +113,14 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   /** Descarga el Excel de un indicador específico */
   const handleDescargarInd = (ind) => _descargar(ind);
 
-  const indInfo       = infoAllInAass?.[indSel];
   const sem           = indInfo?.semaforo;
-  const hgsSet        = useMemo(() => new Set(indInfo?.unidades_hgs ?? []), [indInfo]);
-  const unidadTipoMap = useMemo(() => indInfo?.unidad_tipo ?? {}, [indInfo]);
+  // grupoDeUnidad: {unidad: "HGS"|"HGR"|...} -- solo viene poblado cuando el semaforo
+  // esta agrupado (hoy, IAAS 01 por tipo de hospital).
+  const unidadTipoMap = useMemo(() => indInfo?.grupoDeUnidad ?? {}, [indInfo]);
+  const hgsSet        = useMemo(
+    () => new Set(Object.entries(unidadTipoMap).filter(([, tipo]) => tipo === 'HGS').map(([unidad]) => unidad)),
+    [unidadTipoMap]
+  );
 
   const mesesConDatos = useMemo(() => mesesConDatosDeReporte(reporte), [reporte]);
 
