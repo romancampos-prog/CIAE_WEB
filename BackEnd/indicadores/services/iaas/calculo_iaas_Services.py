@@ -10,7 +10,7 @@ Usado en: services/iaas/generacion_iaas_Services.py
 from schemas.model.generacion_ftp_Model import ResultadoUnidad, UnidadSemaforizada
 from services.calculo_indicador_Services import CLAVE_TOTAL, agregar_total_ooad, calcular_resultado, semaforizar_unidades
 from services.indicadorMapeo_Services import cargar_indicador_iaas
-from shared.UNIDADES import ORDEN_DEMAS_IAAS, ORDEN_IAAS01, grupo_de_unidad_iaas01
+from shared.UNIDADES import ORDEN_DEMAS_IAAS, ORDEN_IAAS01, UNIDADES_SIN_OOAD_IAAS, grupo_de_unidad_iaas01
 
 
 def _unidades_esperadas(indicador: str) -> list[str]:
@@ -37,6 +37,9 @@ def calcular_indicador_iaas(
         den = denominador.get(unidad)
         resultados[unidad] = ResultadoUnidad(numerador=num, denominador=den, resultado=calcular_resultado(num, den, formula))
 
-    resultados[CLAVE_TOTAL] = agregar_total_ooad(resultados, formula)
+    # Unidades con menos de 20 camas censables: se calculan y muestran igual que las
+    # demas, pero no entran a la suma del OOAD (shared/UNIDADES.UNIDADES_SIN_OOAD_IAAS).
+    unidades_para_ooad = {u: r for u, r in resultados.items() if u not in UNIDADES_SIN_OOAD_IAAS}
+    resultados[CLAVE_TOTAL] = agregar_total_ooad(unidades_para_ooad, formula)
 
     return semaforizar_unidades(resultados, mapeo.semaforo, grupo_de_unidad=grupo_de_unidad_iaas01)

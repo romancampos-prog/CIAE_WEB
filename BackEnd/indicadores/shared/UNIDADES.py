@@ -16,6 +16,10 @@ UNIDADES_HGR_IAAS01 = _unidades["UNIDADES_HGR_IAAS01"]
 UNIDADES_HGO_IAAS01 = _unidades.get("UNIDADES_HGO_IAAS01", [])
 UNIDADES_HGP_IAAS01 = _unidades.get("UNIDADES_HGP_IAAS01", [])
 
+# Unidades con menos de 20 camas censables: se siguen calculando y mostrando
+# individualmente en los 6 indicadores IAAS, pero no cuentan para el TOTAL_OOAD.
+UNIDADES_SIN_OOAD_IAAS = _unidades.get("UNIDADES_SIN_OOAD_IAAS", [])
+
 # Mapa unidad -> tipo de semaforo de IAAS 01. Cualquier unidad que no aparezca aqui
 # (ej. "TOTAL_OOAD") se toma como "OOAD" en donde se use este mapa.
 UNIDAD_TIPO_IAAS01: dict[str, str] = {
