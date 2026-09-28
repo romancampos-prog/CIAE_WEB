@@ -52,3 +52,20 @@ _ALIAS_A_CANONICO_IAAS: dict[str, str] = {
 def nombre_canonico_iaas(unidad: str) -> str:
     """El dato crudo de IAAS a veces trae el alias HGSZ/HGSZMF de una unidad HGS/HGSMF; devuelve el nombre del catalogo."""
     return _ALIAS_A_CANONICO_IAAS.get(unidad, unidad)
+
+
+# UNIDAD_TIPO_IAAS01 solo tiene los nombres canonicos (HGS/HGSMF); el dato crudo
+# a veces trae el alias HGSZ/HGSZMF -- este mapa cubre tambien esa variante.
+_ALIAS_TIPO_IAAS01: dict[str, str] = {
+    alias: tipo for nombre, tipo in UNIDAD_TIPO_IAAS01.items()
+    for alias in [alias_hgsz(nombre)] if alias
+}
+
+
+def grupo_de_unidad_iaas01(unidad: str | None) -> str:
+    """
+    Tipo de hospital de una unidad para el semaforo agrupado de IAAS 01
+    (HGS/HGZ/HGR/HGO/HGP); cualquier otra (ej. "TOTAL_OOAD", o una unidad que
+    no aplica a IAAS 01) cae en "OOAD", el grupo con el umbral general.
+    """
+    return UNIDAD_TIPO_IAAS01.get(unidad) or _ALIAS_TIPO_IAAS01.get(unidad, "OOAD")

@@ -6,6 +6,7 @@ Usado en: services/ftp/generacion_indicador_ftp_Services.py, services/iaas/*, ft
 """
 import math
 import re
+from typing import Callable
 
 from schemas.model.ficha_tecnica_Model import Operacion
 from schemas.model.generacion_ftp_Model import (
@@ -121,16 +122,24 @@ def calcular_indicador(
 
 
 def semaforizar_unidades(
-    unidades: dict[str, ResultadoUnidad], semaforo: dict, mes: str | int | None,
+    unidades: dict[str, ResultadoUnidad], semaforo: dict,
+    mes: str | int | None = None, grupo_de_unidad: Callable[[str], str | None] | None = None,
 ) -> dict[str, UnidadSemaforizada]:
-    """Asigna Esperado/Medio/Bajo segun los umbrales del mes; Gris si la unidad no tiene resultado."""
+    """
+    Asigna Esperado/Medio/Bajo; Gris si la unidad no tiene resultado. Los umbrales
+    del semaforo pueden variar por mes (FTP/Extractor, mismo umbral para todas las
+    unidades ese mes) o por grupo (IAAS 01, cada unidad segun su tipo de hospital,
+    via grupo_de_unidad) -- umbrales_para ya resuelve las dos formas.
+    """
     nombre_mes = MESES_ESTANDAR[int(mes) - 1] if mes else None
-    metas      = umbrales_para(semaforo, nombre_mes)
 
     return {
         nombre: UnidadSemaforizada(
             **unidad.model_dump(),
-            color="Gris" if unidad.resultado is None else evaluar_color(unidad.resultado, metas),
+            color="Gris" if unidad.resultado is None else evaluar_color(
+                unidad.resultado,
+                umbrales_para(semaforo, nombre_mes, grupo_de_unidad(nombre) if grupo_de_unidad else None),
+            ),
         )
         for nombre, unidad in unidades.items()
     }
