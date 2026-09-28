@@ -6,7 +6,7 @@ Usado en: services/iaas/generacion_iaas_Services.py, Controller/iaas_Controller.
 """
 from schemas.model.generacion_ftp_Model import UnidadSemaforizada
 from schemas.model.generacion_iaas_Model import SesionIAAS
-from services.bd_Ciae_Guardado_Services import leer_historico_indicador
+from services.bd_Ciae_Guardado_Services import leer_historico_indicador, meses_con_datos
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import ORDEN_DEMAS_IAAS
 
@@ -52,6 +52,18 @@ def pendientes_del_mes(datos_mes: dict[str, dict[str, UnidadSemaforizada]]) -> t
         if faltan:
             pendientes[unidad] = faltan
     return list(pendientes), pendientes
+
+
+def meses_guardados_iaas(anio: str) -> list[str]:
+    """
+    Meses con reporte guardado ese año, como "01".."12" -- los 6 indicadores siempre se
+    generan juntos (mismos meses), asi que basta con el primero que tenga datos.
+    """
+    for indicador in INDICADORES_IAAS:
+        meses = meses_con_datos(indicador, anio)
+        if meses:
+            return sorted(meses, key=int)
+    return []
 
 
 def armar_sesion(anio: str, mes: str) -> SesionIAAS | None:

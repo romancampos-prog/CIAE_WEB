@@ -17,7 +17,6 @@ from configs.cors import AMBIENTE, ORIGINS
 
 from auth.controllers.auth_controller import router as auth_router
 
-import iaas as iass_module
 import ftp as ftp_module
 import epidemiologia as epi_module
 import extractor as extractor_module
@@ -54,9 +53,6 @@ app.include_router(auth_router, prefix="/auth")
 for _router, _prefix in ftp_module.ROUTERS:
     app.include_router(_router, prefix=_prefix)
 
-for _router, _prefix in iass_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
-    
 for _router, _prefix in epi_module.ROUTERS:
     app.include_router(_router, prefix=_prefix)
 

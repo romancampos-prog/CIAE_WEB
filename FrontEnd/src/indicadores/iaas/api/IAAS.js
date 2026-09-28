@@ -1,4 +1,4 @@
-﻿import api from '../../../shared/api/axiosInstance';
+import api from '../../../shared/api/axiosInstance';
 
 /**
  * Obtiene la lista de indicadores IAAS disponibles en el sistema.
@@ -6,7 +6,7 @@
  */
 export const getIndicadoresIAAS = async () => {
     try {
-        const { data } = await api.get('/iass/indicadores');
+        const { data } = await api.get('/Indicadores/iaas/indicadores');
         return data.data ?? [];
     } catch (error) {
         console.error('Error al obtener indicadores IAAS:', error);
@@ -20,7 +20,7 @@ export const getIndicadoresIAAS = async () => {
  */
 export const getUnidadesIAAS = async () => {
     try {
-        const { data } = await api.get('/iass/unidades');
+        const { data } = await api.get('/Indicadores/iaas/unidades');
         return data.data ?? [];
     } catch (error) {
         console.error('Error al obtener unidades IAAS:', error);
@@ -33,7 +33,7 @@ export const getUnidadesIAAS = async () => {
  * @returns {Promise<Object>} Objeto indexado por id de indicador
  */
 export const infoBasicaInAass = async () => {
-    const { data } = await api.get('/iass/info');
+    const { data } = await api.get('/Indicadores/iaas/info');
     return data;
 };
 
@@ -67,7 +67,7 @@ export const generarIAAS = async (anio, mes, numerador, denominador, excel_denom
         });
     });
     form.append('denominador', JSON.stringify(denPorIndicador));
-    const { data } = await api.post('/reportes/IAAS/Generar', form);
+    const { data } = await api.post('/Indicadores/iaas/generar', form);
     return data;
 };
 
@@ -79,7 +79,7 @@ export const generarIAAS = async (anio, mes, numerador, denominador, excel_denom
  */
 export const getSesionIAAS = async (anio, mes) => {
     try {
-        const { data } = await api.get('/iass/sesion', { params: { anio, mes } });
+        const { data } = await api.get('/Indicadores/iaas/sesion', { params: { anio, mes } });
         return data.data ?? null;
     } catch {
         return null;
@@ -114,7 +114,7 @@ export const completarUnidadTardia = async (anio, mes, unidad, indicadores, deno
         form.append('excel_denominador_iaas01', excelDenominadorIAAS01);
         form.append('peso_excel_denominador_iaas01', excelDenominadorIAAS01.size);
     }
-    const { data } = await api.post('/iass/completar-unidad', form);
+    const { data } = await api.post('/Indicadores/iaas/completar-unidad', form);
     return data;
 };
 
@@ -125,7 +125,7 @@ export const completarUnidadTardia = async (anio, mes, unidad, indicadores, deno
  */
 export const getIAASMesesGuardados = async (anio) => {
     try {
-        const { data } = await api.get('/reportes/IAAS/meses-guardados', { params: { anio } });
+        const { data } = await api.get('/Indicadores/iaas/meses-guardados', { params: { anio } });
         return data.data?.meses ?? [];
     } catch {
         return [];
