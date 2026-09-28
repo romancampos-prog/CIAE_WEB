@@ -169,7 +169,7 @@ def _armar_excel_estandar(hojas: list[HojaIndicador]) -> bytes:
 def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]:
     # IAAS dibuja su propio libro (matriz por mes + acumulado/anual) y relee la BD
     # por su cuenta; uno solo -> su Excel, varios -> el libro completo de los 6.
-    from iaas.services.generar_iaas import (
+    from services.iaas.dibujante_excel_iaas_Services import (
         Excel_IAAS01, Excel_IAAS02, Excel_IAAS03, Excel_IAAS04, Excel_IAAS05, Excel_IAAS06,
         Excel_IAAS_Completo,
     )
