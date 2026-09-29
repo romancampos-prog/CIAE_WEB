@@ -1,16 +1,20 @@
 """
 Procesa el Excel de población nacional, filtra Guanajuato y guarda POBLACION.json
--- exclusivo de FTP (los denominadores de población alimentan varios indicadores
-FTP, ver reporte.denominador "poblacionInfoSalud" en el mapeo).
-Usado en: Controller/ftp_Controller.py
+-- compartido entre FTP (varios indicadores dependen de ella para su denominador,
+ver reporte.denominador "poblacionInfoSalud" en el mapeo) y Extractor (EH 03,
+DM 04 la usan igual para el denominador de su corte semestral).
+Usado en: Controller/ftp_Controller.py, services/extractor/corte_extractor_Services.py
 """
 import io
 import re
 import json
 import pandas as pd
+from shared.MESES import MESES_ESTANDAR
 from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, ruta_poblacion, RUTA_MAPEO_POBLACION
 
 DELEGACION_FILTRO = "Guanajuato"
+
+_REGEX_MES_ANIO_TITULO = re.compile(r'(' + '|'.join(MESES_ESTANDAR) + r')\s+(\d{4})', re.IGNORECASE)
 
 
 def obtener_ultimo_archivo_poblacion(anio: str | int | None = None) -> str | None:
@@ -20,6 +24,19 @@ def obtener_ultimo_archivo_poblacion(anio: str | int | None = None) -> str | Non
         return None
     with open(ruta, encoding="utf-8") as f:
         return json.load(f).get("ARCHIVO") or None
+
+
+def leer_periodo_poblacion(anio: str | int | None = None) -> tuple[str | None, int | None]:
+    """
+    Mes/año detectado del título del reporte vigente (ver _detectar_mes_anio_titulo),
+    o (None, None) si no hay población guardada o no se pudo detectar al subirla.
+    """
+    ruta = ruta_poblacion(anio)
+    if not ruta.exists():
+        return None, None
+    with open(ruta, encoding="utf-8") as f:
+        datos = json.load(f)
+    return datos.get("MES_DETECTADO"), datos.get("ANIO_DETECTADO")
 
 
 def _cargar_mapeo() -> dict:
@@ -53,6 +70,22 @@ def _extraer_numero(nombre: str):
     return m.group(1) if m else None
 
 
+def _detectar_mes_anio_titulo(fila_titulo) -> tuple[str | None, int | None]:
+    """
+    Busca "Mes AAAA" en el texto de la fila de titulo del reporte (ej. fila 7:
+    "Población Adscrita..., Julio 2026."). Si no aparece -- el reporte cambió de
+    formato o de fila -- regresa (None, None) para que el llamador avise al
+    usuario en vez de asumir un mes/año incorrecto.
+    """
+    for valor in fila_titulo:
+        if not valor:
+            continue
+        coincidencia = _REGEX_MES_ANIO_TITULO.search(str(valor))
+        if coincidencia:
+            return coincidencia.group(1).capitalize(), int(coincidencia.group(2))
+    return None, None
+
+
 def _sugerir_alias(no_encontradas: list, extras: list) -> dict:
     sugeridos = {}
     usados = set()
@@ -77,6 +110,20 @@ def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio
         buffer = io.BytesIO(contenido_bytes)
 
         crudo = pd.read_excel(buffer, sheet_name=mapeo["hoja"], header=None, usecols="A:EJ")
+
+        mes_detectado = anio_detectado = None
+        advertencia_titulo = None
+        fila_titulo_num = mapeo.get("fila_titulo")
+        if fila_titulo_num:
+            try:
+                mes_detectado, anio_detectado = _detectar_mes_anio_titulo(crudo.iloc[fila_titulo_num - 1])
+            except IndexError:
+                pass
+            if mes_detectado is None:
+                advertencia_titulo = (
+                    f"No se pudo detectar el mes y año del reporte en la fila {fila_titulo_num} del Excel -- "
+                    "verifica manualmente que el archivo sea del período correcto."
+                )
 
         fila_grupos      = crudo.iloc[mapeo["fila_grupos"] - 1]
         fila_encabezados = crudo.iloc[mapeo["fila_encabezados"] - 1]
@@ -182,21 +229,29 @@ def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio
         ruta.parent.mkdir(parents=True, exist_ok=True)
         with open(ruta, "w", encoding="utf-8") as f:
             json.dump(
-                {"ARCHIVO": nombre_sin_ext, "POBLACION": resultado_ordenado},
+                {
+                    "ARCHIVO":        nombre_sin_ext,
+                    "MES_DETECTADO":  mes_detectado,
+                    "ANIO_DETECTADO": anio_detectado,
+                    "POBLACION":      resultado_ordenado,
+                },
                 f, indent=2, ensure_ascii=False,
             )
 
         return {
-            "ok":              True,
-            "detalle":         f"Procesadas {len(resultado_ordenado)} unidades de {DELEGACION_FILTRO}.",
-            "nombre":          nombre_archivo,
-            "nombre_sin_ext":  nombre_sin_ext,
-            "unidades":        len(resultado_ordenado),
-            "no_encontradas":  no_encontradas,
-            "extras":          extras,
-            "celdas_vacias":   len(errores_datos),
-            "errores_datos":   errores_datos,
-            "alias_sugeridos": alias_sugeridos,
+            "ok":                  True,
+            "detalle":             f"Procesadas {len(resultado_ordenado)} unidades de {DELEGACION_FILTRO}.",
+            "nombre":              nombre_archivo,
+            "nombre_sin_ext":      nombre_sin_ext,
+            "unidades":            len(resultado_ordenado),
+            "no_encontradas":      no_encontradas,
+            "extras":              extras,
+            "celdas_vacias":       len(errores_datos),
+            "errores_datos":       errores_datos,
+            "alias_sugeridos":     alias_sugeridos,
+            "mes_detectado":       mes_detectado,
+            "anio_detectado":      anio_detectado,
+            "advertencia_titulo":  advertencia_titulo,
         }
 
     except Exception as e:

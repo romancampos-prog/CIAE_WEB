@@ -1,5 +1,6 @@
 {
   "hoja": "Grupo de Edad MF",
+  "fila_titulo": 7,
   "fila_grupos": 11,
   "fila_encabezados": 12,
   "delegacion_filtro": "Guanajuato",
@@ -32,7 +33,7 @@
     "umf 47 león":                   "UMF 47",
     "umf 53 león":                   "UMF 53",
     "umf 60 los naranjos":           "UMF 60 LEON",
-    "hgsmf 7 sn. fco. del rincón":  "HGSMF 07 SN FCO DEL RINCO",
+    "hgsmf 7 sn. fco. del rincón":   "HGSMF 07 SN FCO DEL RINCO",
     "umf 27 purísima":               "UMF 27 PURISIMA",
     "umf 19 v. santiago":            "UMF 19 V.SANTIAGO",
     "hgsmf 20 s. luis paz":          "HGSMF 20 S.LUIS PAZ",

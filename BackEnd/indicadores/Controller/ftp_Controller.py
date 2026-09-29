@@ -19,7 +19,7 @@ from shared.validarArchivo_service import validarPeso_Archivo
 from services.bd_Ciae_Guardado_Services import meses_con_datos
 from services.indicadorMapeo_Services import AllIndicadores
 from services.ftp.generacion_indicador_ftp_Services import consolidar_categoria, generar_indicador_ftp
-from services.ftp.poblacion_ftp_Services import obtener_ultimo_archivo_poblacion, procesar_archivo_poblacion
+from services.poblacion_Services import leer_periodo_poblacion, obtener_ultimo_archivo_poblacion, procesar_archivo_poblacion
 from services.ftp.recalcular_poblacion_ftp_Services import actualizar_historico_con_nueva_poblacion, usa_poblacion
 
 #/Indicadores/ftp  (GENERACION MEDIANTE EXTRACCION DE FTP: al terminar queda guardado en BD_CIAE;
@@ -127,9 +127,14 @@ async def ArchivoPoblacionActual(
     anio: str | None = None,
     payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")),
 ):
+    mes_detectado, anio_detectado = leer_periodo_poblacion(anio)
     return ApiResponse(
         success=True, message="Archivo de población actual",
-        data={"nombre_sin_ext": obtener_ultimo_archivo_poblacion(anio)},
+        data={
+            "nombre_sin_ext": obtener_ultimo_archivo_poblacion(anio),
+            "mes_detectado":  mes_detectado,
+            "anio_detectado": anio_detectado,
+        },
     )
 
 

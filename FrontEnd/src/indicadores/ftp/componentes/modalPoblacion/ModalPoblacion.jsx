@@ -40,8 +40,11 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
             const ex   = data?.data?.extras ?? [];
             const ed   = data?.data?.errores_datos ?? [];
             const as_  = data?.data?.alias_sugeridos ?? {};
+            const mesDetectado       = data?.data?.mes_detectado ?? null;
+            const anioDetectado      = data?.data?.anio_detectado ?? null;
+            const advertenciaTitulo = data?.data?.advertencia_titulo ?? null;
 
-            onSubido?.(data?.data?.nombre_sin_ext ?? null);
+            onSubido?.({ nombreSinExt: data?.data?.nombre_sin_ext ?? null, mesDetectado, anioDetectado });
 
             const celdasVacias = {};
             ed.forEach(({ unidad, grupo, columna }) => {
@@ -49,10 +52,11 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
                 celdasVacias[unidad].push(`${grupo} — ${columna}`);
             });
 
-            setMensaje({ tipo: 'exito', texto: `${u ? `${u} unidades` : 'Archivo'} procesado correctamente.` });
+            const periodo = mesDetectado && anioDetectado ? ` (${mesDetectado} ${anioDetectado})` : '';
+            setMensaje({ tipo: 'exito', texto: `${u ? `${u} unidades` : 'Archivo'} procesado correctamente${periodo}.` });
             setAdvertencias(
-                nf.length || ex.length || ed.length || Object.keys(as_).length
-                    ? { no_encontradas: nf, extras: ex, celdasVacias, alias_sugeridos: as_ }
+                nf.length || ex.length || ed.length || Object.keys(as_).length || advertenciaTitulo
+                    ? { no_encontradas: nf, extras: ex, celdasVacias, alias_sugeridos: as_, advertenciaTitulo }
                     : null
             );
             setArchivo(null);
@@ -160,6 +164,14 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
 
                         {advertencias && (
                             <div className="mpob-advertencias">
+                                {advertencias.advertenciaTitulo && (
+                                    <div className="mpob-adv-bloque mpob-adv-bloque--celdas">
+                                        <p className="mpob-adv-titulo mpob-adv-titulo--celdas">
+                                            ⚠ No se pudo confirmar el período del archivo
+                                        </p>
+                                        <p className="mpob-adv-lista">{advertencias.advertenciaTitulo}</p>
+                                    </div>
+                                )}
                                 {advertencias.no_encontradas.length > 0 && (
                                     <div className="mpob-adv-bloque">
                                         <p className="mpob-adv-titulo">

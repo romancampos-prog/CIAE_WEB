@@ -91,9 +91,14 @@ const IndicadoresPage = () => {
   useEffect(() => { document.title = 'Indicadores FTP | CIAE'; }, []);
 
   const [archivoPoblacion, setArchivoPoblacion] = useState(null);
+  const [periodoPoblacion, setPeriodoPoblacion] = useState(null); // "Julio 2026" o null si no se detectó
   useEffect(() => {
     getArchivoPoblacionActual()
-      .then(res => setArchivoPoblacion(res?.data?.nombre_sin_ext ?? null))
+      .then(res => {
+        setArchivoPoblacion(res?.data?.nombre_sin_ext ?? null);
+        const { mes_detectado, anio_detectado } = res?.data ?? {};
+        setPeriodoPoblacion(mes_detectado && anio_detectado ? `${mes_detectado} ${anio_detectado}` : null);
+      })
       .catch(() => {});
   }, []);
 
@@ -110,7 +115,9 @@ const IndicadoresPage = () => {
         rightExtra={
           <>
             {!esVisor && archivoPoblacion && (
-              <span className="ind-pob-archivo" title={archivoPoblacion}>{archivoPoblacion}</span>
+              <span className="ind-pob-archivo" title={archivoPoblacion}>
+                {periodoPoblacion ? `Población: ${periodoPoblacion}` : archivoPoblacion}
+              </span>
             )}
             {!esVisor && (
               <button className="ind-btn-pob" onClick={() => setModalPoblacion(true)}>
@@ -133,7 +140,10 @@ const IndicadoresPage = () => {
       {modalPoblacion && (
         <ModalPoblacion
           onClose={() => setModalPoblacion(false)}
-          onSubido={setArchivoPoblacion}
+          onSubido={({ nombreSinExt, mesDetectado, anioDetectado }) => {
+            setArchivoPoblacion(nombreSinExt);
+            setPeriodoPoblacion(mesDetectado && anioDetectado ? `${mesDetectado} ${anioDetectado}` : null);
+          }}
           archivoActual={archivoPoblacion}
         />
       )}
