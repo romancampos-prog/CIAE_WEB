@@ -1,6 +1,8 @@
-﻿"""
-Procesa el Excel de población nacional, filtra Guanajuato y guarda POBLACION.json.
-Usado en: ftp/controllers/poblacion_controller.py
+"""
+Procesa el Excel de población nacional, filtra Guanajuato y guarda POBLACION.json
+-- exclusivo de FTP (los denominadores de población alimentan varios indicadores
+FTP, ver reporte.denominador "poblacionInfoSalud" en el mapeo).
+Usado en: Controller/ftp_Controller.py
 """
 import io
 import re

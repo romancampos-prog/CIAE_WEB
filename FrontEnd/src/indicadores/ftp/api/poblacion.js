@@ -9,7 +9,7 @@ export const subirArchivoPoblacion = async (archivo) => {
     const formData = new FormData();
     formData.append('archivo', archivo);
     formData.append('pesoArchivo', archivo.size);
-    const respuesta = await api.post('/ftp/poblacion/subir', formData);
+    const respuesta = await api.post('/Indicadores/ftp/poblacion/subir', formData);
     return respuesta.data;
 };
 
@@ -19,7 +19,7 @@ export const subirArchivoPoblacion = async (archivo) => {
  * @returns {Promise<Object>} Resultado del recálculo
  */
 export const recalcularPoblacion = async (ano = '2026') => {
-    const respuesta = await api.post('/reportes/recalcular-poblacion', { ano });
+    const respuesta = await api.post('/Indicadores/ftp/recalcular-poblacion', { ano });
     return respuesta.data;
 };
 
@@ -28,6 +28,6 @@ export const recalcularPoblacion = async (ano = '2026') => {
  * @returns {Promise<Object>}
  */
 export const getArchivoPoblacionActual = async () => {
-    const respuesta = await api.get('/ftp/poblacion/archivo-actual');
+    const respuesta = await api.get('/Indicadores/ftp/poblacion/archivo-actual');
     return respuesta.data;
 };

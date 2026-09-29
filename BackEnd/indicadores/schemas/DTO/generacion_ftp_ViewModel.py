@@ -39,6 +39,10 @@ class RegenerarCategoriaRequest(BaseModel):
     password:  TextoObligatorio
 
 
+class RecalcularPoblacionRequest(BaseModel):
+    ano: TextoObligatorio
+
+
 class MesesGeneradosResponse(BaseModel):
     meses: list[str]                     # "01".."12"
 

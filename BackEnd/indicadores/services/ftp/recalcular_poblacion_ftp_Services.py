@@ -5,7 +5,7 @@ usando el numerador ya guardado en el JSON historico y el POBLACION_{anio}.json
 actualizado. NO accede al FTP. Guarda de vuelta numerador, denominador,
 resultado, color y TOTAL_OOAD de cada mes ya cerrado, con las mismas reglas que
 la generacion normal.
-Usado en: ftp/controllers/reportes_controller.py  (/recalcular-poblacion)
+Usado en: Controller/ftp_Controller.py
 """
 from shared.unidades_ftp import NOMBREUNIDADESARCHIVO
 from schemas.model.generacion_ftp_Model import DatosExtraidosUnidad, ResultadoUnidad

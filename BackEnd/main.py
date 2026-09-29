@@ -6,7 +6,9 @@ import os
 import sys
 from pathlib import Path
 
-# iass y ftp viven en indicadores/ — se exponen con su nombre original
+# Controller/ y services/ de indicadores importan con rutas planas (from services...,
+# from shared..., from schemas...) resueltas contra indicadores/, no contra el paquete
+# BackEnd -- de ahi este insert.
 sys.path.insert(0, str(Path(__file__).parent / "indicadores"))
 
 from fastapi import FastAPI
@@ -17,7 +19,6 @@ from configs.cors import AMBIENTE, ORIGINS
 
 from auth.controllers.auth_controller import router as auth_router
 
-import ftp as ftp_module
 import epidemiologia as epi_module
 from indicadores.Routes import indicadores_Route
 from middleware.endPoints_Middleware import ErroresEndpointsMiddleware
@@ -49,8 +50,6 @@ async def agregar_cabeceras_seguridad(request, call_next):
 app.include_router(indicadores_Route.routesIndicadores , prefix="/Indicadores")
 
 app.include_router(auth_router, prefix="/auth")
-for _router, _prefix in ftp_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
 
 for _router, _prefix in epi_module.ROUTERS:
     app.include_router(_router, prefix=_prefix)

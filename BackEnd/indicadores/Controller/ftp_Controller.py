@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 import asyncio
 
 #mis archivos
@@ -7,12 +7,20 @@ from auth.services.jwt_utils import solo_roles
 from configs.response import ApiResponse
 from schemas.DTO.generacion_ftp_ViewModel import (
     GenerarCategoriaRequest, GenerarIndicadorRequest, GeneracionCategoriaResponse,
-    GeneracionIndicadorResponse, MesesGeneradosResponse, RegenerarCategoriaRequest, RegenerarIndicadorRequest,
+    GeneracionIndicadorResponse, MesesGeneradosResponse, RecalcularPoblacionRequest,
+    RegenerarCategoriaRequest, RegenerarIndicadorRequest,
 )
 from schemas.model.generacion_ftp_Model import ResultadoGeneracion
+from schemas.model.poblacion_ftp_Model import (
+    IndicadorRecalculado, ResultadoCargaPoblacion, ResultadoRecalculoPoblacion,
+)
+from shared.auditoria_service import registrar
+from shared.validarArchivo_service import validarPeso_Archivo
 from services.bd_Ciae_Guardado_Services import meses_con_datos
 from services.indicadorMapeo_Services import AllIndicadores
 from services.ftp.generacion_indicador_ftp_Services import consolidar_categoria, generar_indicador_ftp
+from services.ftp.poblacion_ftp_Services import obtener_ultimo_archivo_poblacion, procesar_archivo_poblacion
+from services.ftp.recalcular_poblacion_ftp_Services import actualizar_historico_con_nueva_poblacion, usa_poblacion
 
 #/Indicadores/ftp  (GENERACION MEDIANTE EXTRACCION DE FTP: al terminar queda guardado en BD_CIAE;
 #el Excel se pide aparte a /Indicadores/excel)
@@ -111,3 +119,66 @@ async def RegenerarCategoria(
 ):
     _exigir_contrasena(payload, solicitud.password)
     return await _generar_categoria(solicitud.categoria, solicitud.ano, solicitud.mes, None)
+
+
+#Get Indicadores/ftp/poblacion/archivo-actual?anio=2026
+@ftpApi.get("/poblacion/archivo-actual")
+async def ArchivoPoblacionActual(
+    anio: str | None = None,
+    payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")),
+):
+    return ApiResponse(
+        success=True, message="Archivo de población actual",
+        data={"nombre_sin_ext": obtener_ultimo_archivo_poblacion(anio)},
+    )
+
+
+#Post Indicadores/ftp/poblacion/subir
+@ftpApi.post("/poblacion/subir")
+async def SubirPoblacion(
+    archivo:     UploadFile   = File(...),
+    pesoArchivo: int          = Form(...),
+    anio:        str | None   = Form(None),
+    payload:     dict         = Depends(solo_roles(*ROLES_FTP_FULL)),
+):
+    if not archivo.filename.endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="Solo se aceptan archivos Excel (.xlsx, .xls)")
+
+    contenido = await archivo.read()
+    if not validarPeso_Archivo(contenido, pesoArchivo):
+        raise HTTPException(status_code=413, detail="Archivo demasiado grande o tamaño inconsistente")
+
+    resultado = procesar_archivo_poblacion(contenido, archivo.filename, anio)
+    if not resultado["ok"]:
+        raise HTTPException(status_code=422, detail=resultado["detalle"])
+
+    registrar("SUBIDA_ARCHIVO", usuario=payload.get("sub"), detalle=f"archivo=poblacion({archivo.filename}) bytes={len(contenido)}")
+    return ApiResponse(success=True, message=resultado["detalle"], data=ResultadoCargaPoblacion(**resultado).model_dump())
+
+
+#Post Indicadores/ftp/recalcular-poblacion
+@ftpApi.post("/recalcular-poblacion")
+async def RecalcularPoblacion(
+    solicitud: RecalcularPoblacionRequest,
+    payload: dict = Depends(solo_roles(*ROLES_FTP_FULL)),
+):
+    recalculados: list[IndicadorRecalculado] = []
+    errores: list[str] = []
+
+    for categoria in AllIndicadores("mostrarGenerar", "ftp"):
+        for indicador in categoria.indicadores:
+            try:
+                if not usa_poblacion(indicador):
+                    continue
+                ok, detalle, n_meses = actualizar_historico_con_nueva_poblacion(indicador, solicitud.ano)
+                if ok:
+                    recalculados.append(IndicadorRecalculado(indicador=indicador, meses=n_meses, detalle=detalle))
+                else:
+                    errores.append(f"{indicador}: {detalle}")
+            except Exception as error:
+                errores.append(f"{indicador}: {str(error)}")
+
+    resultado = ResultadoRecalculoPoblacion(
+        total=sum(r.meses for r in recalculados), recalculados=recalculados, errores=errores,
+    )
+    return ApiResponse(success=True, message="Recálculo completado", data=resultado.model_dump())
