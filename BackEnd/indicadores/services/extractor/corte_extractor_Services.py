@@ -137,6 +137,42 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
     return reporte_anio_corte["CORTES"]["MESES"][mes_nombre]
 
 
+def _corte_ya_generado(indicador: str, anio_corte: int, mes_corte: str) -> bool:
+    bloque = leer_reporte(indicador, anio_corte).get("CORTES", {}).get("MESES", {}).get(mes_corte)
+    return bool(bloque and "TOTAL_OOAD" in bloque)
+
+
+def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] | None = None) -> list[dict]:
+    """
+    Cuando se sube una poblacion nueva para 'anio_poblacion', refresca los cortes
+    ya generados que la usan. A diferencia de FTP (que recalcula mes a mes), aqui
+    la poblacion es por año completo -- no importa que mes traiga el reporte de
+    poblacion, solo el año -- asi que solo hay 2 cortes candidatos por indicador
+    (misma regla que intentar_generar_corte: Junio usa el año anterior, Diciembre
+    el mismo año):
+      - Diciembre del mismo anio_poblacion (usa la poblacion de ese mismo año).
+      - Junio del año siguiente (usa la poblacion del año anterior a el, o sea
+        anio_poblacion).
+    Si ese corte todavia no se genero (ventana incompleta), no se fuerza -- sigue
+    esperando a que se complete, igual que siempre. Si ya se genero, se recalcula
+    con la poblacion mas reciente disponible -- no se "congela" con la primera
+    poblacion que alcanzo, sigue ajustandose cada vez que se sube una nueva y se
+    dispara el recalculo, hasta que el usuario decida que ya es la definitiva.
+    """
+    indicadores = indicadores or INDICADORES_EXTRACTOR
+    candidatos  = [("Diciembre", anio_poblacion), ("Junio", anio_poblacion + 1)]
+    recalculados = []
+
+    for indicador in indicadores:
+        for mes_corte, anio_corte in candidatos:
+            if not _corte_ya_generado(indicador, anio_corte, mes_corte):
+                continue
+            if intentar_generar_corte(indicador, anio_corte, mes_corte) is not None:
+                recalculados.append({"indicador": indicador, "corte": f"{mes_corte} {anio_corte}"})
+
+    return recalculados
+
+
 def _ventanas_de_mes(mes_nombre: str, anio: int) -> list[tuple[str, int]]:
     """
     Los cortes (mes_corte, anio_corte) cuya ventana de 12 meses "Semestral

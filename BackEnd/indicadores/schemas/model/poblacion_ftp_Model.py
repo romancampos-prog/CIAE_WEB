@@ -34,7 +34,15 @@ class IndicadorRecalculado(BaseModel):
     detalle:   str
 
 
+class CorteExtractorRecalculado(BaseModel):
+    indicador: str
+    corte:     str  # ej. "Diciembre 2026"
+
+
 class ResultadoRecalculoPoblacion(BaseModel):
-    total:        int
-    recalculados: list[IndicadorRecalculado] = Field(default_factory=list)
-    errores:      list[str] = Field(default_factory=list)
+    total:            int
+    recalculados:     list[IndicadorRecalculado] = Field(default_factory=list)
+    errores:          list[str] = Field(default_factory=list)
+    # Cortes de Extractor (EH 03/DM 04) que ya estaban generados y se
+    # refrescaron con la poblacion nueva -- ver corte_extractor_Services.recalcular_cortes_con_poblacion.
+    cortes_extractor: list[CorteExtractorRecalculado] = Field(default_factory=list)

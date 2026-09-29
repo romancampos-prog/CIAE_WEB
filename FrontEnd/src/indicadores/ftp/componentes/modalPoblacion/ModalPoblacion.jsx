@@ -74,7 +74,11 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
         setResultado(null);
         try {
             const data = await recalcularPoblacion(ANO_ACTIVO);
-            setResultado({ total: data.total, errores: data.errores ?? [] });
+            setResultado({
+                total:           data?.data?.total ?? 0,
+                errores:         data?.data?.errores ?? [],
+                cortesExtractor: data?.data?.cortes_extractor ?? [],
+            });
         } catch {
             setMensaje({ tipo: 'error', texto: 'Error al recalcular los reportes.' });
         } finally {
@@ -280,6 +284,12 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
                                         <polyline points="9 12 11 14 15 10"/>
                                     </svg>
                                     <p className="mpob-recalc-title">{resultado.total} reportes actualizados</p>
+                                    {resultado.cortesExtractor.length > 0 && (
+                                        <p className="mpob-recalc-title" style={{ fontSize: '0.85em', marginTop: 4 }}>
+                                            + {resultado.cortesExtractor.length} corte{resultado.cortesExtractor.length > 1 ? 's' : ''} de Extractor actualizado{resultado.cortesExtractor.length > 1 ? 's' : ''}
+                                            {' '}({resultado.cortesExtractor.map(c => `${c.indicador} ${c.corte}`).join(', ')})
+                                        </p>
+                                    )}
                                     {resultado.errores.length > 0 && (
                                         <p className="mpob-recalc-warn">
                                             ⚠ {resultado.errores.length} con errores

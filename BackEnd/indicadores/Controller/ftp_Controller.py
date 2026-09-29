@@ -12,7 +12,7 @@ from schemas.DTO.generacion_ftp_ViewModel import (
 )
 from schemas.model.generacion_ftp_Model import ResultadoGeneracion
 from schemas.model.poblacion_ftp_Model import (
-    IndicadorRecalculado, ResultadoCargaPoblacion, ResultadoRecalculoPoblacion,
+    CorteExtractorRecalculado, IndicadorRecalculado, ResultadoCargaPoblacion, ResultadoRecalculoPoblacion,
 )
 from shared.auditoria_service import registrar
 from shared.validarArchivo_service import validarPeso_Archivo
@@ -21,6 +21,7 @@ from services.indicadorMapeo_Services import AllIndicadores
 from services.ftp.generacion_indicador_ftp_Services import consolidar_categoria, generar_indicador_ftp
 from services.poblacion_Services import leer_periodo_poblacion, obtener_ultimo_archivo_poblacion, procesar_archivo_poblacion
 from services.ftp.recalcular_poblacion_ftp_Services import actualizar_historico_con_nueva_poblacion, usa_poblacion
+from services.extractor.corte_extractor_Services import recalcular_cortes_con_poblacion
 
 #/Indicadores/ftp  (GENERACION MEDIANTE EXTRACCION DE FTP: al terminar queda guardado en BD_CIAE;
 #el Excel se pide aparte a /Indicadores/excel)
@@ -183,7 +184,16 @@ async def RecalcularPoblacion(
             except Exception as error:
                 errores.append(f"{indicador}: {str(error)}")
 
+    cortes_extractor: list[CorteExtractorRecalculado] = []
+    try:
+        cortes_extractor = [
+            CorteExtractorRecalculado(**c) for c in recalcular_cortes_con_poblacion(int(solicitud.ano))
+        ]
+    except Exception as error:
+        errores.append(f"Extractor: {str(error)}")
+
     resultado = ResultadoRecalculoPoblacion(
         total=sum(r.meses for r in recalculados), recalculados=recalculados, errores=errores,
+        cortes_extractor=cortes_extractor,
     )
     return ApiResponse(success=True, message="Recálculo completado", data=resultado.model_dump())
