@@ -12,6 +12,7 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
     const [fase,           setFase]           = useState('upload'); // 'upload' | 'recalcular'
     const [resultado,      setResultado]      = useState(null);   // { total, recalculados, errores }
     const [advertencias,   setAdvertencias]   = useState(null);   // { no_encontradas, extras, celdasVacias }
+    const [periodo,        setPeriodo]        = useState(null);   // { mes, anio } detectado en el Excel subido
 
     const manejarArchivo = (file) => {
         if (!file) return;
@@ -45,6 +46,7 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
             const advertenciaTitulo = data?.data?.advertencia_titulo ?? null;
 
             onSubido?.({ nombreSinExt: data?.data?.nombre_sin_ext ?? null, mesDetectado, anioDetectado });
+            setPeriodo(mesDetectado && anioDetectado ? { mes: mesDetectado, anio: anioDetectado } : null);
 
             const celdasVacias = {};
             ed.forEach(({ unidad, grupo, columna }) => {
@@ -251,9 +253,19 @@ const ModalPoblacion = ({ onClose, onSubido, archivoActual }) => {
                                     <div>
                                         <p className="mpob-recalc-title">¿Actualizar todos los reportes?</p>
                                         <p className="mpob-recalc-desc">
-                                            Se recalcularán todos los meses ya generados de los indicadores
-                                            que dependen de la población <strong>({ANO_ACTIVO})</strong>,
-                                            usando los nuevos valores que acabas de subir.
+                                            {periodo ? (
+                                                <>
+                                                    Se recalcularán los meses de <strong>{periodo.mes} {periodo.anio} en adelante</strong> de
+                                                    los indicadores que dependen de la población — los meses anteriores a esa
+                                                    fecha conservan el valor que ya tenían, no se tocan.
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Se recalcularán todos los meses ya generados de los indicadores
+                                                    que dependen de la población <strong>({ANO_ACTIVO})</strong>,
+                                                    usando los nuevos valores que acabas de subir.
+                                                </>
+                                            )}
                                         </p>
                                     </div>
                                 </div>

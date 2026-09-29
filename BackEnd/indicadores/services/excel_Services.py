@@ -185,10 +185,15 @@ def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]
 
 
 def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
-    if len(hojas) <= _MAXIMO_NOMBRES_EN_ARCHIVO:
+    familias = dict.fromkeys(h.indicador.split()[0] for h in hojas)  # ej. {"CAMA": None} o {"EH": None, "DM": None}
+    if len(hojas) > 1 and len(familias) == 1:
+        # varios indicadores de la MISMA familia (ej. CAMA 01/40-49/50-69) -- basta el
+        # nombre de la familia, cada indicador ya se distingue por su propia pestaña adentro.
+        base = next(iter(familias))
+    elif len(hojas) <= _MAXIMO_NOMBRES_EN_ARCHIVO:
         base = "_".join(h.metadata.nombreArchivo.replace(" ", "_") for h in hojas)
     else:
-        base = "_".join(dict.fromkeys(h.indicador.split()[0] for h in hojas))  # familias: EH_DM
+        base = "_".join(familias)  # varias familias distintas: EH_DM
     return f"{base}_{ano}.xlsx"
 
 
