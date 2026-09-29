@@ -2,16 +2,24 @@
 Deteccion y calculo del corte "Semestral Anualizado" del motor Extractor (EH 03,
 DM 04): cuando ya estan los 12 meses de numerador crudo de una ventana, se suma,
 se trae el denominador de poblacion y se semaforiza -- exclusivo de Extractor.
+
+El denominador se lee con el mismo motor generico que usa FTP (extraer_poblacion,
+segun reporte.denominador.sexo del mapeo) y se evalua con la misma formula del
+mapeo (evaluar_lado) -- antes sumaba columnas de edad hardcodeadas en vez de leer
+la formula, lo que hubiera hecho pasar por alto un cambio en reporte.operacion.denominador.
 Usado en: services/extractor/generacion_extractor_Services.py, Controller/extractor_Controller.py
 """
-import json
-
 from schemas.model.indicador_Model import UnidadDatos
+from schemas.model.generacion_ftp_Model import DatosExtraidosUnidad
+from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
+from services.calculo_indicador_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
 from services.extractor.guardado_extractor_Services import leer_reporte, guardar_reporte
 from services.indicadorMapeo_Services import cargar_indicador_extractor
+from services.ftp.extraccion_indicador_ftp_Services import extraer_poblacion
+from services.ftp.registro_errores_ftp_Services import crear_log_errores
 from shared.MESES import MESES_ESTANDAR
 from shared.semaforizado_service import SemaforizarReporte
-from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, ruta_poblacion
+from shared.unidades_ftp import NOMBREUNIDADESARCHIVO
 
 _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
 
@@ -41,17 +49,16 @@ def ventana_corte(mes_corte: str, anio: int) -> list[tuple[str, int]]:
     raise ValueError(f"Mes de corte desconocido para Semestral Anualizado: {mes_corte!r}")
 
 
-def _denominador_por_unidad(anio: int) -> dict[str, float]:
-    ruta = ruta_poblacion(anio)
-    if not ruta.exists():
-        return {}
-    poblacion = json.loads(ruta.read_text(encoding="utf-8")).get("POBLACION", {})
-    columnas = ["20 a 24", "25  a 29", "30 a 34", "35 a 39", "40 a 44",
-                "45 a 49", "50 a 54", "55 a 59", "60 a 64", "65 a 69", "70 a 74"]
-    return {
-        unidad: sum(datos.get("Todos", {}).get(c, 0) for c in columnas)
-        for unidad, datos in poblacion.items()
-    }
+def _denominador_por_unidad(anio: int, denominador: FuentePoblacionInfoSalud, formula_denominador: str) -> dict[str, float]:
+    """Denominador por unidad para el corte, leido de POBLACION_{anio}.json (misma extraccion que FTP)."""
+    extraidos = {unidad: DatosExtraidosUnidad() for unidad in NOMBREUNIDADESARCHIVO}
+    extraer_poblacion(denominador.sexo, str(anio), extraidos, crear_log_errores())
+    resultado: dict[str, float] = {}
+    for unidad, datos in extraidos.items():
+        valor = evaluar_lado(formula_denominador, datos.denominador, UMBRAL_SUBE_REDONDEO)
+        if valor is not None:
+            resultado[unidad] = valor
+    return resultado
 
 
 def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict | None:
@@ -85,12 +92,14 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
         for unidad, dato in datos_mes.items():
             numerador_acumulado[unidad] = numerador_acumulado.get(unidad, 0) + (dato.get("numerador") or 0)
 
+    mapeo = cargar_indicador_extractor(indicador)
+
     # Poblacion base del corte: Junio usa la del año anterior (el corte
     # Jul[anio-1]-Jun[anio] cae mayormente en anio-1), Diciembre usa la del
     # mismo año (corte Ene-Dic[anio]).
     anio_poblacion = anio - 1 if mes_nombre == "Junio" else anio
-    denominador_por_unidad = _denominador_por_unidad(anio_poblacion)
-    formula_resultado = cargar_indicador_extractor(indicador).reporte.operacion.resultado
+    denominador_por_unidad = _denominador_por_unidad(anio_poblacion, mapeo.reporte.denominador, mapeo.reporte.operacion.denominador)
+    formula_resultado = mapeo.reporte.operacion.resultado
 
     bloque_corte: dict[str, UnidadDatos] = {}
     total_num = total_den = 0
