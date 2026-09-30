@@ -138,9 +138,10 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     nombre_hoja = f"{indicador} - {abrev_mes} S{semana}" if es_semana and semana else f"{indicador} - {abrev_mes}"
     ws = wb.add_worksheet(nombre_hoja[:31])
     ws.hide_gridlines(2)
-    ws.set_column(0, 0, 50)
+    ws.set_column(0, 0, 37)
     ws.set_column(1, ultima_col, 14)
     ws.set_default_row(20)
+    ws.freeze_panes(0, 1)  # columna A (unidad) fija al deslizar de izquierda a derecha
 
     ws.merge_range(0, 0, 0, ultima_col, "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS", fmt['nota_completas'])
     ws.merge_range(1, 0, 1, ultima_col, titulo.upper(), fmt['titulo_izq'])
