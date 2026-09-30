@@ -215,7 +215,7 @@
         "imagen": "icono_eh.png",
         "color": "#4e1224",
         "modulo": "Extractor",
-        "mostrarGenerar": false,
+        "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Semestral Anualizado",

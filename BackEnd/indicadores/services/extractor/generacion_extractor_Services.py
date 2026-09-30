@@ -1,14 +1,14 @@
 """
 Orquestador del motor Extractor: procesa el Excel mensual subido para TODOS los
 indicadores del extractor a la vez (EH 03, DM 04 por ahora -- ver
-corte_extractor_Services.INDICADORES_EXTRACTOR), guarda el numerador crudo del
+corte_extractor_Services.indicadores_extractor()), guarda el numerador crudo del
 mes y dispara el corte semestral cuando aplica.
 Usado en: Controller/extractor_Controller.py
 """
 import io
 
 from services.extractor.corte_extractor_Services import (
-    INDICADORES_EXTRACTOR, _ventanas_de_mes, intentar_generar_corte,
+    indicadores_extractor, _ventanas_de_mes, intentar_generar_corte,
 )
 from services.extractor.extraccion_extractor_Services import (
     contar_filtro_conteo_acumulado, validar_candidatos_cruce,
@@ -67,7 +67,7 @@ def procesar_archivo_mensual(anio: int, mes_nombre: str, contenido_bytes: bytes,
     procesa para TODOS los indicadores del extractor (EH 03 y DM 04 por
     ahora) -- cada uno con su propio filtro/codigos, del mismo archivo.
     """
-    indicadores = indicadores or INDICADORES_EXTRACTOR
+    indicadores = indicadores or indicadores_extractor()
     resultados = {}
     for indicador in indicadores:
         excel = io.BytesIO(contenido_bytes)

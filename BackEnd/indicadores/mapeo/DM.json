@@ -236,7 +236,7 @@
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
         "modulo": "Extractor",
-        "mostrarGenerar": false,
+        "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Semestral Anualizado",

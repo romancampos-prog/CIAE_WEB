@@ -9,7 +9,7 @@ from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from shared.MESES_ACUMULADOS import MensualAcumulado
 from shared.UNIDADES import nombre_canonico_iaas
-from services.extractor.corte_extractor_Services import INDICADORES_EXTRACTOR
+from services.extractor.corte_extractor_Services import indicadores_extractor
 
 #ruta  a la BD_CIAE 
 
@@ -115,7 +115,7 @@ def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, 
         # MESES en Extractor solo trae el numerador crudo de cada mes, guardado PLANO
         # (nunca envuelto en Poblacion/Reporte -- ver guardado_extractor_Services); el
         # corte ya cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
-        if datosJson.get("INDICADOR") in INDICADORES_EXTRACTOR:
+        if datosJson.get("INDICADOR") in indicadores_extractor():
             datosJson["MESES"] = _normalizar_y_envolver_plano(datosJson.get("MESES", {}))
         else:
             datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))

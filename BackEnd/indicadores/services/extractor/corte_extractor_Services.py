@@ -9,12 +9,14 @@ mapeo (evaluar_lado) -- antes sumaba columnas de edad hardcodeadas en vez de lee
 la formula, lo que hubiera hecho pasar por alto un cambio en reporte.operacion.denominador.
 Usado en: services/extractor/generacion_extractor_Services.py, Controller/extractor_Controller.py
 """
+from functools import lru_cache
+
 from schemas.model.indicador_Model import UnidadDatos
 from schemas.model.generacion_ftp_Model import DatosExtraidosUnidad
 from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
 from services.calculo_indicador_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
 from services.extractor.guardado_extractor_Services import leer_reporte, guardar_reporte
-from services.indicadorMapeo_Services import cargar_indicador_extractor
+from services.indicadorMapeo_Services import AllIndicadores, cargar_indicador_extractor
 from services.poblacion_Services import leer_periodo_poblacion
 from services.ftp.extraccion_indicador_ftp_Services import extraer_poblacion
 from services.ftp.registro_errores_ftp_Services import crear_log_errores
@@ -24,10 +26,19 @@ from shared.unidades_ftp import NOMBREUNIDADESARCHIVO
 
 _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
 
-# Indicadores que usan el motor "extractor" -- un solo Excel mensual (SUI-13 +
-# su cruce con Egresos) alimenta a todos al mismo tiempo, cada uno con su
-# propia lista de codigos/filtros (ver su bloque "reporte" en indicadores/mapeo/).
-INDICADORES_EXTRACTOR = ["EH 03", "DM 04"]
+@lru_cache(maxsize=1)
+def indicadores_extractor() -> list[str]:
+    """
+    Indicadores que usan el motor "extractor" -- un solo Excel mensual (SUI-13 +
+    su cruce con Egresos) alimenta a todos al mismo tiempo, cada uno con su
+    propia lista de codigos/filtros (ver su bloque "reporte" en indicadores/mapeo/).
+    Se calcula del mapeo (modulo="Extractor" + mostrarGenerar=true), mismo
+    mecanismo que ya usan FTP/IAAS (AllIndicadores) -- agregar o desactivar un
+    indicador de Extractor es tocar el mapeo, no este archivo. Cacheado (el mapeo
+    no cambia en caliente): esto se consulta en cada lectura de reporte
+    (CargarReporteIndicador), no tiene caso rescanear todos los mapeos cada vez.
+    """
+    return [ind for categoria in AllIndicadores("mostrarGenerar", "Extractor") for ind in categoria.indicadores]
 
 # Meses en los que la periodicidad "Semestral Anualizado" dispara un corte.
 MESES_CORTE_SEMESTRAL = ["Junio", "Diciembre"]
@@ -164,7 +175,7 @@ def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] 
     poblacion que alcanzo, sigue ajustandose cada vez que se sube una nueva y se
     dispara el recalculo, hasta que el usuario decida que ya es la definitiva.
     """
-    indicadores = indicadores or INDICADORES_EXTRACTOR
+    indicadores = indicadores or indicadores_extractor()
     candidatos  = [("Diciembre", anio_poblacion), ("Junio", anio_poblacion + 1)]
     recalculados = []
 
@@ -197,7 +208,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
     "llevas 8 de 12 meses para el corte de Diciembre 2026".
 
     Un mes cuenta como "subido" solo si YA esta guardado para TODOS los
-    indicadores de la lista (por default, todos los de INDICADORES_EXTRACTOR)
+    indicadores de la lista (por default, todos los de indicadores_extractor())
     -- una sola subida alimenta a todos a la vez, asi que deberian ir siempre
     parejos, pero se valida por si uno fallo y el otro no.
 
@@ -207,7 +218,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
     todavia no se cierra el corte de Diciembre 2026 -- no tiene caso mostrar
     una ventana en 0/12 cuando ni siquiera empezo su turno.
     """
-    indicadores = indicadores or INDICADORES_EXTRACTOR
+    indicadores = indicadores or indicadores_extractor()
     cache: dict[tuple[str, int], dict] = {}
     resultado = {}
     anterior_generado = True

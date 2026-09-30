@@ -2,7 +2,7 @@
 Recibe y procesa el Excel mensual crudo de los indicadores del motor Extractor
 (EH 03, DM 04 por ahora -- fuente "extractor" en indicadores/mapeo/). Un solo
 Excel del mes (+ su cruce con Egresos) alimenta a TODOS los indicadores del
-extractor a la vez -- ver corte_extractor_Services.INDICADORES_EXTRACTOR.
+extractor a la vez -- ver corte_extractor_Services.indicadores_extractor().
 Usado en: Routes/indicadores_Route.py (prefix /extractor)
 """
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
@@ -12,7 +12,7 @@ from configs.response import ApiResponse
 from shared.validarArchivo_service import validarPeso_Archivo
 from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
-from services.extractor.corte_extractor_Services import INDICADORES_EXTRACTOR, estado_ventanas
+from services.extractor.corte_extractor_Services import indicadores_extractor, estado_ventanas
 from services.extractor.generacion_extractor_Services import procesar_archivo_mensual
 
 extractorApi = APIRouter()
@@ -22,7 +22,7 @@ extractorApi = APIRouter()
 async def listar_indicadores_extractor(
     payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "visitante")),
 ):
-    return ApiResponse(success=True, message="Indicadores del modulo Extractor", data=INDICADORES_EXTRACTOR)
+    return ApiResponse(success=True, message="Indicadores del modulo Extractor", data=indicadores_extractor())
 
 
 @extractorApi.get("/estado")
