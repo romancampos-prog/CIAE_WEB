@@ -131,14 +131,18 @@ def _a_formato_excel(unidades: dict[str, UnidadDatos]) -> dict[str, dict]:
 
 def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndicador) -> None:
     historicos: dict[str, dict[int, dict]] = {}
+    # Poblacion usada en CADA mes que aparece en la hoja (no solo el mes activo) --
+    # cada uno pudo haberse calculado con una poblacion distinta (regla de corte
+    # hacia adelante), asi que cada columna de mes necesita su propia leyenda.
+    poblacion_por_mes: dict[int, str | None] = {}
     for mes, mes_reporte in hoja.meses.items():
+        poblacion_por_mes[MESES_ESTANDAR.index(mes)] = mes_reporte.Poblacion
         if mes == hoja.mesActivo:
             continue
         for unidad, valores in _a_formato_excel(mes_reporte.Reporte).items():
             historicos.setdefault(unidad, {})[MESES_ESTANDAR.index(mes)] = valores
 
     metadata = hoja.metadata
-    poblacion_usada = hoja.meses[hoja.mesActivo].Poblacion
     escribir_hoja_indicador(
         libro, estilos, hoja.indicador,
         _a_formato_excel(hoja.meses[hoja.mesActivo].Reporte),
@@ -152,7 +156,7 @@ def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndic
         },
         str(hoja.ano), str(MESES_ESTANDAR.index(hoja.mesActivo) + 1).zfill(2),
         hoja.semana, hoja.semana is not None,
-        historicos, poblacion_usada,
+        historicos, poblacion_por_mes,
     )
 
 

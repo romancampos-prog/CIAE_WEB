@@ -108,7 +108,7 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
                              semana, es_semana: bool, historicos: dict,
-                             poblacion_usada: str | None = None):
+                             poblacion_por_mes: dict[int, str | None] | None = None):
     titulo       = metadata["titulo"] or ""
     desNum       = metadata["desNum"] or ""
     desDen       = metadata["desDen"] or ""
@@ -263,5 +263,14 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                 for i in range(3):
                     ws.write(fila_excel, col + i, "", fmt_base)
 
-    if poblacion_usada:
-        ws.merge_range(ultima_fila + 2, 0, ultima_fila + 2, ultima_col, f"Población: {poblacion_usada}", fmt['poblacion_leyenda'])
+    # Leyenda de poblacion, una por cada mes mostrado (no una sola para toda la
+    # hoja) -- cada mes pudo calcularse con una poblacion distinta (regla de
+    # corte hacia adelante), justo debajo de donde terminan las unidades,
+    # fusionada en el mismo ancho de columnas NUM..% de ese mes.
+    poblacion_por_mes = poblacion_por_mes or {}
+    for pos, idx_real in enumerate(checkpoints):
+        poblacion_mes = poblacion_por_mes.get(idx_real)
+        if not poblacion_mes:
+            continue
+        sc = pos * 3 + 1
+        ws.merge_range(ultima_fila + 1, sc, ultima_fila + 1, sc + 2, f"Población: {poblacion_mes}", fmt['poblacion_leyenda'])
