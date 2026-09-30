@@ -5,11 +5,21 @@ Es la unica funcion que junta las capas; cada paso vive en su propio servicio.
 Usado en: ftp/controllers/reportes_controller.py
 """
 from schemas.model.generacion_ftp_Model import LogErrores, ResultadoCategoria, ResultadoGeneracion
+from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
 from services.bd_Ciae_Guardado_Services import borrar_mes_semanal, guardar_mes_definitivo, guardar_mes_semanal
 from services.calculo_indicador_Services import calcular_indicador, semaforizar_unidades
 from services.indicadorMapeo_Services import cargar_indicador_mapeo
+from services.poblacion_Services import leer_periodo_poblacion
 from services.ftp.extraccion_indicador_ftp_Services import extraer_indicador
 from services.ftp.registro_errores_ftp_Services import error_de_calculo
+
+
+def _poblacion_usada(mapeo, ano: str) -> str | None:
+    """"Mes Año" de la poblacion vigente, solo si el indicador depende de ella y se pudo detectar."""
+    if not isinstance(mapeo.reporte.denominador, FuentePoblacionInfoSalud):
+        return None
+    mes, anio = leer_periodo_poblacion(ano)
+    return f"{mes} {anio}" if mes and anio else None
 
 
 def normalizar_semana(semana: str | int | None) -> int | None:
@@ -32,11 +42,12 @@ def generar_indicador_ftp(
     unidades = semaforizar_unidades(resultados, mapeo.semaforo, mes)
 
     if guardar:
+        poblacion_usada = _poblacion_usada(mapeo, ano)
         if semana_normalizada is None:
-            guardar_mes_definitivo(indicador, ano, mes, unidades)
+            guardar_mes_definitivo(indicador, ano, mes, unidades, poblacion_usada)
             borrar_mes_semanal(indicador, ano, mes)
         else:
-            guardar_mes_semanal(indicador, ano, mes, semana_normalizada, unidades)
+            guardar_mes_semanal(indicador, ano, mes, semana_normalizada, unidades, poblacion_usada)
 
     return ResultadoGeneracion(
         indicador=indicador, ano=ano, mes=mes, semana=semana_normalizada,

@@ -78,6 +78,8 @@ def actualizar_historico_con_nueva_poblacion(indicador: str, ano: str) -> tuple:
             print(f"[RecalcPob] Error evaluando denominador para {unidad}: {e}")
             nuevos_den[unidad] = None
 
+    poblacion_usada = f"{mes_poblacion} {anio_poblacion}" if mes_poblacion and anio_poblacion else None
+
     for mes_str, nums_mes in meses_nums.items():
         resultados: dict[str, ResultadoUnidad] = {}
         for unidad in NOMBREUNIDADESARCHIVO:
@@ -85,6 +87,6 @@ def actualizar_historico_con_nueva_poblacion(indicador: str, ano: str) -> tuple:
             den = nuevos_den[unidad]
             resultados[unidad] = ResultadoUnidad(numerador=num, denominador=den, resultado=calcular_resultado(num, den, operacion.resultado))
         resultados[CLAVE_TOTAL] = agregar_total_ooad(resultados, operacion.resultado)
-        guardar_mes_definitivo(indicador, ano, mes_str, semaforizar_unidades(resultados, mapeo.semaforo, mes_str))
+        guardar_mes_definitivo(indicador, ano, mes_str, semaforizar_unidades(resultados, mapeo.semaforo, mes_str), poblacion_usada)
 
     return True, f"{len(meses_nums)} mes(es) actualizados", len(meses_nums)

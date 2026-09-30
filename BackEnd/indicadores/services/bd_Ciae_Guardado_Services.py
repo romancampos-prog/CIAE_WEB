@@ -103,11 +103,12 @@ def leer_semanal_indicador(indicador: str, ano: str) -> dict:
 def leer_numeradores_todos_meses(indicador: str, ano: str) -> dict[str, dict[str, float | None]]:
     """{"01": {unidad: numerador}, ...} de todos los meses definitivos guardados."""
     numeradores: dict[str, dict[str, float | None]] = {}
-    for mes, unidades in leer_historico_indicador(indicador, ano).get("MESES", {}).items():
+    for mes, mes_reporte in leer_historico_indicador(indicador, ano).get("MESES", {}).items():
         if mes not in MESES_ESTANDAR:
             continue
+        reporte = mes_reporte.get("Reporte", {}) if isinstance(mes_reporte, dict) else {}
         numeradores[str(MESES_ESTANDAR.index(mes) + 1).zfill(2)] = {
-            unidad: datos.get("numerador") for unidad, datos in unidades.items() if isinstance(datos, dict)
+            unidad: datos.get("numerador") for unidad, datos in reporte.items() if isinstance(datos, dict)
         }
     return numeradores
 
@@ -116,24 +117,28 @@ def leer_numeradores_todos_meses(indicador: str, ano: str) -> dict[str, dict[str
 # Escritura
 # --------------------------------------------------------------------------- #
 
-def guardar_mes_definitivo(indicador: str, ano: str, mes: str, unidades: Mapping[str, ResultadoUnidad]) -> None:
+def guardar_mes_definitivo(
+    indicador: str, ano: str, mes: str, unidades: Mapping[str, ResultadoUnidad], poblacion_usada: str | None = None,
+) -> None:
     ruta = _ruta_definitivo(indicador, ano)
     contenido = _leer_json_para_actualizar(ruta, {"INDICADOR": indicador, "ANIO": ano, "MESES": {}})
 
     nombre_mes = _nombre_del_mes(mes)
     if nombre_mes:
-        contenido["MESES"][nombre_mes] = _a_formato_de_disco(unidades)
+        contenido["MESES"][nombre_mes] = {"Poblacion": poblacion_usada, "Reporte": _a_formato_de_disco(unidades)}
     _escribir_json(ruta, contenido)
 
 
-def guardar_mes_semanal(indicador: str, ano: str, mes: str, semana: int | str, unidades: Mapping[str, ResultadoUnidad]) -> None:
+def guardar_mes_semanal(
+    indicador: str, ano: str, mes: str, semana: int | str, unidades: Mapping[str, ResultadoUnidad], poblacion_usada: str | None = None,
+) -> None:
     ruta = _ruta_semanal(indicador, ano)
     contenido = _leer_json_para_actualizar(ruta, {"INDICADOR": indicador, "ANIO": ano, "SEMANA": int(semana), "MES": {}})
     contenido["SEMANA"] = int(semana)
 
     nombre_mes = _nombre_del_mes(mes)
     if nombre_mes:
-        contenido["MES"][nombre_mes] = _a_formato_de_disco(unidades)
+        contenido["MES"][nombre_mes] = {"Poblacion": poblacion_usada, "Reporte": _a_formato_de_disco(unidades)}
     _escribir_json(ruta, contenido)
 
 

@@ -100,13 +100,15 @@ def obtener_estilos_excel(workbook):
         'Medio_Capsula':         workbook.add_format({**base, 'bg_color': C_DORADO,  'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
         'Bajo_Capsula':          workbook.add_format({**base, 'bg_color': C_ROJO,    'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
         'Gris_Capsula':          workbook.add_format({**base, 'bg_color': '#CCCCCC', 'font_color': 'black', 'bold': True, 'num_format': '0.00'}),
+        'poblacion_leyenda':     workbook.add_format({'font_name': 'Calibri', 'font_size': 9, 'italic': True, 'font_color': '#888888', 'align': 'left', 'border': 0}),
     }
 
 
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
-                             semana, es_semana: bool, historicos: dict):
+                             semana, es_semana: bool, historicos: dict,
+                             poblacion_usada: str | None = None):
     titulo       = metadata["titulo"] or ""
     desNum       = metadata["desNum"] or ""
     desDen       = metadata["desDen"] or ""
@@ -260,3 +262,6 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
             else:
                 for i in range(3):
                     ws.write(fila_excel, col + i, "", fmt_base)
+
+    if poblacion_usada:
+        ws.merge_range(ultima_fila + 2, 0, ultima_fila + 2, ultima_col, f"Población: {poblacion_usada}", fmt['poblacion_leyenda'])

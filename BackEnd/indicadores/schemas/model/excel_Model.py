@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from indicadores.schemas.model.indicador_Model import UnidadDatos
+from indicadores.schemas.model.indicador_Model import MesReporte
 from shared.MESES import MESES_ESTANDAR
 
 Modulo = Literal["FTP", "IAAS", "Extractor"]
@@ -55,7 +55,7 @@ class HojaIndicador(BaseModel):
     modulo:     Modulo
     ano:        int
     metadata:   MetadataHoja
-    meses:      dict[str, dict[str, UnidadDatos]]
+    meses:      dict[str, MesReporte]
     mesActivo:  str
     semana:     int | None = None
 

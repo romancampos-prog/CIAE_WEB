@@ -80,7 +80,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
       setIndInfo(ficha);
       const meses      = mesesDisponiblesDeReporte(r);
       const primerMes  = Object.keys(r?.MESES ?? {})[0];
-      setUnidadSel(primerMes ? Object.keys(r.MESES[primerMes])[0] ?? '' : '');
+      setUnidadSel(primerMes ? Object.keys(r.MESES[primerMes]?.Reporte ?? {})[0] ?? '' : '');
       setMesSel(meses.length > 0 ? meses[meses.length - 1] : '');
     }).finally(() => setCargando(false));
   }, [indSel, anio]);
@@ -142,7 +142,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     for (let i = mesesDisponibles.length - 1; i >= 0; i--) {
       const mes = mesesDisponibles[i];
       const nombreMes = MESES_LARGOS_ARR[parseInt(mes, 10) - 1];
-      const datosMes = reporte?.MESES?.[nombreMes] ?? reporte?.SEMANA?.MES?.[nombreMes];
+      const datosMes = (reporte?.MESES?.[nombreMes] ?? reporte?.SEMANA?.MES?.[nombreMes])?.Reporte;
       const tieneResultado = datosMes && Object.values(datosMes).some(u => u?.desempeno && u.desempeno !== 'Gris');
       if (tieneResultado) return mes;
     }

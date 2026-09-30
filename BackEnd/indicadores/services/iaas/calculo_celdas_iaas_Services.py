@@ -112,7 +112,7 @@ def _leer_historicos_IAAS(anio: str, mes_num: int) -> dict:
                     "tasa":        v.get("%"),
                     "color":       v.get("desempeno") or "Bajo",
                 }
-                for unit, v in mes_data.items()
+                for unit, v in mes_data.get("Reporte", {}).items()
             }
             if datos_mes:
                 h_ind[m] = datos_mes

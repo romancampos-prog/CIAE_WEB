@@ -9,20 +9,32 @@ class UnidadDatos(BaseModel):
     denominador: float | None = None
     desempeno:   Literal["Esperado", "Medio", "Bajo", "Gris"]
     resultado:   float | None = Field(None, alias = "%")
-    
+
+
+class MesReporte(BaseModel):
+    """
+    Un mes (o corte) ya guardado: el reporte por unidad, mas con que poblacion
+    se calculo (None si el indicador no depende de poblacion, o si no se pudo
+    detectar el mes/año del archivo subido). Poblacion queda fija en el momento
+    en que ese mes se guarda -- no cambia sola despues aunque se suba una
+    poblacion mas nueva, salvo que ese mes se vuelva a calcular.
+    """
+    Poblacion: str | None = None
+    Reporte:   Dict[str, UnidadDatos]
+
 
 class ReportePrevio(BaseModel):
     SEMANA: int
-    MES:    Dict[str, Dict[str, UnidadDatos]]
-        
+    MES:    Dict[str, MesReporte]
+
 
 
 class ReporteIndicador(BaseModel):
     INDICADOR:    str
     ANIO:         int
-    MESES:        Dict[str, Dict[str, UnidadDatos]]
+    MESES:        Dict[str, MesReporte]
     SEMANA:       ReportePrevio | None = None
-    MENSUAL_ACUMULADO: Dict[str, Dict[str, UnidadDatos]] | None = None
+    MENSUAL_ACUMULADO: Dict[str, MesReporte] | None = None
     
 
 #---------------------------------------------------

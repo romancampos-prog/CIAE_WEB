@@ -15,6 +15,7 @@ from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
 from services.calculo_indicador_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
 from services.extractor.guardado_extractor_Services import leer_reporte, guardar_reporte
 from services.indicadorMapeo_Services import cargar_indicador_extractor
+from services.poblacion_Services import leer_periodo_poblacion
 from services.ftp.extraccion_indicador_ftp_Services import extraer_poblacion
 from services.ftp.registro_errores_ftp_Services import crear_log_errores
 from shared.MESES import MESES_ESTANDAR
@@ -101,6 +102,9 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
     denominador_por_unidad = _denominador_por_unidad(anio_poblacion, mapeo.reporte.denominador, mapeo.reporte.operacion.denominador)
     formula_resultado = mapeo.reporte.operacion.resultado
 
+    mes_pob, anio_pob = leer_periodo_poblacion(anio_poblacion)
+    poblacion_usada = f"{mes_pob} {anio_pob}" if mes_pob and anio_pob else None
+
     bloque_corte: dict[str, UnidadDatos] = {}
     total_num = total_den = 0
 
@@ -130,7 +134,8 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
     # (a lo mas) las llaves "Junio" y "Diciembre", nunca los otros 10 meses.
     reporte_anio_corte = reportes_cache[anio]
     reporte_anio_corte.setdefault("CORTES", {}).setdefault("MESES", {})[mes_nombre] = {
-        unidad: dato.model_dump(by_alias=True) for unidad, dato in bloque_semaforizado.items()
+        "Poblacion": poblacion_usada,
+        "Reporte": {unidad: dato.model_dump(by_alias=True) for unidad, dato in bloque_semaforizado.items()},
     }
     guardar_reporte(indicador, anio, reporte_anio_corte)
 
@@ -139,7 +144,7 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
 
 def _corte_ya_generado(indicador: str, anio_corte: int, mes_corte: str) -> bool:
     bloque = leer_reporte(indicador, anio_corte).get("CORTES", {}).get("MESES", {}).get(mes_corte)
-    return bool(bloque and "TOTAL_OOAD" in bloque)
+    return bool(bloque and "TOTAL_OOAD" in (bloque.get("Reporte") or {}))
 
 
 def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] | None = None) -> list[dict]:
@@ -229,7 +234,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
 
         clave = f"{mes_corte} {anio_corte}"
         ya_generado = all(
-            "TOTAL_OOAD" in (cache[(indicador, anio_corte)].get("CORTES", {}).get("MESES", {}).get(mes_corte) or {})
+            "TOTAL_OOAD" in ((cache[(indicador, anio_corte)].get("CORTES", {}).get("MESES", {}).get(mes_corte) or {}).get("Reporte") or {})
             for indicador in indicadores
         )
         resultado[clave] = {

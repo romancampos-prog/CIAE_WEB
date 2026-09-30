@@ -2,7 +2,7 @@ from typing import Dict
 import json
 
 #mis archivos
-from schemas.model.indicador_Model import UnidadDatos
+from schemas.model.indicador_Model import MesReporte, UnidadDatos
 from services.indicadorMapeo_Services import RutaMapeoExiste
 from shared.MESES import MESES_ESTANDAR
 from shared.color_service import es_inconsistente
@@ -24,7 +24,7 @@ def _operacionResultado(indicador: str) -> str | None:
     return data.get(indicador, {}).get("reporte", {}).get("operacion", {}).get("resultado")
 
 
-def MensualAcumulado(meses: Dict[str, Dict[str, UnidadDatos]], indicador: str) -> Dict[str, Dict[str, UnidadDatos]] | None:
+def MensualAcumulado(meses: Dict[str, MesReporte], indicador: str) -> Dict[str, MesReporte] | None:
     """
     Acumula numerador/denominador mes a mes -- Enero queda igual, Febrero es
     Enero+Febrero, Marzo es Enero+Febrero+Marzo, y asi sucesivo -- y recalcula
@@ -45,7 +45,7 @@ def MensualAcumulado(meses: Dict[str, Dict[str, UnidadDatos]], indicador: str) -
         return None
 
     mesesPresentes   = [mes for mes in MESES_ESTANDAR if mes in meses]
-    todasLasUnidades = {unidad for datosMes in meses.values() for unidad in datosMes}
+    todasLasUnidades = {unidad for datosMes in meses.values() for unidad in datosMes.Reporte}
 
     acumulado: Dict[str, Dict[str, UnidadDatos]] = {}
 
@@ -59,7 +59,7 @@ def MensualAcumulado(meses: Dict[str, Dict[str, UnidadDatos]], indicador: str) -
             completo = True
 
             for mes in mesesHastaAqui:
-                datoUnidad = meses[mes].get(unidad)
+                datoUnidad = meses[mes].Reporte.get(unidad)
                 if datoUnidad is None:
                     continue
                 if datoUnidad.numerador is not None:
@@ -94,4 +94,12 @@ def MensualAcumulado(meses: Dict[str, Dict[str, UnidadDatos]], indicador: str) -
 
         acumulado[mesActual] = filaMes
 
-    return SemaforizarReporte(acumulado, indicador)
+    # SemaforizarReporte espera y regresa la forma plana {mes: {unidad: UnidadDatos}}
+    # (ver shared/semaforizado_service.py) -- se envuelve en MesReporte recien aqui.
+    # Poblacion siempre None: es un acumulado calculado sobre varios meses, no un
+    # guardado real, asi que no hay una sola poblacion que le corresponda.
+    acumulado_semaforizado = SemaforizarReporte(acumulado, indicador)
+    return {
+        mes: MesReporte(Poblacion=None, Reporte=unidades)
+        for mes, unidades in acumulado_semaforizado.items()
+    }

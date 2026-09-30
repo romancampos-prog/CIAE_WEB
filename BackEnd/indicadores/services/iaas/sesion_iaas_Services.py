@@ -28,7 +28,7 @@ def leer_mes_guardado_iaas(anio: str, mes_nombre: str) -> dict[str, dict[str, Un
                 numerador=valores.get("numerador"), denominador=valores.get("denominador"),
                 resultado=valores.get("%"), color=valores.get("desempeno") or "Gris",
             )
-            for unidad, valores in mes_data.items()
+            for unidad, valores in mes_data.get("Reporte", {}).items()
         }
     return datos
 

@@ -77,8 +77,8 @@ export function buildFTPChartDataUnidad(reporte, unidadSel) {
     const esSemana  = mes === mesSemanaStr;
     const nombreMes = MESES_LARGOS_ARR[mesNum - 1];
     const dato      = esSemana
-      ? reporte.SEMANA.MES[nombreMes]?.[unidadSel]
-      : reporte.MESES[nombreMes]?.[unidadSel];
+      ? reporte.SEMANA.MES[nombreMes]?.Reporte?.[unidadSel]
+      : reporte.MESES[nombreMes]?.Reporte?.[unidadSel];
     const etiqueta  = etiquetaMesCorta(mesNum);
     const semana    = esSemana ? reporte.SEMANA.SEMANA : null;
 
@@ -108,10 +108,10 @@ export function buildFTPChartDataMes(reporte, mesSel) {
   if (!reporte?.MESES || !mesSel) return [];
 
   const nombreMes = MESES_LARGOS_ARR[parseInt(mesSel, 10) - 1];
-  let unidadesMes = reporte.MESES[nombreMes];
+  let unidadesMes = reporte.MESES[nombreMes]?.Reporte;
 
   if (!unidadesMes && nombreMesSemana(reporte) === nombreMes) {
-    unidadesMes = reporte.SEMANA.MES[nombreMes];
+    unidadesMes = reporte.SEMANA.MES[nombreMes]?.Reporte;
   }
   if (!unidadesMes) return [];
 

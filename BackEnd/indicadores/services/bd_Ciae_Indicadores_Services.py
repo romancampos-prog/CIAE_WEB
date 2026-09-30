@@ -3,12 +3,13 @@ import logging
 import json
 
 #mis archivos
-from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePrevio,UnidadDatos
+from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePrevio,UnidadDatos,MesReporte
 from configs.settings import DATA_INDICADORES
 from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from shared.MESES_ACUMULADOS import MensualAcumulado
 from shared.UNIDADES import nombre_canonico_iaas
+from services.extractor.corte_extractor_Services import INDICADORES_EXTRACTOR
 
 #ruta  a la BD_CIAE 
 
@@ -57,25 +58,53 @@ def _normalizar_semaforo(bloque_meses: dict) -> dict:
     "desempeno" (shared/semaforizado_service.py). El modelo unificado
     (UnidadDatos) siempre exige "desempeno" -- se traduce aqui, en la
     lectura, para no tener que igualar el formato de guardado en cada modulo.
+    Cada mes viene envuelto como {"Poblacion": ..., "Reporte": {unidad: datos}}
+    (ver MesReporte) -- se normaliza el "Reporte" y se conserva "Poblacion" tal cual.
     """
     return {
         mes: {
-            unidad: (
-                {**vals, "desempeno": vals["color"]}
-                if isinstance(vals, dict) and "color" in vals and "desempeno" not in vals
-                else vals
-            )
-            for unidad, vals in unidades.items()
+            "Poblacion": mes_reporte.get("Poblacion"),
+            "Reporte": {
+                unidad: (
+                    {**vals, "desempeno": vals["color"]}
+                    if isinstance(vals, dict) and "color" in vals and "desempeno" not in vals
+                    else vals
+                )
+                for unidad, vals in mes_reporte.get("Reporte", {}).items()
+            },
+        }
+        for mes, mes_reporte in bloque_meses.items()
+    }
+
+
+def _normalizar_y_envolver_plano(bloque_meses: dict) -> dict:
+    """
+    Igual que _normalizar_semaforo, pero para el MESES crudo de Extractor -- ese
+    NUNCA se guarda envuelto en {"Poblacion", "Reporte"} (es solo numerador, nunca
+    usa poblacion, ver guardado_extractor_Services.guardar_numerador_mes), asi que
+    aqui se envuelve nada mas para la lectura, en memoria, sin tocar el archivo.
+    """
+    return {
+        mes: {
+            "Poblacion": None,
+            "Reporte": {
+                unidad: (
+                    {**vals, "desempeno": vals["color"]}
+                    if isinstance(vals, dict) and "color" in vals and "desempeno" not in vals
+                    else vals
+                )
+                for unidad, vals in unidades.items()
+            },
         }
         for mes, unidades in bloque_meses.items()
     }
 
 
-def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, dict[str, dict[str, UnidadDatos]]] | None:
+def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, dict[str, MesReporte]] | None:
     """
     Lee y valida el JSON de un indicador/año: regresa (reporte, cortes) o None si no existe.
     cortes es CORTES.MESES ya tipado -- solo Extractor lo trae (ver
-    extractor_service.intentar_generar_corte); en los demas queda {}.
+    corte_extractor_Services.intentar_generar_corte); en los demas queda {}.
     Usado en: IndicadorConsultarReporte (graficas) y services/excel_Services.py (Excel).
     """
     rutaIndicador = IndicadorExiste(indicador, ano, False)
@@ -83,9 +112,13 @@ def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, 
 
     with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
         datosJson = json.load(archivoJson) #todo el json leido
-        datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
-        # MESES en Extractor solo trae el numerador crudo de cada mes; el corte ya
-        # cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
+        # MESES en Extractor solo trae el numerador crudo de cada mes, guardado PLANO
+        # (nunca envuelto en Poblacion/Reporte -- ver guardado_extractor_Services); el
+        # corte ya cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
+        if datosJson.get("INDICADOR") in INDICADORES_EXTRACTOR:
+            datosJson["MESES"] = _normalizar_y_envolver_plano(datosJson.get("MESES", {}))
+        else:
+            datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
         cortesCrudos = _normalizar_semaforo(datosJson.get("CORTES", {}).get("MESES", {}))
         reporte = ReporteIndicador.model_validate(datosJson)
 
@@ -94,10 +127,7 @@ def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, 
         logging.error(f"El json y reporte existen, pero no coincide con el indicador o año solicitado")
         return None
 
-    cortes = {
-        mes: {unidad: UnidadDatos.model_validate(datos) for unidad, datos in unidades.items()}
-        for mes, unidades in cortesCrudos.items()
-    }
+    cortes = {mes: MesReporte.model_validate(mes_reporte) for mes, mes_reporte in cortesCrudos.items()}
     return reporte, cortes
 
 
@@ -112,8 +142,11 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
 
     if (modulo == "iaas"):
         reporte.MESES = {
-            mes: {nombre_canonico_iaas(unidad): datos for unidad, datos in unidades.items()}
-            for mes, unidades in reporte.MESES.items()
+            mes: MesReporte(
+                Poblacion=mes_reporte.Poblacion,
+                Reporte={nombre_canonico_iaas(unidad): datos for unidad, datos in mes_reporte.Reporte.items()},
+            )
+            for mes, mes_reporte in reporte.MESES.items()
         }
 
     #si previos true, cuneta con reporte semanal y si es ftp al mismo timepo 

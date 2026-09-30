@@ -52,7 +52,7 @@ export function calcularFaltantes(numeradores, unidades, archivosUnidad, denomin
 export function mesesConDatosDeReporte(reporte) {
   if (!reporte?.MESES) return [];
   return Object.entries(reporte.MESES)
-    .filter(([, unidades]) => Object.values(unidades).some(d => d?.numerador != null || d?.denominador != null || d?.['%'] != null))
+    .filter(([, mesReporte]) => Object.values(mesReporte?.Reporte ?? {}).some(d => d?.numerador != null || d?.denominador != null || d?.['%'] != null))
     .map(([nombre]) => MESES_LARGOS_ARR.indexOf(nombre) + 1)
     .filter(n => n > 0)
     .sort((a, b) => a - b)
@@ -86,7 +86,7 @@ export function buildChartDataUnidad(reporte, unidadSel, mesesConDatos, fuente =
   const clave = unidadSel === TOTAL_KEY ? TOTAL_OOAD_KEY : unidadSel;
   return mesesConDatos.map(mes => ({
     mes: MESES_CORTOS[parseInt(mes) - 1],
-    ...puntoDe(reporte[fuente]?.[MESES_LARGOS_ARR[parseInt(mes) - 1]]?.[clave]),
+    ...puntoDe(reporte[fuente]?.[MESES_LARGOS_ARR[parseInt(mes) - 1]]?.Reporte?.[clave]),
   }));
 }
 
@@ -102,7 +102,7 @@ export function buildChartDataUnidad(reporte, unidadSel, mesesConDatos, fuente =
 export function buildChartDataMes(reporte, unidades, mesSel, fuente = FUENTE_MENSUAL) {
   if (!reporte || !mesSel) return [];
 
-  const delMes = reporte[fuente]?.[MESES_LARGOS_ARR[parseInt(mesSel) - 1]] ?? {};
+  const delMes = reporte[fuente]?.[MESES_LARGOS_ARR[parseInt(mesSel) - 1]]?.Reporte ?? {};
   return [
     ...unidades.map(unidad => ({ unidad, ...puntoDe(delMes[unidad]) })),
     { unidad: TOTAL_KEY, ...puntoDe(delMes[TOTAL_OOAD_KEY]) },
