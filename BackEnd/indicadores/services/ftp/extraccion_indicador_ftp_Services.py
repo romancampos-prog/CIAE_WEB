@@ -102,26 +102,37 @@ def extraer_indicador(
     extraidos = {unidad: DatosExtraidosUnidad() for unidad in NOMBREUNIDADESARCHIVO}
     log       = crear_log_errores()
 
-    detalles_por_reporte: dict[str, dict[str, dict[str, Any]]] = {}
+    # Se agrupa por PREFIJO real del codigo (antes del "_"), no por el codigo
+    # completo: dos codigos como "IN33_MF"/"IN33_40" (DM 03) son dos HOJAS del
+    # MISMO archivo del FTP -- el sufijo es solo un diferenciador interno para
+    # la formula del mapeo (ej. "IN33_MF[0] + IN33_40[0]"), nunca existe en el
+    # nombre real del archivo (ver navegacion_ftp_Services.listar_reportes, ya
+    # corta el sufijo igual). Agrupar por prefijo evita bajar el mismo archivo
+    # dos veces y reportar "archivo duplicado" dos veces para el mismo caso.
+    # La llave "lado::codigo" se desempaca al final para que cada codigo siga
+    # siendo su propia fuente en DatosExtraidosUnidad.
+    detalles_por_prefijo: dict[str, dict[str, dict[str, Any]]] = {}
     for lado in ("numerador", "denominador"):
         fuente = getattr(reporte, lado)
         if isinstance(fuente, FuenteArchivosFTP):
             for codigo, detalle in fuente.archivo.items():
-                detalles_por_reporte.setdefault(codigo, {})[lado] = detalle
+                prefijo = codigo.split("_")[0].strip().upper()
+                detalles_por_prefijo.setdefault(prefijo, {})[f"{lado}::{codigo}"] = detalle
 
-    if detalles_por_reporte:
+    if detalles_por_prefijo:
         ftp = conectar_ftp()
         if not ftp:
             return extraidos, error_de_conexion()
         try:
-            for codigo, detalles in detalles_por_reporte.items():
+            for prefijo, detalles in detalles_por_prefijo.items():
                 valores_por_unidad = extraer_reporte_de_unidades(
-                    ftp, codigo, ano, mes, semana, detalles, mapeo.MESES_CIP01,
+                    ftp, prefijo, ano, mes, semana, detalles, mapeo.MESES_CIP01,
                     mapeo.unidadesSinServicio or [], log,
                 )
-                for unidad, valores_por_lado in valores_por_unidad.items():
-                    for lado in detalles:
-                        getattr(extraidos[unidad], lado)[codigo] = valores_por_lado[lado] if valores_por_lado else None
+                for unidad, valores_por_llave in valores_por_unidad.items():
+                    for llave in detalles:
+                        lado, codigo = llave.split("::", 1)
+                        getattr(extraidos[unidad], lado)[codigo] = valores_por_llave[llave] if valores_por_llave else None
         finally:
             desconectar_ftp(ftp)
 
