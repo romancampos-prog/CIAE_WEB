@@ -217,7 +217,13 @@ def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
     meses_en_hojas = {h.mesActivo for h in hojas}
     sufijo_mes = f"_{meses_en_hojas.pop()}" if len(meses_en_hojas) == 1 else ""
 
-    return f"{base}{sufijo_mes}_{ano}.xlsx"
+    # Semana (reporte previo/semanal de FTP) -- mismo criterio que el mes: solo si
+    # TODAS las pestañas son de la misma semana. Sin esto, dos descargas semanales
+    # de semanas distintas quedarian con el mismo nombre de archivo.
+    semanas_en_hojas = {h.semana for h in hojas}
+    sufijo_semana = f"_S{semanas_en_hojas.pop()}" if len(semanas_en_hojas) == 1 and None not in semanas_en_hojas else ""
+
+    return f"{base}{sufijo_mes}{sufijo_semana}_{ano}.xlsx"
 
 
 # --------------------------------------------------------------------------- #
