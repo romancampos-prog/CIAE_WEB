@@ -199,7 +199,17 @@ def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
         base = "_".join(h.metadata.nombreArchivo.replace(" ", "_") for h in hojas)
     else:
         base = "_".join(familias)  # varias familias distintas: EH_DM
-    return f"{base}_{ano}.xlsx"
+
+    # El mes de los datos (no el dia en que se genera) -- si no se incluye, descargar
+    # el mismo indicador/familia para dos meses distintos da el MISMO nombre de
+    # archivo las dos veces (el navegador termina poniendo "(1)", "(2)"... sin forma
+    # de saber cual es cual). Solo se agrega si todas las pestañas son del mismo mes
+    # (lo normal cuando se pide un mes especifico); si cada una quedo en un mes
+    # distinto (solicitud.mes vacio = "ultimo disponible" por indicador), se omite.
+    meses_en_hojas = {h.mesActivo for h in hojas}
+    sufijo_mes = f"_{meses_en_hojas.pop()}" if len(meses_en_hojas) == 1 else ""
+
+    return f"{base}{sufijo_mes}_{ano}.xlsx"
 
 
 # --------------------------------------------------------------------------- #
