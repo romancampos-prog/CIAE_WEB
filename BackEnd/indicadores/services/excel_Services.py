@@ -182,11 +182,19 @@ def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]
         "IAAS 01": Excel_IAAS01, "IAAS 02": Excel_IAAS02, "IAAS 03": Excel_IAAS03,
         "IAAS 04": Excel_IAAS04, "IAAS 05": Excel_IAAS05, "IAAS 06": Excel_IAAS06,
     }
+    # El Excel de IAAS siempre trae el año completo (matriz por mes + acumulado),
+    # pero el NOMBRE si puede traer el ultimo mes con datos de cada indicador --
+    # mismo criterio que FTP (ver _nombre_archivo): solo se agrega si todas las
+    # hojas pedidas comparten el mismo ultimo mes, para no mostrar un mes que no
+    # le toca a todos por igual.
+    meses_en_hojas = {h.mesActivo for h in hojas}
+    sufijo_mes = f"_{meses_en_hojas.pop()}" if len(meses_en_hojas) == 1 else ""
+
     if len(hojas) == 1 and hojas[0].indicador in por_indicador:
         indicador = hojas[0].indicador
         contenido = por_indicador[indicador](str(ano)).getvalue()
-        return contenido, f"IAAS_{indicador.replace('IAAS ', '').zfill(2)}_{ano}.xlsx"
-    return Excel_IAAS_Completo(str(ano), "0", {}).getvalue(), f"IAAS_{ano}.xlsx"
+        return contenido, f"IAAS_{indicador.replace('IAAS ', '').zfill(2)}{sufijo_mes}_{ano}.xlsx"
+    return Excel_IAAS_Completo(str(ano), "0", {}).getvalue(), f"IAAS{sufijo_mes}_{ano}.xlsx"
 
 
 def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
