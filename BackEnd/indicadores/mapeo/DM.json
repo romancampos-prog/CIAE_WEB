@@ -212,18 +212,71 @@
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
-        "modulo": "",
-        "mostrarGenerar": false,
+        "modulo": "ftp",
+        "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
         "periodicidad": "Mensual Trimestralizado",
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": false
+        },
         "informacion": {
             "titulo": "DM 03 - Porcentaje de pacientes que viven con diabetes en control glucémico con hemoglobina glucosilada (HbA1c) menor o igual a 7%.",
             "objetivo": "Evaluar la eficiencia del control de los pacientes que viven con diabetes tipo 2, mediante el seguimiento de los resultados de la hemoglobina glucosilada (HbA1c).",
             "descNum": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con resultado de hemoglobina glucosilada (HbA1c) menor o igual a 7% del periodo evaluado .",
             "descDen": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con registro de hemoglobina glucosilada (HbA1c) del periodo evaluado."
         },
-        "reporte": {},
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "IN33_MF" : {
+                        "hoja": "Indicadores_2024_MF",
+                        "modoExtraccion": "ULTIMA_FILA",
+                        "columna_dato": [
+                            "V"
+                        ],
+                        "encabezado": 9 
+                    },
+                    "IN33_40" : {
+                        "hoja": "Indicadores_2024_40",
+                        "modoExtraccion": "ULTIMA_FILA",
+                        "columna_dato": [
+                            "V"
+                        ],
+                        "encabezado": 9
+                    }
+                }
+            },
+            "denominador": {
+                 "fuente": "ftp",
+                "archivo": {
+                    "IN33_MF" : {
+                        "hoja": "Indicadores_2024_MF",
+                        "modoExtraccion": "ULTIMA_FILA",
+                        "columna_dato": [
+                            "R"
+                        ],
+                        "encabezado": 9 
+                    },
+                    "IN33_40" : {
+                        "hoja": "Indicadores_2024_40",
+                        "modoExtraccion": "ULTIMA_FILA",
+                        "columna_dato": [
+                            "R"
+                        ],
+                        "encabezado": 9
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "IN33_MF[0] + IN33_40[0]",
+                "denominador": "IN33_MF[0] + IN33_40[0]",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+    
         "semaforo": {
             "Esperado": ">= 53.0",
             "Medio": "> 49 a < 53",
@@ -486,4 +539,5 @@
             }
         }
     }
+
 }
