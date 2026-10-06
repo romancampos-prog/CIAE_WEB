@@ -74,14 +74,31 @@ def _a_numero(valor):
 class CondicionFiltro(BaseModel):
     """
     Una entrada de filtroColumna/columnaUnidad. Puede venir en formato
-    explicito (tipo="LISTA"/"RANGO", ver EH 03/DM 04) o en formato simple
-    (solo "filtro" como texto -- match exacto, o "^prefijo" -- el que ya
-    usaban IAAS 01/02-06).
+    explicito (tipo="LISTA"/"RANGO"/"PREFIJO", ver EH 03/DM 04/MT 03) o en
+    formato simple (solo "filtro" como texto -- match exacto, o "^prefijo" --
+    el que ya usaban IAAS 01/02-06).
     """
     model_config = ConfigDict(extra='ignore')
     filtro: Any
-    tipo:          Literal['LISTA', 'RANGO'] | None = None
+    tipo:          Literal['LISTA', 'RANGO', 'PREFIJO', 'SUFIJO'] | None = None
     nombreColumna: str | None = None
+
+
+class GrupoColumnas(BaseModel):
+    """
+    Una misma condicion revisada en varias columnas a la vez (ej. un codigo CIE
+    en diagnostico principal o en cualquiera de los secundarios):
+      - CUALQUIERA: la fila pasa si AL MENOS una de las columnas cumple.
+      - NINGUNA:    la fila pasa si NINGUNA de las columnas cumple (exclusion).
+    'columnas' es {letra: nombre del encabezado}, igual que nombreColumna.
+    """
+    coincidencia: Literal['CUALQUIERA', 'NINGUNA']
+    tipo:         Literal['LISTA', 'RANGO', 'PREFIJO', 'SUFIJO']
+    filtro:       Any
+    columnas:     dict[str, str]
+
+    def condicion(self) -> 'CondicionFiltro':
+        return CondicionFiltro(filtro=self.filtro, tipo=self.tipo)
 
 
 class DetalleInterseccionColumna(BaseModel):
@@ -101,8 +118,16 @@ class DetalleUltimaFila(BaseModel):
 
 
 class DetalleFiltroConteo(BaseModel):
-    filtroColumna: dict[str, CondicionFiltro]
-    encabezado:    int | None = None
+    """
+    Una fila cuenta si cumple TODO filtroColumna, TODOS los grupos de
+    filtroGrupoColumnas y, si hay filtroAlternativas, AL MENOS UNA de ellas
+    (cada alternativa es un filtroColumna completo: ahi va el "o", ej. MT 04:
+    parto con metodo de parto, o aborto con metodo de aborto).
+    """
+    filtroColumna:       dict[str, CondicionFiltro]
+    filtroGrupoColumnas: list[GrupoColumnas] = []
+    filtroAlternativas:  list[dict[str, CondicionFiltro]] = []
+    encabezado:          int | None = None
 
 
 class DetalleFiltroUnidadValor(BaseModel):
@@ -223,6 +248,21 @@ def cumple_condicion(valor, cfg: CondicionFiltro) -> bool:
         minimo, maximo = cfg.filtro
         return minimo <= valor <= maximo
 
+    if cfg.tipo == 'PREFIJO':
+        # Compara desde el inicio tantos caracteres como tenga cada prefijo: "O11"
+        # acepta O110/O11X, "O" acepta cualquier codigo O (los CIE traen sufijos variables).
+        if valor is None:
+            return False
+        prefijos = cfg.filtro if isinstance(cfg.filtro, list) else [cfg.filtro]
+        return str(valor).strip().upper().startswith(tuple(str(p).strip().upper() for p in prefijos))
+
+    if cfg.tipo == 'SUFIJO':
+        # Lo mismo pero por el final: el regimen viene al final del agregado (1F1992ND -> "ND").
+        if valor is None:
+            return False
+        sufijos = cfg.filtro if isinstance(cfg.filtro, list) else [cfg.filtro]
+        return str(valor).strip().upper().endswith(tuple(str(s).strip().upper() for s in sufijos))
+
     # Formato simple (solo lo usa IAAS): exacto sin distinguir mayusculas ni
     # espacios de los lados, o "^prefijo" = el texto empieza con esa palabra
     # completa ("^CIRUGIA" acepta "CIRUGIA GENERAL" pero no "CIRUGIAS").
@@ -241,13 +281,44 @@ def fila_cumple(fila, filtro_columna: dict[str, CondicionFiltro]) -> bool:
     return True
 
 
-def _filtro_conteo(df, detalle: DetalleFiltroConteo):
+def _columna_cumple(df, letra: str, cfg: CondicionFiltro) -> pd.Series:
+    idx = letra_a_numero(letra)
+    if idx >= df.shape[1]:
+        raise KeyError(f"La columna {letra} no existe en la hoja")
+    return df.iloc[:, idx].map(lambda v, c=cfg: cumple_condicion(v, c)).astype(bool)
+
+
+def mascara_filtros(df, detalle: DetalleFiltroConteo) -> pd.Series:
+    """
+    Que filas pasan TODOS los filtros del detalle (filtroColumna y filtroGrupoColumnas).
+    Es la regla unica de "esta fila cuenta": la usan el conteo total (_filtro_conteo)
+    y el conteo por unidad del Extractor. KeyError si una columna no existe en la hoja.
+    """
     mascara = pd.Series(True, index=df.index)
     for letra, cfg in detalle.filtroColumna.items():
-        idx = letra_a_numero(letra)
-        if idx >= df.shape[1]:
-            return None, "COLUMNA_NO_ENCONTRADA", f"La columna {letra} no existe en la hoja"
-        mascara &= df.iloc[:, idx].map(lambda v, c=cfg: cumple_condicion(v, c)).astype(bool)
+        mascara &= _columna_cumple(df, letra, cfg)
+
+    for grupo in detalle.filtroGrupoColumnas:
+        condicion = grupo.condicion()
+        alguna = pd.concat([_columna_cumple(df, letra, condicion) for letra in grupo.columnas], axis=1).any(axis=1)
+        mascara &= alguna if grupo.coincidencia == 'CUALQUIERA' else ~alguna
+
+    if detalle.filtroAlternativas:
+        cumple_alguna = pd.Series(False, index=df.index)
+        for alternativa in detalle.filtroAlternativas:
+            cumple_esta = pd.Series(True, index=df.index)
+            for letra, cfg in alternativa.items():
+                cumple_esta &= _columna_cumple(df, letra, cfg)
+            cumple_alguna |= cumple_esta
+        mascara &= cumple_alguna
+    return mascara
+
+
+def _filtro_conteo(df, detalle: DetalleFiltroConteo):
+    try:
+        mascara = mascara_filtros(df, detalle)
+    except KeyError as e:
+        return None, "COLUMNA_NO_ENCONTRADA", str(e)
     return int(mascara.sum()), None, None
 
 
@@ -319,6 +390,10 @@ def columnas_esperadas(modo_extraccion: str, detalle: dict) -> dict[str, str]:
         for letra, cfg in (getattr(modelo, bloque, None) or {}).items():
             if cfg.nombreColumna:
                 esperadas[letra] = cfg.nombreColumna
+    for grupo in getattr(modelo, "filtroGrupoColumnas", None) or []:
+        esperadas.update(grupo.columnas)
+    for alternativa in getattr(modelo, "filtroAlternativas", None) or []:
+        esperadas.update({letra: cfg.nombreColumna for letra, cfg in alternativa.items() if cfg.nombreColumna})
     esperadas.update(getattr(modelo, "tomarValor", None) or {})
     return esperadas
 
