@@ -39,6 +39,15 @@ const ESTADO_MES = {
 
 const numeroMes = (mes) => String(MESES.indexOf(mes) + 1).padStart(2, '0');
 
+// "Materna 04 - Cobertura de..." -> "Cobertura de...": la clave ya va arriba en la tarjeta.
+const tituloSinClave = (titulo = '') => titulo.replace(/^[^-–]*?\d+\s*[-–]\s*/, '');
+
+// "Mensual - Mensual Acumulado: dato de cada mes..." -> "Dato de cada mes...": la periodicidad ya va en la etiqueta.
+const explicacionPeriodo = (texto = '') => {
+  const despues = texto.includes(':') ? texto.slice(texto.indexOf(':') + 1).trim() : texto;
+  return despues.charAt(0).toUpperCase() + despues.slice(1);
+};
+
 const RADIO = 22;
 const CIRCUNFERENCIA = 2 * Math.PI * RADIO;
 
@@ -403,37 +412,42 @@ const ExtractorPage = () => {
 
         {/* ── Cada indicador por separado ── */}
         <h2 className="exv-seccion-titulo">Indicadores</h2>
-        <div className="exv-grupos">
+        <div className="exv-ind-grid">
           {indicadores.map(ind => {
             const generados = MESES.filter(m => (mesesGenerados[ind.indicador] ?? []).includes(numeroMes(m)));
             const ultimo = generados[generados.length - 1];
+            // El denominador solo se muestra si no sale del mismo archivo (ej. EH 03: población PAMF).
+            const denominadorAparte = !ind.archivos.some(a => a.archivo === ind.denominador);
             return (
-              <article key={ind.indicador} className="exv-grupo">
-                <header className="exv-grupo-header">
-                  <div className="exv-iconos">{ind.icono && <img src={ind.icono} alt="" />}</div>
-                  <div className="exv-grupo-nombres">
-                    <p className="exv-grupo-claves">{ind.indicador}</p>
-                    <p className="exv-grupo-titulo">{ind.titulo}</p>
+              <article key={ind.indicador} className="exv-ind">
+                <header className="exv-ind-header">
+                  <div className="exv-ind-icono">{ind.icono && <img src={ind.icono} alt="" />}</div>
+                  <div className="exv-ind-id">
+                    <span className="exv-ind-clave">{ind.indicador}</span>
+                    <span className={`exv-tag exv-tag--${ind.tipo === 'corte' ? 'semestral' : 'mensual'}`}>{ind.periodicidad}</span>
                   </div>
-                  <span className={`exv-tag exv-tag--${ind.tipo === 'corte' ? 'semestral' : 'mensual'}`}>{ind.periodicidad}</span>
                 </header>
 
-                <dl className="exv-ficha">
+                <p className="exv-ind-titulo" title={ind.titulo}>{tituloSinClave(ind.titulo)}</p>
+
+                <dl className="exv-ind-datos">
                   <div>
-                    <dt>Archivos</dt>
+                    <dt>Archivo</dt>
                     <dd>
                       {ind.archivos.map(a => (
-                        <span key={a.archivo} className={`exv-archivo-chip${a.requerido ? '' : ' exv-archivo-chip--opcional'}`}>
-                          {a.archivo}{!a.requerido && ' (opcional)'} · {a.uso}
+                        <span key={a.archivo} className={`exv-archivo-chip${a.requerido ? '' : ' exv-archivo-chip--opcional'}`}
+                          title={a.uso}>
+                          {a.archivo}{!a.requerido && ' · opcional'}
                         </span>
                       ))}
                     </dd>
                   </div>
-                  <div><dt>Denominador</dt><dd>{ind.denominador}</dd></div>
+                  {denominadorAparte && <div><dt>Denominador</dt><dd>{ind.denominador}</dd></div>}
                   <div><dt>Agrupa</dt><dd>{ind.agrupacion}</dd></div>
-                  {ind.descripcionPeriodicidad && <div><dt>Periodo</dt><dd>{ind.descripcionPeriodicidad}</dd></div>}
+                  {ind.descripcionPeriodicidad && <div><dt>Periodo</dt><dd>{explicacionPeriodo(ind.descripcionPeriodicidad)}</dd></div>}
                 </dl>
 
+                <div className="exv-ind-estado">
                 {ind.tipo === 'corte' && (
                   <div className="exv-cortes">
                     {cortesDelAnio.length === 0 && <p className="ex-cargando">Sin cortes para {anio}.</p>}
@@ -488,6 +502,7 @@ const ExtractorPage = () => {
                     {generados.length > 0 && <p className="exv-nota-mes">Da clic en un mes para descargar su Excel.</p>}
                   </div>
                 )}
+                </div>
               </article>
             );
           })}

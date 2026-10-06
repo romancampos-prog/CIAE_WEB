@@ -524,12 +524,68 @@
 .exv-anillo-relleno { stroke: var(--color-imss-primario); stroke-linecap: round; transition: stroke-dashoffset .4s ease; }
 .exv-anillo-num { font-size: .7rem; font-weight: 800; fill: #1e2a26; }
 
+/* ── Tarjeta de cada indicador ── */
+.exv-ind-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+.exv-ind {
+  display: flex; flex-direction: column; gap: 14px;
+  background: #fff; border: 1px solid #e5e9ec; border-radius: 16px;
+  padding: 20px; min-width: 0;
+  transition: box-shadow .18s, border-color .18s;
+}
+.exv-ind:hover { border-color: #cfe8de; box-shadow: 0 10px 26px -14px rgba(20, 40, 35, .25); }
+
+.exv-ind-header { display: flex; align-items: center; gap: 12px; }
+.exv-ind-icono {
+  flex-shrink: 0; width: 46px; height: 46px; border-radius: 12px;
+  background: #f7f8fa; display: flex; align-items: center; justify-content: center;
+}
+.exv-ind-icono img { width: 36px; height: 36px; object-fit: contain; }
+.exv-ind-id { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+.exv-ind-clave { font-size: 1.15rem; font-weight: 800; color: #1e2a26; white-space: nowrap; }
+.exv-ind-id .exv-tag { white-space: normal; line-height: 1.3; }
+
+.exv-ind-titulo {
+  margin: 0; font-size: .9rem; font-weight: 600; color: #334155; line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.exv-ind-datos {
+  margin: 0; padding: 12px 0 0; border-top: 1px solid #eef1f0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.exv-ind-datos > div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: baseline; }
+.exv-ind-datos dt { font-size: .7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; }
+.exv-ind-datos dd { margin: 0; font-size: .82rem; color: #334155; line-height: 1.4; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+
+/* El bloque de cortes / meses siempre al fondo: las tarjetas de una fila alinean su parte de abajo. */
+.exv-ind-estado { margin-top: auto; }
+
 .exv-mensual-bloque { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: #fafbfc; }
-.exv-mensual-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.exv-mensual { display: flex; flex-wrap: wrap; gap: 6px; }
+.exv-mensual-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.exv-mensual { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .exv-mensual-mes {
-  padding: 5px 10px; border-radius: 8px; font-size: .74rem; font-weight: 700;
+  padding: 6px 0; border-radius: 8px; font-size: .74rem; font-weight: 700; text-align: center;
   background: #f1f5f9; color: #94a3b8; border: 1px solid transparent; font-family: inherit;
+}
+
+@media (max-width: 520px) {
+  .exv-ind { padding: 16px; }
+  .exv-ind-datos > div { grid-template-columns: 1fr; gap: 2px; }
+  .exv-mensual { grid-template-columns: repeat(4, 1fr); }
+  .exv-mensual-header .exv-boton-excel { width: 100%; justify-content: center; }
+  .exv-corte { flex-wrap: wrap; }
+  .exv-corte .exv-boton-excel { width: 100%; justify-content: center; }
+  .exv-panel, .exv-resultado { padding: 16px; }
+  .exv-archivo-header { flex-wrap: wrap; }
+  .exv-archivo-info { flex-basis: calc(100% - 58px); }
+  .exv-archivo-conteo { text-align: left; white-space: normal; }
+  .exv-archivo-conteo br { display: none; }
+  .exv-archivo-conteo strong { font-size: 1rem; margin-right: 4px; }
 }
 .exv-mensual-mes--ok { background: #e9f7f1; color: var(--color-imss-primario); cursor: pointer; border-color: #cfe8de; }
 .exv-mensual-mes--ok:hover:not(:disabled) { background: #d6f0e5; }
