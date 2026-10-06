@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet'
+import { MapContainer, GeoJSON, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -110,17 +110,14 @@ export default function MapaLeaflet({ geojson, etiqueta }) {
 
   return (
     <div style={{ overflow: 'visible' }}>
+      {/* Sin mapa base externo: CARTO empezó a exigir API key y pintaba "API KEY REQUIRED"
+          sobre el fondo; el GeoJSON ya dibuja todo el estado. */}
       <MapContainer
         center={[20.85, -101.0]}
         zoom={9}
-        style={{ height: 480, width: '100%' }}
+        style={{ height: 480, width: '100%', background: '#f7f8fa' }}
         attributionControl={false}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
-        />
         <GeoJSON
           key={geoKey}
           data={geojson}
