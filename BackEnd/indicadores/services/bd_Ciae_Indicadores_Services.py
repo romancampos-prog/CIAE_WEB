@@ -9,7 +9,7 @@ from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from shared.MESES_ACUMULADOS import MensualAcumulado
 from shared.UNIDADES import nombre_canonico_iaas
-from services.extractor.corte_extractor_Services import indicadores_extractor
+from services.extractor.corte_extractor_Services import indicadores_extractor_de_corte
 
 #ruta  a la BD_CIAE 
 
@@ -112,10 +112,11 @@ def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, 
 
     with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
         datosJson = json.load(archivoJson) #todo el json leido
-        # MESES en Extractor solo trae el numerador crudo de cada mes, guardado PLANO
-        # (nunca envuelto en Poblacion/Reporte -- ver guardado_extractor_Services); el
-        # corte ya cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
-        if datosJson.get("INDICADOR") in indicadores_extractor():
+        # MESES de un indicador Extractor DE CORTE solo trae el numerador crudo de cada mes,
+        # guardado PLANO (nunca envuelto en Poblacion/Reporte -- ver guardado_extractor_Services);
+        # el corte ya cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
+        # Los Extractor mensuales (MT 03) se guardan como FTP/IAAS, ya envueltos.
+        if datosJson.get("INDICADOR") in indicadores_extractor_de_corte():
             datosJson["MESES"] = _normalizar_y_envolver_plano(datosJson.get("MESES", {}))
         else:
             datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
@@ -176,13 +177,14 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
         reporte.MENSUAL_ACUMULADO = reporteAcumulado
         return reporte
 
-    # Modulo Extractor (EH 03, DM 04, periodicidad "Semestral Anualizado"):
+    # Extractor de corte (EH 03, DM 04, periodicidad "Semestral Anualizado"):
     # MESES siempre trae solo el numerador crudo de cada mes (nunca se
     # sobreescribe al cerrar un corte); los cortes ya generados (con
     # TOTAL_OOAD) viven aparte en CORTES.MESES. Se muestra solo el ultimo corte
     # cerrado, para que la grafica muestre el ultimo resultado oficial en vez
-    # de una linea plana en 0 o los numeradores crudos sueltos.
-    if (modulo == "extractor"):
+    # de una linea plana en 0 o los numeradores crudos sueltos. Un Extractor
+    # mensual (MT 03) ya tiene cada mes calculado y se regresa tal cual.
+    if (modulo == "extractor" and payload.indicador in indicadores_extractor_de_corte()):
         if not cortesMes:
             reporte.MESES = {}
             return reporte

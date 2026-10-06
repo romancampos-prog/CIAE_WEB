@@ -5,18 +5,38 @@ que sea el archivo correcto). El chequeo celda-por-celda (LISTA/RANGO/match simp
 vive en services/metodos_extraccion_excel.py (capa 2, compartida con FTP e IAAS).
 Usado en: services/extractor/generacion_extractor_Services.py
 """
+import io
+
 import pandas as pd
 
-from shared.unidades_ftp import CLAVE_UNIDADES_F
+from shared.unidades_ftp import CATALOGOS_UNIDADES, CLAVE_UNIDADES_F
 from shared.MESES import MESES_ESTANDAR
 from shared.validarArchivo_service import ejecutar_validaciones, validar_columnas_esperadas
 from services.metodos_extraccion_excel import (
     columnas_esperadas,
     CondicionFiltro,
     cumple_condicion,
+    DetalleFiltroConteo,
     fila_cumple,
     letra_a_numero,
+    mascara_filtros,
 )
+
+
+class LectorExcel:
+    """
+    Lee cada hoja del Excel subido UNA sola vez aunque varios indicadores la pidan
+    (EH 03, DM 04 y MT 03 salen del mismo SUI-13 del mes).
+    """
+    def __init__(self, contenido_bytes: bytes):
+        self._contenido = contenido_bytes
+        self._hojas: dict[tuple[str, int], pd.DataFrame] = {}
+
+    def hoja(self, nombre: str, encabezado: int = 1) -> pd.DataFrame:
+        clave = (nombre, encabezado)
+        if clave not in self._hojas:
+            self._hojas[clave] = pd.read_excel(io.BytesIO(self._contenido), sheet_name=nombre, header=encabezado - 1)
+        return self._hojas[clave]
 
 
 def _tipar_filtro_columna(filtro_columna: dict) -> dict[str, CondicionFiltro]:
@@ -28,20 +48,23 @@ def _tipar_filtro_columna(filtro_columna: dict) -> dict[str, CondicionFiltro]:
     }
 
 
-def _validar_mes_anio_archivo(df, anio: int, mes_nombre: str) -> None:
+def _validar_mes_anio_archivo(df, anio: int, mes_nombre: str, columnas: dict | None = None) -> None:
     """
-    El SUI-13 trae sus propias columnas "mes"/"anio" (declaradas por quien lo
-    exporto, no necesariamente el mes real de cada ingreso -- pero sirven para
-    detectar el caso mas comun de error: subir el archivo de un mes mientras
-    se declara otro en el formulario). Se compara contra el valor que MAS SE
-    REPITE en el archivo (no exige que el 100% de las filas coincidan, porque
-    es normal que un archivo traiga algunas filas de un mes vecino).
+    El archivo trae sus propias columnas de mes/año (en el SUI-13 "mes"/"anio",
+    en Egresos TOCO "mesm"/"aniom" -- las dice 'columnasPeriodo' del mapeo).
+    Las declaro quien lo exporto, no necesariamente el mes real de cada fila,
+    pero sirven para detectar el error mas comun: subir el archivo de un mes
+    mientras se declara otro. Se compara contra el valor que MAS SE REPITE (no
+    exige el 100%, es normal que traiga algunas filas de un mes vecino). No
+    depende del nombre del archivo.
     """
-    if 'mes' not in df.columns or 'anio' not in df.columns:
+    col_mes  = (columnas or {}).get("mes", "mes")
+    col_anio = (columnas or {}).get("anio", "anio")
+    if col_mes not in df.columns or col_anio not in df.columns:
         return  # el archivo no trae estas columnas -- no se puede validar, se deja pasar
 
     mes_num_declarado = MESES_ESTANDAR.index(mes_nombre) + 1
-    combinaciones = df[['mes', 'anio']].dropna()
+    combinaciones = df[[col_mes, col_anio]].dropna()
     if combinaciones.empty:
         return
 
@@ -54,7 +77,40 @@ def _validar_mes_anio_archivo(df, anio: int, mes_nombre: str) -> None:
         )
 
 
-def contar_filtro_conteo_acumulado(contenido_excel, config_numerador: dict, anio: int | None = None, mes_nombre: str | None = None) -> tuple[dict, list[dict]]:
+def contar_por_unidad(lector: LectorExcel, config: dict, anio: int, mes_nombre: str) -> dict[str, int]:
+    """
+    Cuenta, por unidad, las filas que pasan los filtros del bloque del mapeo
+    (filtroColumna + filtroGrupoColumnas) -- la misma regla que FILTRO_CONTEO,
+    pero agrupada. La unidad sale de la columna 'agrupacion' buscada en el
+    catalogo 'catalogoUnidades' por clave completa; filas de unidades fuera del
+    catalogo no cuentan (asi el mapeo, no el codigo, decide quien entra).
+    Toda unidad del catalogo aparece, en 0 si no tuvo casos.
+    """
+    nombre_catalogo = config.get("catalogoUnidades")
+    catalogo = CATALOGOS_UNIDADES.get(nombre_catalogo)
+    if catalogo is None:
+        raise ValueError(f"catalogoUnidades '{nombre_catalogo}' no existe -- opciones: {list(CATALOGOS_UNIDADES)}")
+
+    hoja = config["hoja"]
+    df = lector.hoja(hoja, config.get("encabezado", 1))
+    errores = ejecutar_validaciones([
+        lambda: validar_columnas_esperadas(list(df.columns), columnas_esperadas("FILTRO_CONTEO", config)),
+        lambda: _validar_mes_anio_archivo(df, anio, mes_nombre, config.get("columnasPeriodo")),
+    ])
+    if errores:
+        raise ValueError("\n".join(errores))
+
+    col_agrupacion = config["agrupacion"]
+    if col_agrupacion not in df.columns:
+        raise KeyError(f"La columna de agrupacion '{col_agrupacion}' no existe en la hoja '{hoja}'")
+
+    mascara = mascara_filtros(df, DetalleFiltroConteo.model_validate(config))
+    unidades = df.loc[mascara, col_agrupacion].astype(str).str.strip().map(catalogo).dropna()
+    conteo = unidades.value_counts()
+    return {nombre: int(conteo.get(nombre, 0)) for nombre in catalogo.values()}
+
+
+def contar_filtro_conteo_acumulado(lector: LectorExcel, config_numerador: dict, anio: int | None = None, mes_nombre: str | None = None) -> tuple[dict, list[dict]]:
     """
     Filtra y cuenta el Excel del mes segun 'reporte.numerador' del mapeo.
 
@@ -71,11 +127,11 @@ def contar_filtro_conteo_acumulado(contenido_excel, config_numerador: dict, anio
     col_agrupacion = config_numerador["agrupacion"]
     cruce_cfg = config_numerador.get("cruce")
 
-    df = pd.read_excel(contenido_excel, sheet_name=hoja, header=encabezado - 1)
+    df = lector.hoja(hoja, encabezado)
 
     errores = ejecutar_validaciones([
         lambda: validar_columnas_esperadas(list(df.columns), columnas_esperadas("FILTRO_CONTEO_ACUMULADO", config_numerador)),
-        lambda: _validar_mes_anio_archivo(df, anio, mes_nombre) if anio is not None and mes_nombre is not None else None,
+        lambda: _validar_mes_anio_archivo(df, anio, mes_nombre, config_numerador.get("columnasPeriodo")) if anio is not None and mes_nombre is not None else None,
     ])
     if errores:
         raise ValueError("\n".join(errores))
@@ -122,7 +178,7 @@ def contar_filtro_conteo_acumulado(contenido_excel, config_numerador: dict, anio
     return conteo_por_unidad, candidatos_cruce
 
 
-def validar_candidatos_cruce(candidatos_cruce: list[dict], contenido_excel_cruce, cruce_cfg: dict) -> dict:
+def validar_candidatos_cruce(candidatos_cruce: list[dict], contenido_excel_cruce: LectorExcel, cruce_cfg: dict) -> dict:
     """
     Cruza los candidatos (via 2) contra el archivo del mismo mes indicado en
     'cruce.archivoCruce'. Por cada paciente valida si alguna de sus filas trae,
@@ -134,7 +190,7 @@ def validar_candidatos_cruce(candidatos_cruce: list[dict], contenido_excel_cruce
 
     hoja = cruce_cfg.get("hoja", "Hoja1")
     encabezado = cruce_cfg.get("encabezado", 1)
-    df = pd.read_excel(contenido_excel_cruce, sheet_name=hoja, header=encabezado - 1)
+    df = contenido_excel_cruce.hoja(hoja, encabezado)
 
     col_llave = cruce_cfg["columnaLlave"]
     cols_diag = cruce_cfg["columnasDiagnostico"]

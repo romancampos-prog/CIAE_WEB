@@ -79,23 +79,33 @@ class IndicadorIAASMapeo(BaseModel):
 
 class FuenteExtractor(BaseModel):
     """
-    Excel crudo mensual (SUI-13) del motor Extractor (EH 03, DM 04). filtroColumna
-    y cruce se conservan tal cual (extra="allow") -- los valida
-    services/extractor/extraccion_extractor_Services.py, no un modelo aqui.
+    Excel crudo mensual (SUI-13) del motor Extractor (EH 03, DM 04, MT 03).
+    filtroColumna, filtroGrupoColumnas y cruce se conservan tal cual (extra="allow")
+    -- los valida services/metodos_extraccion_excel.py, no un modelo aqui.
+    catalogoUnidades: con que catalogo se agrupa (ver shared/unidades_ftp.CATALOGOS_UNIDADES);
+    sin el, se agrupa por las UMF de FTP (lo de EH 03/DM 04).
+    archivo: que archivo base alimenta al indicador (SUI_13, EGRESOS_TOCO...) -- la vista
+    muestra un apartado por archivo y al subir uno solo se procesan sus indicadores.
+    columnasPeriodo: columnas del propio archivo con su mes/año, para validar que se suba
+    el mes correcto sin depender del nombre del archivo.
     """
     model_config = ConfigDict(extra="allow")
 
     fuente:            Literal["extractor"]
+    archivo:            str = "SUI_13"
     hoja:               str
     modoExtraccion:     ModoExtraccion
     encabezado:         int = 1
     agrupacion:         str
     columnaLlaveCruce:  str | None = None
+    catalogoUnidades:   str | None = None
+    columnasPeriodo:    dict[str, str] = {"mes": "mes", "anio": "anio"}
 
 
 class ReporteExtractorMapeo(BaseModel):
     numerador:   FuenteExtractor
-    denominador: FuentePoblacionInfoSalud
+    # Poblacion (EH 03/DM 04, al cerrar el corte) o el mismo SUI-13 (MT 03, cada mes).
+    denominador: Annotated[FuentePoblacionInfoSalud | FuenteExtractor, Field(discriminator="fuente")]
     operacion:   Operacion
 
 

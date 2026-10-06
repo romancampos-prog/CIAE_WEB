@@ -19,6 +19,7 @@ from indicadores.schemas.model.indicador_Model import ReportePrevio, UnidadDatos
 from indicadores.services.bd_Ciae_Guardado_Services import leer_semanal_indicador
 from indicadores.services.bd_Ciae_Indicadores_Services import CargarReporteIndicador, _normalizar_semaforo
 from indicadores.services.excel_dibujante_Services import escribir_hoja_indicador, obtener_estilos_excel
+from indicadores.services.extractor.corte_extractor_Services import es_indicador_de_corte
 from indicadores.services.indicadorMapeo_Services import RutaMapeoExiste
 from shared.MESES import MESES_ESTANDAR
 
@@ -73,15 +74,17 @@ def _cargar_semanal(indicador: str, ano: str) -> ReportePrevio | None:
 def leer_hoja(indicador: str, solicitud: SolicitudExcel) -> HojaIndicador:
     """
     Reglas por modulo (lo unico que cambia al leer):
-      - Extractor: los meses son sus cortes cerrados (CORTES.MESES), no MESES.
+      - Extractor de corte: los meses son sus cortes cerrados (CORTES.MESES), no MESES.
+        Un Extractor mensual (MT 03) se lee como IAAS: sus MESES ya estan calculados.
       - FTP: si el mes mas reciente solo existe como semanal, se usa ese (y su semana).
       - IAAS: todos los meses guardados, tal cual.
     """
     modulo, metadata = _cargar_metadata(indicador)
     ano = str(solicitud.ano)
 
+    por_corte = modulo.lower() == "extractor" and es_indicador_de_corte(indicador)
     cargado = CargarReporteIndicador(indicador, ano)
-    if modulo.lower() == "extractor":
+    if por_corte:
         definitivos = cargado[1] if cargado else {}
     else:
         definitivos = dict(cargado[0].MESES) if cargado else {}
@@ -90,12 +93,12 @@ def leer_hoja(indicador: str, solicitud: SolicitudExcel) -> HojaIndicador:
     disponibles = set(definitivos) | (set(semanal.MES) if semanal else set())
 
     if not disponibles:
-        detalle = "cortes generados" if modulo.lower() == "extractor" else "datos guardados"
+        detalle = "cortes generados" if por_corte else "datos guardados"
         raise ErrorHoja(f"{indicador} no tiene {detalle} de {ano} todavia.")
 
     if solicitud.mes:
         if solicitud.mes not in disponibles:
-            detalle = "el corte de" if modulo.lower() == "extractor" else "datos de"
+            detalle = "el corte de" if por_corte else "datos de"
             raise ErrorHoja(f"{indicador} no tiene {detalle} {solicitud.mes} {ano} generado todavia.")
         mes_activo = solicitud.mes
     else:

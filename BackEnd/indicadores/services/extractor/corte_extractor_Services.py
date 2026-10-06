@@ -21,6 +21,7 @@ from services.poblacion_Services import leer_periodo_poblacion
 from services.ftp.extraccion_indicador_ftp_Services import extraer_poblacion
 from services.ftp.registro_errores_ftp_Services import crear_log_errores
 from shared.MESES import MESES_ESTANDAR
+from shared.reglas_periodicidad import descripcion_periodicidad, es_periodicidad_de_corte
 from shared.semaforizado_service import SemaforizarReporte
 from shared.unidades_ftp import NOMBREUNIDADESARCHIVO
 
@@ -39,6 +40,82 @@ def indicadores_extractor() -> list[str]:
     (CargarReporteIndicador), no tiene caso rescanear todos los mapeos cada vez.
     """
     return [ind for categoria in AllIndicadores("mostrarGenerar", "Extractor") for ind in categoria.indicadores]
+
+
+@lru_cache(maxsize=None)
+def es_indicador_de_corte(indicador: str) -> bool:
+    """
+    True si el indicador del Extractor se publica por corte (ej. Semestral Anualizado:
+    guarda el numerador crudo de cada mes y calcula al juntar la ventana); False si es
+    mensual (cada mes se guarda ya calculado). Lo decide la periodicidad del mapeo.
+    """
+    return es_periodicidad_de_corte(cargar_indicador_extractor(indicador).periodicidad)
+
+
+@lru_cache(maxsize=1)
+def indicadores_extractor_de_corte() -> list[str]:
+    """Solo los indicadores del Extractor que trabajan por corte (los que tienen MESES crudo + CORTES)."""
+    return [ind for ind in indicadores_extractor() if es_indicador_de_corte(ind)]
+
+
+# Nombre legible de cada archivo que el mapeo pide (archivo base o archivoCruce);
+# uno que no este aqui se muestra con su clave tal cual.
+_NOMBRE_ARCHIVO = {
+    "SUI_13": "SUI-13",
+    "EGRESOS_TOCO": "Egresos TOCO",
+    "EGRESOS_NACIMIENTO_TOCO": "Egresos Nacimientos TOCO",
+    "EGRESOS_PACIENTES_DIARIA": "Egresos Pacientes",
+}
+_NOMBRE_AGRUPACION = {"hospitales": "Por hospital que atiende"}
+
+
+def nombre_archivo(clave: str | None) -> str | None:
+    return _NOMBRE_ARCHIVO.get(clave, clave)
+
+
+def archivo_base(indicador: str) -> str:
+    """Clave del archivo que alimenta al indicador (reporte.numerador.archivo del mapeo, SUI_13 por omision)."""
+    return cargar_indicador_extractor(indicador).reporte.numerador.archivo
+
+
+def detalle_indicadores_extractor() -> list[dict]:
+    """
+    Lo que la vista del Extractor necesita de cada indicador, sacado de su mapeo:
+    titulo, periodicidad, si es de corte o mensual, como agrupa y que archivos usa
+    (y para que). Asi el front no tiene nada fijo: agregar un indicador al modulo
+    es solo ponerle modulo "Extractor" en el mapeo.
+    """
+    detalle = []
+    for indicador in indicadores_extractor():
+        mapeo = cargar_indicador_extractor(indicador)
+        numerador = mapeo.reporte.numerador
+        denominador_del_archivo = getattr(mapeo.reporte.denominador, "fuente", None) == "extractor"
+
+        archivos = [{
+            "archivo": nombre_archivo(numerador.archivo),
+            "requerido": True,
+            "uso": "Numerador y denominador" if denominador_del_archivo else "Numerador",
+        }]
+        cruce = (numerador.model_extra or {}).get("cruce") or {}
+        if cruce.get("activa"):
+            archivos.append({
+                "archivo": nombre_archivo(cruce.get("archivoCruce")),
+                "requerido": False,
+                "uso": "Cruce para validar la vía 2",
+            })
+
+        detalle.append({
+            "indicador": indicador,
+            "categoria": indicador.split()[0],
+            "titulo": mapeo.informacion.titulo,
+            "periodicidad": mapeo.periodicidad,
+            "descripcionPeriodicidad": descripcion_periodicidad(mapeo.periodicidad),
+            "tipo": "corte" if es_indicador_de_corte(indicador) else "mensual",
+            "agrupacion": _NOMBRE_AGRUPACION.get(numerador.catalogoUnidades, "Por unidad de adscripción (UMF)"),
+            "denominador": nombre_archivo(numerador.archivo) if denominador_del_archivo else "Población adscrita (PAMF)",
+            "archivos": archivos,
+        })
+    return detalle
 
 # Meses en los que la periodicidad "Semestral Anualizado" dispara un corte.
 MESES_CORTE_SEMESTRAL = ["Junio", "Diciembre"]
@@ -175,7 +252,7 @@ def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] 
     poblacion que alcanzo, sigue ajustandose cada vez que se sube una nueva y se
     dispara el recalculo, hasta que el usuario decida que ya es la definitiva.
     """
-    indicadores = indicadores or indicadores_extractor()
+    indicadores = indicadores or indicadores_extractor_de_corte()
     candidatos  = [("Diciembre", anio_poblacion), ("Junio", anio_poblacion + 1)]
     recalculados = []
 
@@ -208,9 +285,9 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
     "llevas 8 de 12 meses para el corte de Diciembre 2026".
 
     Un mes cuenta como "subido" solo si YA esta guardado para TODOS los
-    indicadores de la lista (por default, todos los de indicadores_extractor())
-    -- una sola subida alimenta a todos a la vez, asi que deberian ir siempre
-    parejos, pero se valida por si uno fallo y el otro no.
+    indicadores de la lista (por default, los de corte: indicadores_extractor_de_corte();
+    los mensuales no tienen ventanas ni CORTES) -- una sola subida alimenta a todos
+    a la vez, asi que deberian ir siempre parejos, pero se valida por si uno fallo y el otro no.
 
     Solo se incluye una ventana si la ventana anterior (6 meses antes) ya
     genero su corte -- la primera de la lista (Junio del anio de referencia)
@@ -218,7 +295,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
     todavia no se cierra el corte de Diciembre 2026 -- no tiene caso mostrar
     una ventana en 0/12 cuando ni siquiera empezo su turno.
     """
-    indicadores = indicadores or indicadores_extractor()
+    indicadores = indicadores or indicadores_extractor_de_corte()
     cache: dict[tuple[str, int], dict] = {}
     resultado = {}
     anterior_generado = True

@@ -34,6 +34,16 @@ def indices_de_meses(periodicidad: str | None) -> list[int]:
     return _MESES_DE_CORTE.get(_clave(periodicidad), list(range(12)))
 
 
+def es_periodicidad_de_corte(periodicidad: str | None) -> bool:
+    """True si el indicador se publica solo en meses de corte (ej. Semestral Anualizado), no cada mes."""
+    return _clave(periodicidad) in _MESES_DE_CORTE
+
+
+def clave_periodicidad(periodicidad: str | None) -> str:
+    """Forma normalizada ("Mensual - Mensual Acumulado" -> "mensual mensual acumulado") para comparar."""
+    return _clave(periodicidad)
+
+
 def descripcion_periodicidad(periodicidad: str | None) -> str | None:
     """Ej. "Mensual Trimestralizado: cada mes acumula los últimos 3 meses"; None si el indicador no tiene periodicidad."""
     if not periodicidad:

@@ -22,6 +22,16 @@ CLAVE_UNIDADES_F      = _unidades["CLAVE_UNIDADES_F"]
 RUTA_POBLACION_DIR   = DATA_POBLACION_INFOSALUD
 RUTA_MAPEO_POBLACION = _MAPEO_UNIFICADO / "POBLACION.json"
 
+# Hospitales de 2o nivel por clave presupuestal completa (12 caracteres), con los
+# mismos nombres que IAAS -- para indicadores que se agrupan por el hospital que
+# atiende (ej. MT 03) y no por la UMF de adscripcion.
+CLAVE_HOSPITALES = json.loads((_MAPEO_UNIFICADO / "unidades" / "hospitales.json").read_text(encoding="utf-8"))["CLAVE_HOSPITALES"]
+
+# Catalogos que un indicador del Extractor puede pedir en 'catalogoUnidades' del mapeo.
+CATALOGOS_UNIDADES = {
+    "hospitales": CLAVE_HOSPITALES,
+}
+
 
 def ruta_poblacion(anio: str | int | None = None) -> Path:
     """POBLACION_{anio}.json -- si no se especifica año, usa el año en curso."""
