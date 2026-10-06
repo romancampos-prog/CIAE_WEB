@@ -4,18 +4,59 @@
         "fechaModificacion": "19/08/2026",
         "imagen": "icono_mt.png",
         "color": "#7E0808",
-        "modulo": "",
-        "mostrarGenerar": false,
+        "modulo": "ftp",
+        "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": false,
-        "periodicidad": "Mensual - Mensual Acumulado",
+        "periodicidad": "Mensual Acumulado",
+        "peridocidadGenerada": {
+            "mensual": false,
+            "mensualAcumulado": true
+        },
         "informacion": {
             "titulo": "Materna 01 - Porcentaje de adolescentes embarazadas.",
             "objetivo": "Medir la proporción de mujeres derechohabientes de 10 a 19 años que se embarazan, grupo vulnerable de alto riesgo para su salud y la supervivencia, así como el desarrollo del binomio madre-hijo.",
             "descNum": "Número de embarazadas adolescentes de 10 a 19 años.",
             "descDen": "Total de embarazadas."
         },
-        "reporte": {},
+        "reporte": {
+            "numerador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "MT03": {
+                        "hoja": "Vigilancia Materna",
+                        "modoExtraccion": "INTERSECCION_FILA",
+                        "columna_dato": [
+                            "K",
+                            "L"
+                        ],
+                        "fila": [
+                            69
+                        ]
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "ftp",
+                "archivo": {
+                    "MT03": {
+                        "hoja": "Vigilancia Materna",
+                        "modoExtraccion": "INTERSECCION_FILA",
+                        "columna_dato": [
+                            "Q"
+                        ],
+                        "fila": [
+                            69
+                        ]
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "(MT03[0] + MT03[1])",
+                "denominador": "(MT03[0])",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
         "semaforo": {
             "Esperado": "<= 8.5",
             "Medio": "> 8.5 a < 9.1",
@@ -83,6 +124,181 @@
             "Bajo": "<= 50",
             "Medio": "> 50 a < 53",
             "Esperado": ">= 53"
+        }
+    },
+    "MT 03": {
+    "nombreArchivoFinal": "MT 03",
+    "fechaModificacion": "05/10/2026",
+    "imagen": "icono_mt.png",
+    "color": "#7E0808",
+    "modulo": "Extractor",
+    "mostrarGenerar": true,
+    "mostrarGrafica": true,
+    "previos": false,
+    "periodicidad": "Mensual - Mensual Acumulado",
+    "peridocidadGenerada": { "mensual": true, "mensualAcumulado": true },
+    "informacion": {
+        "titulo": "Materna 03 - Porcentaje de preeclampsia-eclampsia.",
+        "objetivo": "Medir la proporción de embarazadas con diagnóstico de preeclampsia-eclampsia en las unidades médicas de segundo y tercer nivel de atención, para reorientar o reorganizar la identificación, diagnóstico, tratamiento y/o referencia, de la preeclampsia-eclampsia y sus complicaciones.",
+        "descNum": "Egresos hospitalarios con diagnóstico de preeclampsia-eclampsia (CIE-10: Códigos O11, O14 y O15) ",
+        "descDen": "Total de egresos obstétricos (CIE- X10: Capítulo XV Embarazo, parto y puerperio, Códigos O00 a O99) menos Abortos (CIE-10: Códigos O00 a O08)"
+    },
+    "reporte": {
+        "numerador": {
+            "fuente": "extractor", "hoja": "Hoja1", "modoExtraccion": "FILTRO_CONTEO", "encabezado": 1,
+            "agrupacion": "unidad",
+            "catalogoUnidades": "hospitales",
+            "filtroColumna": {},
+            "filtroGrupoColumnas": [
+                { "coincidencia": "CUALQUIERA", "tipo": "PREFIJO", "filtro": ["O11", "O14", "O15"],
+                  "columnas": { "L": "diagnosticoPrincipal", "AB": "diagnosticoSecundario1", "AC": "diagnosticoSecundario2" } },
+                { "coincidencia": "NINGUNA", "tipo": "PREFIJO",
+                  "filtro": ["O00","O01","O02","O03","O04","O05","O06","O07","O08"],
+                  "columnas": { "L": "diagnosticoPrincipal", "AB": "diagnosticoSecundario1", "AC": "diagnosticoSecundario2" } }
+            ]
+        },
+        "denominador": {
+            "fuente": "extractor", "hoja": "Hoja1", "modoExtraccion": "FILTRO_CONTEO", "encabezado": 1,
+            "agrupacion": "unidad",
+            "catalogoUnidades": "hospitales",
+            "filtroColumna": {},
+            "filtroGrupoColumnas": [
+                { "coincidencia": "CUALQUIERA", "tipo": "PREFIJO", "filtro": ["O"],
+                  "columnas": { "L": "diagnosticoPrincipal", "AB": "diagnosticoSecundario1", "AC": "diagnosticoSecundario2" } },
+                { "coincidencia": "NINGUNA", "tipo": "PREFIJO",
+                  "filtro": ["O00","O01","O02","O03","O04","O05","O06","O07","O08"],
+                  "columnas": { "L": "diagnosticoPrincipal", "AB": "diagnosticoSecundario1", "AC": "diagnosticoSecundario2" } }
+            ]
+        },
+        "operacion": {
+            "numerador": "numerador",
+            "denominador": "denominador",
+            "resultado": "round((numerador / denominador) * 100, 2)"
+        }
+    },
+    "semaforo": {
+        "Esperado": ">= 5.0 a <= 8.0",
+        "Medio": "> 3.9 a < 5.0 o > 8.0 a < 10.0",
+        "Bajo": "<= 3.9 o >= 10.0"
+    }
+},
+    "MT 04": {
+        "nombreArchivoFinal": "MT 04",
+        "fechaModificacion": "06/10/2026",
+        "imagen": "icono_mt.png",
+        "color": "#7E0808",
+        "modulo": "Extractor",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "peridocidadGenerada": { "mensual": true, "mensualAcumulado": true },
+        "informacion": {
+            "titulo": "Materna 04 - Cobertura de protección anticonceptiva posevento obstétrico.",
+            "objetivo": "Medir la proporción de mujeres aceptantes de un método anticonceptivo, después de la interrupción del embarazo (parto eutócico, distócico vaginal, distócico abdominal o complicaciones de aborto) y antes del egreso hospitalario para concluir la fecundación o ampliar el periodo entre cada gestación.",
+            "descNum": "Total de aceptantes de método anticonceptivo en parto eutócico, distócico vaginal, distócico abdominal y por complicaciones de aborto.",
+            "descDen": "Total de egresos de partos eutócicos, distócicos vaginales, distócicos abdominales y por complicaciones de aborto."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor", "archivo": "EGRESOS_TOCO",
+                "hoja": "Hoja1", "modoExtraccion": "FILTRO_CONTEO", "encabezado": 1,
+                "agrupacion": "cvePresupuestal", "catalogoUnidades": "hospitales",
+                "columnasPeriodo": { "mes": "mesm", "anio": "aniom" },
+                "filtroColumna": {},
+                "filtroGrupoColumnas": [
+                    { "coincidencia": "NINGUNA", "tipo": "SUFIJO", "filtro": ["ND"], "columnas": { "H": "AGREGADO" } }
+                ],
+                "filtroAlternativas": [
+                    {
+                        "K": { "tipo": "LISTA", "filtro": [1], "nombreColumna": "ATENCION" },
+                        "M": { "tipo": "LISTA", "filtro": [1, 2, 3], "nombreColumna": "TP_PARTO" },
+                        "R": { "tipo": "LISTA", "filtro": [9, 11, 13, 15, 17, 23, 27, 31, 33], "nombreColumna": "cve_metodo_anticonceptivo" }
+                    },
+                    {
+                        "K": { "tipo": "LISTA", "filtro": [2], "nombreColumna": "ATENCION" },
+                        "R": { "tipo": "LISTA", "filtro": [9, 11, 13, 15, 17, 23, 27, 31, 33, 45], "nombreColumna": "cve_metodo_anticonceptivo" }
+                    }
+                ]
+            },
+            "denominador": {
+                "fuente": "extractor", "archivo": "EGRESOS_TOCO",
+                "hoja": "Hoja1", "modoExtraccion": "FILTRO_CONTEO", "encabezado": 1,
+                "agrupacion": "cvePresupuestal", "catalogoUnidades": "hospitales",
+                "columnasPeriodo": { "mes": "mesm", "anio": "aniom" },
+                "filtroColumna": {},
+                "filtroGrupoColumnas": [
+                    { "coincidencia": "NINGUNA", "tipo": "SUFIJO", "filtro": ["ND"], "columnas": { "H": "AGREGADO" } }
+                ],
+                "filtroAlternativas": [
+                    {
+                        "K": { "tipo": "LISTA", "filtro": [1], "nombreColumna": "ATENCION" },
+                        "M": { "tipo": "LISTA", "filtro": [1, 2, 3], "nombreColumna": "TP_PARTO" }
+                    },
+                    {
+                        "K": { "tipo": "LISTA", "filtro": [2], "nombreColumna": "ATENCION" }
+                    }
+                ]
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "denominador",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": ">= 83.5",
+            "Medio": "> 81.9 a < 83.5",
+            "Bajo": "<= 81.9"
+        }
+    },
+    "MT 05": {
+        "nombreArchivoFinal": "MT 05",
+        "fechaModificacion": "06/10/2026",
+        "imagen": "icono_mt.png",
+        "color": "#7E0808",
+        "modulo": "Extractor",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "peridocidadGenerada": { "mensual": true, "mensualAcumulado": true },
+        "informacion": {
+            "titulo": "Materna 05 - Porcentaje de prematurez (26 a 36.6 semanas de gestación) en Unidades Médicas de Segundo Nivel de Atención y en Unidades Médicas de Alta Especialidad.",
+            "objetivo": "Medir el porcentaje de recién nacidos vivos de 26 a 36.6 semanas de gestación, para establecer acciones preventivas y asistenciales que disminuyan la prematurez, causa principal de morbilidad y mortalidad en los neonatos.",
+            "descNum": "Total de recién nacidos vivos de 26 a 36.6 semanas de gestación, en un periodo y área geográfica determinada en Unidades médicas de Segundo Nivel de atención o en Unidades Médicas de Alta Especialidad.",
+            "descDen": "Total de recién nacidos vivos en las Unidades médicas de Segundo Nivel o en Unidades Médicas de Alta Especialidad con atención obstétrica del IMSS régimen ordinario, en el mismo periodo y área geográfica."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor", "archivo": "EGRESOS_NACIMIENTO_TOCO",
+                "hoja": "Hoja1", "modoExtraccion": "FILTRO_CONTEO", "encabezado": 1,
+                "agrupacion": "cvePresupuestal", "catalogoUnidades": "hospitales",
+                "columnasPeriodo": { "mes": "mesm", "anio": "aniom" },
+                "filtroColumna": {
+                    "U": { "tipo": "LISTA", "filtro": [1], "nombreColumna": "ESTADORN" },
+                    "T": { "tipo": "RANGO", "filtro": [26, 36], "nombreColumna": "SEMGES" }
+                }
+            },
+            "denominador": {
+                "fuente": "extractor", "archivo": "EGRESOS_NACIMIENTO_TOCO",
+                "hoja": "Hoja1", "modoExtraccion": "FILTRO_CONTEO", "encabezado": 1,
+                "agrupacion": "cvePresupuestal", "catalogoUnidades": "hospitales",
+                "columnasPeriodo": { "mes": "mesm", "anio": "aniom" },
+                "filtroColumna": {
+                    "U": { "tipo": "LISTA", "filtro": [1], "nombreColumna": "ESTADORN" }
+                }
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "denominador",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": "<= 9.7",
+            "Medio": "> 9.7 a < 10.7",
+            "Bajo": ">= 10.7"
         }
     }
 }
