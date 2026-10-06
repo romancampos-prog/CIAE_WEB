@@ -255,10 +255,12 @@ export const parsearResultado = (expr) =>
 // ({ codigos: [...] }) -- el front decide cómo pintar cada uno (texto vs.
 // chips), aquí solo se arma el contenido, nunca el markup.
 const descripcionCondicion = (col, cfg) => {
-  const base = `"${cfg.nombreColumna}" (columna ${col}) = `;
-  if (cfg.tipo === 'LISTA') return [`${base}uno de: `, { codigos: cfg.filtro }];
-  if (cfg.tipo === 'RANGO') return [`${base}entre ${cfg.filtro[0]} y ${cfg.filtro[1]}`];
-  return [`${base}"${cfg.filtro}"`];
+  const base = `"${cfg.nombreColumna}" (columna ${col}) `;
+  if (cfg.tipo === 'LISTA')   return [`${base}= uno de: `, { codigos: cfg.filtro }];
+  if (cfg.tipo === 'RANGO')   return [`${base}= entre ${cfg.filtro[0]} y ${cfg.filtro[1]}`];
+  if (cfg.tipo === 'PREFIJO') return [`${base}empieza con: `, { codigos: cfg.filtro }];
+  if (cfg.tipo === 'SUFIJO')  return [`${base}termina con: `, { codigos: cfg.filtro }];
+  return [`${base}= "${cfg.filtro}"`];
 };
 
 const segmentosFiltroColumna = (filtroColumna = {}) => {
@@ -268,6 +270,40 @@ const segmentosFiltroColumna = (filtroColumna = {}) => {
     segmentos.push(...descripcionCondicion(col, cfg));
   });
   return segmentos;
+};
+
+// filtroGrupoColumnas: una misma condición revisada en varias columnas a la vez
+// (ej. diagnóstico principal o secundarios) -- CUALQUIERA = basta una, NINGUNA = ninguna.
+const ACCION_GRUPO = { LISTA: 'es', PREFIJO: 'empieza con', SUFIJO: 'termina con', RANGO: 'está' };
+
+const segmentosGrupoColumnas = (grupo) => {
+  const columnas = Object.entries(grupo.columnas).map(([col, nombre]) => `"${nombre}" (${col})`);
+  const accion = ACCION_GRUPO[grupo.tipo] ?? 'cumple';
+  const ninguna = grupo.coincidencia === 'NINGUNA';
+  const sujeto = columnas.length === 1
+    ? `${columnas[0]} ${ninguna ? 'no ' : ''}${accion}`
+    : `${ninguna ? 'ninguna' : 'alguna'} de las columnas ${columnas.join(', ')} ${accion}`;
+  if (grupo.tipo === 'RANGO') return [`${sujeto} entre ${grupo.filtro[0]} y ${grupo.filtro[1]}`];
+  return [`${sujeto} uno de: `, { codigos: grupo.filtro }];
+};
+
+// filtroAlternativas: varias combinaciones de columnas; la fila cuenta si cumple al menos una.
+const segmentosAlternativas = (alternativas) => {
+  const segmentos = ['cumple alguna de estas opciones: '];
+  alternativas.forEach((alternativa, i) => {
+    if (i > 0) segmentos.push('  O  ');
+    segmentos.push(`(opción ${i + 1}) `, ...segmentosFiltroColumna(alternativa));
+  });
+  return segmentos;
+};
+
+// Junta todas las condiciones que puede traer un FILTRO_CONTEO (todas deben cumplirse).
+const segmentosCondiciones = (detalle) => {
+  const bloques = [];
+  if (Object.keys(detalle.filtroColumna ?? {}).length) bloques.push(segmentosFiltroColumna(detalle.filtroColumna));
+  (detalle.filtroGrupoColumnas ?? []).forEach(grupo => bloques.push(segmentosGrupoColumnas(grupo)));
+  if (detalle.filtroAlternativas?.length) bloques.push(segmentosAlternativas(detalle.filtroAlternativas));
+  return bloques.flatMap((bloque, i) => (i > 0 ? ['  Y  ', ...bloque] : bloque));
 };
 
 const descripcionCruce = (cruce) => {
@@ -293,11 +329,11 @@ const descripcionFiltroUnidadValor = (detalle) => {
 // { condiciones, cruce }; agregar un modo nuevo es agregar una entrada aquí.
 const DESCRIPTORES_FILTRO = {
   FILTRO_CONTEO: (detalle) => ({
-    condiciones: ['Cuenta las filas donde ', ...segmentosFiltroColumna(detalle.filtroColumna), '.'],
+    condiciones: ['Cuenta las filas donde ', ...segmentosCondiciones(detalle), '.'],
     cruce: null,
   }),
   FILTRO_CONTEO_ACUMULADO: (detalle) => ({
-    condiciones: ['Cuenta las filas donde ', ...segmentosFiltroColumna(detalle.filtroColumna), '.'],
+    condiciones: ['Cuenta las filas donde ', ...segmentosCondiciones(detalle), '.'],
     cruce: descripcionCruce(detalle.cruce),
   }),
   FILTRO_UNIDAD_VALOR: (detalle) => ({
