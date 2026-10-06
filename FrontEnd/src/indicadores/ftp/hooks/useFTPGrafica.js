@@ -42,6 +42,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const [descargando, setDescargando]   = useState(false);
   const [vistaGrafica, setVistaGrafica] = useState('unidad');
   const [mesSel, setMesSel]             = useState('');
+  const [acumulado, setAcumulado]       = useState(false);
 
   /** Carga inicial del índice de indicadores, agrupados por categoría */
   useEffect(() => {
@@ -92,10 +93,23 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     return acc;
   }, [listaIndicadores]);
 
+  // El backend solo manda MENSUAL_ACUMULADO cuando el mapeo pide mensual + mensual
+  // acumulado (suma Ene→mes, como IAAS); los que ya vienen acumulados del FTP no lo traen.
+  const tieneAcumulado = Object.keys(reporte?.MENSUAL_ACUMULADO ?? {}).length > 0;
+
+  // Mismo formato que MESES, así todas las gráficas de abajo sirven igual para
+  // las dos vistas. Sin SEMANA: el parcial del mes en curso no se acumula.
+  const reporteVista = useMemo(
+    () => (acumulado && tieneAcumulado
+      ? { ...reporte, MESES: reporte.MENSUAL_ACUMULADO, SEMANA: null }
+      : reporte),
+    [reporte, acumulado, tieneAcumulado]
+  );
+
   /** Tendencia mensual de la unidad seleccionada */
   const chartData = useMemo(
-    () => buildFTPChartDataUnidad(reporte, unidadSel),
-    [reporte, unidadSel]
+    () => buildFTPChartDataUnidad(reporteVista, unidadSel),
+    [reporteVista, unidadSel]
   );
 
   const maxTasa = useMemo(
@@ -105,8 +119,8 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
 
   /** Todas las unidades en el mes seleccionado + TOTAL por separado */
   const chartDataMesConTotal = useMemo(
-    () => buildFTPChartDataMes(reporte, mesSel),
-    [reporte, mesSel]
+    () => buildFTPChartDataMes(reporteVista, mesSel),
+    [reporteVista, mesSel]
   );
 
   /** TOTAL aparte: su magnitud no es comparable a una sola unidad, no debe compartir escala */
@@ -128,7 +142,15 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   /** Conteo Esperado/Medio/Bajo/Gris del mes seleccionado — para la vista "Por mes" */
   const cumplimientoMes = useMemo(() => contarSemaforo(chartDataMes), [chartDataMes]);
 
-  const mesesDisponibles = useMemo(() => mesesDisponiblesDeReporte(reporte), [reporte]);
+  const mesesDisponibles = useMemo(() => mesesDisponiblesDeReporte(reporteVista), [reporteVista]);
+
+  // Al prender el acumulado desaparece el mes parcial de SEMANA; si era el
+  // seleccionado, se pasa al último mes que sí existe en la vista.
+  useEffect(() => {
+    if (mesSel && mesesDisponibles.length && !mesesDisponibles.includes(mesSel)) {
+      setMesSel(mesesDisponibles[mesesDisponibles.length - 1]);
+    }
+  }, [mesesDisponibles, mesSel]);
 
   // El ultimo mes "disponible" (con una fila en MESES) no siempre trae un
   // resultado real -- en indicadores "Semestral Anualizado" (EH 03, DM 04) la
@@ -142,17 +164,17 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     for (let i = mesesDisponibles.length - 1; i >= 0; i--) {
       const mes = mesesDisponibles[i];
       const nombreMes = MESES_LARGOS_ARR[parseInt(mes, 10) - 1];
-      const datosMes = (reporte?.MESES?.[nombreMes] ?? reporte?.SEMANA?.MES?.[nombreMes])?.Reporte;
+      const datosMes = (reporteVista?.MESES?.[nombreMes] ?? reporteVista?.SEMANA?.MES?.[nombreMes])?.Reporte;
       const tieneResultado = datosMes && Object.values(datosMes).some(u => u?.desempeno && u.desempeno !== 'Gris');
       if (tieneResultado) return mes;
     }
     return mesesDisponibles[mesesDisponibles.length - 1] ?? '';
-  }, [reporte, mesesDisponibles]);
+  }, [reporteVista, mesesDisponibles]);
 
   /** Color de semáforo de cada unidad en el último mes disponible (incluye el parcial de SEMANA) */
   const unidadesStatus = useMemo(
-    () => buildFTPChartDataMes(reporte, ultimoMesDisponible).map(({ unidad, color }) => ({ unidad, color })),
-    [reporte, ultimoMesDisponible]
+    () => buildFTPChartDataMes(reporteVista, ultimoMesDisponible).map(({ unidad, color }) => ({ unidad, color })),
+    [reporteVista, ultimoMesDisponible]
   );
 
   /** Conteo Esperado/Medio/Bajo/Gris del último mes disponible — para la vista "Por unidad" */
@@ -222,6 +244,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     reporte, unidadSel, setUnidadSel,
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel, mesesDisponibles,
+    acumulado, setAcumulado, tieneAcumulado,
     listaIndicadores,
     todosLosIndicadores, chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes, unidadesStatus,

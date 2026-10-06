@@ -7,7 +7,7 @@ from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePr
 from configs.settings import DATA_INDICADORES
 from shared.MESES import MESES_ESTANDAR
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
-from shared.MESES_ACUMULADOS import MensualAcumulado
+from shared.MESES_ACUMULADOS import AcumulaSumandoMeses, MensualAcumulado
 from shared.UNIDADES import nombre_canonico_iaas
 from services.extractor.corte_extractor_Services import indicadores_extractor_de_corte
 
@@ -167,8 +167,9 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
             reporte.SEMANA = reportePrevio
             
     
-    # si el modulo tiene mensual acumualdo true y es del modulo de iaas
-    if (payload.mensualAcumulado and modulo == "iaas"):
+    # Mensual + mensual acumulado en el mapeo (IAAS, MT 03-05 del Extractor): el
+    # acumulado se arma sumando meses. Lo decide el mapeo, no lo que mande el front.
+    if AcumulaSumandoMeses(payload.indicador):
         reporteAcumulado = MensualAcumulado(reporte.MESES, payload.indicador)
 
         if(not reporteAcumulado):

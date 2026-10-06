@@ -12,16 +12,28 @@ from shared.semaforizado_service import SemaforizarReporte
 _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
 
 
-def _operacionResultado(indicador: str) -> str | None:
-    """Busca en el mapeo del indicador la formula de texto de 'operacion.resultado'."""
+def _bloque_mapeo(indicador: str) -> dict:
     rutaMapeo = RutaMapeoExiste(indicador)
     if not rutaMapeo:
-        return None
-
+        return {}
     with open(rutaMapeo, "r", encoding="utf-8") as archivo:
-        data = json.load(archivo)
+        return json.load(archivo).get(indicador, {})
 
-    return data.get(indicador, {}).get("reporte", {}).get("operacion", {}).get("resultado")
+
+def _operacionResultado(indicador: str) -> str | None:
+    """Busca en el mapeo del indicador la formula de texto de 'operacion.resultado'."""
+    return _bloque_mapeo(indicador).get("reporte", {}).get("operacion", {}).get("resultado")
+
+
+def AcumulaSumandoMeses(indicador: str) -> bool:
+    """
+    True si el mapeo pide mensual Y mensual acumulado (peridocidadGenerada): se guarda
+    el dato de cada mes y el acumulado se arma sumando meses (IAAS, MT 03-05 del
+    Extractor). Con solo mensualAcumulado el archivo ya viene acumulado (CACU 01,
+    CAMA...) y NO se vuelve a sumar. Lo decide el mapeo, no el front.
+    """
+    generada = _bloque_mapeo(indicador).get("peridocidadGenerada") or {}
+    return bool(generada.get("mensual") and generada.get("mensualAcumulado"))
 
 
 def MensualAcumulado(meses: Dict[str, MesReporte], indicador: str) -> Dict[str, MesReporte] | None:
@@ -44,8 +56,20 @@ def MensualAcumulado(meses: Dict[str, MesReporte], indicador: str) -> Dict[str, 
     if not operacionResultado:
         return None
 
-    mesesPresentes   = [mes for mes in MESES_ESTANDAR if mes in meses]
-    todasLasUnidades = {unidad for datosMes in meses.values() for unidad in datosMes.Reporte}
+    # Se acumula solo mientras los meses vayan seguidos: si faltara Marzo, "Enero-Abril"
+    # no puede ser Ene+Feb+Abr, asi que el acumulado se detiene en el primer hueco.
+    mesesPresentes = []
+    for mes in MESES_ESTANDAR:
+        if mes in meses:
+            mesesPresentes.append(mes)
+        elif mesesPresentes:
+            break
+
+    # Lista (no set) para conservar el orden de las unidades, con el TOTAL al final.
+    todasLasUnidades = list(dict.fromkeys(u for mes in mesesPresentes for u in meses[mes].Reporte))
+    if "TOTAL_OOAD" in todasLasUnidades:
+        todasLasUnidades.remove("TOTAL_OOAD")
+        todasLasUnidades.append("TOTAL_OOAD")
 
     acumulado: Dict[str, Dict[str, UnidadDatos]] = {}
 

@@ -130,14 +130,96 @@ def obtener_estilos_excel(workbook):
         'Bajo_Capsula':          workbook.add_format({**base, 'bg_color': C_ROJO,    'font_color': 'white', 'bold': True, 'num_format': '0.00'}),
         'Gris_Capsula':          workbook.add_format({**base, 'bg_color': '#CCCCCC', 'font_color': 'black', 'bold': True, 'num_format': '0.00'}),
         'poblacion_leyenda':     workbook.add_format({'font_name': 'Calibri', 'font_size': 9, 'italic': True, 'font_color': '#888888', 'align': 'left', 'border': 0}),
+        # Barra que separa el bloque "MENSUAL ACUMULADO" (igual idea que la barra de IAAS).
+        'titulo_seccion':        workbook.add_format({**base, 'bold': True, 'font_size': 12, 'bg_color': C_VERDE, 'font_color': 'white', 'align': 'left'}),
     }
+
+
+def _escribir_encabezado_meses(ws, fmt, r, checkpoints, semaforo, etiqueta_mes) -> None:
+    """Fila r: nombre de cada columna de mes; r+1..r+3: leyenda del semaforo; r+4: NUM / DEN / %."""
+    ws.merge_range(r, 0, r + 4, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
+    for pos, idx_real in enumerate(checkpoints):
+        nombre_m = MESES_LISTA[idx_real]
+        sc = pos * 3 + 1
+        ws.merge_range(r, sc, r, sc + 2, etiqueta_mes(idx_real), fmt['subtitulo'])
+
+        # cada mes con su propio semaforo (puede variar por mes)
+        texto_esp, texto_medio, texto_critico = _leyendas_semaforo(semaforo.get(nombre_m, semaforo))
+        ws.merge_range(r + 1, sc, r + 1, sc + 2, texto_esp,     fmt['Esperado_Leyenda'])
+        ws.merge_range(r + 2, sc, r + 2, sc + 2, texto_medio,   fmt['Medio_Leyenda'])
+        ws.merge_range(r + 3, sc, r + 3, sc + 2, texto_critico, fmt['Bajo_Leyenda'])
+
+        ws.write(r + 4, sc,     "NUM", fmt['header_sub'])
+        ws.write(r + 4, sc + 1, "DEN", fmt['header_sub'])
+        ws.write(r + 4, sc + 2, "%",   fmt['header_sub'])
+
+
+def _nombre_oficial(unidad_id: str, lista_tecnica: list) -> str:
+    if unidad_id == "TOTAL_OOAD":
+        return "TOTAL"
+    try:
+        return NOMBREUNIDADESARCHIVO[lista_tecnica.index(unidad_id)]
+    except Exception:
+        return unidad_id
+
+
+def _escribir_celdas_mes(ws, fmt, fila, col, clave_base, num, den, res, color) -> None:
+    """NUM / DEN / % de una unidad en un mes. Sin resultado (Gris = dato incompleto) se muestra
+    el numerador o denominador que si tenga valor en gris RGB(49,134,155) bold, para marcar que
+    no se conto en el total; el % se deja vacio y en gris."""
+    num = None if num in (None, "") else num
+    den = None if den in (None, "") else den
+    if res in (None, ""):
+        ws.write(fila, col,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))
+        ws.write(fila, col + 1, den if den is not None else "", _estilo_valor(fmt, clave_base, den))
+        ws.write(fila, col + 2, "", fmt.get("Gris_Capsula", fmt['dato_normal']))
+    else:
+        ws.write(fila, col,     num, fmt[clave_base])
+        ws.write(fila, col + 1, den, fmt[clave_base])
+        ws.write(fila, col + 2, res, fmt.get(f"{color}_Capsula", fmt['dato_normal']))
+
+
+def _clave_base_fila(idx_fila: int, es_total: bool) -> str:
+    return 'total_gris_80' if es_total else ('fila_par' if idx_fila % 2 == 0 else 'dato_normal')
+
+
+def _escribir_bloque_acumulado(ws, fmt, fila_titulo, ultima_col, checkpoints, semaforo,
+                               acumulado_por_mes: dict[int, dict], unidades: list, lista_tecnica: list,
+                               idx_mes_activo: int) -> None:
+    """
+    Debajo de la tabla mensual: "MENSUAL ACUMULADO" con el mismo formato (unidades x meses,
+    NUM/DEN/% y semaforo), cada columna sumando desde Enero ("ENERO", "ENERO - FEBRERO"...).
+    Mismo orden de unidades que la tabla mensual; meses posteriores al activo, en blanco.
+    """
+    ws.merge_range(fila_titulo, 0, fila_titulo, ultima_col,
+                   "  MENSUAL ACUMULADO  ·  cada columna suma desde enero hasta ese mes", fmt['titulo_seccion'])
+    r = fila_titulo + 1
+    _escribir_encabezado_meses(ws, fmt, r, checkpoints, semaforo,
+                               lambda i: "ENERO" if i == 0 else f"ENERO - {MESES_LISTA[i].upper()}")
+
+    for idx_fila, unidad_id in enumerate(unidades):
+        fila_excel = r + 5 + idx_fila
+        es_total   = unidad_id == "TOTAL_OOAD"
+        clave_base = _clave_base_fila(idx_fila, es_total)
+        ws.write(fila_excel, 0, _nombre_oficial(unidad_id, lista_tecnica),
+                 fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato'])
+        for pos, idx_real in enumerate(checkpoints):
+            col   = pos * 3 + 1
+            datos = acumulado_por_mes.get(idx_real, {}).get(unidad_id) if idx_real <= idx_mes_activo else None
+            if datos:
+                _escribir_celdas_mes(ws, fmt, fila_excel, col, clave_base,
+                                     datos.get("numerador"), datos.get("denominador"), datos.get("resultado"), datos.get("color", "Gris"))
+            else:
+                for i in range(3):
+                    ws.write(fila_excel, col + i, "", fmt[clave_base])
 
 
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,
                              metadata: dict, ano: str, mes: str,
                              semana, es_semana: bool, historicos: dict,
-                             poblacion_por_mes: dict[int, str | None] | None = None):
+                             poblacion_por_mes: dict[int, str | None] | None = None,
+                             acumulado_por_mes: dict[int, dict] | None = None):
     titulo       = metadata["titulo"] or ""
     desNum       = metadata["desNum"] or ""
     desDen       = metadata["desDen"] or ""
@@ -180,22 +262,7 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     if texto_periodicidad:
         ws.write(5, 0, "  PERIODICIDAD", fmt['etiqueta_bold'])
         ws.merge_range(5, 1, 5, ultima_col, f"  {texto_periodicidad.upper()}", fmt['descripcion'])
-    ws.merge_range(r, 0, r + 4, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
-
-    for pos, idx_real in enumerate(checkpoints):
-        nombre_m = MESES_LISTA[idx_real]
-        sc = pos * 3 + 1
-        ws.merge_range(r, sc, r, sc + 2, nombre_m.upper(), fmt['subtitulo'])
-
-        # cada mes con su propio semaforo (puede variar por mes)
-        texto_esp, texto_medio, texto_critico = _leyendas_semaforo(semaforo.get(nombre_m, semaforo))
-        ws.merge_range(r + 1, sc, r + 1, sc + 2, texto_esp,     fmt['Esperado_Leyenda'])
-        ws.merge_range(r + 2, sc, r + 2, sc + 2, texto_medio,   fmt['Medio_Leyenda'])
-        ws.merge_range(r + 3, sc, r + 3, sc + 2, texto_critico, fmt['Bajo_Leyenda'])
-
-        ws.write(r + 4, sc,     "NUM", fmt['header_sub'])
-        ws.write(r + 4, sc + 1, "DEN", fmt['header_sub'])
-        ws.write(r + 4, sc + 2, "%",   fmt['header_sub'])
+    _escribir_encabezado_meses(ws, fmt, r, checkpoints, semaforo, lambda i: MESES_LISTA[i].upper())
 
     ultima_fila   = r + 5 + len(diccionarioPrevio) - 1
     lista_tecnica = UNIDADES_PREVIOS if es_semana else UNIDADES_FINALES
@@ -204,70 +271,28 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     for idx_fila, unidad_id in enumerate(diccionarioPrevio.keys()):
         fila_excel = idx_fila + r + 5
         es_total   = (unidad_id == "TOTAL_OOAD")
+        clave_base = _clave_base_fila(idx_fila, es_total)
 
-        fmt_nombre = fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato']
-        clave_base = 'total_gris_80' if es_total else (
-            'fila_par' if idx_fila % 2 == 0 else 'dato_normal'
-        )
-        fmt_base   = fmt[clave_base]
-
-        if es_total:
-            nombre_oficial = "TOTAL"
-        else:
-            try:
-                pos            = lista_tecnica.index(unidad_id)
-                nombre_oficial = NOMBREUNIDADESARCHIVO[pos]
-            except Exception:
-                nombre_oficial = unidad_id
-
-        ws.write(fila_excel, 0, nombre_oficial, fmt_nombre)
+        ws.write(fila_excel, 0, _nombre_oficial(unidad_id, lista_tecnica),
+                 fmt['total_gris_80'] if es_total else fmt['columna_unidad_dato'])
 
         for pos, idx_real in enumerate(checkpoints):
             col = pos * 3 + 1
 
             if idx_real == idx_mes_activo:
-                reg      = diccionarioPrevio[unidad_id]
-                num      = reg.get("numerador")
-                den      = reg.get("denominador")
-                res      = reg.get("resultado")
-                fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
-
-                if res is None:
-                    # Gris = dato incompleto -- se muestra el numerador o denominador que
-                    # sí tenga valor (el que sea None se deja vacio), en gris RGB(49,134,155)
-                    # bold para marcar que no se contó en el total; solo el resultado se deja
-                    # vacio y en gris.
-                    ws.write(fila_excel, col,     num if num is not None else "", _estilo_valor(fmt, clave_base, num))
-                    ws.write(fila_excel, col + 1, den if den is not None else "", _estilo_valor(fmt, clave_base, den))
-                    ws.write(fila_excel, col + 2, "", fmt_gris)
-                else:
-                    fmt_pct = fmt.get(f"{reg.get('color','Gris')}_Capsula", fmt['dato_normal'])
-                    ws.write(fila_excel, col,     num, fmt_base)
-                    ws.write(fila_excel, col + 1, den, fmt_base)
-                    ws.write(fila_excel, col + 2, res, fmt_pct)
-            elif idx_real < idx_mes_activo:
-                hist = historicos.get(unidad_id, {}).get(idx_real, {})
-                if hist:
-                    h_num    = hist.get("numerador", "")
-                    h_den    = hist.get("denominador", "")
-                    h_res    = hist.get("resultado", "")
-                    fmt_gris = fmt.get("Gris_Capsula", fmt['dato_normal'])
-
-                    if h_res == "" or h_res is None:
-                        ws.write(fila_excel, col,     h_num if h_num not in (None, "") else "", _estilo_valor(fmt, clave_base, h_num if h_num not in (None, "") else None))
-                        ws.write(fila_excel, col + 1, h_den if h_den not in (None, "") else "", _estilo_valor(fmt, clave_base, h_den if h_den not in (None, "") else None))
-                        ws.write(fila_excel, col + 2, "", fmt_gris)
-                    else:
-                        fmt_pct = fmt.get(f"{_calcular_color(h_res, idx_real, semaforo)}_Capsula", fmt['dato_normal'])
-                        ws.write(fila_excel, col,     h_num, fmt_base)
-                        ws.write(fila_excel, col + 1, h_den, fmt_base)
-                        ws.write(fila_excel, col + 2, h_res, fmt_pct)
-                else:
-                    for i in range(3):
-                        ws.write(fila_excel, col + i, "", fmt_base)
+                reg = diccionarioPrevio[unidad_id]
+                _escribir_celdas_mes(ws, fmt, fila_excel, col, clave_base,
+                                     reg.get("numerador"), reg.get("denominador"), reg.get("resultado"), reg.get('color', 'Gris'))
+            elif idx_real < idx_mes_activo and historicos.get(unidad_id, {}).get(idx_real):
+                # Meses anteriores: el color se recalcula con el semaforo de ESE mes.
+                hist  = historicos[unidad_id][idx_real]
+                h_res = hist.get("resultado", "")
+                color = _calcular_color(h_res, idx_real, semaforo) if h_res not in (None, "") else "Gris"
+                _escribir_celdas_mes(ws, fmt, fila_excel, col, clave_base,
+                                     hist.get("numerador", ""), hist.get("denominador", ""), h_res, color)
             else:
                 for i in range(3):
-                    ws.write(fila_excel, col + i, "", fmt_base)
+                    ws.write(fila_excel, col + i, "", fmt[clave_base])
 
     # Leyenda de poblacion, una por cada mes mostrado (no una sola para toda la
     # hoja) -- cada mes pudo calcularse con una poblacion distinta (regla de
@@ -280,3 +305,9 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
             continue
         sc = pos * 3 + 1
         ws.merge_range(ultima_fila + 1, sc, ultima_fila + 1, sc + 2, f"Población: {poblacion_mes}", fmt['poblacion_leyenda'])
+
+    # Solo indicadores que piden mensual Y mensual acumulado (MT 03-05): bloque aparte debajo,
+    # dejando una fila libre tras la leyenda de poblacion.
+    if acumulado_por_mes:
+        _escribir_bloque_acumulado(ws, fmt, ultima_fila + 3, ultima_col, checkpoints, semaforo,
+                                   acumulado_por_mes, list(diccionarioPrevio.keys()), lista_tecnica, idx_mes_activo)

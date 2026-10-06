@@ -40,6 +40,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
     reporte, unidadSel, setUnidadSel,
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel, mesesDisponibles,
+    acumulado, setAcumulado, tieneAcumulado,
     chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes, unidadesStatus,
     cumplimientoMes, cumplimientoUltimoMes,
@@ -49,8 +50,11 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
 
   const rangosSemConMes  = rangosSem && esSemPorMes ? rangosSem : rangosSem ? { ...rangosSem, _mes: undefined } : null;
 
-  // Resetear página al cambiar indicador, mes o filtro de color
-  useEffect(() => { setPagina(0); }, [indSel, mesSel, colorFiltro]);
+  // Resetear página al cambiar indicador, mes, filtro de color o modo acumulado
+  useEffect(() => { setPagina(0); }, [indSel, mesSel, colorFiltro, acumulado]);
+
+  const conAcumulado = tieneAcumulado && acumulado;
+  const sufijoAcumulado = conAcumulado ? ' — acumulado' : '';
   // El filtro de color es una selección de la vista, no del indicador — se limpia al cambiar de indicador.
   useEffect(() => { setColorFiltro(null); }, [indSel]);
 
@@ -196,15 +200,27 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               <div className="ig-chart-topbar">
                 <div className="ig-chart-topbar-left">
                   <VistaToggle vistas={VISTAS_FTP} actual={vistaGrafica} onChange={setVistaGrafica} color={indColor} />
+                  {tieneAcumulado && (
+                    <button
+                      className={`ig-acumulado-switch${acumulado ? ' ig-acumulado-switch--on' : ''}`}
+                      onClick={() => setAcumulado(v => !v)}
+                      style={{ '--ic': indColor }}
+                      role="switch"
+                      aria-checked={acumulado}
+                    >
+                      <span className="ig-acumulado-switch-track"><span className="ig-acumulado-switch-thumb" /></span>
+                      Acumulado
+                    </button>
+                  )}
                   <div className="ig-chart-badges">
                     {vistaGrafica === 'unidad' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {unidadSel === 'TOTAL_OOAD' ? 'TOTAL OOAD' : unidadSel}
+                        {unidadSel === 'TOTAL_OOAD' ? 'TOTAL OOAD' : unidadSel}{sufijoAcumulado}
                       </span>
                     )}
                     {vistaGrafica === 'mes' && (
                       <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
-                        {etiquetaMesCorta(parseInt(mesSel))}
+                        {etiquetaMesCorta(parseInt(mesSel))}{sufijoAcumulado}
                       </span>
                     )}
                   </div>
@@ -234,7 +250,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               {vistaGrafica === 'unidad' && (
                 <div style={{ marginTop: '14px' }}>
                   <GraficaBarras
-                    chartKey={`u-${indSel}-${unidadSel}`}
+                    chartKey={`u-${indSel}-${unidadSel}-${conAcumulado ? 'a' : 'n'}`}
                     data={chartData}
                     xKey="mes"
                     maxTasa={maxTasa}
@@ -251,7 +267,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                 <div className="ig-mes-chart-row">
                   <div className="ig-mes-chart-col">
                     <GraficaBarras
-                      chartKey={`m-${indSel}-${mesSel}-p${pagina}`}
+                      chartKey={`m-${indSel}-${mesSel}-${conAcumulado ? 'a' : 'n'}-p${pagina}`}
                       data={dataPaginada}
                       xKey="unidad"
                       maxTasa={maxTasaMes}

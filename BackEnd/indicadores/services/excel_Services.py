@@ -22,6 +22,7 @@ from indicadores.services.excel_dibujante_Services import escribir_hoja_indicado
 from indicadores.services.extractor.corte_extractor_Services import es_indicador_de_corte
 from indicadores.services.indicadorMapeo_Services import RutaMapeoExiste
 from shared.MESES import MESES_ESTANDAR
+from shared.MESES_ACUMULADOS import AcumulaSumandoMeses, MensualAcumulado
 
 _MAXIMO_NOMBRES_EN_ARCHIVO = 3
 
@@ -145,6 +146,14 @@ def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndic
         for unidad, valores in _a_formato_excel(mes_reporte.Reporte).items():
             historicos.setdefault(unidad, {})[MESES_ESTANDAR.index(mes)] = valores
 
+    # Mensual + mensual acumulado en el mapeo: bloque acumulado debajo, sumando los
+    # meses guardados hasta el mes activo (mismo calculo que la grafica). El semanal no aplica.
+    acumulado_por_mes = None
+    if hoja.semana is None and AcumulaSumandoMeses(hoja.indicador):
+        hasta = MESES_ESTANDAR.index(hoja.mesActivo)
+        acumulado = MensualAcumulado({m: r for m, r in hoja.meses.items() if MESES_ESTANDAR.index(m) <= hasta}, hoja.indicador) or {}
+        acumulado_por_mes = {MESES_ESTANDAR.index(m): _a_formato_excel(r.Reporte) for m, r in acumulado.items()}
+
     metadata = hoja.metadata
     escribir_hoja_indicador(
         libro, estilos, hoja.indicador,
@@ -160,6 +169,7 @@ def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndic
         str(hoja.ano), str(MESES_ESTANDAR.index(hoja.mesActivo) + 1).zfill(2),
         hoja.semana, hoja.semana is not None,
         historicos, poblacion_por_mes,
+        acumulado_por_mes,
     )
 
 
