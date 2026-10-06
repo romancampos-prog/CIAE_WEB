@@ -4,6 +4,8 @@ la pestana con encabezado, leyendas del semaforo y una fila por unidad. Recibe l
 datos ya leidos (incluido el historico de meses); no lee la BD.
 Usado en: services/excel_Services.py
 """
+import re
+
 import xlsxwriter
 
 from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS
@@ -38,6 +40,33 @@ def _texto_medio(v_esp, v_critico, descendente) -> str:
     if v_esp == v_critico:
         return ""
     return f"MEDIO: > {v_esp} y < {v_critico}" if descendente else f"MEDIO: < {v_esp} y > {v_critico}"
+
+
+def _es_rango_compuesto(texto) -> bool:
+    """Umbral de dos lados en el mapeo, ej. ">= 5.0 a <= 8.0" o "<= 3.9 o >= 10.0" (MT 03)."""
+    return isinstance(texto, str) and len(re.findall(r"\d+(?:\.\d+)?", texto)) > 1
+
+
+def _leyendas_semaforo(limites: dict) -> tuple[str, str, str]:
+    """
+    Textos (ESPERADO, MEDIO, BAJO/ALTO) de la leyenda. Con umbrales de un solo
+    numero se arman como siempre; si alguno es de dos lados, se escribe el rango
+    tal cual viene en el mapeo -- si no, "ESPERADO: >= 5.0" se comia el "<= 8.0".
+    """
+    clave_critica = "Alto" if "Alto" in limites else "Bajo"
+    # Solo Esperado/Bajo deciden: el Medio de casi todos ya es de dos lados ("> 12 a < 16").
+    if any(_es_rango_compuesto(limites.get(c)) for c in ("Esperado", clave_critica)):
+        legible = lambda c: str(limites.get(c) or "").replace(" a ", " y ").strip()
+        medio = legible("Medio")
+        return (f"ESPERADO: {legible('Esperado')}", f"MEDIO: {medio}" if medio else "",
+                f"{clave_critica.upper()}: {legible(clave_critica)}")
+
+    v_esp       = numero_de_umbral(limites.get("Esperado", 0))
+    v_critico   = numero_de_umbral(limites.get(clave_critica, 0))
+    descendente = _es_descendente(limites)
+    if descendente:
+        return f"ESPERADO: <= {v_esp}", _texto_medio(v_esp, v_critico, True), f"{clave_critica.upper()}: >= {v_critico}"
+    return f"ESPERADO: >= {v_esp}", _texto_medio(v_esp, v_critico, False), f"BAJO: <= {v_critico}"
 
 
 def _calcular_color(valor, idx_mes, indicadorSemaforo):
@@ -121,12 +150,6 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
     checkpoints = indices_de_meses(periodicidad)
     ultima_col = len(checkpoints) * 3
 
-    nombre_mes_act = MESES_LISTA[idx_mes_activo]
-    limites       = semaforo.get(nombre_mes_act, semaforo)
-    v_esp         = numero_de_umbral(limites.get("Esperado", 0))
-    tiene_alto    = _es_descendente(limites)
-    clave_critica = "Alto" if "Alto" in limites else "Bajo"
-    v_critico     = numero_de_umbral(limites.get(clave_critica, 0))
 
     # El mes (y la semana, si aplica) siempre van en el nombre de la pestaña
     # -- no en el nombre del archivo -- porque ahora cada indicador de la
@@ -164,29 +187,11 @@ def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
         sc = pos * 3 + 1
         ws.merge_range(r, sc, r, sc + 2, nombre_m.upper(), fmt['subtitulo'])
 
-        if idx_real == idx_mes_activo:
-            if tiene_alto:
-                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: <= {v_esp}", fmt['Esperado_Leyenda'])
-                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_esp, v_critico, True), fmt['Medio_Leyenda'])
-                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"{clave_critica.upper()}: >= {v_critico}", fmt['Bajo_Leyenda'])
-            else:
-                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: >= {v_esp}", fmt['Esperado_Leyenda'])
-                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_esp, v_critico, False), fmt['Medio_Leyenda'])
-                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"BAJO: <= {v_critico}", fmt['Bajo_Leyenda'])
-        else:
-            lim_h         = semaforo.get(MESES_LISTA[idx_real], semaforo)
-            v_h           = numero_de_umbral(lim_h.get("Esperado", 0))
-            alt_h         = _es_descendente(lim_h)
-            clave_crit_h  = "Alto" if "Alto" in lim_h else "Bajo"
-            crit_h        = numero_de_umbral(lim_h.get(clave_crit_h, 0))
-            if alt_h:
-                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: <= {v_h}", fmt['Esperado_Leyenda'])
-                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_h, crit_h, True), fmt['Medio_Leyenda'])
-                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"{clave_crit_h.upper()}: >= {crit_h}", fmt['Bajo_Leyenda'])
-            else:
-                ws.merge_range(r + 1, sc, r + 1, sc + 2, f"ESPERADO: >= {v_h}", fmt['Esperado_Leyenda'])
-                ws.merge_range(r + 2, sc, r + 2, sc + 2, _texto_medio(v_h, crit_h, False), fmt['Medio_Leyenda'])
-                ws.merge_range(r + 3, sc, r + 3, sc + 2, f"BAJO: <= {crit_h}", fmt['Bajo_Leyenda'])
+        # cada mes con su propio semaforo (puede variar por mes)
+        texto_esp, texto_medio, texto_critico = _leyendas_semaforo(semaforo.get(nombre_m, semaforo))
+        ws.merge_range(r + 1, sc, r + 1, sc + 2, texto_esp,     fmt['Esperado_Leyenda'])
+        ws.merge_range(r + 2, sc, r + 2, sc + 2, texto_medio,   fmt['Medio_Leyenda'])
+        ws.merge_range(r + 3, sc, r + 3, sc + 2, texto_critico, fmt['Bajo_Leyenda'])
 
         ws.write(r + 4, sc,     "NUM", fmt['header_sub'])
         ws.write(r + 4, sc + 1, "DEN", fmt['header_sub'])
