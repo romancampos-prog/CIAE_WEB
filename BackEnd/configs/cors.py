@@ -13,7 +13,9 @@ ORIGINS_DESARROLLO = [
     "http://localhost:5174",
     "http://127.0.0.1:5173",
     "http://localhost:4200",
-    "http://11.1.11.62:5173"
+    "http://11.1.11.62:5173",
+    "http://11.1.11.59:5173",
+    "https://11.1.11.59:8005"
 ]
 
 ORIGINS_PRODUCCION = [
