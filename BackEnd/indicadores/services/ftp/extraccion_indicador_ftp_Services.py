@@ -8,16 +8,20 @@ import json
 from ftplib import FTP
 from typing import Any
 
-from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS, ruta_poblacion
+from shared.unidades_ftp import CLAVE_UNIDADES_F, NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS, ruta_poblacion
 from schemas.model.generacion_ftp_Model import DatosExtraidosUnidad, LogErrores
 from schemas.model.reporte_mapeo_Model import FuenteArchivosFTP, FuentePoblacionInfoSalud, IndicadorFTPMapeo
 from services.indicadorMapeo_Services import cargar_indicador_mapeo
 from services.ftp.conexion_ftp_Services import conectar_ftp, desconectar_ftp
 from services.ftp.lectura_reporte_ftp_Services import extraer_lados_del_excel
-from services.ftp.catalogo_reportes_ftp_Services import subcarpeta_de_reporte
+from services.ftp.catalogo_reportes_ftp_Services import es_reporte_de_piramides, subcarpeta_de_reporte
 from services.ftp.navegacion_ftp_Services import (
-    descargar_archivo, listar_reportes, navegar_ruta, ruta_reportes_unidad,
+    descargar_archivo, listar_reportes, navegar_ruta, ruta_piramides, ruta_reportes_unidad,
 )
+
+# La clave del catalogo, no la de la carpeta mensual: no siempre coinciden
+# (Salvatierra: carpeta 111302, PB02 111303).
+_CLAVE_POR_UNIDAD = {nombre: clave for clave, nombre in CLAVE_UNIDADES_F.items()}
 from services.ftp.registro_errores_ftp_Services import (
     crear_log_errores, error_de_conexion, registrar_error, solo_con_errores,
 )
@@ -33,11 +37,13 @@ def extraer_reporte_de_unidades(
     se pudo}; un fallo en una unidad no detiene a las demas (queda None y se registra).
     """
     unidades_ruta = UNIDADES_PREVIOS if semana is not None else UNIDADES_FINALES
-    subcarpeta    = subcarpeta_de_reporte(reporte)
+    de_piramides  = es_reporte_de_piramides(reporte)
+    subcarpeta    = None if de_piramides else subcarpeta_de_reporte(reporte)
     valores_por_unidad: dict[str, dict[str, list[float] | None] | None] = {}
 
     for unidad_ruta, unidad in zip(unidades_ruta, NOMBREUNIDADESARCHIVO):
-        carpeta = ruta_reportes_unidad(ano, mes, unidad_ruta, subcarpeta, semana)
+        # Piramides: una sola carpeta del año para todas las unidades (no depende del mes ni de la semana).
+        carpeta = ruta_piramides(ano) if de_piramides else ruta_reportes_unidad(ano, mes, unidad_ruta, subcarpeta, semana)
         try:
             navegacion = navegar_ruta(ftp, carpeta)
             if not navegacion.ok:
@@ -46,7 +52,12 @@ def extraer_reporte_de_unidades(
                 valores_por_unidad[unidad] = None
                 continue
 
-            archivos = listar_reportes(ftp, reporte)
+            clave = _CLAVE_POR_UNIDAD.get(unidad) if de_piramides else None
+            if de_piramides and not clave:
+                registrar_error(log, "ARCHIVO_NO_ENCONTRADO", unidad, reporte, f"{carpeta} · la unidad no tiene clave en CLAVE_UNIDADES_F")
+                valores_por_unidad[unidad] = None
+                continue
+            archivos = listar_reportes(ftp, reporte, clave)
             if len(archivos) > 1:
                 registrar_error(log, "ARCHIVO_DUPLICADO", unidad, reporte, carpeta)
             if not archivos:

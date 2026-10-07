@@ -28,6 +28,11 @@ def ruta_reportes_unidad(ano: str, mes: str, unidad: str, subcarpeta: str, seman
     return f"01. DATAMARTEM/ArchsData_Previos_{ano}/{ano}{mes}/{unidad}/1.SIAIS_Reportes/Semana_{semana}/{subcarpeta}_S{semana}"
 
 
+def ruta_piramides(ano: str) -> str:
+    """01. DATAMARTEM/ArchsDataMart_{año}/Piramides para {año} por unidades -- un PB02 por unidad, fijo todo el año."""
+    return f"01. DATAMARTEM/ArchsDataMart_{ano}/Piramides para {ano} por unidades"
+
+
 def navegar_ruta(ftp: FTP, carpeta_remota: str) -> ResultadoNavegacion:
     """Entra a la ruta segmento por segmento; si uno falla, diagnostica por que."""
     ftp.cwd('/')
@@ -41,9 +46,15 @@ def navegar_ruta(ftp: FTP, carpeta_remota: str) -> ResultadoNavegacion:
     return ResultadoNavegacion(True)
 
 
-def listar_reportes(ftp: FTP, codigo_reporte: str) -> list[str]:
-    """Excel de la carpeta actual cuyo nombre empieza con el codigo del reporte (ej. "CP03_algo" -> "CP03")."""
+def listar_reportes(ftp: FTP, codigo_reporte: str, clave_unidad: str | None = None) -> list[str]:
+    """
+    Excel de la carpeta actual cuyo nombre empieza con el codigo del reporte (ej. "CP03_algo" -> "CP03").
+    clave_unidad: para carpetas con los archivos de todas las unidades juntos (piramides), donde el
+    nombre es "{codigo}U{clave}..." y el resto del nombre no sigue ningun formato.
+    """
     prefijo = codigo_reporte.split("_")[0].upper()
+    if clave_unidad:
+        prefijo = f"{prefijo}U{clave_unidad.upper()}"
     return [
         archivo for archivo in ftp.nlst()
         if archivo.upper().strip().startswith(prefijo) and archivo.upper().endswith(_EXTENSIONES_EXCEL)

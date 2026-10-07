@@ -45,6 +45,10 @@ REPORTES_POR_SUBCARPETA: dict[str, tuple[str, ...]] = {
     ),
 }
 
+# No viven en 1.SIAIS_Reportes de cada unidad sino en una carpeta del año con un
+# archivo por unidad (la piramide de poblacion adscrita, ej. PB02 al 30 de junio).
+REPORTES_DE_PIRAMIDES: tuple[str, ...] = ("PB02",)
+
 _SUBCARPETA_POR_REPORTE: dict[str, str] = {
     reporte: subcarpeta
     for subcarpeta, reportes in REPORTES_POR_SUBCARPETA.items()
@@ -58,7 +62,11 @@ def _codigo_base(codigo_reporte: str) -> str:
 
 
 def existe_reporte(codigo_reporte: str) -> bool:
-    return _codigo_base(codigo_reporte) in _SUBCARPETA_POR_REPORTE
+    return _codigo_base(codigo_reporte) in _SUBCARPETA_POR_REPORTE or es_reporte_de_piramides(codigo_reporte)
+
+
+def es_reporte_de_piramides(codigo_reporte: str) -> bool:
+    return _codigo_base(codigo_reporte) in REPORTES_DE_PIRAMIDES
 
 
 def subcarpeta_de_reporte(codigo_reporte: str) -> str:

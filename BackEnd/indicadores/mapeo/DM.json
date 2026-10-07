@@ -1,7 +1,7 @@
 {
     "DM 01": {
         "nombreArchivoFinal": "DM 01",
-        "fechaModificacion": "19/08/2026",
+        "fechaModificacion": "07/10/2026",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
         "modulo": "ftp",
@@ -47,41 +47,30 @@
                 }
             },
             "denominador": {
-                "fuente": "poblacionInfoSalud",
-                "sexo": {
-                    "Mujeres": [
-                        "20 a 24",
-                        "25  a 29",
-                        "30 a 34",
-                        "35 a 39",
-                        "40 a 44",
-                        "45 a 49",
-                        "50 a 54",
-                        "55 a 59"
-                    ],
-                    "Hombres": [
-                        "20 a 24",
-                        "25  a 29",
-                        "30 a 34",
-                        "35 a 39",
-                        "40 a 44",
-                        "45 a 49",
-                        "50 a 54",
-                        "55 a 59"
-                    ],
-                    "Todos": [
-                        "60 a 64",
-                        "65 a 69",
-                        "70 a 74",
-                        "75 a 79",
-                        "80 a 84",
-                        "85 y más"
-                    ]
+                "fuente": "ftp",
+                "archivo": {
+                    "PB02": {
+                        "hoja": "Poblacion_Sub14",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "B",
+                        "buscar": "99.-TOTAL",
+                        "columna_dato": [
+                            "BL",
+                            "BK",
+                            "AQ",
+                            "AS",
+                            "AU",
+                            "AR",
+                            "AT",
+                            "AV",
+                            "G"
+                        ]
+                    }
                 }
             },
             "operacion": {
                 "numerador": "sum(CP02[0:3]) + sum(CP03[0:2])",
-                "denominador": "sum([ (sum(Mujeres[0:5]) * (1 - 0.029)), (sum(Hombres[0:5]) * (1 - 0.025)), (sum(Mujeres[5:8]) * (1 - 0.17)), (sum(Hombres[5:8]) * (1 - 0.145)), (sum(Todos) * (1 - 0.268)) ])",
+                "denominador": "math.floor(PB02[0] * (1 - 0.029) + 0.5) + math.floor(PB02[1] * (1 - 0.025) + 0.5) + math.floor(sum(PB02[2:5]) * (1 - 0.17) + 0.5) + math.floor(sum(PB02[5:8]) * (1 - 0.145) + 0.5) + math.floor(PB02[8] * (1 - 0.268) + 0.5)",
                 "resultado": "round((numerador / denominador) * 100, 2)"
             }
         },
