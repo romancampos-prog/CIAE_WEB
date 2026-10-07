@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './informacionIndicador.css';
-import { parsearNumerador, parsearDenominador, parsearResultado, descripcionExtraccion, describirFuenteCalculo } from './operacionParser.js';
+import { parsearNumerador, parsearDenominador, parsearResultado, descripcionExtraccion, describirFuenteCalculo, pct } from './operacionParser.js';
 
 // ── Tarjeta de fuente — colapsable ────────────────────────────────────────────
 const TarjetaFuente = ({ fuente }) => {
@@ -36,19 +36,9 @@ const TarjetaFuente = ({ fuente }) => {
       {abierta && (
         <div className="fuente-card-body">
           {extraccion && <p className="fc-extraccion">{extraccion}</p>}
-          <div className="fc-grupos">
-            {fuente.grupos.map((g, i) => (
-              <div key={i} className={`fc-grupo ${g.prev ? 'con-prev' : ''}`}>
-                <div className="tags-flex">
-                  {g.cols.map((c, j) => (
-                    <span key={j} className={`col-tag ${g.prev ? 'col-tag-prev' : ''}`}>{c}</span>
-                  ))}
-                  {g.prev && (
-                    <span className="prev-badge">−{(parseFloat(g.prev) * 100).toFixed(1)}% prevalencia a descontar</span>
-                  )}
-                </div>
-              </div>
-            ))}
+          {/* Solo qué columnas se extraen; cómo se agrupan y qué prevalencia se descuenta lo explica la operación de abajo */}
+          <div className="tags-flex">
+            {todasCols.map((c, j) => <span key={j} className="col-tag">{c}</span>)}
           </div>
         </div>
       )}
@@ -56,23 +46,75 @@ const TarjetaFuente = ({ fuente }) => {
   );
 };
 
+// ── Grupos con prevalencia descontada (ej. denominador DM 01): una fila por
+//    grupo con la parte de la población que se conserva y la que se descuenta ──
+const TablaPrevalencias = ({ fuentes }) => {
+  const grupos = fuentes.flatMap(f => f.grupos.filter(g => g.prev));
+  return (
+    <div className="prev-tabla">
+      <div className="prev-tabla-encabezado">
+        <span className="op-lbl">Operación</span>
+        <span className="prev-tabla-sub">A cada grupo (sus columnas sumadas) se le saca su prevalencia; al final se suman los grupos</span>
+      </div>
+      {grupos.map((g, i) => {
+        const prevalencia = parseFloat(g.prev);
+        return (
+          <div key={i} className="prev-fila">
+            <span className="prev-num">{i + 1}</span>
+            <div className="prev-cols">
+              {g.cols.map((c, j) => (
+                <span key={j} className="prev-col">
+                  {j > 0 && <span className="prev-mas">+</span>}
+                  <span className="col-tag">{c}</span>
+                </span>
+              ))}
+            </div>
+            <div className="prev-barra" aria-hidden="true">
+              <span className="prev-barra-queda" style={{ width: `${(1 - prevalencia) * 100}%` }} />
+            </div>
+            <div className="prev-valores">
+              <span className="prev-menos">− {pct(g.prev)} <small>prevalencia</small></span>
+              <span className="prev-queda">se cuenta el {pct(1 - prevalencia)}</span>
+            </div>
+          </div>
+        );
+      })}
+      <div className="prev-suma">
+        <span className="op-lbl">Suma completa</span>
+        <div className="prev-suma-grupos">
+          {grupos.map((_, i) => (
+            <span key={i} className="prev-col">
+              {i > 0 && <span className="prev-mas">+</span>}
+              <span className="prev-num">{i + 1}</span>
+            </span>
+          ))}
+        </div>
+        <span className="prev-tabla-sub">cada grupo ya con su prevalencia descontada</span>
+      </div>
+    </div>
+  );
+};
+
 // ── Bloque "fórmula" (INTERSECCION_*/ULTIMA_FILA/población) ────────────────
-const BloqueFormula = ({ fuentes, operacion, resumen }) => (
-  <>
-    {fuentes?.length > 0 && (
-      <div className="fuentes-wrap">
-        {fuentes.map((f, i) => <TarjetaFuente key={i} fuente={f} />)}
-      </div>
-    )}
-    {fuentes?.length > 0 && (
-      <div className="operacion-box">
-        <span className="op-lbl">Operación:</span>
-        <code>{operacion}</code>
-      </div>
-    )}
-    {resumen && <p className="resumen-op">{resumen}</p>}
-  </>
-);
+const BloqueFormula = ({ fuentes, operacion, resumen }) => {
+  const conPrevalencia = fuentes?.some(f => f.grupos.some(g => g.prev));
+  return (
+    <>
+      {fuentes?.length > 0 && (
+        <div className="fuentes-wrap">
+          {fuentes.map((f, i) => <TarjetaFuente key={i} fuente={f} />)}
+        </div>
+      )}
+      {fuentes?.length > 0 && (conPrevalencia ? <TablaPrevalencias fuentes={fuentes} /> : (
+        <div className="operacion-box">
+          <span className="op-lbl">Operación:</span>
+          <code>{operacion}</code>
+        </div>
+      ))}
+      {resumen && <p className="resumen-op">{resumen}</p>}
+    </>
+  );
+};
 
 // ── Segmentos de descripción -- texto plano intercalado con chips de código
 //    (ej. diagnósticos CIE-10), en vez de una lista corrida separada por comas ──

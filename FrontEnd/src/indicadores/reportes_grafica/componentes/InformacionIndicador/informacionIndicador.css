@@ -207,14 +207,6 @@
   font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 10px;
 }
 
-.fc-grupos { display: flex; flex-direction: column; gap: 6px; }
-.fc-grupo { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-.fc-grupo.con-prev {
-  background: #fffcf0;
-  border-left: 2px solid var(--color-oro-institucional);
-  border-radius: 6px; padding: 5px 10px;
-}
-
 /* ── Tags ── */
 .tags-flex { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
@@ -230,19 +222,6 @@
   border: 1px solid #c7d2fe;
   font-family: 'Consolas', monospace;
 }
-.col-tag-prev {
-  background: #fffcf0 !important;
-  border-color: var(--color-oro-institucional) !important;
-  color: #7a5010 !important;
-}
-
-.prev-badge {
-  font-size: 11px; font-weight: 700;
-  background: #fff8e8; color: #854f0b;
-  padding: 2px 9px; border-radius: 100px;
-  border: 1px solid #fcd34d;
-}
-
 /* ── Nota prevalencia ── */
 .nota-prevalencia {
   font-size: 12px; color: #854F0B;
@@ -271,6 +250,69 @@ code {
   background: rgba(11,84,69,0.06);
   padding: 2px 7px; border-radius: 5px;
   word-break: break-all;
+}
+
+/* ── Tabla de prevalencias (grupos de población con prevalencia descontada) ── */
+.prev-tabla {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafb;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.prev-tabla-encabezado { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.prev-tabla-sub { font-size: 11.5px; color: #64748b; }
+
+/* Columnas de ancho fijo para que todas las barras arranquen y midan igual */
+.prev-fila {
+  display: grid;
+  grid-template-columns: 22px 170px 1fr 120px;
+  align-items: center; gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #edf1f4;
+}
+.prev-fila:first-of-type { border-top: none; padding-top: 0; }
+/* Número de grupo: se reutiliza en la suma completa para que se lea "1 + 2 + 3..." */
+.prev-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  font-size: 10.5px; font-weight: 800; color: #fff;
+  background: var(--fc, var(--color-imss-primario));
+}
+.prev-mas {
+  margin: 0 4px;
+  font-size: 13px; font-weight: 800;
+  color: var(--fc, var(--color-imss-primario));
+}
+.prev-suma-grupos { display: flex; flex-wrap: wrap; align-items: center; row-gap: 4px; }
+.prev-cols { display: flex; flex-wrap: wrap; align-items: center; row-gap: 4px; }
+.prev-col { display: inline-flex; align-items: center; }
+
+.prev-barra {
+  height: 8px; border-radius: 100px; overflow: hidden;
+  background: #e2e8f0;
+}
+.prev-barra-queda {
+  display: block; height: 100%;
+  background: var(--fc, var(--color-imss-primario));
+  opacity: 0.8;
+}
+
+.prev-valores { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
+.prev-menos { font-size: 12.5px; font-weight: 800; color: #334155; }
+.prev-menos small { font-size: 10.5px; font-weight: 600; color: #94a3b8; }
+.prev-queda { font-size: 10.5px; color: #64748b; }
+
+.prev-suma {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 2px; padding-top: 10px;
+  border-top: 2px solid #e2e8f0;
+}
+
+@media (max-width: 600px) {
+  .prev-fila { grid-template-columns: 22px 1fr auto; }
+  .prev-barra { grid-column: 2 / -1; grid-row: 2; }
 }
 
 .resumen-op {

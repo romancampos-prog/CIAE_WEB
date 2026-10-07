@@ -191,8 +191,15 @@ const extraerListaSum = (expr) => {
   return splitTop(m[1].trim(), ',');
 };
 
+// El redondeo por grupo (ej. DM 01: "math.floor(PB02[0] * (1 - 0.029) + 0.5)") no cambia
+// de dónde sale el dato -- se quita para describir solo el grupo y su prevalencia.
+const sinRedondeo = (tok) => {
+  const m = strip(tok).match(/^(?:math\.floor|round)\(([\s\S]+?)(?:\s*\+\s*0\.5)?\)$/);
+  return m ? m[1] : tok;
+};
+
 const tokenAFuente = (tok, reporte, raiz, mes) => {
-  const t = strip(tok);
+  const t = strip(sinRedondeo(tok));
   const gp = parseGrupoPrev(t, reporte, raiz, mes);
   if (gp) return { id: gp.id, hoja: gp.hoja, cfg: gp.cfg, cols: gp.cols, prev: gp.prev };
   const s = parseSum(t, reporte, raiz, mes);
