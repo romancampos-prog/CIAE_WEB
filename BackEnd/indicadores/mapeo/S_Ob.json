@@ -186,21 +186,59 @@
   },
   "S_Ob 03": {
     "nombreArchivoFinal": "S_Ob 03",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "07/10/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",
-    "modulo": "",
-    "mostrarGenerar": false,
+    "modulo": "ftp",
+    "mostrarGenerar": true,
     "mostrarGrafica": true,
-    "previos": false,
+    "previos": true,
     "periodicidad": "Mensual",
+    "peridocidadGenerada": {
+      "mensual": true
+    },
     "informacion": {
       "titulo": "S_Ob 03 - Proporción de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0).",
       "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), como factor de riesgo de desarrollo de enfermedades crónicas.",
       "descNum": "Número de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), en el periodo evaluado.",
       "descDen": "Total, de población derechohabiente de 20 años y más años, adscrita a Médico Familiar con medición de peso y talla en periodo evaluado"
     },
-    "reporte": {},
+    "reporte": {
+      "numerador": {
+        "fuente": "ftp",
+        "archivo": {
+          "CP03": {
+            "hoja": "15_EvalNut_20_120",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "A",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "DN",
+              "EI"
+            ]
+          }
+        }
+      },
+      "denominador": {
+        "fuente": "ftp",
+        "archivo": {
+          "CP03": {
+            "hoja": "15_EvalNut_20_120",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "A",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "CB"
+            ]
+          }
+        }
+      },
+      "operacion": {
+        "numerador": "sum(CP03[0:2])",
+        "denominador": "(CP03[0])",
+        "resultado": "round((numerador / denominador) * 100, 2)"
+      }
+    },
     "semaforo": {
       "Esperado": "<= 4.0",
       "Medio": "> 4 a < 6",
