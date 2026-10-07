@@ -3,9 +3,9 @@
    ═══════════════════════════════════ */
 .cf-root {
   width: 100%;
-  background: #ffffff;
+  background: var(--superficie);
   flex-shrink: 0;
-  border-top: 1px solid #eef0f3;
+  border-top: 1px solid var(--borde);
   position: relative;
 }
 
@@ -14,8 +14,8 @@
   height: 3px;
   width: 100%;
   background: linear-gradient(90deg,
-    #0b5445 0%,
-    #0b5445 40%,
+    var(--marca) 0%,
+    var(--marca) 40%,
     #9a7026 60%,
     #7e0808 100%
   );
@@ -57,7 +57,7 @@
 .cf-brand {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #0b5445;
+  color: var(--marca-texto);
   letter-spacing: 0.5px;
   flex-shrink: 0;
 }
@@ -65,13 +65,13 @@
 .cf-pipe {
   width: 1px;
   height: 12px;
-  background: #e2e8f0;
+  background: var(--superficie-marcada);
   flex-shrink: 0;
 }
 
 .cf-tagline {
   font-size: 0.67rem;
-  color: #94a3b8;
+  color: var(--texto-tenue);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -88,25 +88,25 @@
 
 .cf-dev {
   font-size: 0.65rem;
-  color: #94a3b8;
+  color: var(--texto-tenue);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .cf-mail {
-  color: #0b5445;
+  color: var(--marca-texto);
   text-decoration: none;
 }
 .cf-mail:hover { text-decoration: underline; }
 
 .cf-dot {
   font-size: 0.6rem;
-  color: #cbd5e1;
+  color: var(--texto-deshabilitado);
 }
 
 .cf-copy {
   font-size: 0.65rem;
-  color: #94a3b8;
+  color: var(--texto-tenue);
   font-weight: 500;
   white-space: nowrap;
 }

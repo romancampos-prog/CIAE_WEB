@@ -12,7 +12,7 @@
 @keyframes me-overlayIn { from { opacity: 0; } to { opacity: 1; } }
 
 .me-content {
-  background: white;
+  background: var(--superficie);
   padding: 40px 44px 32px;
   border-radius: 20px; width: 95%; max-width: 520px;
   text-align: center;
@@ -24,7 +24,7 @@
 .me-content::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: linear-gradient(90deg, #0b5445, #9a7026);
+  background: linear-gradient(90deg, var(--marca), #9a7026);
 }
 @keyframes me-popIn {
   from { opacity: 0; transform: scale(0.88) translateY(20px); }
@@ -33,7 +33,7 @@
 
 .me-icon-success {
   width: 68px; height: 68px;
-  background: linear-gradient(135deg, #0b5445, #1a7a62);
+  background: linear-gradient(135deg, var(--marca), #1a7a62);
   color: white; font-size: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 20px;
@@ -46,28 +46,28 @@
 }
 
 .me-content h2 {
-  color: #111827; margin-bottom: 8px;
+  color: var(--texto); margin-bottom: 8px;
   font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em;
 }
 .me-content p {
-  color: #64748b; margin-bottom: 22px;
+  color: var(--texto-suave); margin-bottom: 22px;
   font-size: 0.88rem; line-height: 1.55;
 }
 
 .me-ruta-container { text-align: left; margin-bottom: 22px; }
 .me-ruta-container label {
-  font-size: 9px; color: #94a3b8; font-weight: 800;
+  font-size: 9px; color: var(--texto-tenue); font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.08em;
   margin-left: 2px; display: block; margin-bottom: 6px;
 }
 .me-ruta-box {
-  background: #f8fafb; padding: 14px;
-  border-radius: 10px; border: 1px solid #e2e8f0;
+  background: var(--superficie-suave); padding: 14px;
+  border-radius: 10px; border: 1px solid var(--borde);
   overflow-x: auto;
 }
 .me-ruta-box code {
   font-family: 'Consolas', monospace; font-size: 0.83rem;
-  color: #0b5445; word-break: break-all;
+  color: var(--marca-texto); word-break: break-all;
   background: none; padding: 0;
 }
 
@@ -80,13 +80,13 @@
   cursor: pointer; transition: all 0.2s;
   font-family: inherit;
 }
-.me-btn-primario { background: #0b5445; color: white; }
+.me-btn-primario { background: var(--marca); color: white; }
 .me-btn-primario:hover {
   background: #0e6655; transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(11,84,69,0.3);
 }
-.me-btn-secundario { background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; }
-.me-btn-secundario:hover { background: #e8ecf0; }
+.me-btn-secundario { background: var(--superficie-alterna); color: var(--texto-secundario); border: 1.5px solid var(--borde); }
+.me-btn-secundario:hover { background: var(--superficie-marcada); }
 
 .me-animate-pop { animation: me-popIn 0.38s cubic-bezier(0.16,1,0.3,1); }
 

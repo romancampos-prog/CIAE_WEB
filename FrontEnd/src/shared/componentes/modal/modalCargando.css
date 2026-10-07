@@ -16,7 +16,7 @@
 }
 
 .modal-content-loading {
-  background: white;
+  background: var(--superficie-elevada);
   padding: 40px 48px 36px;
   border-radius: 20px; text-align: center;
   width: 95%; max-width: 500px;
@@ -27,7 +27,7 @@
 .modal-content-loading::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: linear-gradient(90deg, #0b5445, #9a7026, #7e0808);
+  background: linear-gradient(90deg, var(--marca), #9a7026, #7e0808);
   background-size: 200% 100%;
   animation: mcl-barFlow 2s ease infinite;
 }
@@ -46,24 +46,24 @@
 }
 
 .modal-content-loading h3 {
-  color: #0b5445; margin-bottom: 6px;
+  color: var(--marca-texto); margin-bottom: 6px;
   font-family: 'Inter', sans-serif;
   font-size: 1.15rem; font-weight: 700;
 }
 
 .modal-content-loading p {
-  color: #64748b; font-size: 0.87rem; line-height: 1.5;
+  color: var(--texto-suave); font-size: 0.87rem; line-height: 1.5;
 }
 
 /* Barra de carga */
 .loading-bar-container {
   width: 100%; height: 5px;
-  background: #f1f5f9; border-radius: 10px;
+  background: var(--superficie-alterna); border-radius: 10px;
   margin-top: 24px; overflow: hidden;
 }
 .loading-bar-fill {
   width: 35%; height: 100%;
-  background: linear-gradient(90deg, #0b5445, #1a7a62);
+  background: linear-gradient(90deg, var(--marca), #1a7a62);
   border-radius: 10px;
   animation: mcl-moveBar 1.4s ease-in-out infinite;
 }
@@ -76,7 +76,7 @@
    párrafo; el ícono queda inline con la primera línea. */
 .mcl-nota {
   margin: 18px 0 0; text-align: center;
-  font-size: 0.76rem; font-weight: 500; line-height: 1.45; color: #9a7026;
+  font-size: 0.76rem; font-weight: 500; line-height: 1.45; color: var(--dorado-texto);
 }
 .mcl-nota svg {
   display: inline-block; vertical-align: -2px; margin-right: 5px;

@@ -3,8 +3,8 @@
    =========================== */
 
 .fp-panel {
-    background: white;
-    border: 1px solid var(--color-arena-detalle, #d1c4a9);
+    background: var(--superficie);
+    border: 1px solid var(--color-arena-detalle, var(--borde-arena));
     border-radius: var(--radius-md, 8px);
     overflow: hidden;
     box-shadow: var(--shadow-minimal, 0 2px 10px rgba(0,0,0,0.05));
@@ -17,9 +17,9 @@
     align-items: center;
     gap: 16px;
     padding: 10px 16px;
-    border-bottom: 1px solid var(--color-arena-detalle, #d1c4a9);
+    border-bottom: 1px solid var(--color-arena-detalle, var(--borde-arena));
     flex-wrap: wrap;
-    background: #fafaf8;
+    background: var(--superficie-suave);
 }
 
 .fp-header-left {
@@ -31,7 +31,7 @@
 .fp-title {
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--color-imss-primario, #245c4f);
+    color: var(--primario-texto);
 }
 
 .fp-badge {
@@ -52,18 +52,18 @@
 
 .fp-stat {
     font-size: 0.75rem;
-    color: #555;
-    background: #f0ede6;
+    color: var(--texto-secundario);
+    background: var(--superficie-alterna);
     padding: 3px 10px;
     border-radius: 5px;
-    border: 1px solid #e8e3d8;
+    border: 1px solid var(--borde);
 }
-.fp-stat strong { color: #222; }
+.fp-stat strong { color: var(--texto); }
 
 /* Corrección de colores en Stats Superiores */
-.fp-stat.color-v { color: #1a6b33; border-color: #28a745; background: rgba(40,167,69,0.05); }
-.fp-stat.color-a { color: #8a6200; border-color: #ffc107; background: rgba(255,193,7,0.05); }
-.fp-stat.color-r { color: #a71c2e; border-color: #dc3545; background: rgba(220,53,69,0.05); }
+.fp-stat.color-v { color: var(--exito-texto); border-color: #28a745; background: var(--tinte-exito); }
+.fp-stat.color-a { color: var(--aviso-texto-fuerte); border-color: #ffc107; background: var(--tinte-aviso); }
+.fp-stat.color-r { color: var(--peligro-texto-fuerte); border-color: #dc3545; background: var(--tinte-peligro); }
 
 .fp-actions {
     display: flex;
@@ -75,22 +75,22 @@
     font-size: 0.75rem;
     padding: 5px 12px;
     border-radius: 6px;
-    border: 1px solid var(--color-arena-detalle, #d1c4a9);
-    background: white;
-    color: #555;
+    border: 1px solid var(--color-arena-detalle, var(--borde-arena));
+    background: var(--superficie);
+    color: var(--texto-secundario);
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s;
 }
 .fp-btn:hover {
-    border-color: var(--color-imss-primario, #245c4f);
-    color: var(--color-imss-primario, #245c4f);
+    border-color: var(--primario-texto);
+    color: var(--primario-texto);
 }
 
 .fp-btn-primary {
     background: var(--color-imss-primario, #245c4f);
     color: white;
-    border-color: var(--color-imss-primario, #245c4f);
+    border-color: var(--primario-texto);
     font-weight: 700;
 }
 .fp-btn-primary:hover {
@@ -107,7 +107,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border-bottom: 1px solid var(--color-arena-detalle, #d1c4a9);
+    border-bottom: 1px solid var(--color-arena-detalle, var(--borde-arena));
     flex-wrap: wrap;
 }
 
@@ -115,17 +115,17 @@
     flex: 1;
     min-width: 160px;
     padding: 6px 12px;
-    border: 1px solid var(--color-arena-detalle, #d1c4a9);
+    border: 1px solid var(--color-arena-detalle, var(--borde-arena));
     border-radius: 6px;
     font-size: 0.8rem;
-    background: #fafaf8;
-    color: #333;
+    background: var(--superficie-suave);
+    color: var(--texto-medio);
     outline: none;
     transition: all 0.2s;
 }
 .fp-search:focus {
-    border-color: var(--color-imss-primario, #245c4f);
-    background: white;
+    border-color: var(--primario-texto);
+    background: var(--superficie);
 }
 
 .fp-color-filters {
@@ -137,21 +137,21 @@
 .fp-color-btn {
     padding: 5px 10px;
     border-radius: 6px;
-    border: 1px solid var(--color-arena-detalle, #d1c4a9);
-    background: white;
+    border: 1px solid var(--color-arena-detalle, var(--borde-arena));
+    background: var(--superficie);
     font-size: 0.75rem;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s;
 }
 
-.fp-color-btn.v { color: #1a6b33; border-color: #28a745; }
+.fp-color-btn.v { color: var(--exito-texto); border-color: #28a745; }
 .fp-color-btn.v:hover { background: rgba(40,167,69,0.1); }
 
-.fp-color-btn.a { color: #8a6200; border-color: #ffc107; }
+.fp-color-btn.a { color: var(--aviso-texto-fuerte); border-color: #ffc107; }
 .fp-color-btn.a:hover { background: rgba(255,193,7,0.1); }
 
-.fp-color-btn.r { color: #a71c2e; border-color: #dc3545; }
+.fp-color-btn.r { color: var(--peligro-texto-fuerte); border-color: #dc3545; }
 .fp-color-btn.r:hover { background: rgba(220,53,69,0.1); }
 
 /* --- Grid de unidades --- */
@@ -162,12 +162,12 @@
     max-height: 200px;
     overflow-y: auto;
     padding: 8px 10px;
-    background: #fafaf8;
+    background: var(--superficie-suave);
 }
 
 .fp-grid::-webkit-scrollbar { width: 4px; }
 .fp-grid::-webkit-scrollbar-thumb {
-    background: #ddd;
+    background: var(--borde-fuerte);
     border-radius: 4px;
 }
 
@@ -181,26 +181,26 @@
     transition: background 0.15s;
     border: 1px solid transparent;
 }
-.fp-unit:hover { background: #f0ede6; }
+.fp-unit:hover { background: var(--superficie-alterna); }
 .fp-unit-sel {
-    background: rgba(36, 92, 79, 0.04);
-    border-color: rgba(36, 92, 79, 0.12);
+    background: rgba(var(--marca-rgb), 0.04);
+    border-color: rgba(var(--marca-rgb), 0.12);
 }
 
 .fp-checkbox {
     width: 15px;
     height: 15px;
-    border: 1.5px solid #ccc;
+    border: 1.5px solid var(--borde-fuerte);
     border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: white;
+    background: var(--superficie);
 }
 .fp-checkbox.checked {
     background: var(--color-imss-primario, #245c4f);
-    border-color: var(--color-imss-primario, #245c4f);
+    border-color: var(--primario-texto);
 }
 
 .fp-unit-dot {
@@ -212,7 +212,7 @@
 
 .fp-unit-name {
     font-size: 0.75rem;
-    color: #333;
+    color: var(--texto-medio);
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -222,5 +222,5 @@
 .fp-unit-val {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #888;
+    color: var(--texto-tenue);
 }

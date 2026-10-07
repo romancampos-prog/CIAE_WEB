@@ -4,6 +4,7 @@ import { subirOperativa, subirSiscep } from '../api/archivos'
 import { usePipeline } from '../contexto/PipelineContext'
 import ReporteToast from '../componentes/comun/ReporteToast'
 import corgiGif from '../../../assets/corgi.gif'
+import { textoAcento } from '../../../shared/utils/colorAcento'
 
 const PASOS_MSGS = [
   'Analizando bases de datos…',
@@ -38,7 +39,7 @@ function CorgiOverlay({ paso }) {
       zIndex: 9999,
     }}>
       <div style={{
-        background: 'white', borderRadius: 20,
+        background: 'var(--superficie)', borderRadius: 20,
         padding: '40px 36px 36px',
         textAlign: 'center', width: 340,
         boxShadow: '0 24px 60px rgba(0,0,0,0.25)',
@@ -58,14 +59,14 @@ function CorgiOverlay({ paso }) {
           style={{ width: 150, height: 'auto', borderRadius: 10, marginBottom: 20 }}
         />
 
-        <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#245c4f', marginBottom: 4 }}>
+        <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--primario-texto)', marginBottom: 4 }}>
           {paso || PASOS_MSGS[idx]}
         </div>
-        <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 24 }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--texto-suave)', marginBottom: 24 }}>
           Por favor, no cierre esta ventana.
         </div>
 
-        <div style={{ width: '100%', height: 5, background: '#f1f5f9', borderRadius: 10, overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: 5, background: 'var(--superficie-alterna)', borderRadius: 10, overflow: 'hidden' }}>
           <div style={{
             width: '35%', height: '100%',
             background: 'linear-gradient(90deg, #245c4f, #1a7a62)',
@@ -140,7 +141,7 @@ export default function CargaPage() {
             background: 'rgba(105,28,50,0.08)',
             border: '1px solid rgba(105,28,50,0.15)',
             borderRadius: 100, padding: '4px 14px',
-            fontSize: '0.65rem', fontWeight: 700, color: '#691c32',
+            fontSize: '0.65rem', fontWeight: 700, color: 'var(--tinto-texto)',
             textTransform: 'uppercase', letterSpacing: '1px',
             marginBottom: 12,
           }}>
@@ -155,7 +156,7 @@ export default function CargaPage() {
           </div>
           <h1 className="epi-carga-titulo" style={{
             fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 800,
-            color: '#1e293b', letterSpacing: '-1px', margin: '0 0 6px',
+            color: 'var(--texto)', letterSpacing: '-1px', margin: '0 0 6px',
             lineHeight: 1.1,
           }}>
             Carga de{' '}
@@ -165,7 +166,7 @@ export default function CargaPage() {
               backgroundClip: 'text',
             }}>bases de datos</span>
           </h1>
-          <p className="epi-carga-sub" style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>
+          <p className="epi-carga-sub" style={{ fontSize: 13, color: 'var(--texto-tenue)', margin: 0 }}>
             Sube los archivos Excel para ejecutar el análisis epidemiológico
           </p>
         </div>
@@ -174,7 +175,7 @@ export default function CargaPage() {
         {estado?.ultimo_reporte && (
           <div className="epi-carga-reporte" style={{
             flexShrink: 0,
-            background: 'white',
+            background: 'var(--superficie)',
             border: '1px solid rgba(167,128,45,0.2)',
             borderRadius: 14, padding: '10px 16px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
@@ -183,7 +184,7 @@ export default function CargaPage() {
             <div className="epi-carga-reporte-label" style={{ fontSize: 10, fontWeight: 700, color: '#a4a4a4', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>
               Último reporte
             </div>
-            <div className="epi-carga-reporte-valor" style={{ fontSize: 13, fontWeight: 700, color: '#a7802d' }}>
+            <div className="epi-carga-reporte-valor" style={{ fontSize: 13, fontWeight: 700, color: 'var(--oro-texto)' }}>
               {estado.ultimo_reporte}
             </div>
           </div>
@@ -193,7 +194,7 @@ export default function CargaPage() {
       {/* ── Progreso ── */}
       <div className="epi-progreso-bar" style={{
         display: 'flex', alignItems: 'center',
-        background: 'white', borderRadius: 16,
+        background: 'var(--superficie)', borderRadius: 16,
         padding: '14px 22px',
         border: '1px solid rgba(0,0,0,0.06)',
         boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
@@ -210,9 +211,9 @@ export default function CargaPage() {
                 width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, fontWeight: 800,
-                background: done ? color : n <= cuenta + 1 ? `${color}22` : '#f1f5f9',
-                color: done ? 'white' : n <= cuenta + 1 ? color : '#94a3b8',
-                border: `2px solid ${done ? color : n <= cuenta + 1 ? `${color}44` : '#e2e8f0'}`,
+                background: done ? color : n <= cuenta + 1 ? `${color}22` : 'var(--superficie-alterna)',
+                color: done ? 'white' : n <= cuenta + 1 ? textoAcento(color) : 'var(--texto-tenue)',
+                border: `2px solid ${done ? color : n <= cuenta + 1 ? `${color}44` : 'var(--borde)'}`,
                 transition: 'all 0.35s cubic-bezier(0.16,1,0.3,1)',
                 boxShadow: done ? `0 3px 10px ${color}44` : 'none',
               }}>
@@ -220,14 +221,14 @@ export default function CargaPage() {
               </div>
               <span className="epi-progreso-label" style={{
                 fontSize: 12, fontWeight: done ? 700 : 500,
-                color: done ? color : n <= cuenta + 1 ? color : '#94a3b8',
+                color: done || n <= cuenta + 1 ? textoAcento(color) : 'var(--texto-tenue)',
                 whiteSpace: 'nowrap', transition: 'color 0.3s',
               }}>{label}</span>
             </div>
             {i < 2 && (
               <div className="epi-progreso-sep" style={{
                 flex: 1, height: 2, margin: '0 12px',
-                background: done ? `linear-gradient(90deg, ${color}, ${['#245c4f','#a7802d'][i]})` : '#f1f5f9',
+                background: done ? `linear-gradient(90deg, ${color}, ${['#245c4f','#a7802d'][i]})` : 'var(--superficie-alterna)',
                 borderRadius: 2, transition: 'background 0.4s',
               }} />
             )}
@@ -262,8 +263,8 @@ export default function CargaPage() {
             width: '100%', maxWidth: 400, padding: '15px 32px',
             background: ambosListos && !corriendo
               ? 'linear-gradient(135deg, #691c32 0%, #a7802d 100%)'
-              : '#e2e8f0',
-            color: ambosListos && !corriendo ? 'white' : '#94a3b8',
+              : 'var(--superficie-marcada)',
+            color: ambosListos && !corriendo ? 'white' : 'var(--texto-tenue)',
             border: 'none', borderRadius: 100,
             fontSize: '0.95rem', fontWeight: 700,
             cursor: ambosListos && !corriendo ? 'pointer' : 'not-allowed',
@@ -282,7 +283,7 @@ export default function CargaPage() {
               <div style={{
                 width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
                 border: '2.5px solid rgba(255,255,255,0.3)',
-                borderTopColor: 'white',
+                borderTopColor: 'var(--superficie)',
                 animation: 'epi-girar 0.75s linear infinite',
               }} />
               {estado?.paso || 'Procesando…'}
@@ -321,10 +322,10 @@ export default function CargaPage() {
         }}>
           <span style={{ fontSize: 18 }}>⚠</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#dc2626', marginBottom: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--peligro-texto)', marginBottom: 4 }}>
               Error en el pipeline
             </div>
-            <code style={{ fontSize: 11, color: '#dc2626', fontFamily: 'monospace' }}>
+            <code style={{ fontSize: 11, color: 'var(--peligro-texto)', fontFamily: 'monospace' }}>
               {estado.error}
             </code>
           </div>

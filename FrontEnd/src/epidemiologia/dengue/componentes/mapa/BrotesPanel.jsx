@@ -2,7 +2,7 @@ import PanelDeslizante from '../comun/PanelDeslizante'
 
 const estiloSeccion = { borderBottom: '1px solid #f0ece4', padding: '16px 20px' }
 const estiloTitulo  = {
-  fontSize: 11, fontWeight: 700, color: '#245C4F',
+  fontSize: 11, fontWeight: 700, color: 'var(--primario-texto)',
   textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 12,
 }
 

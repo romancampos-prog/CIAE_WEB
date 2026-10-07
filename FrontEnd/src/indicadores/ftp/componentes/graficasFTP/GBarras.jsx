@@ -182,7 +182,7 @@ const GBarras = ({ datos, config }) => {
                                 dataKey="resultado" 
                                 position="top" 
                                 formatter={(val) => `${Number(val).toFixed(2)}%`} 
-                                style={{ fontSize: '10px', fontWeight: 700, fill: '#444' }} 
+                                style={{ fontSize: '10px', fontWeight: 700, fill: 'var(--texto-secundario)' }} 
                             />
                         </Bar>
                     </BarChart>

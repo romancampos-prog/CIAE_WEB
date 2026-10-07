@@ -3,6 +3,7 @@ import DengueSpinner from '../componentes/comun/Spinner'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getAlertasSiscep } from '../api/reportes'
 import { calcularKpisAlertas } from '../utils/calculos'
+import { textoAcento } from '../../../shared/utils/colorAcento'
 
 const SECCIONES = [
   { clave: 'muestras_rechazadas',  titulo: 'Alerta 1 — Muestras rechazadas',                     descripcion: 'Muestras rechazadas por el laboratorio. Debe retomarse una nueva muestra.',                                                           tipo: 'cols_caso', color: '#691c32' },
@@ -41,14 +42,14 @@ export default function AlertasSiscepPage() {
             display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
             background: 'rgba(167,128,45,0.1)', border: '1px solid rgba(167,128,45,0.22)',
             borderRadius: 100, padding: '0.1875rem 0.75rem',
-            fontSize: '0.6rem', fontWeight: 700, color: '#a7802d',
+            fontSize: '0.6rem', fontWeight: 700, color: 'var(--oro-texto)',
             textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.625rem',
           }}>
             ⚠️ Alertas operativas SisCep
           </div>
           <h1 className="epi-canal-titulo" style={{
             fontSize: 'clamp(1.4rem,3vw,1.9rem)', fontWeight: 800,
-            color: '#1e293b', letterSpacing: '-0.8px', margin: '0 0 0.25rem',
+            color: 'var(--texto)', letterSpacing: '-0.8px', margin: '0 0 0.25rem',
           }}>
             Seguimiento de muestras{' '}
             <span style={{
@@ -57,7 +58,7 @@ export default function AlertasSiscepPage() {
               backgroundClip: 'text',
             }}>{datos.año}</span>
           </h1>
-          <p className="epi-canal-sub" style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
+          <p className="epi-canal-sub" style={{ fontSize: '0.75rem', color: 'var(--texto-tenue)', margin: 0 }}>
             IMSS OOAD Guanajuato · haz clic en cada alerta para ver el detalle
           </p>
         </div>
@@ -65,18 +66,18 @@ export default function AlertasSiscepPage() {
         {/* KPIs hero */}
         <div className="epi-canal-kpis" style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap' }}>
           {[
-            { valor: totalRegistros,   label: 'Total registros',    color: '#691c32', borde: 'rgba(105,28,50,0.18)' },
-            { valor: seccionesActivas, label: 'Alertas con casos',  color: '#a7802d', borde: 'rgba(167,128,45,0.18)' },
-            { valor: prioritarias,     label: 'Casos prioritarios', color: prioritarias > 0 ? '#691c32' : '#245c4f',
+            { valor: totalRegistros,   label: 'Total registros',    color: 'var(--tinto-texto)', borde: 'rgba(105,28,50,0.18)' },
+            { valor: seccionesActivas, label: 'Alertas con casos',  color: 'var(--oro-texto)', borde: 'rgba(167,128,45,0.18)' },
+            { valor: prioritarias,     label: 'Casos prioritarios', color: prioritarias > 0 ? 'var(--tinto-texto)' : 'var(--primario-texto)',
               borde: prioritarias > 0 ? 'rgba(105,28,50,0.18)' : 'rgba(36,92,79,0.18)' },
           ].map(({ valor, label, color, borde }) => (
             <div key={label} style={{
-              background: 'white', borderRadius: '0.875rem', padding: '0.625rem 1rem',
+              background: 'var(--superficie)', borderRadius: '0.875rem', padding: '0.625rem 1rem',
               border: `1px solid ${borde}`, borderLeft: `0.25rem solid ${color}`,
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)', textAlign: 'right',
             }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color, lineHeight: 1 }}>{valor}</div>
-              <div style={{ fontSize: '0.625rem', color: '#94a3b8', fontWeight: 500, marginTop: '0.125rem' }}>{label}</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: textoAcento(color), lineHeight: 1 }}>{valor}</div>
+              <div style={{ fontSize: '0.625rem', color: 'var(--texto-tenue)', fontWeight: 500, marginTop: '0.125rem' }}>{label}</div>
             </div>
           ))}
         </div>
@@ -95,7 +96,7 @@ export default function AlertasSiscepPage() {
 
       {/* ── Negativos ── */}
       <div style={{
-        background: 'white', borderRadius: 16, overflow: 'hidden',
+        background: 'var(--superficie)', borderRadius: 16, overflow: 'hidden',
         border: '1px solid rgba(0,0,0,0.05)',
         boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
       }}>
@@ -106,10 +107,10 @@ export default function AlertasSiscepPage() {
           flexWrap: 'wrap', gap: 10,
         }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--texto)' }}>
               Casos negativos por unidad médica
             </div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 2 }}>
               Dx final OTROS o SisCep NEGATIVO
             </div>
           </div>
@@ -117,14 +118,14 @@ export default function AlertasSiscepPage() {
             <div style={{
               padding: '4px 12px', borderRadius: 100,
               background: 'rgba(164,164,164,0.1)', border: '1px solid rgba(164,164,164,0.25)',
-              fontSize: 12, fontWeight: 700, color: '#64748b',
+              fontSize: 12, fontWeight: 700, color: 'var(--texto-suave)',
             }}>
               {datos.tabla_negativos.length} unidades
             </div>
             <div style={{
               padding: '4px 12px', borderRadius: 100,
               background: 'rgba(36,92,79,0.08)', border: '1px solid rgba(36,92,79,0.2)',
-              fontSize: 12, fontWeight: 700, color: '#245c4f',
+              fontSize: 12, fontWeight: 700, color: 'var(--primario-texto)',
             }}>
               {datos.tabla_negativos.reduce((s, r) => s + (r.N_NEGATIVOS || 0), 0)} casos
             </div>
@@ -143,7 +144,7 @@ export default function AlertasSiscepPage() {
               {datos.tabla_negativos.map((row, i) => (
                 <tr key={i}>
                   <td>{row.DES_UNI_MED_NOTIF}</td>
-                  <td style={{ textAlign: 'center', fontWeight: 700, color: '#245c4f' }}>
+                  <td style={{ textAlign: 'center', fontWeight: 700, color: 'var(--primario-texto)' }}>
                     {row.N_NEGATIVOS}
                   </td>
                 </tr>
@@ -151,7 +152,7 @@ export default function AlertasSiscepPage() {
             </tbody>
           </table>
         ) : (
-          <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
+          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--texto-tenue)', fontSize: 13 }}>
             Sin casos negativos registrados
           </div>
         )}

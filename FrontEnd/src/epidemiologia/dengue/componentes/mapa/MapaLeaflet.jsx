@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { MapContainer, GeoJSON, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import useTema from '../../../../shared/hooks/useTema'
 
 /**
  * Interpolación lineal de color entre dos colores hex.
@@ -27,8 +28,8 @@ function lerp(a, b, t) {
  * @param {number} maxCasos
  * @returns {string}
  */
-function getColor(casos, maxCasos) {
-  if (!casos || casos === 0) return '#d4d4d4'
+function getColor(casos, maxCasos, esOscuro) {
+  if (!casos || casos === 0) return esOscuro ? '#3b524e' : '#d4d4d4'
   const r = casos / maxCasos
   if (r <= 0.25) return lerp('#2e8b57', '#ccaa00', r / 0.25)
   if (r <= 0.50) return lerp('#ccaa00', '#e07b00', (r - 0.25) / 0.25)
@@ -78,6 +79,7 @@ function InvalidateOnMount() {
  * @param {{ geojson: object|null, etiqueta: string }} props  etiqueta se muestra en el tooltip del municipio
  */
 export default function MapaLeaflet({ geojson, etiqueta }) {
+  const { tema, esOscuro } = useTema()
   if (!geojson) return null
 
   const maxReal = Math.max(1, ...geojson.features.map(f => f.properties.N_CASOS || 0))
@@ -85,9 +87,10 @@ export default function MapaLeaflet({ geojson, etiqueta }) {
   const style = (feature) => {
     const casos = feature.properties.N_CASOS || 0
     return {
-      fillColor  : getColor(casos, maxReal),
+      fillColor  : getColor(casos, maxReal, esOscuro),
       fillOpacity: casos > 0 ? 0.82 : 0.45,
-      color      : 'white',
+      // Contorno del color del fondo: separa municipios sin rayas blancas en oscuro
+      color      : esOscuro ? '#0d1a19' : 'white',
       weight     : 1.8,
       dashArray  : casos > 0 ? '' : '3',
     }
@@ -106,7 +109,9 @@ export default function MapaLeaflet({ geojson, etiqueta }) {
     })
   }
 
-  const geoKey = `${etiqueta}-${geojson.features?.length ?? 0}`
+  // El tema va en la key: los handlers de hover guardan el estilo con el que se
+  // crearon, así que al alternar tema se vuelve a montar la capa.
+  const geoKey = `${etiqueta}-${geojson.features?.length ?? 0}-${tema}`
 
   return (
     <div style={{ overflow: 'visible' }}>
@@ -115,7 +120,7 @@ export default function MapaLeaflet({ geojson, etiqueta }) {
       <MapContainer
         center={[20.85, -101.0]}
         zoom={9}
-        style={{ height: 480, width: '100%', background: '#f7f8fa' }}
+        style={{ height: 480, width: '100%', background: 'var(--superficie-suave)' }}
         attributionControl={false}
       >
         <GeoJSON

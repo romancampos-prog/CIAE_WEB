@@ -39,7 +39,7 @@ export default function IAASValidacionPanel({ errores, trigger = 0 }) {
       `}</style>
 
       <div style={{
-        background:          'rgba(255,255,255,0.94)',
+        background:          'rgba(var(--superficie-rgb), 0.94)',
         backdropFilter:      'blur(18px)',
         WebkitBackdropFilter:'blur(18px)',
         borderRadius:        18,
@@ -69,10 +69,10 @@ export default function IAASValidacionPanel({ errores, trigger = 0 }) {
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '0.9px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--peligro-texto-fuerte)', textTransform: 'uppercase', letterSpacing: '0.9px' }}>
               Excel incorrecto
             </div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginTop: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--texto-secundario)', marginTop: 1 }}>
               {errores.length} {errores.length === 1 ? 'problema encontrado' : 'problemas encontrados'}
             </div>
           </div>
@@ -81,11 +81,11 @@ export default function IAASValidacionPanel({ errores, trigger = 0 }) {
             onClick={cerrar}
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: '#cbd5e1', fontSize: 15, lineHeight: 1, padding: 3,
+              color: 'var(--texto-deshabilitado)', fontSize: 15, lineHeight: 1, padding: 3,
               flexShrink: 0, transition: 'color 0.15s', borderRadius: 6,
             }}
-            onMouseOver={e => e.currentTarget.style.color = '#64748b'}
-            onMouseOut={e  => e.currentTarget.style.color = '#cbd5e1'}
+            onMouseOver={e => e.currentTarget.style.color = 'var(--texto-suave)'}
+            onMouseOut={e  => e.currentTarget.style.color = 'var(--texto-deshabilitado)'}
           >✕</button>
         </div>
 
@@ -100,14 +100,14 @@ export default function IAASValidacionPanel({ errores, trigger = 0 }) {
               display:   'flex',
               gap:       9,
               padding:   '7px 14px',
-              borderBottom: i < errores.length - 1 ? '1px solid rgba(241,245,249,0.9)' : 'none',
+              borderBottom: i < errores.length - 1 ? '1px solid var(--borde-suave)' : 'none',
               alignItems: 'flex-start',
             }}>
               <div style={{
                 width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
                 background: '#ef4444', marginTop: 5,
               }} />
-              <span style={{ fontSize: 12.5, color: '#1e293b', lineHeight: 1.5 }}>
+              <span style={{ fontSize: 12.5, color: 'var(--texto)', lineHeight: 1.5 }}>
                 {err}
               </span>
             </div>

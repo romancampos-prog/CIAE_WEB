@@ -27,7 +27,7 @@ export default function DengueSpinner({ texto }) {
       padding: '64px 0', minHeight: 300,
     }}>
       <div style={{
-        background: 'white',
+        background: 'var(--superficie)',
         borderRadius: 20,
         padding: '40px 36px 36px',
         textAlign: 'center',
@@ -52,18 +52,18 @@ export default function DengueSpinner({ texto }) {
         />
 
         <div style={{
-          fontSize: '1.05rem', fontWeight: 700, color: '#245c4f', marginBottom: 6,
+          fontSize: '1.05rem', fontWeight: 700, color: 'var(--primario-texto)', marginBottom: 6,
         }}>
           {texto || MENSAJES[idx]}
         </div>
 
-        <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 24 }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--texto-suave)', marginBottom: 24 }}>
           Por favor, no cierre esta ventana.
         </div>
 
         {/* Barra de progreso */}
         <div style={{
-          width: '100%', height: 5, background: '#f1f5f9',
+          width: '100%', height: 5, background: 'var(--superficie-alterna)',
           borderRadius: 10, overflow: 'hidden',
         }}>
           <div style={{

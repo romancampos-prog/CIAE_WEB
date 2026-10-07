@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getCanal } from '../api/reportes'
 import { calcularKpisCanal } from '../utils/calculos'
+import { textoAcento } from '../../../shared/utils/colorAcento'
 
 /**
  * Panel lateral de semanas que superaron el umbral histórico del canal endémico.
@@ -14,7 +15,7 @@ function AlertaCanal({ alertas }) {
   return (
     <div style={{ padding: '16px 20px' }}>
       <div style={{
-        fontSize: 10, fontWeight: 700, color: '#a7802d',
+        fontSize: 10, fontWeight: 700, color: 'var(--oro-texto)',
         textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 14,
       }}>
         Semanas que superaron el umbral histórico
@@ -25,7 +26,7 @@ function AlertaCanal({ alertas }) {
           padding: '14px 16px', borderRadius: 12,
           background: 'rgba(36,92,79,0.06)',
           border: '1px solid rgba(36,92,79,0.15)',
-          fontSize: 13, color: '#245c4f', fontWeight: 600,
+          fontSize: 13, color: 'var(--primario-texto)', fontWeight: 600,
         }}>
           ✓ Todas las semanas dentro del canal histórico
         </div>
@@ -39,7 +40,7 @@ function AlertaCanal({ alertas }) {
               <tr key={i}>
                 <td style={{ fontWeight: 600 }}>Sem. {a.sem}</td>
                 <td style={{ fontWeight: 700 }}>{a.casos}</td>
-                <td style={{ color: '#64748b' }}>{a.umbral}</td>
+                <td style={{ color: 'var(--texto-suave)' }}>{a.umbral}</td>
                 <td>
                   <span style={{
                     display: 'inline-flex', alignItems: 'center',
@@ -47,7 +48,7 @@ function AlertaCanal({ alertas }) {
                     fontSize: 11, fontWeight: 700,
                     background: a.zona === 'epidemica'
                       ? 'rgba(105,28,50,0.1)' : 'rgba(220,123,0,0.1)',
-                    color: a.zona === 'epidemica' ? '#691c32' : '#e07b00',
+                    color: a.zona === 'epidemica' ? 'var(--tinto-texto)' : '#e07b00',
                     border: `1px solid ${a.zona === 'epidemica' ? 'rgba(105,28,50,0.2)' : 'rgba(220,123,0,0.2)'}`,
                   }}>
                     {a.zona === 'epidemica' ? 'Epidémica' : 'Alerta'}
@@ -99,14 +100,14 @@ export default function CanalPage() {
             display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
             background: 'rgba(167,128,45,0.1)', border: '1px solid rgba(167,128,45,0.22)',
             borderRadius: 100, padding: '0.1875rem 0.75rem',
-            fontSize: '0.6rem', fontWeight: 700, color: '#a7802d',
+            fontSize: '0.6rem', fontWeight: 700, color: 'var(--oro-texto)',
             textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.625rem',
           }}>
             📊 Análisis epidemiológico
           </div>
           <h1 className="epi-canal-titulo" style={{
             fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 800,
-            color: '#1e293b', letterSpacing: '-0.8px', margin: '0 0 0.25rem',
+            color: 'var(--texto)', letterSpacing: '-0.8px', margin: '0 0 0.25rem',
           }}>
             Canal Endémico{' '}
             <span style={{
@@ -115,7 +116,7 @@ export default function CanalPage() {
               backgroundClip: 'text',
             }}>{datos.año}</span>
           </h1>
-          <p className="epi-canal-sub" style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
+          <p className="epi-canal-sub" style={{ fontSize: '0.75rem', color: 'var(--texto-tenue)', margin: 0 }}>
             IMSS OOAD Guanajuato · {datos.semanas.length} semanas epidemiológicas
           </p>
         </div>
@@ -135,7 +136,7 @@ export default function CanalPage() {
           >
             <span style={{ fontSize: '1.25rem' }}>⚠️</span>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#691c32', lineHeight: 1 }}>
+              <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--tinto-texto)', lineHeight: 1 }}>
                 {semsAlerta}
               </div>
               <div style={{ fontSize: '0.625rem', color: '#a4a4a4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -149,23 +150,23 @@ export default function CanalPage() {
       {/* ── KPIs ── */}
       <div className="epi-canal-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(9rem, 1fr))', gap: 12 }}>
         {[
-          { valor: totalCasos,   label: 'Total de casos',      sub: `año ${datos.año}`,          color: '#691c32', bg: 'rgba(105,28,50,0.06)',  borde: 'rgba(105,28,50,0.12)'  },
-          { valor: semsConDatos, label: 'Semanas con casos',   sub: `de ${datos.semanas.length}`, color: '#245c4f', bg: 'rgba(36,92,79,0.06)',   borde: 'rgba(36,92,79,0.12)'   },
-          { valor: picoCasos,    label: 'Pico semanal',        sub: `sem. ${picaSemana}`,         color: '#a7802d', bg: 'rgba(167,128,45,0.06)', borde: 'rgba(167,128,45,0.15)' },
+          { valor: totalCasos,   label: 'Total de casos',      sub: `año ${datos.año}`,          color: 'var(--tinto-texto)', bg: 'rgba(105,28,50,0.06)',  borde: 'rgba(105,28,50,0.12)'  },
+          { valor: semsConDatos, label: 'Semanas con casos',   sub: `de ${datos.semanas.length}`, color: 'var(--primario-texto)', bg: 'rgba(36,92,79,0.06)',   borde: 'rgba(36,92,79,0.12)'   },
+          { valor: picoCasos,    label: 'Pico semanal',        sub: `sem. ${picaSemana}`,         color: 'var(--oro-texto)', bg: 'rgba(167,128,45,0.06)', borde: 'rgba(167,128,45,0.15)' },
         ].map(({ valor, label, sub, color, bg, borde }) => (
           <div key={label} style={{
-            background: 'white', borderRadius: '1rem', padding: '0.625rem 1.125rem',
+            background: 'var(--superficie)', borderRadius: '1rem', padding: '0.625rem 1.125rem',
             border: `1px solid ${borde}`,
             boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
             borderLeft: `0.25rem solid ${color}`,
           }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color, lineHeight: 1, marginBottom: '0.125rem' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: textoAcento(color), lineHeight: 1, marginBottom: '0.125rem' }}>
               {valor}
             </div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', marginBottom: '0.125rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--texto-medio)', marginBottom: '0.125rem' }}>
               {label}
             </div>
-            <div style={{ fontSize: '0.625rem', color: '#94a3b8', fontWeight: 500 }}>
+            <div style={{ fontSize: '0.625rem', color: 'var(--texto-tenue)', fontWeight: 500 }}>
               {sub}
             </div>
           </div>
@@ -174,7 +175,7 @@ export default function CanalPage() {
 
       {/* ── Gráfica ── */}
       <div style={{
-        background: 'white', borderRadius: '1.25rem',
+        background: 'var(--superficie)', borderRadius: '1.25rem',
         border: '1px solid rgba(0,0,0,0.06)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
         overflow: 'hidden',
@@ -186,10 +187,10 @@ export default function CanalPage() {
           flexWrap: 'wrap', gap: '0.625rem',
         }}>
           <div>
-            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e293b' }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--texto)' }}>
               Comparativo histórico por semana epidemiológica
             </div>
-            <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.125rem' }}>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--texto-tenue)', marginTop: '0.125rem' }}>
               Zonas calculadas con datos históricos · línea = casos {datos.año}
             </div>
           </div>
@@ -200,7 +201,7 @@ export default function CanalPage() {
                 display: 'flex', alignItems: 'center', gap: '0.3125rem',
                 padding: '0.1875rem 0.625rem', borderRadius: 100,
                 background: bg, border: `1px solid ${borde}`,
-                fontSize: '0.625rem', fontWeight: 700, color,
+                fontSize: '0.625rem', fontWeight: 700, color: textoAcento(color),
               }}>
                 <div style={{ width: '0.4375rem', height: '0.4375rem', borderRadius: '50%', background: color, flexShrink: 0 }} />
                 {label}
@@ -210,7 +211,7 @@ export default function CanalPage() {
               display: 'flex', alignItems: 'center', gap: '0.3125rem',
               padding: '0.1875rem 0.625rem', borderRadius: 100,
               background: 'rgba(105,28,50,0.07)', border: '1px solid rgba(105,28,50,0.18)',
-              fontSize: '0.625rem', fontWeight: 700, color: '#691c32',
+              fontSize: '0.625rem', fontWeight: 700, color: 'var(--tinto-texto)',
             }}>
               <div style={{ width: '1.125rem', height: '0.125rem', background: '#691c32', borderRadius: '0.0625rem', flexShrink: 0 }} />
               Casos {datos.año}
@@ -237,7 +238,7 @@ export default function CanalPage() {
           onMouseOut={e  => e.currentTarget.style.background = 'rgba(105,28,50,0.07)'}
         >
           <span style={{ fontSize: '1.1rem' }}>⚠️</span>
-          <span style={{ fontSize: '1rem', fontWeight: 800, color: '#691c32', lineHeight: 1 }}>
+          <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--tinto-texto)', lineHeight: 1 }}>
             {semsAlerta}
           </span>
           <span style={{ fontSize: '0.72rem', color: '#a4a4a4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>

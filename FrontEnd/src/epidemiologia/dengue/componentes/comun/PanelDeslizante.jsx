@@ -62,7 +62,7 @@ export default function PanelDeslizante({ titulo, badge, children, labelBoton, o
           <div style={{
             position: 'fixed', top: 0, right: 0,
             width: 640, maxWidth: '92vw', height: '100vh',
-            background: '#fff',
+            background: 'var(--superficie)',
             boxShadow: '-8px 0 32px rgba(0,0,0,0.18)',
             zIndex: 1400,
             display: 'flex', flexDirection: 'column',

@@ -3,8 +3,9 @@ import {
   Tooltip, ResponsiveContainer, Cell, LabelList,
 } from 'recharts';
 import ChartTooltip from '../../../ftp/componentes/graficasFTP/ChartTooltip';
-import { COLOR_SEMAFORO } from '../../constantes/semaforo';
+import { COLOR_SEMAFORO_HEX } from '../../constantes/semaforo';
 import { ticksEscala } from '../../utils/escala';
+import useTema from '../../../../shared/hooks/useTema';
 
 /**
  * Gráfica de barras con semáforo de color.
@@ -43,7 +44,7 @@ const TickMes = ({ x, y, payload }) => {
   const partes = String(payload.value).split(' - ');
   return (
     <g transform={`translate(${x},${y})`}>
-      <text textAnchor="middle" fontSize={11} fontWeight={600} fill="#64748b">
+      <text textAnchor="middle" fontSize={11} fontWeight={600} style={{ fill: 'var(--texto-suave)' }}>
         {lineaMesAnio(partes[0], '0.9em')}
         {partes.length === 2 && lineaMesAnio(partes[1], '1.15em')}
       </text>
@@ -66,6 +67,8 @@ const GraficaBarras = ({
   onBarHover,
   onBarLeave,
 }) => {
+  const { tema } = useTema();
+  const colorSemaforo = COLOR_SEMAFORO_HEX[tema];
   const xTickProps = xKey === 'mes'
     ? { tick: <TickMes />, interval: 0, height: 40 }
     : tickEl
@@ -123,13 +126,13 @@ const GraficaBarras = ({
               onMouseLeave={onBarLeave ?? undefined}
             >
               {data.map((d, i) => (
-                <Cell key={i} fill={COLOR_SEMAFORO[d.color] ?? '#aaa'} fillOpacity={0.9} />
+                <Cell key={i} fill={colorSemaforo[d.color] ?? '#aaa'} fillOpacity={0.9} />
               ))}
               <LabelList
                 dataKey="tasa"
                 position="top"
                 formatter={v => v > 0 ? Number(v).toFixed(2) : ''}
-                style={{ fontSize: labelSize, fontWeight: 700, fill: '#475569' }}
+                style={{ fontSize: labelSize, fontWeight: 700, fill: 'var(--texto-secundario)' }}
               />
             </Bar>
 

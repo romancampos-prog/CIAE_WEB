@@ -123,7 +123,7 @@ export default function UploadCard({ titulo, hint, onUpload, nombreActual, paso,
           <div style={{
             width: 28, height: 28, borderRadius: '50%',
             background: ok ? 'rgba(167,128,45,0.9)' : 'rgba(212,188,148,0.15)',
-            border: `1.5px solid ${ok ? '#a7802d' : 'rgba(212,188,148,0.3)'}`,
+            border: `1.5px solid ${ok ? 'var(--oro-texto)' : 'rgba(212,188,148,0.3)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 11, fontWeight: 800, color: ok ? 'white' : t.accent,
             transition: 'all 0.3s', flexShrink: 0,

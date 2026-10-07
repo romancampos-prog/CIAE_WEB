@@ -4,8 +4,8 @@
 .ciae-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(11,84,69,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(11,84,69,0.025) 1px, transparent 1px);
+    linear-gradient(rgba(var(--marca-rgb), 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--marca-rgb), 0.025) 1px, transparent 1px);
   background-size: 44px 44px;
   pointer-events: none;
 }
@@ -19,7 +19,7 @@
   --color-arena-detalle: rgb(212, 188, 148);
   --color-gris-neutral: rgb(164, 164, 164);
   --color-verde-institucional: rgb(11, 84, 69);
-  --bg-principal: #fdfdfb;
+  --bg-principal: var(--fondo);
 }
 
 
@@ -37,7 +37,7 @@ html, body {
   overflow: hidden; /* Bloquea el scroll exterior */
   font-family: var(--font-principal);
   background-color: var(--bg-principal);
-  color: #1f2937;
+  color: var(--texto);
   -webkit-font-smoothing: antialiased;
 }
 

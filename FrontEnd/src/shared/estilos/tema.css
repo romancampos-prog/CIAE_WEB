@@ -1,0 +1,274 @@
+/* ═══════════════════════════════════════════════════════════════
+   TEMA — paleta claro / oscuro de toda la app
+   El tema vive en <html data-theme="light|dark"> (lo pone el script
+   inline de index.html antes del primer render y lo cambia BotonTema).
+   Los valores claros son los hex que ya usaban las pantallas (las
+   variantes casi idénticas se unificaron), así el modo claro no cambia.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── Neutros ── */
+  --fondo:                #fdfdfb;
+  --superficie:           #ffffff;
+  --superficie-rgb:       255, 255, 255;
+  --superficie-elevada:   #ffffff;   /* modales, menús, tooltips */
+  --superficie-suave:     #f8fafc;   /* paneles dentro de tarjetas */
+  --superficie-alterna:   #f1f5f9;   /* hover, chips, pistas de switches */
+  --superficie-marcada:   #e2e8f0;
+  --borde:                #e2e8f0;
+  --borde-rgb:            226, 232, 240;
+  --borde-suave:          #f1f5f9;
+  --borde-fuerte:         #cbd5e1;
+  --texto:                #1e293b;
+  --texto-medio:          #334155;
+  --texto-secundario:     #475569;
+  --texto-suave:          #64748b;
+  --texto-tenue:          #8aa29d;
+  --texto-deshabilitado:  #cbd5e1;
+  /* Velos y bordes muy tenues (rgba con alfa < 0.2): negro en claro, blanco en oscuro */
+  --contraste-rgb:        0, 0, 0;
+
+  /* ── Marca (verde IMSS, dorado, guinda) ── */
+  --marca:                #0b5445;   /* fondos de botones con texto blanco */
+  --marca-texto:          #0b5445;   /* texto, íconos y bordes sobre superficie */
+  --marca-rgb:            11, 84, 69;
+  --primario-texto:       var(--color-imss-primario);
+  --dorado-texto:         #9a7026;
+  --dorado-rgb:           154, 112, 38;
+  --oro-texto:            var(--color-oro-institucional);
+  --guinda-texto:         #7e0808;
+  --guinda-rgb:           126, 8, 8;
+  --tinto-texto:          var(--color-tinto-gobierno);
+  /* Para rgba(var(--x-rgb), alfa) de las paletas institucionales de index.css */
+  --primario-rgb:         36, 92, 79;
+  --tinto-rgb:            105, 28, 50;
+  --oro-rgb:              167, 128, 45;
+
+  /* ── Estados ── */
+  --peligro-texto:        #dc2626;
+  --peligro-texto-fuerte: #991b1b;
+  --aviso-texto:          #d97706;
+  --aviso-texto-fuerte:   #92400e;
+  --exito-texto:          #166534;
+  --info-texto:           #1a3a8f;
+  --tinte-marca:          #f0faf6;
+  --tinte-peligro:        #fef2f2;
+  --tinte-aviso:          #fffbeb;
+  --tinte-exito:          #f0fdf4;
+  --tinte-info:           #eef2ff;
+  --borde-marca:          #cfe8de;
+  --borde-peligro:        #fecaca;
+  --borde-aviso:          #fde68a;
+  --borde-info:           #c7d2fe;
+  --borde-arena:          #d1c4a9;
+
+  /* ── Semáforo de desempeño ── */
+  --semaforo-esperado:    #0b5445;
+  --semaforo-medio:       #9a7026;
+  --semaforo-bajo:        #7e0808;
+  --semaforo-gris:        #a4a4a4;
+
+  /* Los colores por categoría (--ic, --fc, --cc, --status…) son oscuros
+     pensados para fondo blanco; como texto se mezclan con --texto en
+     esta proporción. En claro 100% = el color tal cual. */
+  --acento-peso:          100%;
+}
+
+/* Sin preferencia guardada, el script de index.html resuelve
+   prefers-color-scheme a este mismo atributo; por eso basta un bloque. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --fondo:                #0d1a19;
+  --superficie:           #142825;
+  --superficie-rgb:       20, 40, 37;
+  --superficie-elevada:   #18302c;
+  --superficie-suave:     #1a312e;
+  --superficie-alterna:   #1d3532;
+  --superficie-marcada:   #24403c;
+  --borde:                #24443e;
+  --borde-rgb:            36, 68, 62;
+  --borde-suave:          #1a302d;
+  --borde-fuerte:         #2c4e48;
+  --texto:                #e4eeec;
+  --texto-medio:          #cddbd8;
+  --texto-secundario:     #b0c4c0;
+  --texto-suave:          #9db3ae;
+  --texto-tenue:          #8aa29d;
+  --texto-deshabilitado:  #5b716c;
+  --contraste-rgb:        255, 255, 255;
+
+  --marca:                #17735e;
+  --marca-texto:          #5fbf9f;
+  --marca-rgb:            95, 191, 159;
+  --primario-texto:       #6cc4a8;
+  --dorado-texto:         #d6ad5e;
+  --dorado-rgb:           214, 173, 94;
+  --oro-texto:            #d6ad5e;
+  --guinda-texto:         #f08f8f;
+  --guinda-rgb:           240, 143, 143;
+  --tinto-texto:          #e8919f;
+  --primario-rgb:         108, 196, 168;
+  --tinto-rgb:            232, 145, 159;
+  --oro-rgb:              214, 173, 94;
+
+  --peligro-texto:        #f87171;
+  --peligro-texto-fuerte: #fca5a5;
+  --aviso-texto:          #f5b544;
+  --aviso-texto-fuerte:   #f3c46b;
+  --exito-texto:          #86d9a8;
+  --info-texto:           #a5b4fc;
+  --tinte-marca:          rgba(95, 191, 159, 0.10);
+  --tinte-peligro:        rgba(248, 113, 113, 0.10);
+  --tinte-aviso:          rgba(245, 181, 68, 0.10);
+  --tinte-exito:          rgba(134, 217, 168, 0.10);
+  --tinte-info:           rgba(165, 180, 252, 0.10);
+  --borde-marca:          rgba(95, 191, 159, 0.30);
+  --borde-peligro:        rgba(248, 113, 113, 0.35);
+  --borde-aviso:          rgba(245, 181, 68, 0.35);
+  --borde-info:           rgba(165, 180, 252, 0.35);
+  --borde-arena:          #4a4336;
+  /* Arena institucional (index.css) solo se usa en bordes: en oscuro se apaga */
+  --color-arena-detalle:  rgb(74, 67, 54);
+
+  --semaforo-esperado:    #3a9e80;
+  --semaforo-medio:       #c9a04a;
+  --semaforo-bajo:        #e07370;
+  --semaforo-gris:        #8a94a0;
+
+  /* 100%: cada indicador conserva su color exacto también en oscuro (decisión del usuario) */
+  --acento-peso:          100%;
+}
+
+/* ── Fondos de página: en claro cada módulo usa su propio gris claro;
+   en oscuro todos bajan al fondo base para que las tarjetas resalten. ── */
+html[data-theme="dark"] :is(
+  .home-root, .ftp-screen-container, .ind-root, .ia-root, .ex-root,
+  .cfg-root, .pg-root, .pg-loading, .res-page, .epi-root
+) {
+  /* Brillo verde suave arriba que se apaga hacia el fondo base */
+  background:
+    radial-gradient(120% 70% at 50% -15%, rgba(38, 92, 82, 0.35) 0%, transparent 60%),
+    var(--fondo);
+  background-attachment: fixed;
+}
+
+/* ── Títulos con degradado verde→dorado (hubs): el verde de marca se
+   pierde como texto sobre oscuro, mismo degradado con tonos aclarados.
+   Solo background-image, para conservar el background-size animado. ── */
+html[data-theme="dark"] :is(
+  .home-hero-name-big, .ftp-hub-title-main, .ind-hero-title, .ia-hub-title-main, .ia-hub-acronym
+) {
+  background-image: linear-gradient(90deg,
+    #5fbf9f 0%, #4fae8e 20%, #d6ad5e 42%, #ecc977 50%, #d6ad5e 58%, #4fae8e 80%, #5fbf9f 100%
+  );
+}
+
+/* Título IAAS: guinda con destello; en oscuro, guinda aclarado */
+html[data-theme="dark"] .ia-hero-title-main {
+  background-image: linear-gradient(100deg,
+    var(--tinto-texto) 0%, var(--tinto-texto) 45%, #ffffff 50%, var(--tinto-texto) 55%, var(--tinto-texto) 100%);
+}
+
+/* ── Logo Gobierno/IMSS: guinda y verde sobre transparente; sobre fondo
+   oscuro se pierde, así que lleva una placa clara. ── */
+html[data-theme="dark"] .tb-logo,
+html[data-theme="dark"] .pg-logo {
+  background: #e9eef2;
+  border-radius: 8px;
+  padding: 3px 6px;
+}
+
+/* Transición suave al alternar (solo colores, nada de layout) */
+html.tema-transicion,
+html.tema-transicion *,
+html.tema-transicion *::before,
+html.tema-transicion *::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, fill 0.25s ease !important;
+}
+
+/* ── Scrollbars nativas en oscuro ── */
+html[data-theme="dark"] * {
+  scrollbar-color: #2c4e48 transparent;
+}
+
+/* ── Formularios nativos: el navegador ya los pinta con color-scheme,
+   pero el autocompletado de Chrome los deja amarillos/blancos. ── */
+html[data-theme="dark"] input:-webkit-autofill {
+  -webkit-text-fill-color: var(--texto);
+  -webkit-box-shadow: 0 0 0 40px var(--superficie-suave) inset;
+}
+html[data-theme="dark"] ::placeholder { color: var(--texto-tenue); }
+
+/* ═══ Recharts — las props de color van como atributos SVG y el CSS
+   les gana, así las gráficas siguen el tema sin volver a renderizar. ═══ */
+html[data-theme="dark"] .recharts-cartesian-grid line {
+  stroke: rgba(255, 255, 255, 0.07);
+}
+html[data-theme="dark"] .recharts-cartesian-axis-tick-value,
+html[data-theme="dark"] .recharts-cartesian-axis-tick-value tspan,
+html[data-theme="dark"] .recharts-label {
+  fill: var(--texto-suave);
+}
+html[data-theme="dark"] .recharts-cartesian-axis-line,
+html[data-theme="dark"] .recharts-cartesian-axis-tick-line {
+  stroke: var(--borde-fuerte);
+}
+html[data-theme="dark"] .recharts-tooltip-cursor {
+  fill: rgba(255, 255, 255, 0.04);
+}
+html[data-theme="dark"] .recharts-default-tooltip {
+  background: var(--superficie-elevada) !important;
+  border-color: var(--borde) !important;
+  color: var(--texto);
+}
+html[data-theme="dark"] .recharts-legend-item-text {
+  color: var(--texto-secundario) !important;
+}
+html[data-theme="dark"] .recharts-label-list text,
+html[data-theme="dark"] .recharts-label-list tspan {
+  fill: var(--texto-secundario);
+}
+html[data-theme="dark"] .recharts-reference-line line {
+  stroke: var(--texto-tenue);
+}
+
+/* ═══ Leaflet ═══ */
+html[data-theme="dark"] .leaflet-container {
+  background: var(--superficie-suave);
+}
+html[data-theme="dark"] .leaflet-tooltip,
+html[data-theme="dark"] .leaflet-popup-content-wrapper,
+html[data-theme="dark"] .leaflet-popup-tip {
+  background: var(--superficie-elevada);
+  color: var(--texto);
+  border-color: var(--borde);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+html[data-theme="dark"] .leaflet-tooltip-top::before    { border-top-color: var(--superficie-elevada); }
+html[data-theme="dark"] .leaflet-tooltip-bottom::before { border-bottom-color: var(--superficie-elevada); }
+html[data-theme="dark"] .leaflet-tooltip-left::before   { border-left-color: var(--superficie-elevada); }
+html[data-theme="dark"] .leaflet-tooltip-right::before  { border-right-color: var(--superficie-elevada); }
+html[data-theme="dark"] .leaflet-bar a,
+html[data-theme="dark"] .leaflet-control-attribution {
+  background: var(--superficie-elevada);
+  color: var(--texto-secundario);
+  border-color: var(--borde);
+}
+html[data-theme="dark"] .leaflet-control-attribution a { color: var(--marca-texto); }
+
+/* ═══ Plotly — el layout de cada gráfica ya llega con colores del tema
+   (useColoresGrafica); esto solo cubre la barra de herramientas. ═══ */
+html[data-theme="dark"] .js-plotly-plot .plotly .modebar { background: transparent !important; }
+html[data-theme="dark"] .js-plotly-plot .plotly .modebar-btn path { fill: var(--texto-tenue); }
+
+/* ── Capas (verde azulado profundo): barra superior la más oscura, fondo de página
+   intermedio y tarjetas/contenido lo más claro (ahí es donde se lee). La
+   separación la da el cambio de tono, no los bordes. ── */
+html[data-theme="dark"] .tb-bar {
+  background: rgba(11, 23, 22, 0.92);
+  border-bottom-color: rgba(95, 191, 159, 0.12);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}

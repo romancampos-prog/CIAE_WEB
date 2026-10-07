@@ -8,7 +8,7 @@ export default function TickMesUnidad({ x, y, payload, hgsSet, indSel }) {
     <g transform={`translate(${x},${y})`}>
       <text
         x={0} y={0} dy={4} textAnchor="end"
-        fill={isHGS ? HGS_COLOR : '#64748b'}
+        style={{ fill: isHGS ? HGS_COLOR : 'var(--texto-suave)' }}
         fontSize={10} fontWeight={isHGS ? 700 : 600}
         transform="rotate(-38)"
       >

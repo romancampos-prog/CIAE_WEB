@@ -52,7 +52,7 @@ export default function IAASErrorToast({ mensaje, trigger = 0 }) {
       `}</style>
 
       <div style={{
-        background: 'rgba(255,255,255,0.92)',
+        background: 'rgba(var(--superficie-rgb), 0.92)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: 16,
@@ -75,10 +75,10 @@ export default function IAASErrorToast({ mensaje, trigger = 0 }) {
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--peligro-texto-fuerte)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>
               Excel incorrecto
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', lineHeight: 1.45 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--texto)', lineHeight: 1.45 }}>
               {mensaje}
             </div>
           </div>
@@ -87,15 +87,15 @@ export default function IAASErrorToast({ mensaje, trigger = 0 }) {
             onClick={() => { setSaliendo(true); setTimeout(() => { setVisible(false); setSaliendo(false) }, 350) }}
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: '#cbd5e1', fontSize: 16, lineHeight: 1, padding: 2,
+              color: 'var(--texto-deshabilitado)', fontSize: 16, lineHeight: 1, padding: 2,
               flexShrink: 0, transition: 'color 0.15s', marginTop: -1,
             }}
-            onMouseOver={e => e.currentTarget.style.color = '#64748b'}
-            onMouseOut={e  => e.currentTarget.style.color = '#cbd5e1'}
+            onMouseOver={e => e.currentTarget.style.color = 'var(--texto-suave)'}
+            onMouseOut={e  => e.currentTarget.style.color = 'var(--texto-deshabilitado)'}
           >✕</button>
         </div>
 
-        <div style={{ height: 3, background: '#fee2e2' }}>
+        <div style={{ height: 3, background: 'var(--tinte-peligro)' }}>
           <div style={{
             height: '100%',
             width: `${progreso}%`,

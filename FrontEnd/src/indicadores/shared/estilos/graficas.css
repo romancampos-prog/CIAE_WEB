@@ -17,17 +17,17 @@
 .ig-legal-footer {
   margin: 18px 2px 0;
   padding-top: 14px;
-  border-top: 1px solid rgba(15,23,42,0.08);
-  font-size: 0.72rem; line-height: 1.55; color: #94a3b8;
+  border-top: 1px solid rgba(var(--contraste-rgb), 0.08);
+  font-size: 0.72rem; line-height: 1.55; color: var(--texto-tenue);
   text-align: left;
 }
 
 /* ── Tabs ── */
 .ig-tabs {
   display: flex; gap: 3px;
-  background: rgba(255,255,255,0.78);
+  background: rgba(var(--superficie-rgb), 0.78);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(226,232,240,0.9);
+  border: 1px solid rgba(var(--borde-rgb), 0.9);
   border-radius: 14px; padding: 5px;
   width: fit-content; margin-bottom: 36px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.04);
@@ -35,13 +35,13 @@
 .ig-tab {
   font-size: 0.76rem; font-weight: 700;
   padding: 7px 18px; border-radius: 10px;
-  border: none; background: transparent; color: #64748b;
+  border: none; background: transparent; color: var(--texto-suave);
   cursor: pointer; font-family: inherit;
   transition: all 0.18s;
 }
-.ig-tab:hover { color: #1e293b; background: rgba(0,0,0,0.04); }
+.ig-tab:hover { color: var(--texto); background: rgba(var(--contraste-rgb), 0.04); }
 .ig-tab--active {
-  background: var(--c, #0b5445);
+  background: var(--c, var(--marca));
   color: white;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
@@ -70,16 +70,16 @@
 .ig-info-toggle {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 14px; border-radius: 100px;
-  border: 1px solid #e2e8f0; background: rgba(255,255,255,0.7);
-  cursor: pointer; font-size: 0.7rem; font-weight: 600; color: #64748b;
+  border: 1px solid var(--borde); background: rgba(var(--superficie-rgb), 0.7);
+  cursor: pointer; font-size: 0.7rem; font-weight: 600; color: var(--texto-suave);
   transition: all 0.2s; white-space: nowrap;
 }
-.ig-info-toggle:hover { border-color: #94a3b8; color: #334155; background: #fff; }
+.ig-info-toggle:hover { border-color: var(--texto-tenue); color: var(--texto-medio); background: var(--superficie); }
 .ig-info-toggle--active {
-  border-color: var(--ic, #0b5445); color: var(--ic, #0b5445);
-  background: color-mix(in srgb, var(--ic, #0b5445) 8%, white);
+  border-color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto)); color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
+  background: color-mix(in srgb, var(--ic, var(--marca)) 8%, var(--superficie));
 }
-.ig-info-toggle--active:hover { color: var(--ic, #0b5445); }
+.ig-info-toggle--active:hover { color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto)); }
 
 .ig-desc-block {
   max-width: 680px; display: flex; flex-direction: column; gap: 10px;
@@ -90,9 +90,9 @@
 .ig-desc-panel {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; gap: 10px;
-  background: color-mix(in srgb, var(--ic, #0b5445) 6%, white);
+  background: color-mix(in srgb, var(--ic, var(--marca)) 6%, var(--superficie));
   border-radius: 14px;
-  border-left: 4px solid var(--ic, #0b5445);
+  border-left: 4px solid color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
   padding: 14px 20px;
   backdrop-filter: blur(8px);
   animation: ig-desc-in 0.2s ease;
@@ -100,37 +100,37 @@
 }
 .ig-desc-panel .ig-desc-titulo {
   font-size: 0.88rem; font-weight: 700;
-  color: var(--ic, #0b5445);
+  color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
   margin: 0; line-height: 1.4;
 }
 .ig-desc-panel .ig-desc-label {
   font-size: 0.62rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.6px;
-  background: var(--ic, #0b5445);
+  background: var(--ic, var(--marca));
   color: white;
   padding: 2px 7px; border-radius: 4px;
   flex-shrink: 0;
 }
 .ig-desc-panel .ig-desc-row {
   display: flex; gap: 10px; align-items: flex-start;
-  font-size: 0.78rem; color: #475569; line-height: 1.5;
+  font-size: 0.78rem; color: var(--texto-secundario); line-height: 1.5;
 }
 @keyframes ig-desc-in {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .ig-desc-titulo {
-  font-size: 0.87rem; color: #475569;
+  font-size: 0.87rem; color: var(--texto-secundario);
   line-height: 1.65; margin: 0; font-weight: 400;
 }
 .ig-desc-meta { display: flex; flex-direction: column; gap: 3px; }
 .ig-desc-row {
   display: flex; align-items: baseline; gap: 7px;
-  font-size: 0.72rem; color: #94a3b8; line-height: 1.5;
+  font-size: 0.72rem; color: var(--texto-tenue); line-height: 1.5;
 }
 .ig-desc-label {
   font-size: 0.59rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 0.8px; color: #94a3b8;
+  letter-spacing: 0.8px; color: var(--texto-tenue);
   min-width: 24px; flex-shrink: 0;
 }
 
@@ -142,24 +142,24 @@
 .ig-control-group { display: flex; flex-direction: column; gap: 5px; }
 .ig-control-label {
   font-size: 0.63rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.9px; color: #94a3b8; padding-left: 2px;
+  letter-spacing: 0.9px; color: var(--texto-tenue); padding-left: 2px;
 }
 .ig-select {
   padding: 9px 30px 9px 12px;
-  border: 1.5px solid #e2e8f0; border-radius: 11px;
-  background: rgba(255,255,255,0.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border: 1.5px solid var(--borde); border-radius: 11px;
+  background: rgba(var(--superficie-rgb), 0.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 10px center;
   -webkit-appearance: none; appearance: none;
-  font-size: 0.82rem; font-weight: 600; color: #1e293b;
+  font-size: 0.82rem; font-weight: 600; color: var(--texto);
   cursor: pointer; font-family: inherit;
   transition: border-color 0.15s, box-shadow 0.15s; outline: none;
 }
-.ig-select:focus { border-color: #0b5445; box-shadow: 0 0 0 3px rgba(11,84,69,0.08); }
+.ig-select:focus { border-color: var(--marca-texto); box-shadow: 0 0 0 3px rgba(11,84,69,0.08); }
 .ig-select--wide { min-width: 185px; }
 .ig-select--sm { padding: 6px 26px 6px 10px; font-size: 0.74rem; border-radius: 9px; }
 .ig-select:disabled { opacity: 0.5; cursor: default; }
 .ig-year-chip {
-  font-size: 0.74rem; font-weight: 700; color: #64748b;
-  background: #f1f5f9; padding: 5px 12px; border-radius: 100px;
+  font-size: 0.74rem; font-weight: 700; color: var(--texto-suave);
+  background: var(--superficie-alterna); padding: 5px 12px; border-radius: 100px;
   white-space: nowrap;
 }
 .ig-btn-dl {
@@ -178,11 +178,11 @@
 }
 .ig-btn-dl:disabled { opacity: 0.45; cursor: default; }
 .ig-btn-dl--secondary {
-  background: transparent; color: #64748b;
+  background: transparent; color: var(--texto-suave);
   border: 1.5px solid rgba(100,116,139,0.3); box-shadow: none;
 }
 .ig-btn-dl--secondary:hover:not(:disabled) {
-  background: #f1f5f9; color: #1e293b; border-color: #cbd5e1;
+  background: var(--superficie-alterna); color: var(--texto); border-color: var(--borde-fuerte);
   box-shadow: none; transform: none;
 }
 .ig-btn-dl--icon {
@@ -190,7 +190,7 @@
 }
 .ig-btn-dl-spinner {
   display: block; width: 13px; height: 13px;
-  border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--superficie);
   border-radius: 50%; animation: ig-btn-dl-spin 0.7s linear infinite;
 }
 @keyframes ig-btn-dl-spin { to { transform: rotate(360deg); } }
@@ -206,8 +206,8 @@
 }
 .ig-dl-menu {
   position: absolute; top: calc(100% + 10px); right: 0; z-index: 30;
-  min-width: 240px; background: white; border-radius: 14px;
-  border: 1px solid rgba(15,23,42,0.06);
+  min-width: 240px; background: var(--superficie-elevada); border-radius: 14px;
+  border: 1px solid rgba(var(--contraste-rgb), 0.06);
   box-shadow: 0 16px 40px rgba(15,23,42,0.18), 0 2px 6px rgba(15,23,42,0.06);
   padding: 10px; display: flex; flex-direction: column; gap: 2px;
   transform-origin: top right;
@@ -215,21 +215,21 @@
 }
 .ig-dl-menu-titulo {
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
-  color: #94a3b8; margin: 2px 6px 7px; padding-bottom: 7px;
-  border-bottom: 1px solid rgba(15,23,42,0.06);
+  color: var(--texto-tenue); margin: 2px 6px 7px; padding-bottom: 7px;
+  border-bottom: 1px solid rgba(var(--contraste-rgb), 0.06);
 }
 .ig-dl-menu-item {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
   background: none; border: none; border-radius: 9px;
-  padding: 8px 8px; font-size: 0.79rem; font-weight: 600; color: #334155;
+  padding: 8px 8px; font-size: 0.79rem; font-weight: 600; color: var(--texto-medio);
   font-family: inherit; cursor: pointer; white-space: nowrap;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.ig-dl-menu-item:hover { background: #f1f5f9; color: #0f172a; }
+.ig-dl-menu-item:hover { background: var(--superficie-alterna); color: var(--texto); }
 .ig-dl-menu-icon {
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   width: 28px; height: 28px; border-radius: 9px;
-  background: #eef2f7; color: #64748b; border: 1px solid rgba(15,23,42,0.05);
+  background: var(--superficie-alterna); color: var(--texto-suave); border: 1px solid rgba(var(--contraste-rgb), 0.05);
   transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 .ig-dl-menu-item:hover .ig-dl-menu-icon { background: #1e293b; color: white; border-color: #1e293b; }
@@ -238,16 +238,16 @@
 .ig-skeleton {
   display: flex; align-items: flex-end; gap: 10px;
   height: 420px; padding: 0 4px 0;
-  background: rgba(255,255,255,0.6);
+  background: rgba(var(--superficie-rgb), 0.6);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(226,232,240,0.8);
+  border: 1px solid rgba(var(--borde-rgb), 0.8);
   border-radius: 20px;
   padding: 20px;
   box-sizing: border-box;
 }
 .ig-skeleton-bar {
   flex: 1; border-radius: 8px 8px 0 0;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--superficie-alterna) 25%, var(--superficie-marcada) 50%, var(--superficie-alterna) 75%);
   background-size: 400% 100%;
   animation: ia-shimmer 1.5s ease infinite;
 }
@@ -256,15 +256,15 @@
 .ig-empty {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 12px;
-  min-height: 240px; color: #94a3b8;
+  min-height: 240px; color: var(--texto-tenue);
   font-size: 0.88rem; font-weight: 600;
 }
 
 /* ── Chart card ── */
 .ig-chart-card {
-  background: rgba(255,255,255,0.88);
+  background: rgba(var(--superficie-rgb), 0.88);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(226,232,240,0.85);
+  border: 1px solid rgba(var(--borde-rgb), 0.85);
   border-radius: 20px;
   padding: 16px 32px 24px;
   box-shadow: 0 4px 32px rgba(0,0,0,0.06);
@@ -293,15 +293,39 @@
 }
 .ig-hermano-btn {
   padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
-  border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+  border: 1.5px solid var(--borde); background: var(--superficie); color: var(--texto-suave);
   cursor: pointer; transition: all 0.15s; font-family: inherit;
 }
 .ig-hermano-btn:hover {
-  border-color: #cbd5e1; color: #475569;
+  border-color: var(--borde-fuerte); color: var(--texto-secundario);
 }
 .ig-hermano-btn--active {
-  border-color: var(--ic, #0b5445); color: var(--ic, #0b5445);
-  background: color-mix(in srgb, var(--ic, #0b5445) 10%, white);
+  border-color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto)); color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
+  background: color-mix(in srgb, var(--ic, var(--marca)) 10%, var(--superficie));
+}
+/* En oscuro, botones y chips dentro de la tarjeta van un tono más claro que
+   ella, para que se distingan por color y no solo por el borde. */
+html[data-theme="dark"] .ig-vista-btn,
+html[data-theme="dark"] .ig-hermano-btn:not(.ig-hermano-btn--active) {
+  background: var(--superficie-suave);
+}
+html[data-theme="dark"] .ig-btn-dl:not(.ig-btn-dl--secondary) {
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+}
+html[data-theme="dark"] .ig-btn-dl:hover:not(:disabled):not(.ig-btn-dl--secondary),
+html[data-theme="dark"] .ig-btn-dl--activo {
+  background: var(--superficie-marcada);
+}
+
+/* En oscuro el color del indicador como texto se pierde (son tonos oscuros):
+   el activo va relleno con su color exacto y texto blanco para que resalte. */
+html[data-theme="dark"] .ig-hermano-btn--active {
+  background: var(--ic, var(--marca));
+  border-color: color-mix(in srgb, var(--ic, var(--marca)) 70%, white);
+  color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ic, var(--marca)) 30%, transparent),
+              0 2px 10px color-mix(in srgb, var(--ic, var(--marca)) 45%, transparent);
 }
 
 .ig-chart-badges { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
@@ -310,7 +334,7 @@
   border-radius: 100px; padding: 4px 14px;
   transition: background 0.25s, color 0.25s;
 }
-.ig-badge--neutral { background: #f1f5f9; color: #64748b; font-size: 0.72rem; }
+.ig-badge--neutral { background: var(--superficie-alterna); color: var(--texto-suave); font-size: 0.72rem; }
 
 /* ── Fila de la vista "Por mes": gráfica + tarjeta TOTAL a un lado ──
    En mobile se apilan (ver media query) -- la tarjeta tiene ancho fijo
@@ -324,28 +348,28 @@
   flex-shrink: 0; width: 168px; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 10px;
   padding: 20px 14px; border-radius: 16px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--status, #94a3b8) 10%, white), color-mix(in srgb, var(--status, #94a3b8) 4%, white));
-  border: 1.5px solid color-mix(in srgb, var(--status, #94a3b8) 32%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--status, #94a3b8) 10%, var(--superficie)), color-mix(in srgb, var(--status, #94a3b8) 4%, var(--superficie)));
+  border: 1.5px solid color-mix(in srgb, var(--status, var(--texto-tenue)) 32%, transparent);
   box-shadow: 0 2px 14px color-mix(in srgb, var(--status, #94a3b8) 12%, transparent);
   text-align: center;
 }
 .ig-total-tile-label {
   font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 0.7px; color: var(--ic, #0b5445); margin: 0;
+  letter-spacing: 0.7px; color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto)); margin: 0;
 }
 .ig-total-tile-mid {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 8px;
 }
 .ig-total-tile-value {
-  font-size: 2.3rem; font-weight: 800; color: #1e293b;
+  font-size: 2.3rem; font-weight: 800; color: var(--texto);
   line-height: 1; font-variant-numeric: tabular-nums;
 }
 .ig-total-tile-status {
   display: flex; align-items: center; gap: 6px;
-  font-size: 0.72rem; font-weight: 700; color: #475569;
-  background: white; padding: 4px 10px; border-radius: 100px;
-  border: 1px solid color-mix(in srgb, var(--status, #94a3b8) 25%, transparent);
+  font-size: 0.72rem; font-weight: 700; color: var(--texto-secundario);
+  background: var(--superficie); padding: 4px 10px; border-radius: 100px;
+  border: 1px solid color-mix(in srgb, var(--status, var(--texto-tenue)) 25%, transparent);
 }
 .ig-total-tile-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
@@ -353,36 +377,36 @@
 .ig-total-tile-meta {
   display: flex; flex-direction: column; gap: 6px;
   width: 100%; padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--status, #94a3b8) 22%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--status, var(--texto-tenue)) 22%, transparent);
 }
 .ig-total-tile-meta-row {
   display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
 }
 .ig-total-tile-meta-row span {
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.4px; color: #94a3b8;
+  letter-spacing: 0.4px; color: var(--texto-tenue);
 }
 .ig-total-tile-meta-row strong {
-  font-size: 0.76rem; font-weight: 700; color: #475569;
+  font-size: 0.76rem; font-weight: 700; color: var(--texto-secundario);
   font-variant-numeric: tabular-nums;
 }
 
 /* ── Franja de KPIs por color de semáforo (conteo + %), "Unidades" una sola vez ── */
 .ig-kpi-strip {
   display: flex; align-items: stretch; border-radius: 9px; overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(var(--contraste-rgb), 0.08);
   margin-bottom: 12px;
   perspective: 900px;
 }
 .ig-kpi-titulo {
   display: flex; align-items: center; justify-content: center;
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-  color: #94a3b8; background: rgba(0,0,0,0.02);
-  padding: 0 0.625rem; border-right: 1px solid rgba(0,0,0,0.08);
+  color: var(--texto-tenue); background: rgba(var(--contraste-rgb), 0.02);
+  padding: 0 0.625rem; border-right: 1px solid rgba(var(--contraste-rgb), 0.08);
   white-space: nowrap; transition: background 0.15s ease, color 0.15s ease;
 }
 .ig-kpi-titulo--clickeable { cursor: pointer; }
-.ig-kpi-titulo--clickeable:hover { background: rgba(0,0,0,0.05); color: #64748b; }
+.ig-kpi-titulo--clickeable:hover { background: rgba(var(--contraste-rgb), 0.05); color: var(--texto-suave); }
 
 /* La fila completa de tarjetas gira sobre su eje horizontal (arriba/abajo); el
    contenido (conteo <-> umbral) se intercambia en el punto medio del giro, cuando
@@ -398,27 +422,27 @@
   flex: 1; min-width: 4rem; min-height: 2.125rem;
   display: flex; align-items: center; justify-content: center; gap: 0.3125rem;
   padding: 0 0.375rem;
-  border-right: 1px solid rgba(0,0,0,0.08);
-  background: color-mix(in srgb, var(--status, #94a3b8) 5%, white);
+  border-right: 1px solid rgba(var(--contraste-rgb), 0.08);
+  background: color-mix(in srgb, var(--status, #94a3b8) 5%, var(--superficie));
   transition: background 0.15s ease;
 }
 .ig-kpi-item:last-child { border-right: none; }
 .ig-kpi-item--clickeable { cursor: pointer; }
-.ig-kpi-item--clickeable:hover { background: color-mix(in srgb, var(--status, #94a3b8) 12%, white); }
+.ig-kpi-item--clickeable:hover { background: color-mix(in srgb, var(--status, #94a3b8) 12%, var(--superficie)); }
 .ig-kpi-item--activo {
-  background: color-mix(in srgb, var(--status, #94a3b8) 20%, white);
+  background: color-mix(in srgb, var(--status, #94a3b8) 20%, var(--superficie));
   box-shadow: inset 0 -2px 0 var(--status, #94a3b8);
 }
 
 .ig-kpi-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--status, #94a3b8); flex-shrink: 0; }
 .ig-kpi-num {
-  font-size: 0.95rem; font-weight: 800; color: #1e293b; line-height: 1;
+  font-size: 0.95rem; font-weight: 800; color: var(--texto); line-height: 1;
 }
 .ig-kpi-pct {
-  font-size: 0.68rem; font-weight: 700; color: var(--status, #94a3b8);
+  font-size: 0.68rem; font-weight: 700; color: var(--status, var(--texto-tenue));
 }
 .ig-kpi-umbral {
-  font-size: 0.88rem; font-weight: 800; color: var(--status, #94a3b8);
+  font-size: 0.88rem; font-weight: 800; color: var(--status, var(--texto-tenue));
   line-height: 1.2; white-space: nowrap;
 }
 .ig-semaforo {
@@ -427,7 +451,7 @@
 }
 .ig-sem-item {
   display: flex; align-items: center; gap: 5px;
-  font-size: 0.7rem; font-weight: 600; color: #64748b;
+  font-size: 0.7rem; font-weight: 600; color: var(--texto-suave);
 }
 .ig-sem-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
 
@@ -447,7 +471,7 @@
 
 .ig-unit-panel {
   width: 220px; flex-shrink: 0;
-  border-right: 1px solid rgba(226,232,240,0.9);
+  border-right: 1px solid rgba(var(--borde-rgb), 0.9);
   padding-right: 12px;
   display: flex; flex-direction: column;
 }
@@ -457,11 +481,11 @@
   max-height: 460px;
 }
 .ig-unit-list::-webkit-scrollbar { width: 3px; }
-.ig-unit-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+.ig-unit-list::-webkit-scrollbar-thumb { background: var(--superficie-marcada); border-radius: 4px; }
 
 .ig-unit-list-title {
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.9px; color: #94a3b8;
+  letter-spacing: 0.9px; color: var(--texto-tenue);
   margin: 0 0 6px 4px;
 }
 .ig-unit-search-wrap {
@@ -471,27 +495,27 @@
 }
 .ig-unit-search-icon {
   position: absolute; left: 8px;
-  color: #94a3b8; pointer-events: none; flex-shrink: 0;
+  color: var(--texto-tenue); pointer-events: none; flex-shrink: 0;
 }
 .ig-unit-search {
   width: 100%; padding: 5px 24px 5px 26px;
-  font-size: 0.68rem; color: #374151;
-  background: rgba(241,245,249,0.8);
-  border: 1px solid rgba(226,232,240,0.9);
+  font-size: 0.68rem; color: var(--texto-medio);
+  background: var(--superficie-suave);
+  border: 1px solid rgba(var(--borde-rgb), 0.9);
   border-radius: 8px; outline: none;
   transition: border-color 0.15s, background 0.15s;
 }
-.ig-unit-search::placeholder { color: #cbd5e1; }
+.ig-unit-search::placeholder { color: var(--texto-deshabilitado); }
 .ig-unit-search:focus {
-  border-color: #94a3b8;
-  background: #fff;
+  border-color: var(--texto-tenue);
+  background: var(--superficie);
 }
 .ig-unit-search-clear {
   position: absolute; right: 6px;
   background: none; border: none; padding: 0;
-  font-size: 0.85rem; color: #94a3b8; cursor: pointer; line-height: 1;
+  font-size: 0.85rem; color: var(--texto-tenue); cursor: pointer; line-height: 1;
 }
-.ig-unit-search-clear:hover { color: #475569; }
+.ig-unit-search-clear:hover { color: var(--texto-secundario); }
 .ig-unit-item {
   display: flex; align-items: center; justify-content: space-between;
   gap: 6px; padding: 6px 8px;
@@ -500,10 +524,10 @@
   cursor: pointer; text-align: left;
   transition: background 0.15s, border-color 0.15s;
 }
-.ig-unit-item:hover { background: rgba(0,0,0,0.04); }
-.ig-unit-item--active { background: rgba(0,0,0,0.05); }
+.ig-unit-item:hover { background: rgba(var(--contraste-rgb), 0.04); }
+.ig-unit-item--active { background: rgba(var(--contraste-rgb), 0.05); }
 .ig-unit-name {
-  font-size: 0.68rem; font-weight: 600; color: #475569;
+  font-size: 0.68rem; font-weight: 600; color: var(--texto-secundario);
   line-height: 1.3; flex: 1;
 }
 /* Año dentro de una etiqueta de rango de meses (ej. "Noviembre 2025 - Enero
@@ -549,12 +573,12 @@
 }
 
 .ig-unit-total-sep {
-  height: 1px; background: rgba(15,23,42,0.1);
+  height: 1px; background: rgba(var(--contraste-rgb), 0.1);
   margin: 6px 4px;
 }
 .ig-unit-item--total .ig-unit-name {
   font-weight: 800; letter-spacing: 0.01em; font-size: 0.65rem;
-  text-transform: uppercase; color: #334155;
+  text-transform: uppercase; color: var(--texto-medio);
 }
 .ig-unit-item--total { border-radius: 0 8px 8px 0; }
 .ig-unit-panel--mes .ig-unit-name { font-size: 0.82rem; }
@@ -583,18 +607,18 @@
 .ig-acumulado-switch {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 12px 5px 6px; border-radius: 100px;
-  border: 1px solid #e2e8f0; background: rgba(255,255,255,0.7);
-  cursor: pointer; font-size: 0.72rem; font-weight: 700; color: #64748b;
+  border: 1px solid var(--borde); background: rgba(var(--superficie-rgb), 0.7);
+  cursor: pointer; font-size: 0.72rem; font-weight: 700; color: var(--texto-suave);
   transition: color 0.2s, border-color 0.2s; font-family: inherit; white-space: nowrap;
 }
-.ig-acumulado-switch:hover { border-color: #cbd5e1; }
-.ig-acumulado-switch--on { color: var(--ic, #0b5445); }
+.ig-acumulado-switch:hover { border-color: var(--borde-fuerte); }
+.ig-acumulado-switch--on { color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto)); }
 .ig-acumulado-switch-track {
   width: 30px; height: 17px; border-radius: 100px; flex-shrink: 0;
-  background: #cbd5e1; position: relative;
+  background: var(--borde-fuerte); position: relative;
   transition: background 0.2s;
 }
-.ig-acumulado-switch--on .ig-acumulado-switch-track { background: var(--ic, #0b5445); }
+.ig-acumulado-switch--on .ig-acumulado-switch-track { background: var(--ic, var(--marca)); }
 .ig-acumulado-switch-thumb {
   position: absolute; top: 2px; left: 2px;
   width: 13px; height: 13px; border-radius: 50%;
@@ -611,16 +635,16 @@
 .ig-vista-btn {
   display: flex; align-items: center; gap: 6px;
   padding: 5px 14px;
-  border: 1px solid #e2e8f0; border-radius: 100px;
+  border: 1px solid var(--borde); border-radius: 100px;
   background: transparent; cursor: pointer;
-  font-size: 0.7rem; font-weight: 600; color: #94a3b8;
+  font-size: 0.7rem; font-weight: 600; color: var(--texto-tenue);
   transition: all 0.2s;
 }
-.ig-vista-btn:hover { border-color: #cbd5e1; color: #475569; }
+.ig-vista-btn:hover { border-color: var(--borde-fuerte); color: var(--texto-secundario); }
 .ig-vista-btn--active {
-  background: color-mix(in srgb, var(--vc, #0b5445) 12%, transparent);
-  border-color: color-mix(in srgb, var(--vc, #0b5445) 40%, transparent);
-  color: var(--vc, #0b5445);
+  background: color-mix(in srgb, var(--vc, var(--marca)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--vc, var(--marca-texto)) 40%, transparent);
+  color: color-mix(in srgb, var(--vc, #0b5445) var(--acento-peso), var(--texto));
 }
 
 /* ── Drawer lateral de indicadores ── */
@@ -639,8 +663,8 @@
      ese hueco dejaba ver lo que hubiera quedado ahí en vez del header. */
   position: fixed; right: 0; top: 0; bottom: 0; z-index: 200;
   width: 300px;
-  background: white;
-  border-left: 1px solid rgba(226,232,240,0.9);
+  background: var(--superficie-elevada);
+  border-left: 1px solid rgba(var(--borde-rgb), 0.9);
   display: flex; flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.32s cubic-bezier(0.16,1,0.3,1), box-shadow 0.32s;
@@ -653,33 +677,33 @@
 .ig-drawer-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 18px 14px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-bottom: 1px solid rgba(226,232,240,0.9);
+  background: linear-gradient(135deg, var(--superficie-suave) 0%, var(--superficie-alterna) 100%);
+  border-bottom: 1px solid rgba(var(--borde-rgb), 0.9);
   flex-shrink: 0;
 }
 .ig-drawer-title {
   font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 1.2px; color: #64748b;
+  letter-spacing: 1.2px; color: var(--texto-suave);
   display: flex; align-items: center; gap: 7px;
 }
 .ig-drawer-title::before {
   content: ''; display: inline-block;
   width: 8px; height: 8px; border-radius: 50%;
-  background: linear-gradient(135deg, #0b5445, #1a7a62);
+  background: linear-gradient(135deg, var(--marca), #1a7a62);
 }
 .ig-drawer-close {
   display: flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; border-radius: 8px;
-  border: 1px solid rgba(226,232,240,0.9); background: white; cursor: pointer;
-  color: #94a3b8; transition: all 0.15s;
+  border: 1px solid rgba(var(--borde-rgb), 0.9); background: var(--superficie-elevada); cursor: pointer;
+  color: var(--texto-tenue); transition: all 0.15s;
 }
-.ig-drawer-close:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+.ig-drawer-close:hover { background: var(--tinte-peligro); border-color: var(--borde-peligro); color: var(--peligro-texto); }
 
 .ig-drawer-body {
   flex: 1; overflow-y: auto; padding: 10px 12px 24px;
 }
 .ig-drawer-body::-webkit-scrollbar { width: 4px; }
-.ig-drawer-body::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+.ig-drawer-body::-webkit-scrollbar-thumb { background: var(--superficie-marcada); border-radius: 4px; }
 
 /* ── Selector de indicadores en panel lateral ── */
 .ig-ind-groups { display: flex; flex-direction: column; gap: 2px; }
@@ -689,34 +713,34 @@
   width: 100%; display: flex; align-items: center; justify-content: space-between;
   padding: 9px 10px; border-radius: 10px;
   border: none; background: transparent;
-  font-size: 0.8rem; font-weight: 700; color: #475569;
+  font-size: 0.8rem; font-weight: 700; color: var(--texto-secundario);
   cursor: pointer; font-family: inherit; text-align: left;
   transition: background 0.13s, color 0.13s;
   letter-spacing: 0.1px;
 }
-.ig-ind-cat-btn:hover { background: rgba(0,0,0,0.04); color: #1e293b; }
+.ig-ind-cat-btn:hover { background: rgba(var(--contraste-rgb), 0.04); color: var(--texto); }
 .ig-ind-cat-btn--open {
-  background: color-mix(in srgb, var(--ic, #0b5445) 10%, transparent);
-  color: var(--ic, #0b5445);
+  background: color-mix(in srgb, var(--ic, var(--marca)) 10%, transparent);
+  color: color-mix(in srgb, var(--ic, #0b5445) var(--acento-peso), var(--texto));
 }
 
 .ig-ind-cat-right { display: flex; align-items: center; gap: 6px; }
 
 .ig-ind-cat-badge {
   font-size: 0.62rem; font-weight: 700;
-  background: rgba(0,0,0,0.08); color: #94a3b8;
+  background: rgba(var(--contraste-rgb), 0.08); color: var(--texto-tenue);
   border-radius: 100px; padding: 2px 8px; min-width: 20px; text-align: center;
 }
 .ig-ind-cat-btn--open .ig-ind-cat-badge {
-  background: color-mix(in srgb, var(--ic, #0b5445) 15%, transparent);
-  color: var(--ic, #0b5445);
+  background: color-mix(in srgb, var(--ic, var(--marca)) 15%, transparent);
+  color: color-mix(in srgb, var(--ic, #0b5445) var(--acento-peso), var(--texto));
 }
 
 .ig-ind-cat-items {
   display: flex; flex-direction: column; gap: 2px;
   margin: 3px 0 6px 10px;
   padding-left: 10px;
-  border-left: 2px solid color-mix(in srgb, var(--ic, #94a3b8) 30%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--ic, var(--texto-tenue)) 30%, transparent);
   animation: ig-slide-in 0.16s ease both;
 }
 @keyframes ig-slide-in {
@@ -730,20 +754,20 @@
   width: 100%; padding: 7px 10px; border-radius: 8px;
   border: none; border-left: 3px solid transparent;
   background: transparent;
-  font-size: 0.78rem; font-weight: 600; color: #64748b;
+  font-size: 0.78rem; font-weight: 600; color: var(--texto-suave);
   cursor: pointer; font-family: inherit; text-align: left;
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.ig-ind-item:hover { background: rgba(0,0,0,0.04); color: #1e293b; }
+.ig-ind-item:hover { background: rgba(var(--contraste-rgb), 0.04); color: var(--texto); }
 .ig-ind-item--active {
-  background: color-mix(in srgb, var(--ic, #0b5445) 11%, transparent);
-  border-left-color: var(--ic, #0b5445);
-  color: var(--ic, #0b5445);
+  background: color-mix(in srgb, var(--ic, var(--marca)) 11%, transparent);
+  border-left-color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
+  color: color-mix(in srgb, var(--ic, #0b5445) var(--acento-peso), var(--texto));
   font-weight: 700;
 }
 
 .ig-ind-sep {
-  height: 1px; background: rgba(226,232,240,0.9);
+  height: 1px; background: rgba(var(--borde-rgb), 0.9);
   margin: 10px 0 6px; flex-shrink: 0;
 }
 
@@ -752,12 +776,12 @@
   position: fixed; right: 20px; top: 82px; z-index: 198;
   display: flex; align-items: center; gap: 0;
   padding: 0 8px; height: 58px;
-  background: white;
-  border: 2px solid color-mix(in srgb, var(--ic, #0b5445) 22%, transparent);
+  background: var(--superficie);
+  border: 2px solid color-mix(in srgb, var(--ic, var(--marca-texto)) 22%, transparent);
   border-radius: 100px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
   cursor: pointer; font-family: inherit;
-  color: var(--ic, #0b5445);
+  color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
   transition: gap 0.28s, padding 0.28s, box-shadow 0.2s, transform 0.2s, border-color 0.2s;
   animation: ig-float-in 0.28s cubic-bezier(0.16,1,0.3,1) both;
 }
@@ -766,7 +790,7 @@
   padding: 0 8px 0 22px;
   transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08);
-  border-color: var(--ic, #0b5445);
+  border-color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
 }
 @keyframes ig-float-in {
   from { opacity: 0; transform: translateX(16px); }
@@ -794,10 +818,10 @@
 }
 .ig-float-trigger-cat {
   font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.8px; color: #94a3b8; line-height: 1;
+  letter-spacing: 0.8px; color: var(--texto-tenue); line-height: 1;
 }
 .ig-float-trigger-ind {
-  font-size: 0.92rem; font-weight: 800; color: var(--ic, #0b5445);
+  font-size: 0.92rem; font-weight: 800; color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
   line-height: 1; letter-spacing: -0.2px;
 }
 
@@ -812,19 +836,19 @@
 .ig-dl-titulo {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: #94a3b8;
+  letter-spacing: 1px; color: var(--texto-tenue);
   white-space: nowrap; margin-right: 4px;
 }
 .ig-dl-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 14px; border-radius: 8px;
-  border: 1.5px solid var(--c, #0b5445);
-  background: transparent; color: var(--c, #0b5445);
+  border: 1.5px solid color-mix(in srgb, var(--c, var(--marca-texto)) var(--acento-peso), var(--texto));
+  background: transparent; color: color-mix(in srgb, var(--c, var(--marca-texto)) var(--acento-peso), var(--texto));
   font-size: 0.72rem; font-weight: 700;
   cursor: pointer; transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-.ig-dl-btn:hover:not(:disabled) { background: var(--c, #0b5445); color: #fff; }
+.ig-dl-btn:hover:not(:disabled) { background: var(--c, var(--marca)); color: #fff; }
 .ig-dl-btn--cat { opacity: 0.8; }
 .ig-dl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -877,19 +901,19 @@
     width: 100%;
     padding: 0.625rem 0.875rem;
     margin-bottom: 12px;
-    background: #fff; border: 1px solid rgba(226,232,240,0.9); border-radius: 0.75rem;
+    background: var(--superficie); border: 1px solid rgba(var(--borde-rgb), 0.9); border-radius: 0.75rem;
     font-family: inherit; cursor: pointer;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   }
   .ig-unit-trigger-label {
     font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.6px; color: #94a3b8;
+    letter-spacing: 0.6px; color: var(--texto-tenue);
   }
   .ig-unit-trigger-value {
     flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-size: 0.85rem; font-weight: 800; color: var(--ic, #0b5445);
+    font-size: 0.85rem; font-weight: 800; color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto));
   }
-  .ig-unit-trigger svg { color: #94a3b8; flex-shrink: 0; }
+  .ig-unit-trigger svg { color: var(--texto-tenue); flex-shrink: 0; }
 
   .ig-unit-backdrop {
     display: block;
@@ -908,7 +932,7 @@
     display: flex; flex-direction: column;
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 300;
     width: auto; max-height: 75vh;
-    background: #fff;
+    background: var(--superficie);
     border-right: none; padding: 0;
     border-radius: 1.25rem 1.25rem 0 0;
     box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
@@ -926,8 +950,8 @@
   .ig-unit-panel-close {
     display: flex; align-items: center; justify-content: center;
     width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
-    border: 1px solid rgba(226,232,240,0.9); background: #fff;
-    color: #94a3b8; cursor: pointer;
+    border: 1px solid rgba(var(--borde-rgb), 0.9); background: var(--superficie);
+    color: var(--texto-tenue); cursor: pointer;
   }
 
   /* margin, no padding: el ícono/botón de limpiar están posicionados con
@@ -949,7 +973,7 @@
   .ig-unit-panel--open .ig-unit-item {
     padding: 12px 10px;
     min-height: 44px;
-    border-bottom: 1px solid rgba(15,23,42,0.12);
+    border-bottom: 1px solid rgba(var(--contraste-rgb), 0.12);
   }
   .ig-unit-panel--open .ig-unit-item:last-child { border-bottom: none; }
   .ig-unit-panel--open .ig-unit-total-sep { margin: 6px 4px 9px; }
@@ -988,7 +1012,7 @@
     grid-area: meta;
     width: auto; padding: 0 0 0 12px; margin: 0; gap: 1px;
     border-top: none;
-    border-left: 1px solid color-mix(in srgb, var(--status, #94a3b8) 22%, transparent);
+    border-left: 1px solid color-mix(in srgb, var(--status, var(--texto-tenue)) 22%, transparent);
   }
   .ig-mes-total-col .ig-total-tile-meta-row { gap: 6px; }
   .ig-mes-total-col .ig-total-tile-meta-row span { font-size: 0.56rem; }

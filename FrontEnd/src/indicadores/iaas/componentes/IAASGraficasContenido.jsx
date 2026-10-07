@@ -10,6 +10,7 @@ import CumplimientoTile from '../../shared/componentes/graficas/CumplimientoTile
 import MenuDescarga     from '../../shared/componentes/graficas/MenuDescarga';
 import { MESES_CORTOS, MESES_LARGOS } from '../../shared/constantes/meses';
 import { useEsMovil } from '../../shared/utils/useEsMovil';
+import { textoAcento } from '../../../shared/utils/colorAcento';
 
 
 
@@ -81,7 +82,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
       {/* ── Título + ficha técnica ── */}
       <div className="ig-header">
         <div className="ig-title-block">
-          <h1 className="ig-title" style={{ color: indColor }}>{indSel}</h1>
+          <h1 className="ig-title" style={{ color: textoAcento(indColor) }}>{indSel}</h1>
         </div>
 
         <div className="ig-header-detail-row">
@@ -221,13 +222,13 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                   <div className="ig-chart-badges">
                     {vistaGrafica === 'unidad' && (
                       <>
-                        <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
+                        <span className="ig-badge" style={{ background: `${indColor}14`, color: textoAcento(indColor) }}>
                           {unidadSel}{acumulado ? ' — acumulado' : ''}
                         </span>
                         {indSel === 'IAAS 01' && !esTotal && (
                           <span className="ig-badge" style={{
-                            background: hgsSet.has(unidadSel) ? HGS_BG : '#f1f5f9',
-                            color: hgsSet.has(unidadSel) ? HGS_COLOR : '#64748b', fontWeight: 700,
+                            background: hgsSet.has(unidadSel) ? HGS_BG : 'var(--superficie-alterna)',
+                            color: hgsSet.has(unidadSel) ? HGS_COLOR : 'var(--texto-suave)', fontWeight: 700,
                           }}>
                             {hgsSet.has(unidadSel) ? 'HGS' : 'Otros'}
                           </span>
@@ -235,7 +236,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                       </>
                     )}
                     {vistaGrafica === 'mes' && (
-                      <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
+                      <span className="ig-badge" style={{ background: `${indColor}14`, color: textoAcento(indColor) }}>
                         {MESES_CORTOS[parseInt(mesSel) - 1]}{acumulado ? ' — acumulado' : ''}
                       </span>
                     )}
@@ -314,7 +315,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
                         >
                           ‹ Anterior
                         </button>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--texto-suave)' }}>
                           {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, datosMesActivo.length)} de {datosMesActivo.length} unidades
                         </span>
                         <button
@@ -336,7 +337,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
 
               {indInfo?.descripcionPeriodicidad && (
                 <div className="ig-periodicidad-pie">
-                  <span className="ig-periodicidad-pildora" style={{ background: `${indColor}14`, color: indColor }}>
+                  <span className="ig-periodicidad-pildora" style={{ background: `${indColor}14`, color: textoAcento(indColor) }}>
                     {indInfo.descripcionPeriodicidad}
                   </span>
                 </div>

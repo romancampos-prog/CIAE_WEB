@@ -61,7 +61,7 @@ export default function EpiLandingPage() {
           }}>
             Vigilancia Epidemiológica
           </h1>
-          <p style={{ fontSize: 14, color: '#64748b', margin: 0 }}>
+          <p style={{ fontSize: 14, color: 'var(--texto-suave)', margin: 0 }}>
             Selecciona la enfermedad prioritaria que deseas consultar
           </p>
         </div>

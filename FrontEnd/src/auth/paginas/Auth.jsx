@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth_login } from '../api/auth';
 import { useAuth } from '../contexto/AuthContext';
 import logo_imss from '../../assets/logo_imms.png';
+import BotonTema from '../../shared/componentes/BotonTema';
 import "./auth.css";
 
 const IconUser = () => (
@@ -68,6 +69,7 @@ const Login = () => {
 
   return (
     <div className="cl-root">
+      <BotonTema className="boton-tema--flotante" />
 
       {/* Fondo animado a pantalla completa — solo se muestra en mobile,
           para que todo (logo, marca y formulario) quede sobre un mismo

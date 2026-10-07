@@ -60,12 +60,12 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
       `}</style>
 
       <div style={{
-        background: 'rgba(255,255,255,0.82)',
+        background: 'rgba(var(--superficie-rgb), 0.82)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: 16,
         boxShadow: '0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05)',
-        border: '1px solid rgba(255,255,255,0.6)',
+        border: '1px solid rgba(var(--superficie-rgb), 0.6)',
         overflow: 'hidden',
       }}>
         <div className="epi-toast-content" style={{ padding: '13px 15px', display: 'flex', gap: 11, alignItems: 'center' }}>
@@ -78,17 +78,17 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
           }}>📋</div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="epi-toast-label" style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            <div className="epi-toast-label" style={{ fontSize: 11, fontWeight: 700, color: 'var(--texto-tenue)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
               Último reporte generado
             </div>
-            <div className="epi-toast-valor" style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', marginTop: 2, lineHeight: 1.2 }}>
+            <div className="epi-toast-valor" style={{ fontSize: 14, fontWeight: 800, color: 'var(--texto)', marginTop: 2, lineHeight: 1.2 }}>
               {ultimoReporte}
             </div>
           </div>
 
           <button onClick={cerrar} style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            color: '#cbd5e1', fontSize: 16, lineHeight: 1, padding: 2,
+            color: 'var(--texto-deshabilitado)', fontSize: 16, lineHeight: 1, padding: 2,
             flexShrink: 0, transition: 'color 0.15s', marginTop: -2,
           }}
             onMouseOver={e => e.currentTarget.style.color = '#64748b'}
@@ -96,7 +96,7 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }) {
           >✕</button>
         </div>
 
-        <div style={{ height: 3, background: '#f1f5f9' }}>
+        <div style={{ height: 3, background: 'var(--superficie-alterna)' }}>
           <div style={{
             height: '100%',
             width: `${progreso}%`,

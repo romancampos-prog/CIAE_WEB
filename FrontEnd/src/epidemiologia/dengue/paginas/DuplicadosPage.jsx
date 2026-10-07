@@ -4,6 +4,7 @@ import SeccionPosiblesDuplicados from '../componentes/duplicados/SeccionPosibles
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getDuplicados, getPosiblesDuplicados } from '../api/reportes'
 import { agruparPorMetodo } from '../utils/calculos'
+import { textoAcento } from '../../../shared/utils/colorAcento'
 
 const COLOR        = '#4f46e5'
 const COLOR_POSIBLE = '#b45309'
@@ -40,14 +41,14 @@ export default function DuplicadosPage() {
             display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
             background: `${COLOR}10`, border: `1px solid ${COLOR}30`,
             borderRadius: 100, padding: '0.1875rem 0.75rem',
-            fontSize: '0.6rem', fontWeight: 700, color: COLOR,
+            fontSize: '0.6rem', fontWeight: 700, color: textoAcento(COLOR),
             textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.625rem',
           }}>
             ⧉ Depuración de base
           </div>
           <h1 className="epi-canal-titulo" style={{
             fontSize: 'clamp(1.4rem,3vw,1.9rem)', fontWeight: 800,
-            color: '#1e293b', letterSpacing: '-0.8px', margin: '0 0 0.25rem',
+            color: 'var(--texto)', letterSpacing: '-0.8px', margin: '0 0 0.25rem',
           }}>
             Duplicados{' '}
             <span style={{
@@ -56,7 +57,7 @@ export default function DuplicadosPage() {
               backgroundClip: 'text',
             }}>detectados</span>
           </h1>
-          <p className="epi-canal-sub" style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
+          <p className="epi-canal-sub" style={{ fontSize: '0.75rem', color: 'var(--texto-tenue)', margin: 0 }}>
             IMSS OOAD Guanajuato · haz clic en cada fila para ver el detalle
           </p>
         </div>
@@ -69,12 +70,12 @@ export default function DuplicadosPage() {
             { valor: posibles.length,    label: 'Para revisión manual',   color: COLOR_POSIBLE, borde: `${COLOR_POSIBLE}30`   },
           ].map(({ valor, label, color, borde }) => (
             <div key={label} style={{
-              background: 'white', borderRadius: '0.875rem', padding: '0.625rem 1rem',
+              background: 'var(--superficie)', borderRadius: '0.875rem', padding: '0.625rem 1rem',
               border: `1px solid ${borde}`, borderLeft: `0.25rem solid ${color}`,
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)', textAlign: 'right',
             }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color, lineHeight: 1 }}>{valor}</div>
-              <div style={{ fontSize: '0.625rem', color: '#94a3b8', fontWeight: 500, marginTop: '0.125rem' }}>{label}</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: textoAcento(color), lineHeight: 1 }}>{valor}</div>
+              <div style={{ fontSize: '0.625rem', color: 'var(--texto-tenue)', fontWeight: 500, marginTop: '0.125rem' }}>{label}</div>
             </div>
           ))}
         </div>

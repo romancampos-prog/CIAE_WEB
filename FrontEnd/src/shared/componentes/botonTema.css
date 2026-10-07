@@ -1,0 +1,30 @@
+/* Mismo círculo de 44px que el botón volver del TopBar (área de toque cómoda) */
+.boton-tema {
+  display: flex; align-items: center; justify-content: center;
+  width: 2.75rem; height: 2.75rem;
+  border-radius: 50%;
+  background: none;
+  border: 1.5px solid rgba(var(--marca-rgb), 0.18);
+  color: var(--marca-texto);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.boton-tema:hover {
+  background: var(--tinte-marca);
+  border-color: rgba(var(--marca-rgb), 0.45);
+}
+.boton-tema:focus-visible {
+  outline: 2px solid var(--marca-texto);
+  outline-offset: 2px;
+}
+html[data-theme="dark"] .boton-tema { color: var(--dorado-texto); }
+
+/* Variante flotante para pantallas sin TopBar (login) */
+.boton-tema--flotante {
+  position: fixed;
+  top: 1rem; right: 1rem;
+  z-index: 50;
+  background: rgba(var(--superficie-rgb), 0.85);
+  backdrop-filter: blur(8px);
+}

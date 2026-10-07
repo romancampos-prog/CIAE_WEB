@@ -16,7 +16,7 @@
 }
 
 .mpob-card {
-    background: white;
+    background: var(--superficie);
     border-radius: 20px;
     padding: 32px 40px;
     width: 95%;
@@ -45,40 +45,40 @@
 .mpob-title {
     font-size: 1.05rem;
     font-weight: 800;
-    color: var(--color-imss-primario);
+    color: var(--primario-texto);
     margin: 0;
 }
 
 .mpob-close {
-    background: #f1f5f9;
+    background: var(--superficie-alterna);
     border: none;
     border-radius: 50%;
     width: 30px;
     height: 30px;
     font-size: 1rem;
     cursor: pointer;
-    color: #64748b;
+    color: var(--texto-suave);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background 0.2s;
 }
-.mpob-close:hover { background: #e2e8f0; }
+.mpob-close:hover { background: var(--superficie-marcada); }
 
 .mpob-drop-area {
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed var(--borde-fuerte);
     border-radius: 14px;
     padding: 28px 20px;
     text-align: center;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
-    background: #f8fafc;
+    background: var(--superficie-suave);
     position: relative;
 }
 .mpob-drop-area:hover,
 .mpob-drop-area.mpob-drag-over {
-    border-color: var(--color-imss-primario);
-    background: #eef4fb;
+    border-color: var(--primario-texto);
+    background: var(--tinte-info);
 }
 .mpob-drop-area input[type="file"] {
     position: absolute;
@@ -96,16 +96,16 @@
 
 .mpob-drop-label {
     font-size: 0.82rem;
-    color: #64748b;
+    color: var(--texto-suave);
     margin: 0;
 }
 .mpob-drop-label span {
-    color: var(--color-imss-primario);
+    color: var(--primario-texto);
     font-weight: 700;
 }
 
 .mpob-file-selected {
-    background: #f0fdf4;
+    background: var(--tinte-exito);
     border: 1px solid #86efac;
     border-radius: 10px;
     padding: 10px 14px;
@@ -113,7 +113,7 @@
     align-items: center;
     gap: 10px;
     font-size: 0.82rem;
-    color: #166534;
+    color: var(--exito-texto);
     font-weight: 600;
 }
 
@@ -129,7 +129,7 @@
 .mpob-btn-quitar {
     background: none;
     border: none;
-    color: #dc2626;
+    color: var(--peligro-texto);
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: 700;
@@ -145,26 +145,26 @@
 .mpob-archivo-actual {
     margin: 10px 0 0;
     font-size: 0.72rem;
-    color: #94a3b8;
+    color: var(--texto-tenue);
     text-align: center;
 }
 .mpob-archivo-actual strong {
-    color: #475569;
+    color: var(--texto-secundario);
     font-weight: 700;
 }
 
 .mpob-btn-cancel {
-    background: #f1f5f9;
+    background: var(--superficie-alterna);
     border: none;
     border-radius: 10px;
     padding: 10px 20px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--texto-suave);
     cursor: pointer;
     transition: background 0.2s;
     font-size: 0.85rem;
 }
-.mpob-btn-cancel:hover { background: #e2e8f0; }
+.mpob-btn-cancel:hover { background: var(--superficie-marcada); }
 
 .mpob-btn-subir {
     background: var(--color-imss-primario);
@@ -189,7 +189,7 @@
     width: 14px;
     height: 14px;
     border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: white;
+    border-top-color: var(--superficie);
     border-radius: 50%;
     animation: mpob-spin 0.7s linear infinite;
 }
@@ -205,14 +205,14 @@
     text-align: center;
 }
 .mpob-msg.exito {
-    background: #f0fdf4;
-    color: #166534;
+    background: var(--tinte-exito);
+    color: var(--exito-texto);
     border: 1px solid #86efac;
 }
 .mpob-msg.error {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fca5a5;
+    background: var(--tinte-peligro);
+    color: var(--peligro-texto-fuerte);
+    border: 1px solid var(--borde-peligro);
 }
 
 /* ── Fase 2: recalcular ── */
@@ -220,7 +220,7 @@
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    background: #f0fdf8;
+    background: var(--tinte-marca);
     border: 1px solid #6ee7b7;
     border-radius: 14px;
     padding: 18px 16px;
@@ -229,13 +229,13 @@
 .mpob-recalc-title {
     font-size: 0.92rem;
     font-weight: 800;
-    color: #0b5445;
+    color: var(--marca-texto);
     margin: 0 0 4px;
 }
 
 .mpob-recalc-desc {
     font-size: 0.78rem;
-    color: #334155;
+    color: var(--texto-medio);
     margin: 0;
     line-height: 1.5;
 }
@@ -255,7 +255,7 @@
 
 .mpob-recalc-warn {
     font-size: 0.78rem;
-    color: #b45309;
+    color: var(--aviso-texto-fuerte);
     font-weight: 600;
     margin: 0;
 }
@@ -268,7 +268,7 @@
 }
 
 .mpob-adv-bloque {
-    background: #fffbeb;
+    background: var(--tinte-aviso);
     border: 1px solid #fcd34d;
     border-radius: 10px;
     padding: 10px 13px;
@@ -277,7 +277,7 @@
 .mpob-adv-titulo {
     font-size: 0.76rem;
     font-weight: 700;
-    color: #92400e;
+    color: var(--aviso-texto-fuerte);
     margin: 0 0 5px;
 }
 
@@ -293,19 +293,19 @@
 
 .mpob-adv-lista li {
     font-size: 0.72rem;
-    color: #78350f;
+    color: var(--aviso-texto-fuerte);
 }
 
 /* ── Bloque celdas vacías (errores de captura humana) ── */
 .mpob-adv-bloque--celdas {
-    background: #fff1f1;
-    border-color: #fca5a5;
+    background: var(--tinte-peligro);
+    border-color: var(--borde-peligro);
     max-height: 200px;
     overflow-y: auto;
 }
 
 .mpob-adv-titulo--celdas {
-    color: #991b1b;
+    color: var(--peligro-texto-fuerte);
 }
 
 .mpob-adv-unidad {
@@ -315,23 +315,23 @@
 .mpob-adv-unidad-nombre {
     font-size: 0.73rem;
     font-weight: 700;
-    color: #7f1d1d;
+    color: var(--peligro-texto-fuerte);
     margin: 0 0 2px;
 }
 
 .mpob-adv-lista--celdas li {
-    color: #b91c1c;
+    color: var(--peligro-texto-fuerte);
     font-family: 'Consolas', monospace;
 }
 
 /* ── Bloque alias sugeridos ── */
 .mpob-adv-bloque--alias {
-    background: #f0fdf4;
+    background: var(--tinte-exito);
     border-color: #86efac;
 }
 
 .mpob-adv-titulo--alias {
-    color: #166534;
+    color: var(--exito-texto);
 }
 
 .mpob-alias-tabla {
@@ -354,21 +354,21 @@
 
 .mpob-alias-excel {
     font-family: 'Consolas', monospace;
-    color: #374151;
+    color: var(--texto-medio);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .mpob-alias-arrow {
-    color: #6b7280;
+    color: var(--texto-suave);
     text-align: center;
     font-weight: 700;
 }
 
 .mpob-alias-sistema {
     font-family: 'Consolas', monospace;
-    color: #166534;
+    color: var(--exito-texto);
     font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -393,11 +393,11 @@
 .mpob-alias-hint {
     margin-top: 6px;
     font-size: 0.68rem;
-    color: #4b7c5f;
+    color: var(--exito-texto);
     line-height: 1.4;
 }
 .mpob-alias-hint code {
-    background: #dcfce7;
+    background: var(--tinte-exito);
     padding: 1px 4px;
     border-radius: 4px;
     font-family: 'Consolas', monospace;
@@ -408,12 +408,12 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    background: #eff6ff;
-    border: 1px solid #93c5fd;
+    background: var(--tinte-info);
+    border: 1px solid var(--borde-info);
     border-radius: 10px;
     padding: 10px 14px;
     font-size: 0.78rem;
-    color: #1e3a5f;
+    color: var(--info-texto);
     line-height: 1.45;
 }
 
@@ -425,3 +425,5 @@
     word-break: break-all;
 }
 .mpob-source-link:hover { color: #1e40af; }
+html[data-theme="dark"] .mpob-source-link       { color: #93b4fd; }
+html[data-theme="dark"] .mpob-source-link:hover { color: #bcd0fe; }

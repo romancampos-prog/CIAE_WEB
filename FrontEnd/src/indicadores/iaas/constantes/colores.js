@@ -18,4 +18,4 @@ export const COLOR_IND = {
 export const HGS_COLOR = '#0ea5e9';
 
 /** Fondo de etiqueta HGS */
-export const HGS_BG    = '#e0f2fe';
+export const HGS_BG    = 'rgba(14, 165, 233, 0.13)';

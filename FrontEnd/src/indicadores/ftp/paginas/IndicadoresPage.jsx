@@ -14,6 +14,7 @@ import FichaTecnicaBoton from '../../shared/componentes/FichaTecnica/FichaTecnic
 import { useEffect, useState } from 'react';
 import SidebarCategorias from '../componentes/SidebarCategorias';
 import PeriodoReporte from '../componentes/PeriodoReporte';
+import { textoAcento } from '../../../shared/utils/colorAcento';
 
 import iconoCama  from '../../../assets/icono_cama.png';
 import iconoCacu  from '../../../assets/icono_cacu.png';
@@ -175,7 +176,7 @@ const IndicadoresPage = () => {
                 <div className="ind-sel-card" style={{ '--fc': catColor }}>
                   {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
                   <p className="ind-sel-eyebrow">Indicador</p>
-                  <h2 className="ind-sel-name" style={{ color: catColor }}>{indicadorSel}</h2>
+                  <h2 className="ind-sel-name" style={{ color: textoAcento(catColor) }}>{indicadorSel}</h2>
                   {infoIndicador?.informacion?.titulo && (
                     <p className="ind-sel-desc">{infoIndicador.informacion.titulo}</p>
                   )}
@@ -274,7 +275,7 @@ const IndicadoresPage = () => {
                 <div className="ind-sel-card" style={{ '--fc': catColor }}>
                   {catIcon && <img src={catIcon} alt="" className="ind-sel-card-icon" />}
                   <p className="ind-sel-eyebrow">Categoría · generar todos</p>
-                  <h2 className="ind-sel-name" style={{ color: catColor }}>{categoria}</h2>
+                  <h2 className="ind-sel-name" style={{ color: textoAcento(catColor) }}>{categoria}</h2>
                   <p className="ind-sel-desc">
                     {indicadores.length} indicador{indicadores.length !== 1 ? 'es' : ''} · se generará un Excel con una pestaña por indicador
                   </p>

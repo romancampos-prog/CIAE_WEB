@@ -7,6 +7,7 @@ import DengueSpinner from '../componentes/comun/Spinner'
 import { useDengueReporte } from '../hooks/useDengueReportes'
 import { getMapa } from '../api/reportes'
 import { getTemaMapa } from '../utils/calculos'
+import { textoAcento } from '../../../shared/utils/colorAcento'
 
 const SEMAFORO = [
   { color: '#2d8a57', label: 'Bajo' },
@@ -48,14 +49,14 @@ export default function MapaPage() {
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: bgTema, border: `1px solid ${bordeTema}`,
             borderRadius: 100, padding: '3px 12px',
-            fontSize: '0.6rem', fontWeight: 700, color: colorTema,
+            fontSize: '0.6rem', fontWeight: 700, color: textoAcento(colorTema),
             textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8,
           }}>
             🗺️ {tipo === 'situacion' ? 'Mapa de situación' : 'Mapa de confirmados'}
           </div>
           <h1 className="epi-canal-titulo" style={{
             fontSize: 'clamp(1.4rem,3vw,1.9rem)', fontWeight: 800,
-            color: '#1e293b', letterSpacing: '-0.8px', margin: '0 0 2px',
+            color: 'var(--texto)', letterSpacing: '-0.8px', margin: '0 0 2px',
           }}>
             {etiqueta}{' '}
             <span style={{
@@ -64,7 +65,7 @@ export default function MapaPage() {
               backgroundClip: 'text',
             }}>{datos.año}</span>
           </h1>
-          <p className="epi-canal-sub" style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>
+          <p className="epi-canal-sub" style={{ fontSize: 12, color: 'var(--texto-tenue)', margin: 0 }}>
             IMSS OOAD Guanajuato · distribución por municipio
           </p>
         </div>
@@ -84,7 +85,7 @@ export default function MapaPage() {
           >
             <span style={{ fontSize: 22 }}>⚠️</span>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: '#691c32', lineHeight: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--tinto-texto)', lineHeight: 1 }}>
                 {(datos.brotes_espacial?.length || 0) + (datos.brotes_temporal?.length || 0)}
               </div>
               <div style={{ fontSize: 10, color: '#a4a4a4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -101,7 +102,7 @@ export default function MapaPage() {
         {/* Tabs */}
         <div style={{
           display: 'flex', gap: 4,
-          background: 'white', borderRadius: 14, padding: 4,
+          background: 'var(--superficie)', borderRadius: 14, padding: 4,
           border: '1px solid rgba(0,0,0,0.06)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
           flexShrink: 0,
@@ -115,7 +116,7 @@ export default function MapaPage() {
               fontSize: 12, fontWeight: 700, cursor: 'pointer',
               fontFamily: 'inherit', transition: 'all 0.18s',
               background: tabActiva === id ? colorTema : 'transparent',
-              color: tabActiva === id ? 'white' : '#64748b',
+              color: tabActiva === id ? 'white' : 'var(--texto-suave)',
               boxShadow: tabActiva === id ? `0 3px 10px ${colorTema}44` : 'none',
             }}>{label}</button>
           ))}
@@ -125,18 +126,18 @@ export default function MapaPage() {
         <div className="epi-canal-kpis" style={{ display: 'flex', gap: 8, flex: 1, flexWrap: 'wrap' }}>
           {[
             { valor: datos.total,         label: 'Total casos',          color: colorTema, borde: bordeTema                },
-            { valor: datos.mun_con_casos, label: 'Municipios con casos', color: '#a7802d', borde: 'rgba(167,128,45,0.18)' },
+            { valor: datos.mun_con_casos, label: 'Municipios con casos', color: 'var(--oro-texto)', borde: 'rgba(167,128,45,0.18)' },
             { valor: datos.max_casos,     label: 'Máx. por municipio',  color: '#c0392b', borde: 'rgba(192,57,43,0.18)'  },
           ].map(({ valor, label, color, borde }) => (
             <div key={label} style={{
-              flex: '1 1 8rem', background: 'white', borderRadius: 12,
+              flex: '1 1 8rem', background: 'var(--superficie)', borderRadius: 12,
               padding: '12px 16px',
               border: `1px solid ${borde}`, borderLeft: `3px solid ${color}`,
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               display: 'flex', flexDirection: 'column', gap: 3,
             }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color, lineHeight: 1 }}>{valor}</div>
-              <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>{label}</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: textoAcento(color), lineHeight: 1 }}>{valor}</div>
+              <div style={{ fontSize: 10, color: 'var(--texto-tenue)', fontWeight: 500 }}>{label}</div>
             </div>
           ))}
         </div>
@@ -146,7 +147,7 @@ export default function MapaPage() {
       {/* ── Mapa ── */}
       {tabActiva === 'mapa' && (
         <div style={{
-          background: 'white', borderRadius: 20,
+          background: 'var(--superficie)', borderRadius: 20,
           border: '1px solid rgba(0,0,0,0.06)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
           overflow: 'visible',
@@ -159,19 +160,19 @@ export default function MapaPage() {
             flexWrap: 'wrap', gap: 10,
           }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--texto)' }}>
                 {etiqueta} por Municipio
               </div>
-              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 1 }}>
                 Hover sobre un municipio para ver su detalle
               </div>
             </div>
             {/* Semáforo compacto */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>SEMÁFORO</span>
+              <span style={{ fontSize: 10, color: 'var(--texto-tenue)', fontWeight: 600 }}>SEMÁFORO</span>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 1,
-                background: '#f8fafc', borderRadius: 8, padding: '4px 8px',
+                background: 'var(--superficie-suave)', borderRadius: 8, padding: '4px 8px',
                 border: '1px solid rgba(0,0,0,0.06)',
               }}>
                 <div style={{
@@ -183,12 +184,12 @@ export default function MapaPage() {
                 {SEMAFORO.map(({ color, label }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <div style={{ width: 7, height: 7, borderRadius: '50%', background: color }} />
-                    <span style={{ fontSize: 10, color: '#64748b', fontWeight: 500 }}>{label}</span>
+                    <span style={{ fontSize: 10, color: 'var(--texto-suave)', fontWeight: 500 }}>{label}</span>
                   </div>
                 ))}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4d4d4' }} />
-                  <span style={{ fontSize: 10, color: '#64748b', fontWeight: 500 }}>Sin casos</span>
+                  <span style={{ fontSize: 10, color: 'var(--texto-suave)', fontWeight: 500 }}>Sin casos</span>
                 </div>
               </div>
             </div>
@@ -201,7 +202,7 @@ export default function MapaPage() {
       {/* ── Tabla ── */}
       {tabActiva === 'tabla' && (
         <div style={{
-          background: 'white', borderRadius: 20,
+          background: 'var(--superficie)', borderRadius: 20,
           border: '1px solid rgba(0,0,0,0.06)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
           overflow: 'hidden',
@@ -213,10 +214,10 @@ export default function MapaPage() {
             flexWrap: 'wrap', gap: 10,
           }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--texto)' }}>
                 {etiqueta} por Unidad Médica
               </div>
-              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 1 }}>
                 Ordenadas por número de casos descendente
               </div>
             </div>
@@ -224,7 +225,7 @@ export default function MapaPage() {
               display: 'inline-flex', alignItems: 'center', gap: 5,
               background: bgTema, border: `1px solid ${bordeTema}`,
               borderRadius: 100, padding: '4px 12px',
-              fontSize: 11, fontWeight: 700, color: colorTema,
+              fontSize: 11, fontWeight: 700, color: textoAcento(colorTema),
             }}>
               {datos.unidades.length} unidades
             </div>
@@ -249,7 +250,7 @@ export default function MapaPage() {
           onMouseOut={e  => e.currentTarget.style.background = 'rgba(105,28,50,0.07)'}
         >
           <span style={{ fontSize: '1.1rem' }}>⚠️</span>
-          <span style={{ fontSize: '1rem', fontWeight: 800, color: '#691c32', lineHeight: 1 }}>
+          <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--tinto-texto)', lineHeight: 1 }}>
             {(datos.brotes_espacial?.length || 0) + (datos.brotes_temporal?.length || 0)}
           </span>
           <span style={{ fontSize: '0.72rem', color: '#a4a4a4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>

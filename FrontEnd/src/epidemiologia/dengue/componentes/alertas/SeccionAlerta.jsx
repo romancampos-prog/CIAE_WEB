@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { textoAcento } from '../../../../shared/utils/colorAcento'
 
 const CABECERAS = {
   cols_caso: ['Folio', 'Unidad', 'Nombre', 'Ap. Paterno', 'Ap. Materno', 'Dx Probable', 'Sem'],
@@ -26,9 +27,9 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
 
   return (
     <div style={{
-      background: 'white', borderRadius: 16,
-      border: `1px solid ${vacio ? 'rgba(0,0,0,0.05)' : `${colorReal}30`}`,
-      borderLeft: `4px solid ${vacio ? '#e2e8f0' : colorReal}`,
+      background: 'var(--superficie)', borderRadius: 16,
+      border: `1px solid ${vacio ? 'rgba(var(--contraste-rgb), 0.05)' : `${colorReal}30`}`,
+      borderLeft: `4px solid ${vacio ? 'var(--borde)' : colorReal}`,
       boxShadow: prioritaria && !vacio
         ? `0 4px 20px ${colorReal}18`
         : '0 2px 10px rgba(0,0,0,0.04)',
@@ -49,11 +50,11 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
         {/* Número de alerta */}
         <div style={{
           width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-          background: vacio ? '#f1f5f9' : `${colorReal}15`,
-          border: `1.5px solid ${vacio ? '#e2e8f0' : `${colorReal}35`}`,
+          background: vacio ? 'var(--superficie-alterna)' : `${colorReal}15`,
+          border: `1.5px solid ${vacio ? 'var(--borde)' : `${colorReal}35`}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 13, fontWeight: 800,
-          color: vacio ? '#94a3b8' : colorReal,
+          color: vacio ? 'var(--texto-tenue)' : textoAcento(colorReal),
         }}>{numAlerta}</div>
 
         {/* Título y descripción */}
@@ -61,7 +62,7 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span style={{
               fontSize: 13, fontWeight: 700,
-              color: vacio ? '#94a3b8' : '#1e293b',
+              color: vacio ? 'var(--texto-tenue)' : 'var(--texto)',
             }}>{titulo.replace(/Alerta \d+ — /, '')}</span>
             {prioritaria && !vacio && (
               <span style={{
@@ -71,7 +72,7 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
               }}>PRIORITARIA</span>
             )}
           </div>
-          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {descripcion}
           </div>
         </div>
@@ -82,10 +83,10 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
         }}>
           <div style={{
             padding: '4px 12px', borderRadius: 100,
-            background: vacio ? '#f1f5f9' : `${colorReal}12`,
-            border: `1px solid ${vacio ? '#e2e8f0' : `${colorReal}30`}`,
+            background: vacio ? 'var(--superficie-alterna)' : `${colorReal}12`,
+            border: `1px solid ${vacio ? 'var(--borde)' : `${colorReal}30`}`,
             fontSize: 13, fontWeight: 800,
-            color: vacio ? '#94a3b8' : colorReal,
+            color: vacio ? 'var(--texto-tenue)' : textoAcento(colorReal),
           }}>{registros.length}</div>
 
           {/* Chevron */}
@@ -124,7 +125,7 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
                   <th key={c} style={{
                     padding: '10px 14px', textAlign: ci === 6 ? 'center' : 'left',
                     fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                    letterSpacing: '0.7px', color: colorReal,
+                    letterSpacing: '0.7px', color: textoAcento(colorReal),
                     background: `${colorReal}08`,
                     borderBottom: `2px solid ${colorReal}20`,
                     whiteSpace: 'nowrap',
@@ -134,12 +135,12 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
             </thead>
             <tbody>
               {registros.map((row, i) => (
-                <tr key={i} style={{ background: i % 2 === 0 ? 'white' : `${colorReal}04` }}>
+                <tr key={i} style={{ background: i % 2 === 0 ? 'var(--superficie)' : `${colorReal}04` }}>
                   {campos.map((campo, j) => (
                     <td key={campo} style={{
                       padding: '9px 14px',
                       borderBottom: `1px solid ${colorReal}10`,
-                      color: j === 0 ? colorReal : '#374151',
+                      color: j === 0 ? textoAcento(colorReal) : 'var(--texto-medio)',
                       fontWeight: j === 0 ? 700 : 400,
                       textAlign: j === 6 ? 'center' : 'left',
                       whiteSpace: j === 5 ? 'normal' : 'nowrap',

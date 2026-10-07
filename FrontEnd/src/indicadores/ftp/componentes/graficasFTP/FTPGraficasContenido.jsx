@@ -10,6 +10,7 @@ import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga'
 import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
 import { etiquetaMesLarga, etiquetaMesCorta } from '../../utils/calculos';
 import { useEsMovil } from '../../../shared/utils/useEsMovil';
+import { textoAcento } from '../../../../shared/utils/colorAcento';
 
 
 
@@ -81,7 +82,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
       {/* ── Título + ficha técnica ── */}
       <div className="ig-header">
         <div className="ig-title-block">
-          <h1 className="ig-title" style={{ color: indColor }}>{indSel || 'Indicadores FTP'}</h1>
+          <h1 className="ig-title" style={{ color: textoAcento(indColor) }}>{indSel || 'Indicadores FTP'}</h1>
         </div>
 
         <div className="ig-header-detail-row">
@@ -214,12 +215,12 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                   )}
                   <div className="ig-chart-badges">
                     {vistaGrafica === 'unidad' && (
-                      <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
+                      <span className="ig-badge" style={{ background: `${indColor}14`, color: textoAcento(indColor) }}>
                         {unidadSel === 'TOTAL_OOAD' ? 'TOTAL OOAD' : unidadSel}{sufijoAcumulado}
                       </span>
                     )}
                     {vistaGrafica === 'mes' && (
-                      <span className="ig-badge" style={{ background: `${indColor}14`, color: indColor }}>
+                      <span className="ig-badge" style={{ background: `${indColor}14`, color: textoAcento(indColor) }}>
                         {etiquetaMesCorta(parseInt(mesSel))}{sufijoAcumulado}
                       </span>
                     )}
@@ -287,7 +288,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
                         >
                           ‹ Anterior
                         </button>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--texto-suave)' }}>
                           {pagina * POR_PAGINA + 1}–{Math.min((pagina + 1) * POR_PAGINA, chartDataMesFiltrado.length)} de {chartDataMesFiltrado.length} unidades
                         </span>
                         <button
@@ -309,7 +310,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
 
               {indInfo?.descripcionPeriodicidad && (
                 <div className="ig-periodicidad-pie">
-                  <span className="ig-periodicidad-pildora" style={{ background: `${indColor}14`, color: indColor }}>
+                  <span className="ig-periodicidad-pildora" style={{ background: `${indColor}14`, color: textoAcento(indColor) }}>
                     {indInfo.descripcionPeriodicidad}
                   </span>
                 </div>

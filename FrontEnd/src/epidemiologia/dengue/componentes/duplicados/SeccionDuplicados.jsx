@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { textoAcento } from '../../../../shared/utils/colorAcento'
 
 const COLOR = '#4f46e5'   // índigo — diferente a los colores de alertas
 
@@ -12,9 +13,9 @@ const CAMPOS_RECHAZADO = [
 ]
 
 const COLOR_CLASIF = {
-  POSITIVO      : { bg: 'rgba(105,28,50,0.08)',  color: '#691c32' },
-  NEGATIVO      : { bg: 'rgba(36,92,79,0.08)',   color: '#245c4f' },
-  'SIN CLASIFICAR': { bg: 'rgba(164,164,164,0.1)', color: '#64748b' },
+  POSITIVO      : { bg: 'rgba(105,28,50,0.08)',  color: 'var(--tinto-texto)' },
+  NEGATIVO      : { bg: 'rgba(36,92,79,0.08)',   color: 'var(--primario-texto)' },
+  'SIN CLASIFICAR': { bg: 'rgba(164,164,164,0.1)', color: 'var(--texto-suave)' },
 }
 
 /**
@@ -34,9 +35,9 @@ export default function SeccionDuplicados({ registros }) {
 
   return (
     <div style={{
-      background: 'white', borderRadius: 16,
-      border: `1px solid ${vacio ? 'rgba(0,0,0,0.05)' : `${COLOR}30`}`,
-      borderLeft: `4px solid ${vacio ? '#e2e8f0' : COLOR}`,
+      background: 'var(--superficie)', borderRadius: 16,
+      border: `1px solid ${vacio ? 'rgba(var(--contraste-rgb), 0.05)' : `${COLOR}30`}`,
+      borderLeft: `4px solid ${vacio ? 'var(--borde)' : COLOR}`,
       boxShadow: vacio ? '0 2px 10px rgba(0,0,0,0.04)' : `0 4px 20px ${COLOR}10`,
       overflow: 'hidden',
     }}>
@@ -54,18 +55,18 @@ export default function SeccionDuplicados({ registros }) {
         {/* Ícono */}
         <div style={{
           width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-          background: vacio ? '#f1f5f9' : `${COLOR}15`,
-          border: `1.5px solid ${vacio ? '#e2e8f0' : `${COLOR}35`}`,
+          background: vacio ? 'var(--superficie-alterna)' : `${COLOR}15`,
+          border: `1.5px solid ${vacio ? 'var(--borde)' : `${COLOR}35`}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 15,
         }}>⧉</div>
 
         {/* Título */}
         <div style={{ flex: '1 1 12rem', minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: vacio ? '#94a3b8' : '#1e293b' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: vacio ? 'var(--texto-tenue)' : 'var(--texto)' }}>
             Duplicados detectados
           </div>
-          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 2 }}>
             Registros descartados por el algoritmo · se muestra el folio conservado para cada uno
           </div>
         </div>
@@ -75,15 +76,15 @@ export default function SeccionDuplicados({ registros }) {
           {!vacio && Object.entries(metodos).map(([met, n]) => (
             <div key={met} style={{
               padding: '3px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700,
-              background: `${COLOR}10`, border: `1px solid ${COLOR}25`, color: COLOR,
+              background: `${COLOR}10`, border: `1px solid ${COLOR}25`, color: textoAcento(COLOR),
             }}>{met}: {n}</div>
           ))}
           <div style={{
             padding: '4px 12px', borderRadius: 100,
-            background: vacio ? '#f1f5f9' : `${COLOR}12`,
-            border: `1px solid ${vacio ? '#e2e8f0' : `${COLOR}30`}`,
+            background: vacio ? 'var(--superficie-alterna)' : `${COLOR}12`,
+            border: `1px solid ${vacio ? 'var(--borde)' : `${COLOR}30`}`,
             fontSize: 13, fontWeight: 800,
-            color: vacio ? '#94a3b8' : COLOR,
+            color: vacio ? 'var(--texto-tenue)' : textoAcento(COLOR),
           }}>{registros.length}</div>
 
           {!vacio && (
@@ -125,7 +126,7 @@ export default function SeccionDuplicados({ registros }) {
                   <th key={c} style={{
                     padding: '10px 14px', textAlign: 'left',
                     fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                    letterSpacing: '0.7px', color: COLOR,
+                    letterSpacing: '0.7px', color: textoAcento(COLOR),
                     background: `${COLOR}08`,
                     borderBottom: `2px solid ${COLOR}20`,
                     whiteSpace: 'nowrap',
@@ -141,7 +142,7 @@ export default function SeccionDuplicados({ registros }) {
                   <>
                     <tr
                       key={row.VEC_ID}
-                      style={{ background: i % 2 === 0 ? 'white' : `${COLOR}04`, cursor: 'pointer' }}
+                      style={{ background: i % 2 === 0 ? 'var(--superficie)' : `${COLOR}04`, cursor: 'pointer' }}
                       onClick={() => setExpandido(estaExpandido ? null : row.VEC_ID)}
                     >
                       {/* Toggle sub-fila */}
@@ -169,7 +170,7 @@ export default function SeccionDuplicados({ registros }) {
                           <td key={campo} style={{
                             padding: '9px 14px',
                             borderBottom: `1px solid ${COLOR}10`,
-                            color: j === 0 ? COLOR : '#374151',
+                            color: j === 0 ? textoAcento(COLOR) : 'var(--texto-medio)',
                             fontWeight: j === 0 ? 700 : 400,
                             whiteSpace: 'nowrap',
                           }}>{row[campo] ?? ''}</td>
@@ -191,9 +192,9 @@ export default function SeccionDuplicados({ registros }) {
                                  stroke={COLOR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12"/>
                             </svg>
-                            <span style={{ fontSize: 11, color: '#64748b' }}>Folio conservado:</span>
+                            <span style={{ fontSize: 11, color: 'var(--texto-suave)' }}>Folio conservado:</span>
                             <span style={{
-                              fontSize: 12, fontWeight: 800, color: COLOR,
+                              fontSize: 12, fontWeight: 800, color: textoAcento(COLOR),
                               background: `${COLOR}10`, border: `1px solid ${COLOR}25`,
                               padding: '2px 10px', borderRadius: 6,
                             }}>{row.VEC_ID_CONSERVADO}</span>

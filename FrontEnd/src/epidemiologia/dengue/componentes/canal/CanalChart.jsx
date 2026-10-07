@@ -1,11 +1,29 @@
 import { useState } from 'react'
 import Plot from 'react-plotly.js'
+import useTema from '../../../../shared/hooks/useTema'
 
 const ZONA_COLORES = {
   exito    : '#2e8b57',
   seguridad: '#ccaa00',
   alerta   : '#e07b00',
   epidemica: '#cc0000',
+}
+
+// Plotly pinta en SVG/canvas con colores calculados: no acepta var(--x),
+// así que cada tema lleva sus colores explícitos.
+const COLORES_TEMA = {
+  light: {
+    ejes: '#64748b', tituloEjes: '#94a3b8',
+    rejilla: 'rgba(0,0,0,0.05)', lineaEje: 'rgba(0,0,0,0.08)',
+    lineaCasos: '#691c32', bordeMarcador: 'white',
+    fondoEtiqueta: 'rgba(30,41,59,0.9)', bordeEtiqueta: 'transparent',
+  },
+  dark: {
+    ejes: '#b0c4c0', tituloEjes: '#8aa29d',
+    rejilla: 'rgba(255,255,255,0.07)', lineaEje: 'rgba(255,255,255,0.12)',
+    lineaCasos: '#e8919f', bordeMarcador: '#142825',
+    fondoEtiqueta: 'rgba(13,26,25,0.96)', bordeEtiqueta: '#2c4e48',
+  },
 }
 
 /**
@@ -16,6 +34,8 @@ const ZONA_COLORES = {
  */
 export default function CanalChart({ datos }) {
   const { semanas, q1, mediana, q3, casos_actual, zonas, año } = datos
+  const { tema } = useTema()
+  const colores = COLORES_TEMA[tema]
 
   const upper = Math.max(Math.max(...q3) * 2, Math.max(...casos_actual) * 1.15, 1)
   const coloresMarcador = zonas.map(z => ZONA_COLORES[z] || '#000')
@@ -58,10 +78,10 @@ export default function CanalChart({ datos }) {
     {
       x: semanas, y: casos_actual,
       mode: 'lines+markers',
-      line: { color: '#691c32', width: 2.8 },
+      line: { color: colores.lineaCasos, width: 2.8 },
       marker: {
         color: coloresMarcador, size: 9,
-        line: { color: 'white', width: 1.8 },
+        line: { color: colores.bordeMarcador, width: 1.8 },
       },
       cliponaxis: false,
       name: `Casos ${año}`,
@@ -75,18 +95,18 @@ export default function CanalChart({ datos }) {
       layout={{
         margin: { t: 16, r: 20, b: 48, l: 44 },
         xaxis: {
-          title: { text: 'Semana Epidemiológica', font: { size: 11, color: '#94a3b8', family: 'Inter' } },
+          title: { text: 'Semana Epidemiológica', font: { size: 11, color: colores.tituloEjes, family: 'Inter' } },
           tickmode: 'linear', tick0: 1, dtick: 2, range: [0.5, 53.5],
-          gridcolor: 'rgba(0,0,0,0.05)', gridwidth: 1,
-          linecolor: 'rgba(0,0,0,0.08)',
-          tickfont: { size: 11, color: '#64748b', family: 'Inter' },
+          gridcolor: colores.rejilla, gridwidth: 1,
+          linecolor: colores.lineaEje,
+          tickfont: { size: 11, color: colores.ejes, family: 'Inter' },
           zeroline: false,
         },
         yaxis: {
-          title: { text: 'Casos', font: { size: 11, color: '#94a3b8', family: 'Inter' } },
+          title: { text: 'Casos', font: { size: 11, color: colores.tituloEjes, family: 'Inter' } },
           rangemode: 'nonnegative',
-          gridcolor: 'rgba(0,0,0,0.05)', gridwidth: 1,
-          tickfont: { size: 11, color: '#64748b', family: 'Inter' },
+          gridcolor: colores.rejilla, gridwidth: 1,
+          tickfont: { size: 11, color: colores.ejes, family: 'Inter' },
           zeroline: false,
         },
         height: altura,
@@ -95,8 +115,8 @@ export default function CanalChart({ datos }) {
         showlegend: false,
         hovermode: 'x unified',
         hoverlabel: {
-          bgcolor: 'rgba(30,41,59,0.9)',
-          bordercolor: 'transparent',
+          bgcolor: colores.fondoEtiqueta,
+          bordercolor: colores.bordeEtiqueta,
           font: { size: 12, color: 'white', family: 'Inter' },
         },
       }}

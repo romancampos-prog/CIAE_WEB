@@ -90,7 +90,7 @@ export default function DengueSidebar({ collapsed, onToggle }) {
           background: 'rgba(167,128,45,0.1)',
           border: '1px solid rgba(167,128,45,0.25)',
           fontSize: 10,
-          color: '#a7802d',
+          color: 'var(--oro-texto)',
           fontWeight: 600,
           display: 'flex',
           alignItems: 'center',

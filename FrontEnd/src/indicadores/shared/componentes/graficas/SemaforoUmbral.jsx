@@ -1,5 +1,6 @@
 ﻿import { Fragment } from 'react';
 import { COLOR_SEMAFORO } from '../../constantes/semaforo';
+import { textoAcento } from '../../../../shared/utils/colorAcento';
 
 /**
  * Display de umbrales del semáforo (Esperado / Medio / Bajo).
@@ -20,14 +21,14 @@ const SemaforoUmbral = ({ rangos = [], indColor }) => {
         <Fragment key={idx}>
           {idx > 0 && (
             <div style={{
-              width: '1px', background: 'rgba(226,232,240,0.9)',
+              width: '1px', background: 'var(--borde)',
               margin: '0 14px', alignSelf: 'stretch',
             }} />
           )}
           <div className="ig-semaforo" style={{ alignItems: 'flex-start', gap: '16px' }}>
             <span style={{
               fontSize: '0.63rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.8px', color: '#94a3b8',
+              letterSpacing: '0.8px', color: 'var(--texto-tenue)',
               paddingTop: '2px', paddingRight: '6px', whiteSpace: 'nowrap',
             }}>
               Umbral
@@ -35,7 +36,7 @@ const SemaforoUmbral = ({ rangos = [], indColor }) => {
                 <span style={{
                   display: 'block', fontSize: '0.6rem', fontWeight: 600,
                   textTransform: 'none', letterSpacing: 0,
-                  color: r._label ? indColor : '#cbd5e1',
+                  color: r._label ? textoAcento(indColor) : 'var(--texto-deshabilitado)',
                   marginTop: '1px',
                 }}>
                   {r._label ?? r._mes}
@@ -49,7 +50,7 @@ const SemaforoUmbral = ({ rangos = [], indColor }) => {
                   <span className="ig-sem-dot" style={{ background: v }} />
                   <span style={{ color: v, fontWeight: 700, fontSize: '0.72rem' }}>{k}</span>
                 </span>
-                <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '0.62rem', color: 'var(--texto-tenue)', fontWeight: 500, whiteSpace: 'nowrap' }}>
                   {r?.[k] ?? '—'}
                 </span>
               </span>

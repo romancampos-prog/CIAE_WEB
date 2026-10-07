@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/contexto/AuthContext';
 import logo_imss from '../../assets/logo_imms.png';
+import BotonTema from './BotonTema';
 import './topbar.css';
 
 /**
@@ -30,6 +31,7 @@ const TopBar = ({ backTo, onLogout, children, rightExtra }) => {
 
       <div className="tb-right">
         {rightExtra}
+        <BotonTema />
         {onLogout ? (
           <button className="tb-back-btn" onClick={onLogout} aria-label="Salir">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
