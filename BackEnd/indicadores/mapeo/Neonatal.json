@@ -1,0 +1,95 @@
+{
+  "Neonatal 03": {
+    "nombreArchivoFinal": "Neonatal 03",
+    "fechaModificacion": "08/10/2026",
+    "imagen": "icono_mt.png",
+    "color": "#2E6F95",
+    "modulo": "Extractor",
+    "mostrarGenerar": true,
+    "mostrarGrafica": true,
+    "previos": false,
+    "periodicidad": "Mensual - Mensual Acumulado",
+    "peridocidadGenerada": {
+      "mensual": true,
+      "mensualAcumulado": true
+    },
+    "informacion": {
+      "titulo": "Neonatal 03 - Proporción de prematuros (menores de 37 semanas) con peso menor o igual a 1,000 g.",
+      "objetivo": "Medir el porcentaje de recién nacidos prematuros (menores de 37 semanas), con peso menor o igual a 1,000 g para establecer acciones preventivas y asistenciales que disminuyan la prematurez de recién nacidos con peso extremadamente bajo, principal causa de morbilidad y mortalidad en los neonatos.",
+      "descNum": "Total de recién nacidos vivos prematuros (menor de 37 semanas), con peso menor o igual a 1,000 g en un periodo y área geográfica determinados.",
+      "descDen": "Total de recién nacidos vivos en un periodo y área geográfica determinados."
+    },
+    "reporte": {
+      "numerador": {
+        "fuente": "extractor",
+        "archivo": "EGRESOS_NACIMIENTO_TOCO",
+        "hoja": "Hoja1",
+        "modoExtraccion": "FILTRO_CONTEO",
+        "encabezado": 1,
+        "agrupacion": "cvePresupuestal",
+        "catalogoUnidades": "hospitales",
+        "columnasPeriodo": {
+          "mes": "mesm",
+          "anio": "aniom"
+        },
+        "filtroColumna": {
+          "U": {
+            "tipo": "LISTA",
+            "filtro": [
+              1
+            ],
+            "nombreColumna": "ESTADORN"
+          },
+          "T": {
+            "tipo": "RANGO",
+            "filtro": [
+              0,
+              36
+            ],
+            "nombreColumna": "SEMGES"
+          },
+          "O": {
+            "tipo": "RANGO",
+            "filtro": [
+              0,
+              1000
+            ],
+            "nombreColumna": "PESO"
+          }
+        }
+      },
+      "denominador": {
+        "fuente": "extractor",
+        "archivo": "EGRESOS_NACIMIENTO_TOCO",
+        "hoja": "Hoja1",
+        "modoExtraccion": "FILTRO_CONTEO",
+        "encabezado": 1,
+        "agrupacion": "cvePresupuestal",
+        "catalogoUnidades": "hospitales",
+        "columnasPeriodo": {
+          "mes": "mesm",
+          "anio": "aniom"
+        },
+        "filtroColumna": {
+          "U": {
+            "tipo": "LISTA",
+            "filtro": [
+              1
+            ],
+            "nombreColumna": "ESTADORN"
+          }
+        }
+      },
+      "operacion": {
+        "numerador": "numerador",
+        "denominador": "denominador",
+        "resultado": "round((numerador / denominador) * 100, 2)"
+      }
+    },
+    "semaforo": {
+      "Esperado": "<= 1.4",
+      "Medio": "> 1.4 a < 2.5",
+      "Bajo": ">= 2.5"
+    }
+  }
+}

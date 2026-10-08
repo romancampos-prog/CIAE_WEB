@@ -28,6 +28,7 @@ import iconoCe    from '../../../assets/icono_ce (2).png';
 const CAT_ICON = {
   CAMA: iconoCama, CACU: iconoCacu, EH: iconoEh,  DM: iconoDm,
   MT:   iconoMt,  CUPN: iconoCupn, S_Ob: iconoSOb, CE: iconoCe,
+  Neonatal: iconoMt,
 };
 
 const IcoDownload = () => (

@@ -21,6 +21,7 @@ import iconoIaas  from '../../../assets/icono_iaas.png';
 const CAT_ICON = {
   CAMA: iconoCama, CACU: iconoCacu, EH: iconoEh,  DM: iconoDm,
   MT:   iconoMt,  CUPN: iconoCupn, S_Ob: iconoSOb, CE: iconoCe,
+  Neonatal: iconoMt,
   IAAS: iconoIaas,
 };
 

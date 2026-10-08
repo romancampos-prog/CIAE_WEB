@@ -8,4 +8,5 @@ export const COLORS = {
 export const CAT_COLOR = {
   CAMA: '#8d3456', CACU: '#0f766e', EH: '#4e1224', DM: '#5c35a0',
   MT:   '#7E0808', CUPN: '#336699', S_Ob: '#9a7026', CE: '#2e7d32',
+  Neonatal: '#2E6F95',
 };

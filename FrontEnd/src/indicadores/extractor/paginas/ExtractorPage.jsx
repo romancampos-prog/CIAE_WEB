@@ -23,7 +23,7 @@ import './extractor.css';
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 // Mismo criterio que GraficasUnificadasPage: el icono sale de la categoría que manda el backend.
-const ICONOS_CATEGORIA = { EH: iconoEH, DM: iconoDM, MT: iconoMT, CAMA: iconoCama, CACU: iconoCacu, CUPN: iconoCupn, S_Ob: iconoSOb };
+const ICONOS_CATEGORIA = { EH: iconoEH, DM: iconoDM, MT: iconoMT, CAMA: iconoCama, CACU: iconoCacu, CUPN: iconoCupn, S_Ob: iconoSOb, Neonatal: iconoMT };
 
 // Años del selector: el actual y los anteriores, calculados con la fecha (en 2027 aparece solo).
 const ANIOS_HACIA_ATRAS = 1;
