@@ -1,7 +1,7 @@
 {
   "CACU 01": {
     "nombreArchivoFinal": "CACU 01",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "08/10/2026",
     "imagen": "icono_cacu.png",
     "color": "#0f766e",
     "modulo": "ftp",
@@ -35,23 +35,29 @@
         }
       },
       "denominador": {
-        "fuente": "poblacionInfoSalud",
-        "sexo": {
-          "Mujeres": [
-            "25  a 29",
-            "30 a 34",
-            "35 a 39",
-            "40 a 44",
-            "45 a 49",
-            "50 a 54",
-            "55 a 59",
-            "60 a 64"
-          ]
+        "fuente": "ftp",
+        "archivo": {
+          "PB02": {
+            "hoja": "Poblacion_Sub14",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "B",
+            "buscar": "99.-TOTAL",
+            "columna_dato": [
+              "AI",
+              "AK",
+              "AM",
+              "AO",
+              "AQ",
+              "AS",
+              "AU",
+              "AW"
+            ]
+          }
         }
       },
       "operacion": {
         "numerador": "(CP02[0])",
-        "denominador": "sum([ (Mujeres[0] * (1 - 0.004)), (sum(Mujeres[1:3]) * (1 - 0.029)), (sum(Mujeres[3:5]) * (1 - 0.109)), (sum(Mujeres[5:7]) * (1 - 0.211)), (Mujeres[7] * (1 - 0.295)) ])",
+        "denominador": "math.floor(PB02[0] * (1 - 0.004) + 0.5) + math.floor(sum(PB02[1:3]) * (1 - 0.029) + 0.5) + math.floor(sum(PB02[3:5]) * (1 - 0.109) + 0.5) + math.floor(sum(PB02[5:7]) * (1 - 0.211) + 0.5) + math.floor(PB02[7] * (1 - 0.295) + 0.5)",
         "resultado": "round((numerador / denominador) * 100, 2)"
       }
     },
