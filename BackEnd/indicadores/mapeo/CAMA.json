@@ -1,7 +1,7 @@
 {
   "CAMA 01": {
     "nombreArchivoFinal": "CAMA 01",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "08/10/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
     "modulo": "ftp",
@@ -44,21 +44,31 @@
         }
       },
       "denominador": {
-        "fuente": "poblacionInfoSalud",
-        "sexo": {
-          "Mujeres": [
-            "40 a 44",
-            "45 a 49",
-            "50 a 54",
-            "55 a 59",
-            "60 a 64",
-            "65 a 69"
-          ]
+        "fuente": "ftp",
+        "archivo": {
+          "CP02": {
+            "hoja": "IMCPUM",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "CO",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "CX"
+            ]
+          },
+          "CP03": {
+            "hoja": "06OtrasCob",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "A",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "J"
+            ]
+          }
         }
       },
       "operacion": {
         "numerador": "(CP02[0] + CP03[0])",
-        "denominador": "sum(Mujeres) * (1 - 0.0036)",
+        "denominador": "math.floor(CP02[0] * (1 - 0.0036) + 0.5) + math.floor(CP03[0] * (1 - 0.0036) + 0.5)",
         "resultado": "round((numerador / denominador) * 100, 2)"
       }
     },
@@ -127,7 +137,7 @@
   },
   "CAMA 40-49": {
     "nombreArchivoFinal": "CAMA 40_49",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "08/10/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
     "modulo": "ftp",
@@ -161,17 +171,22 @@
         }
       },
       "denominador": {
-        "fuente": "poblacionInfoSalud",
-        "sexo": {
-          "Mujeres": [
-            "40 a 44",
-            "45 a 49"
-          ]
+        "fuente": "ftp",
+        "archivo": {
+          "CP03": {
+            "hoja": "06OtrasCob",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "A",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "J"
+            ]
+          }
         }
       },
       "operacion": {
         "numerador": "(CP03[0])",
-        "denominador": "sum(Mujeres)",
+        "denominador": "(CP03[0])",
         "resultado": "round((numerador / denominador) * 100, 2)"
       }
     },
@@ -240,7 +255,7 @@
   },
   "CAMA 50-69": {
     "nombreArchivoFinal": "CAMA 50_69",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "08/10/2026",
     "imagen": "icono_cama.png",
     "color": "#8d3456",
     "modulo": "ftp",
@@ -274,19 +289,22 @@
         }
       },
       "denominador": {
-        "fuente": "poblacionInfoSalud",
-        "sexo": {
-          "Mujeres": [
-            "50 a 54",
-            "55 a 59",
-            "60 a 64",
-            "65 a 69"
-          ]
+        "fuente": "ftp",
+        "archivo": {
+          "CP02": {
+            "hoja": "IMCPUM",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "CO",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "CX"
+            ]
+          }
         }
       },
       "operacion": {
         "numerador": "(CP02[0])",
-        "denominador": "sum(Mujeres)",
+        "denominador": "(CP02[0])",
         "resultado": "round((numerador / denominador) * 100, 2)"
       }
     },

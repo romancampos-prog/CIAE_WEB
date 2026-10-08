@@ -1,7 +1,7 @@
 {
     "EH 01": {
         "nombreArchivoFinal": "EH 01",
-        "fechaModificacion": "07/10/2026",
+        "fechaModificacion": "08/10/2026",
         "imagen": "icono_eh.png",
         "color": "#4e1224",
         "modulo": "ftp",
@@ -49,26 +49,32 @@
             "denominador": {
                 "fuente": "ftp",
                 "archivo": {
-                    "PB02": {
-                        "hoja": "Poblacion_Sub14",
+                    "CP02": {
+                        "hoja": "IMCPUM",
                         "modoExtraccion": "INTERSECCION_COLUMNA",
-                        "columna": "B",
-                        "buscar": "99.-TOTAL",
+                        "columna": "DD",
+                        "buscar": "TOTAL DE LA UNIDAD",
                         "columna_dato": [
-                            "AG",
-                            "AI",
-                            "AH",
-                            "AJ",
-                            "BO",
-                            "BN",
-                            "G"
+                            "DI",
+                            "EW",
+                            "GC"
+                        ]
+                    },
+                    "CP03": {
+                        "hoja": "04CobDM_HTA_COL",
+                        "modoExtraccion": "INTERSECCION_COLUMNA",
+                        "columna": "M",
+                        "buscar": "TOTAL DE LA UNIDAD",
+                        "columna_dato": [
+                            "N",
+                            "R"
                         ]
                     }
                 }
             },
             "operacion": {
                 "numerador": "sum(CP02[0:3]) + sum(CP03[0:2])",
-                "denominador": "math.floor(sum(PB02[0:2]) * (1 - 0.012) + 0.5) + math.floor(sum(PB02[2:4]) * (1 - 0.016) + 0.5) + math.floor(PB02[4] * (1 - 0.158) + 0.5) + math.floor(PB02[5] * (1 - 0.135) + 0.5) + math.floor(PB02[6] * (1 - 0.433) + 0.5)",
+                "denominador": "math.floor(CP03[0] * (1 - 0.012) + 0.5) + math.floor(CP03[1] * (1 - 0.016) + 0.5) + math.floor(CP02[0] * (1 - 0.158) + 0.5) + math.floor(CP02[1] * (1 - 0.135) + 0.5) + math.floor(CP02[2] * (1 - 0.433) + 0.5)",
                 "resultado": "round((numerador / denominador) * 100, 2)"
             }
         },
