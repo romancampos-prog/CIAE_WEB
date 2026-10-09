@@ -1,7 +1,7 @@
 {
   "S_Ob 01": {
     "nombreArchivoFinal": "S_Ob 01",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "09/10/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",
     "modulo": "ftp",
@@ -46,16 +46,33 @@
         }
       },
       "denominador": {
-        "fuente": "poblacionInfoSalud",
-        "sexo": {
-          "Todos": [
-            "Total"
-          ]
+        "fuente": "ftp",
+        "archivo": {
+          "CP03_A": {
+            "hoja": "15_EvalNut_20_120",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "A",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "BY"
+            ]
+          },
+          "CP03_B": {
+            "hoja": "14_EvalNut_0_19",
+            "modoExtraccion": "INTERSECCION_COLUMNA",
+            "columna": "A",
+            "buscar": "TOTAL DE LA UNIDAD",
+            "columna_dato": [
+              "E",
+              "Z",
+              "AU"
+            ]
+          }
         }
       },
       "operacion": {
         "numerador": "(CP03_A[0] + sum(CP03_B[0:3]))",
-        "denominador": "(Todos[0])",
+        "denominador": "(CP03_A[0] + sum(CP03_B[0:3]))",
         "resultado": "round((numerador / denominador) * 100, 2)"
       }
     },
@@ -124,7 +141,7 @@
   },
   "S_Ob 02": {
     "nombreArchivoFinal": "S_Ob 02",
-    "fechaModificacion": "19/08/2026",
+    "fechaModificacion": "09/10/2026",
     "imagen": "icono_S_Ob.png",
     "color": "#9a7026",
     "modulo": "ftp",
@@ -152,8 +169,8 @@
             "columna": "A",
             "buscar": "TOTAL DE LA UNIDAD",
             "columna_dato": [
-              "CB",
-              "CF"
+              "DK",
+              "EF"
             ]
           }
         }
@@ -173,7 +190,7 @@
         }
       },
       "operacion": {
-        "numerador": "CP03[0] * (CP03[1] / 100)",
+        "numerador": "sum(CP03[0:2])",
         "denominador": "(CP03[0])",
         "resultado": "round((numerador / denominador) * 100, 2)"
       }
