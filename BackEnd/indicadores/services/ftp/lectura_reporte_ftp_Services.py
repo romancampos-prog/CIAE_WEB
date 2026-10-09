@@ -29,7 +29,7 @@ def _leer_hoja(buffer: io.BytesIO, hoja: str) -> tuple[pd.DataFrame | None, str 
 
 def extraer_lados_del_excel(
     buffer: io.BytesIO, detalles_por_lado: dict[str, dict[str, Any]],
-    mes: str, meses_cip01: dict[str, str],
+    mes: str, columnas_por_mes: dict[str, dict[str, str]],
 ) -> LecturaReporte:
     """
     Un mismo archivo se baja UNA vez y de el se lee cada lado que pida ese reporte.
@@ -49,7 +49,7 @@ def extraer_lados_del_excel(
         else:
             valores_por_lado[lado], id_error, mensaje = extraer(
                 df, detalle["modoExtraccion"], detalle,
-                mes=mes, meses_dinamicos={"MESES_CIP01": meses_cip01},
+                mes=mes, meses_dinamicos=columnas_por_mes,
             )
         if id_error and primer_error[0] is None:
             primer_error = (id_error, mensaje)

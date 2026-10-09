@@ -29,7 +29,7 @@ from services.ftp.registro_errores_ftp_Services import (
 
 def extraer_reporte_de_unidades(
     ftp: FTP, reporte: str, ano: str, mes: str, semana: int | None,
-    detalles_por_lado: dict[str, dict[str, Any]], meses_cip01: dict[str, str],
+    detalles_por_lado: dict[str, dict[str, Any]], columnas_por_mes: dict[str, dict[str, str]],
     unidades_sin_servicio: list[str], log: LogErrores,
 ) -> dict[str, dict[str, list[float] | None] | None]:
     """
@@ -65,7 +65,7 @@ def extraer_reporte_de_unidades(
                 valores_por_unidad[unidad] = None
                 continue
 
-            lectura = extraer_lados_del_excel(descargar_archivo(ftp, archivos[0]), detalles_por_lado, mes, meses_cip01)
+            lectura = extraer_lados_del_excel(descargar_archivo(ftp, archivos[0]), detalles_por_lado, mes, columnas_por_mes)
             valores_por_unidad[unidad] = lectura.valores_por_lado
             if lectura.id_error:
                 # Si la unidad no maneja ese servicio, la etiqueta faltante es esperada, no una falla.
@@ -137,7 +137,7 @@ def extraer_indicador(
         try:
             for prefijo, detalles in detalles_por_prefijo.items():
                 valores_por_unidad = extraer_reporte_de_unidades(
-                    ftp, prefijo, ano, mes, semana, detalles, mapeo.MESES_CIP01,
+                    ftp, prefijo, ano, mes, semana, detalles, mapeo.marcadores_por_mes(),
                     mapeo.unidadesSinServicio or [], log,
                 )
                 for unidad, valores_por_llave in valores_por_unidad.items():

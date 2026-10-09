@@ -129,7 +129,13 @@ class IndicadorFTPMapeo(FichaFTPMapeo):
     """Indicador FTP automatizado: la ficha mas todo lo que la extraccion necesita."""
     reporte:             ReporteFTPMapeo
     MESES_CIP01:         dict[str, str] = {}
+    # Otros marcadores de "columna que cambia segun el mes" ademas de MESES_CIP01,
+    # ej. {"POBLACION_CIP01": {"1": "C", ..., "7": "R"}} para usarlos en columna_dato.
+    COLUMNAS_POR_MES:    dict[str, dict[str, str]] = {}
     unidadesSinServicio: list[str] = []
+
+    def marcadores_por_mes(self) -> dict[str, dict[str, str]]:
+        return {"MESES_CIP01": self.MESES_CIP01, **self.COLUMNAS_POR_MES}
 
 
 class IndicadorExtractorMapeo(FichaFTPMapeo):

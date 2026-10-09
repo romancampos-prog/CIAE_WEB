@@ -256,14 +256,14 @@ const SemaforoMensual = ({ semaforo }) => (
  * @param {boolean} esDenominador - cuál parser algebraico usar (difieren en
  *   cómo agrupan la lista de la expresión, ver operacionParser.js).
  */
-const resolverLado = (ladoFicha, expresionOperacion, esDenominador) => {
+const resolverLado = (ladoFicha, expresionOperacion, esDenominador, columnasPorMes) => {
   const resultado = describirFuenteCalculo(ladoFicha);
   if (resultado.tipo !== 'formula') return resultado;
 
   const reporte = ladoFicha.detalle.archivo ?? ladoFicha.detalle.sexo;
   const parsed = esDenominador
-    ? parsearDenominador(expresionOperacion, reporte)
-    : parsearNumerador(expresionOperacion, reporte);
+    ? parsearDenominador(expresionOperacion, reporte, columnasPorMes)
+    : parsearNumerador(expresionOperacion, reporte, columnasPorMes);
   return { tipo: 'formula', parsed };
 };
 
@@ -285,8 +285,8 @@ const InformacionIndicador = ({ data }) => {
   const esFijo     = ['Esperado', 'Medio', 'Bajo', 'Alto'].some(k => k in semaforo);
   const esAgrupado = !esFijo && !esMensual;
 
-  const numResultado = reporte ? resolverLado(reporte.numerador, reporte.operacion.numerador, false) : null;
-  const denResultado = reporte ? resolverLado(reporte.denominador, reporte.operacion.denominador, true) : null;
+  const numResultado = reporte ? resolverLado(reporte.numerador, reporte.operacion.numerador, false, data.columnasPorMes) : null;
+  const denResultado = reporte ? resolverLado(reporte.denominador, reporte.operacion.denominador, true, data.columnasPorMes) : null;
   const textoRes      = reporte ? parsearResultado(reporte.operacion.resultado) : null;
 
   return (

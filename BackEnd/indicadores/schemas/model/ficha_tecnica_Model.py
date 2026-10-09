@@ -69,3 +69,6 @@ class FichaTecnicaCompleta(BaseModel):
     informacion: InformacionFicha
     reporte: ReporteFicha | None = None
     semaforo: Dict[str, Semaforo] | Semaforo
+    # Columnas que cambian segun el mes (ej. CUPN 01: {"MESES_CIP01": {"1": "D", ...}});
+    # vacio en los indicadores que no las usan.
+    columnasPorMes: Dict[str, Dict[str, str]] = {}

@@ -23,6 +23,24 @@ const getHoja = (reporte, id) => {
   return f.hoja ?? id;
 };
 
+const MESES_ABREV = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+// Columna que cambia segun el mes ({"1": "C", ..., "7": "R"}): junta los meses
+// seguidos que usan la misma columna -> "Ene–Jun: C · Jul–Dic: R".
+const describirColumnasPorMes = (mapa) => {
+  const tramos = [];
+  for (let m = 1; m <= 12; m++) {
+    const col = mapa[String(m)];
+    if (!col) continue;
+    const ultimo = tramos[tramos.length - 1];
+    if (ultimo && ultimo.col === col && ultimo.hasta === m - 1) ultimo.hasta = m;
+    else tramos.push({ col, desde: m, hasta: m });
+  }
+  return tramos
+    .map(t => `${MESES_ABREV[t.desde - 1]}${t.hasta > t.desde ? `–${MESES_ABREV[t.hasta - 1]}` : ''}: ${t.col}`)
+    .join(' · ');
+};
+
 /**
  * Resuelve las columnas de datos de una fuente.
  * @param {object} reporte  - detalle.archivo o detalle.sexo
@@ -56,8 +74,7 @@ const getCols = (reporte, id, raiz = null, mes = null) => {
       const mapa = raiz[c];
       const clave = mes != null ? String(mes) : null;
       if (clave && mapa[clave]) return mapa[clave];
-      const ejemplo = Object.entries(mapa).map(([m, col]) => `mes ${m}→${col}`).join(', ');
-      return `[dinámica: ${ejemplo}]`;
+      return describirColumnasPorMes(mapa);
     }
     return c;
   });

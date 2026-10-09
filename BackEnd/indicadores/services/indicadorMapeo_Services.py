@@ -172,6 +172,10 @@ def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
         informacion=dato["informacion"],
         reporte=reporte,
         semaforo=dato["semaforo"],
+        columnasPorMes={
+            **({"MESES_CIP01": dato["MESES_CIP01"]} if dato.get("MESES_CIP01") else {}),
+            **dato.get("COLUMNAS_POR_MES", {}),
+        },
     )
 
 

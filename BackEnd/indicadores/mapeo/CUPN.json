@@ -1,7 +1,7 @@
 {
     "CUPN 01": {
         "nombreArchivoFinal": "CUPN 01",
-        "fechaModificacion": "19/08/2026",
+        "fechaModificacion": "09/10/2026",
         "imagen": "icono_cupn.png",
         "color": "#336699",
         "modulo": "ftp",
@@ -43,7 +43,7 @@
                         "columna": "A",
                         "buscar": "T   O   T   A   L",
                         "columna_dato": [
-                            "C"
+                            "POBLACION_CIP01"
                         ]
                     }
                 }
@@ -67,6 +67,22 @@
             "10": "Y",
             "11": "AA",
             "12": "AC"
+        },
+        "COLUMNAS_POR_MES": {
+            "POBLACION_CIP01": {
+                "1": "C",
+                "2": "C",
+                "3": "C",
+                "4": "C",
+                "5": "C",
+                "6": "C",
+                "7": "R",
+                "8": "R",
+                "9": "R",
+                "10": "R",
+                "11": "R",
+                "12": "R"
+            }
         },
         "semaforo": {
             "Enero": {
