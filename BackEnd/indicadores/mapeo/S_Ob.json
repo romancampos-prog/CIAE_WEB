@@ -13,6 +13,12 @@
       "mensual": false,
       "mensualAcumulado": true
     },
+    "criterioGeneracion": {
+      "basadoEn": "guiaSistemas",
+      "comoSeGenera": "CP03: numerador 15_EvalNut BZ + 14_EvalNut F+AA+AV; denominador 15_EvalNut BY + 14_EvalNut E+Z+AU.",
+      "justificacion": "Es lo que indica la Guía.",
+      "diferenciaOficial": "Numerador ±1 a 2; denominador 41 de 46 (difieren UMF 60, Dolores, SLP, SJI y UMF 29)."
+    },
     "informacion": {
       "titulo": "S_Ob 01 - Cobertura de medición de peso y talla de la población derechohabiente, en unidad médica de primer nivel.",
       "objetivo": "Medir el porcentaje de población derechohabiente con medición de peso y talla para identificar peso bajo, peso normal, sobrepeso y obesidad a través del Índice de Masa Corporal (IMC).",
@@ -153,6 +159,12 @@
       "mensual": true,
       "mensualAcumulado": false
     },
+    "criterioGeneracion": {
+      "basadoEn": "guiaSistemas",
+      "comoSeGenera": "CP03, hoja 15_EvalNut_20_120: numerador DK+EF; denominador CB.",
+      "justificacion": "Es lo que indica la Guía.",
+      "diferenciaOficial": "Numerador 44 a 46 de 46 por mes; denominador ±1 a 5 por unidad."
+    },
     "informacion": {
       "titulo": "S_Ob 02 - Proporción de obesidad en derechohabientes de 20 años y más que acudieron a medición de peso y talla.",
       "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad, para identificar un factor de riesgo para desarrollar enfermedades crónicas.",
@@ -213,6 +225,12 @@
     "periodicidad": "Mensual",
     "peridocidadGenerada": {
       "mensual": true
+    },
+    "criterioGeneracion": {
+      "basadoEn": "guiaSistemas",
+      "comoSeGenera": "CP03, hoja 15_EvalNut_20_120: numerador DN+EI; denominador CB.",
+      "justificacion": "Es lo que indica la Guía.",
+      "diferenciaOficial": "Numerador exacto; denominador de 2% a 35% arriba."
     },
     "informacion": {
       "titulo": "S_Ob 03 - Proporción de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0).",
@@ -275,6 +293,12 @@
     "peridocidadGenerada": {
       "mensual": true,
       "mensualAcumulado": false
+    },
+    "criterioGeneracion": {
+      "basadoEn": "sinRevisar",
+      "comoSeGenera": "",
+      "justificacion": "",
+      "diferenciaOficial": ""
     },
     "informacion": {
       "titulo": "S_Ob 04 - Porcentaje de confirmación diagnóstica de obesidad en Medicina Familiar de derechohabientes de 20 años y más, con índice de masa corporal igual o mayor a 30 kg/m2",

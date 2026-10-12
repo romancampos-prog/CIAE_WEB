@@ -13,6 +13,12 @@
             "mensual": false,
             "mensualAcumulado": true
         },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "Numerador: CP02 DJ+EX+GG y CP03 O+S. Denominador: CP03 N+R y CP02 DI+EW+GC, cada grupo restando su prevalencia (1.2%, 1.6%, 15.8%, 13.5%, 43.3%).",
+            "justificacion": "Es lo que indica la Guía.",
+            "diferenciaOficial": "Numerador coincide; denominador no coincide."
+        },
         "informacion": {
             "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más, con medición de tensión arterial en el primer nivel de atención, que permita la identificación temprana de hipertensión arterial y prehipertensión.",
@@ -155,6 +161,12 @@
             "mensual": true,
             "mensualAcumulado": false
         },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
+        },
         "informacion": {
             "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
             "objetivo": "Medir el porcentaje de pacientes hipertensos mayores de 20 años, con cifras de tensión arterial en control adecuado (sistólica menor de 140 mmHg y diastólica menor de 90 mm Hg), que acudieron a consulta en el periodo de medición (mes, año), para conocer la eficiencia de la atención en este grupo de pacientes",
@@ -214,6 +226,12 @@
         "periodicidad": "Semestral Anualizado",
         "peridocidadGenerada": {
             "semstralAnualizado": true
+        },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
         },
         "informacion": {
             "titulo": "EH 03 - Tasa de hospitalizaciones evitables por hipertensión arterial en población derechohabiente de 20 a 74 años",

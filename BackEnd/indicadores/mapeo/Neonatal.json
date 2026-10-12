@@ -13,6 +13,12 @@
       "mensual": true,
       "mensualAcumulado": true
     },
+    "criterioGeneracion": {
+      "basadoEn": "fichaTecnica",
+      "comoSeGenera": "Egresos Nacimientos TOCO por hospital: nacidos vivos (ESTADORN 1) de 0 a 36 semanas (SEMGES) y peso de 0 a 1000 g (col. O) / nacidos vivos.",
+      "justificacion": "Se arma con los rangos de la Ficha sobre las columnas del Egresos.",
+      "diferenciaOficial": "Coincide 70 de 70."
+    },
     "informacion": {
       "titulo": "Neonatal 03 - Proporción de prematuros (menores de 37 semanas) con peso menor o igual a 1,000 g.",
       "objetivo": "Medir el porcentaje de recién nacidos prematuros (menores de 37 semanas), con peso menor o igual a 1,000 g para establecer acciones preventivas y asistenciales que disminuyan la prematurez de recién nacidos con peso extremadamente bajo, principal causa de morbilidad y mortalidad en los neonatos.",

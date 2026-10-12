@@ -13,6 +13,12 @@
             "mensual": false,
             "mensualAcumulado": true
         },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
+        },
         "informacion": {
             "titulo": "Materna 01 - Porcentaje de adolescentes embarazadas.",
             "objetivo": "Medir la proporción de mujeres derechohabientes de 10 a 19 años que se embarazan, grupo vulnerable de alto riesgo para su salud y la supervivencia, así como el desarrollo del binomio madre-hijo.",
@@ -77,6 +83,12 @@
             "mensual": true,
             "mensualAcumulado": false
         },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
+        },
         "informacion": {
             "titulo": "Materna 02 - Oportunidad de inicio de la vigilancia prenatal.",
             "objetivo": "Medir el porcentaje de mujeres que acuden dentro del primer trimestre de gestación a la vigilancia prenatal en el servicio de medicina familiar, para identificar tempranamente factores de riesgo, otorgar tratamiento y prevenir complicaciones durante el embarazo; así como brindar educación para el cuidado de la salud en el beneficio del binomio madre-hijo.",
@@ -137,6 +149,12 @@
     "previos": false,
     "periodicidad": "Mensual - Mensual Acumulado",
     "peridocidadGenerada": { "mensual": true, "mensualAcumulado": true },
+    "criterioGeneracion": {
+        "basadoEn": "sinRevisar",
+        "comoSeGenera": "",
+        "justificacion": "",
+        "diferenciaOficial": ""
+    },
     "informacion": {
         "titulo": "Materna 03 - Porcentaje de preeclampsia-eclampsia.",
         "objetivo": "Medir la proporción de embarazadas con diagnóstico de preeclampsia-eclampsia en las unidades médicas de segundo y tercer nivel de atención, para reorientar o reorganizar la identificación, diagnóstico, tratamiento y/o referencia, de la preeclampsia-eclampsia y sus complicaciones.",
@@ -193,6 +211,12 @@
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
         "peridocidadGenerada": { "mensual": true, "mensualAcumulado": true },
+        "criterioGeneracion": {
+            "basadoEn": "fichaTecnica",
+            "comoSeGenera": "Egresos TOCO por hospital, con los filtros de diagnóstico del mapeo; se excluye AGREGADO terminado en ND.",
+            "justificacion": "Se arma con las columnas del Egresos según la definición de la Ficha.",
+            "diferenciaOficial": "Coincide 69 de 70 (hospital-mes)."
+        },
         "informacion": {
             "titulo": "Materna 04 - Cobertura de protección anticonceptiva posevento obstétrico.",
             "objetivo": "Medir la proporción de mujeres aceptantes de un método anticonceptivo, después de la interrupción del embarazo (parto eutócico, distócico vaginal, distócico abdominal o complicaciones de aborto) y antes del egreso hospitalario para concluir la fecundación o ampliar el periodo entre cada gestación.",
@@ -263,6 +287,12 @@
         "previos": false,
         "periodicidad": "Mensual - Mensual Acumulado",
         "peridocidadGenerada": { "mensual": true, "mensualAcumulado": true },
+        "criterioGeneracion": {
+            "basadoEn": "fichaTecnica",
+            "comoSeGenera": "Egresos Nacimientos TOCO por hospital: nacidos vivos (ESTADORN 1) de 26 a 36 semanas (SEMGES) / nacidos vivos.",
+            "justificacion": "La Ficha dice 28 a 36 semanas, pero con 26 a 36 coincide con el oficial.",
+            "diferenciaOficial": "Coincide 84 de 84."
+        },
         "informacion": {
             "titulo": "Materna 05 - Porcentaje de prematurez (26 a 36.6 semanas de gestación) en Unidades Médicas de Segundo Nivel de Atención y en Unidades Médicas de Alta Especialidad.",
             "objetivo": "Medir el porcentaje de recién nacidos vivos de 26 a 36.6 semanas de gestación, para establecer acciones preventivas y asistenciales que disminuyan la prematurez, causa principal de morbilidad y mortalidad en los neonatos.",

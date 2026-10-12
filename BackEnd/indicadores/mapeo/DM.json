@@ -13,6 +13,12 @@
             "mensual": false,
             "mensualAcumulado": true
         },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "Numerador: CP02 DF+ET+GD y CP03 C+G (hoja 04CobDM_HTA_COL). Denominador: PB02 (hoja Poblacion_Sub14) por grupo de edad, restando la prevalencia de cada grupo.",
+            "justificacion": "Es lo que indica la Guía: denominador del PB02 por grupos de edad con sus prevalencias.",
+            "diferenciaOficial": "Coincide 44 de 46 unidades; UMF 47 −3 y UMF 49 −1."
+        },
         "informacion": {
             "titulo": "DM 01 - Cobertura de detección de diabetes en población derechohabiente de 20 años y más.",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más a los que se realizó la medición de glucosa en el primer nivel de atención, para identificar niveles elevados que permitan la detección temprana de prediabetes o de diabetes tipo 2.",
@@ -151,6 +157,12 @@
             "mensual": true,
             "mensualAcumulado": false
         },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
+        },
         "informacion": {
             "titulo": "DM 02 - Índice de confirmación de diabetes en casos sospechosos, población derechohabiente de 20 años y más.",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más, a quienes se les confirmó el diagnóstico de diabetes, clasificados inicialmente como casos sospechosos en la detección mediante glucosa capilar.",
@@ -209,6 +221,12 @@
         "peridocidadGenerada": {
             "mensual": true,
             "mensualAcumulado": false
+        },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
         },
         "informacion": {
             "titulo": "DM 03 - Porcentaje de pacientes que viven con diabetes en control glucémico con hemoglobina glucosilada (HbA1c) menor o igual a 7%.",
@@ -284,6 +302,12 @@
         "periodicidad": "Semestral Anualizado",
         "peridocidadGenerada": {
             "semstralAnualizado": true
+        },
+        "criterioGeneracion": {
+            "basadoEn": "sinRevisar",
+            "comoSeGenera": "",
+            "justificacion": "",
+            "diferenciaOficial": ""
         },
         "informacion": {
             "titulo": "DM 04 - Tasa de hospitalizaciones evitables por diabetes en población derechohabiente de 20 a 74 años",

@@ -13,6 +13,12 @@
       "mensual": false,
       "mensualAcumulado": true
     },
+    "criterioGeneracion": {
+      "basadoEn": "fichaTecnica",
+      "comoSeGenera": "Numerador: CP02 CQ. Denominador: PB02 mujeres de 25 a 64 años por grupo de edad, restando las prevalencias de la Ficha (0.4%, 2.9%, 10.9%, 21.1%, 29.5%).",
+      "justificacion": "La Guía indica CP02 CP, pero es un solo total y no permite aplicar las prevalencias por edad que pide la Ficha.",
+      "diferenciaOficial": "Coincide 46 de 46."
+    },
     "informacion": {
       "titulo": "CACU 01 - Cobertura de tamizaje de primera vez de cáncer cérvico uterino en mujeres entre 25 y 64 años.",
       "objetivo": "Medir la proporción de mujeres entre 25 y 64 años, con tamizaje de cáncer cérvico uterino, a través de la prueba de papanicolaou, para identificar a derechohabientes con lesiones precancerosas y cáncer en etapa temprana.",

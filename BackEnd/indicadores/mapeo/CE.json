@@ -13,6 +13,12 @@
             "mensual": true,
             "mensualAcumulado": false
         },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "IAP03, hoja Prod_Enf_Mens_Serv80, renglón Total del servicio 80: numerador col. L, denominador col. K.",
+            "justificacion": "Es lo que indica la Guía.",
+            "diferenciaOficial": "Coincide 259 de 259."
+        },
         "informacion": {
             "titulo": "CE 01 - Promedio de atenciones preventivas por personal de enfermería.",
             "objetivo": "Medir la productividad diaria del personal auxiliar de enfermería en salud pública que proporciona atenciones preventivas (80).",
@@ -78,6 +84,12 @@
         "peridocidadGenerada": {
             "mensual": true,
             "mensualAcumulado": false
+        },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "IAP03, hoja Prod_Enf_Mens_Serv87, renglón Total del servicio 87: numerador col. M, denominador col. K.",
+            "justificacion": "Es lo que indica la Guía. La Guía cita el IAP01 para el denominador, pero la hoja solo existe en el IAP03.",
+            "diferenciaOficial": "Denominador 105 de 105; numerador 100 de 105."
         },
         "informacion": {
             "titulo": "CE 02 - Promedio de atenciones integrales por personal de enfermería especialista en medicina de familia.",
