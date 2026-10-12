@@ -1,0 +1,38 @@
+{
+  "reporte": "PU01",
+  "ubicacionFTP": "01. DATAMARTEM/ArchsDataMart_{año}/{año}{mes}/{unidad}/1.SIAIS_Reportes/Productividad/PU01U*.xls",
+  "tomadoDe": "PU01 UMF 50, julio 2026",
+  "nota": "Solo encabezados (filas antes de los datos). Cada columna: secciones combinadas de arriba / nombre de la columna.",
+  "hojas": {
+    "Parte I": {
+      "primeraFilaDatos": 13,
+      "columnas": {
+        "A": "DELEGACIÓN: / UNIDAD MEDICA: / RENGLÓN",
+        "B": "11.-GUANAJUATO / 110111252110.-UMF 50 GUANAJUATO / POBLACIÓN ADSCRITA",
+        "C": "ASEGURADOS ADSCRITOS A LA UNIDAD",
+        "D": "ADSCRITA A MEDICO FAMILIAR",
+        "E": "CITAS CUMPLIDAS EN MEDICINA FAMILIAR",
+        "F": "PASES EN MEDICINA FAMILIAR A ESPECIALISTAS / DE LA UNIDAD",
+        "G": "PASES EN MEDICINA FAMILIAR A ESPECIALISTAS / OTRA UNIDAD",
+        "H": "MEDICOS FAMILIARES CON POBLACIÓN ADSCRITA",
+        "I": "CITA CONCERTADA",
+        "J": "PERIODO:",
+        "K": "Del 26/06/2026 al 25/07/2026"
+      },
+      "segundaTabla": {
+        "nota": "La hoja 'Parte I' tiene DOS tablas. La de arriba (fila 9) es de población/citas; la de abajo (filas 17-20) es por SERVICIO (renglones: MEDICINA FAMILIAR, ESTOMATOLOGIA, ...). CUPN 04 usa la de abajo: renglón 'MEDICINA FAMILIAR', columna E.",
+        "columnas": {
+          "A": "SERVICIO",
+          "B": "NÚMERO DE MÉDICOS",
+          "C": "TIEMPO DE TRABAJO / HORAS",
+          "D": "TIEMPO DE TRABAJO / DIAS",
+          "E": "TOTAL DE CONSULTAS",
+          "F": "ATENCIONES MÉDICAS / 1a. VEZ",
+          "G": "ATENCIONES MÉDICAS / NO OTORG.",
+          "H": "PROM. HORA",
+          "I": "CITAS CUMPLIDAS"
+        }
+      }
+    }
+  }
+}

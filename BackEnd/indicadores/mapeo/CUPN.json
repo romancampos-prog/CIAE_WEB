@@ -13,6 +13,12 @@
             "mensual": false,
             "mensualAcumulado": true
         },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "CIP01, hoja CIP Unidad Médica, renglón TOTAL: numerador la columna del mes; denominador col. C (ene–jun) o col. R (jul–dic).",
+            "justificacion": "Es lo que indica la Guía.",
+            "diferenciaOficial": "Denominador 41 de 46; numerador en promedio 6% abajo (solo UMF 18 exacta)."
+        },
         "informacion": {
             "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
             "objetivo": "Medir la proporción de población derechohabiente que recibió, en el último año, acciones preventivas de acuerdo con su grupo de edad y sexo, para conocer la población beneficiada con PrevenIMSS.",
@@ -161,6 +167,12 @@
             "mensual": true,
             "mensualAcumulado": false
         },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "IN08, hoja Indicadores, renglón T O T A L E S: numerador col. D (pacientes referidos a segundo nivel, derechohabientes); denominador col. B (total de consultas de Medicina Familiar).",
+            "justificacion": "Es lo que indica la Guía. El resultado es el mismo % que trae el IN08 en su col. E.",
+            "diferenciaOficial": "Numerador 321 de 322; denominador 267 de 322 (ene–jul). UMF 53, 47 y 14 difieren todos los meses."
+        },
         "informacion": {
             "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
             "objetivo": "Medir el porcentaje de derechohabientes que requieren atención con mayor grado de especialización y recursos, para conocer la capacidad resolutiva de las Unidades de Medicina Familiar.",
@@ -185,20 +197,20 @@
             "denominador": {
                 "fuente": "ftp",
                 "archivo": {
-                    "PU01": {
-                        "hoja": "Parte I",
+                    "IN08": {
+                        "hoja": "Indicadores",
                         "modoExtraccion": "INTERSECCION_COLUMNA",
                         "columna": "A",
-                        "buscar": "MEDICINA FAMILIAR",
+                        "buscar": "T O T A L E S",
                         "columna_dato": [
-                            "E"
+                            "B"
                         ]
                     }
                 }
             },
             "operacion": {
                 "numerador": "(IN08[0])",
-                "denominador": "(PU01[0])",
+                "denominador": "(IN08[0])",
                 "resultado": "round((numerador / denominador) * 100, 2)"
             }
         },
@@ -220,7 +232,13 @@
         "periodicidad": "Mensual - Mensual Acumulado",
         "peridocidadGenerada": {
             "mensual": true,
-            "mensualAcumulado": false
+            "mensualAcumulado": true
+        },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "PU01, hoja Parte I, renglón MEDICINA FAMILIAR: numerador col. E (total de consultas); denominador col. C (horas). Acumulado sumando meses.",
+            "justificacion": "Es lo que indica la Guía.",
+            "diferenciaOficial": "Coincide 321 de 322 (ene–jul); UMF 46 enero −694 por archivo duplicado en el FTP."
         },
         "informacion": {
             "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
@@ -304,7 +322,13 @@
         "periodicidad": "Mensual - Mensual Acumulado",
         "peridocidadGenerada": {
             "mensual": true,
-            "mensualAcumulado": false
+            "mensualAcumulado": true
+        },
+        "criterioGeneracion": {
+            "basadoEn": "guiaSistemas",
+            "comoSeGenera": "PU01, hoja Parte I, renglón ESTOMATOLOGIA: numerador col. E (total de consultas); denominador col. C (horas). Acumulado sumando meses.",
+            "justificacion": "Es lo que indica la Guía.",
+            "diferenciaOficial": "Coincide 175 de 175 (ene–jul)."
         },
         "informacion": {
             "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",

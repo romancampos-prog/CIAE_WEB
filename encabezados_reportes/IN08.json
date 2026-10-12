@@ -1,0 +1,20 @@
+{
+  "reporte": "IN08",
+  "ubicacionFTP": "01. DATAMARTEM/ArchsDataMart_{año}/{año}{mes}/{unidad}/1.SIAIS_Reportes/Indicadores/IN08U*.xls",
+  "tomadoDe": "IN08 UMF 50, julio 2026",
+  "nota": "Solo encabezados (filas antes de los datos). Cada columna: secciones combinadas de arriba / nombre de la columna.",
+  "hojas": {
+    "Indicadores": {
+      "primeraFilaDatos": 16,
+      "columnas": {
+        "A": "DELEGACIÓN: / UNIDAD MEDICA: / MEDICO / UNIDAD MEDICA / DELEGACION",
+        "B": "11.-GUANAJUATO / 110111252110.-UMF 50 GUANAJUATO / TOTAL DE CONSULTAS DE MEDICINA FAMILIAR / NUM.",
+        "C": "TOTAL DE CONSULTAS DE MEDICINA FAMILIAR / %",
+        "D": "PACIENTES REFERIDOS A SEGUNDO NIVEL (DERECHOHABIENTES) / NUM.",
+        "E": "PERIODO: / PACIENTES REFERIDOS A SEGUNDO NIVEL (DERECHOHABIENTES) / %",
+        "F": "Del 26/06/2026 al 25/07/2026 / TOTAL DE PASES A SEGUNDO NIVEL (PASES) / NUM",
+        "G": "TOTAL DE PASES A SEGUNDO NIVEL (PASES) / &"
+      }
+    }
+  }
+}
