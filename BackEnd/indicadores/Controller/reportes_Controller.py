@@ -1,48 +1,24 @@
-from fastapi import HTTPException, status, APIRouter
+from fastapi import Depends, HTTPException, status, APIRouter
+from auth.services.jwt_utils import solo_roles
 from configs.response import ApiResponse
-from schemas.DTO.Indicador_ViewModel import IndicadorRequest
-from services.bd_Ciae_Indicadores_Services import IndicadorConsultarReporte
-import logging
+from services.bd_Ciae_Indicadores_Services import ConsultarGraficaIndicador
 
 #/Indicadores/reportes
 reportesApi = APIRouter()
 
+# Cualquier usuario con sesion puede consultar las graficas (los datos ya guardados en BD_CIAE).
+ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 
-#Get Indicadores/reporte/Indicador)
-@reportesApi.get("/{indicador}")
-async def Obtener_Indicador(
+
+#Get Indicadores/reportes/{indicador}/grafica?ano=2026
+@reportesApi.get("/{indicador}/grafica")
+async def Grafica_Indicador(
     indicador: str,
     ano: str,
-    modulo: str | None = None,
-    previos: bool = False,
-    mensual: bool = False,
-    mensualAcumulado: bool = False,
+    payload: dict = Depends(solo_roles(*ROLES_CONSULTA)),
 ):
-    payload = IndicadorRequest(
-        indicador=indicador, ano=ano, modulo=modulo,
-        previos=previos, mensual=mensual, mensualAcumulado=mensualAcumulado,
-    )
-    try:
-        if (not payload.indicador or not payload.ano):
-            raise HTTPException (
-                status_code = status.HTTP_400_BAD_REQUEST,
-                detail = "El Campo Indicador o año viene vacio"
-            )
-        
-        reporte = IndicadorConsultarReporte(payload)
-        if (not reporte):
-                   raise HTTPException(
-                       status_code = status.HTTP_400_BAD_REQUEST,
-                       detail = f"El Indicador {payload.indicador} no cuenta con reporte"
-                   )
-                   
-        return reporte
-    
-    except Exception as error:
-        #print para el desarrolador 
-        logging.exception(f"Ocurrio un Error al Consultar el Indicador: {error}", exc_info=True)
-        #Mensaje para el Usuario
-        raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = "Error al Consultar el indicador"
-        )
+    """Ficha (del mapeo) + reporte (de BD_CIAE) en una sola consulta; el modulo lo resuelve el backend."""
+    grafica = ConsultarGraficaIndicador(indicador, ano)
+    if grafica is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se encontró el indicador: {indicador}")
+    return ApiResponse(success=True, message="Datos de la gráfica", data=grafica)

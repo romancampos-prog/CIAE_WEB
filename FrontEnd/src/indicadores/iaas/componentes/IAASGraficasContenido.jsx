@@ -45,7 +45,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
     indColor, sinDatos, hayDatos,
     HGS_COLOR, HGS_BG,
     TOTAL_KEY,
-  } = useIAASGrafica(extIndSel, onIndSelChange);
+  } = useIAASGrafica(extIndSel, onIndSelChange, indsHermanos);
 
   const esTotal = unidadSel === TOTAL_KEY;
 

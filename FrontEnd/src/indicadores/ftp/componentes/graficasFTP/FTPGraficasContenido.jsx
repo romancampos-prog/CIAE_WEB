@@ -29,7 +29,7 @@ const conAnioChico = (texto) =>
     /^\d{4}$/.test(parte) ? <span key={i} className="ig-mes-anio">{parte}</span> : parte
   );
 
-const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [] }) => {
+const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, indsHermanos = [], colorFamilia }) => {
   const [busqUnidad, setBusqUnidad]   = useState('');
   const [infoAbierta, setInfoAbierta] = useState(false);
   const [hoveredMes, setHoveredMes]   = useState(null);
@@ -47,7 +47,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
     cumplimientoMes, cumplimientoUltimoMes,
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
-  } = useFTPGrafica(hoveredMes, extIndSel, onIndSelChange);
+  } = useFTPGrafica(hoveredMes, extIndSel, onIndSelChange, { indsHermanos, colorFamilia });
 
   const rangosSemConMes  = rangosSem && esSemPorMes ? rangosSem : rangosSem ? { ...rangosSem, _mes: undefined } : null;
 

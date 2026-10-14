@@ -48,16 +48,25 @@ export const obtenerFichaTecnicaCompleta = async (indicador) => {
   return data;
 };
 
+// Lo ya consultado en esta visita a gráficas: regresar a un indicador no lo vuelve a pedir.
+// Se guarda la promesa (no el resultado) para que dos pedidos seguidos del mismo no dupliquen la llamada.
+const graficasConsultadas = new Map();
+
 /**
- * Reporte ya generado de un indicador (los datos reales para graficar).
- * @param {string} indicador
- * @param {string} ano
- * @param {{modulo:string, mensualAcumulado?:boolean, previos?:boolean}} opciones
- *   modulo: "ftp" | "iaas" -- de eso depende si el backend calcula MENSUAL_ACUMULADO.
+ * Ficha (del mapeo) + reporte (de BD_CIAE) de un indicador en una sola llamada. El backend
+ * resuelve el módulo y el semanal; el front solo manda indicador y año.
+ * @returns {Promise<{ficha: Object, reporte: Object|null}>}
  */
-export const obtenerReporteIndicador = async (indicador, ano, { modulo, mensualAcumulado = false, previos = false } = {}) => {
-  const { data } = await api.get(`/Indicadores/reportes/${encodeURIComponent(indicador)}`, {
-    params: { ano, modulo, previos, mensualAcumulado },
-  });
-  return data;
+export const obtenerGraficaIndicador = (indicador, ano) => {
+  const clave = `${indicador}|${ano}`;
+  if (!graficasConsultadas.has(clave)) {
+    const pedido = api.get(`/Indicadores/reportes/${encodeURIComponent(indicador)}/grafica`, { params: { ano } })
+      .then(({ data }) => data.data)
+      .catch(error => { graficasConsultadas.delete(clave); throw error; });
+    graficasConsultadas.set(clave, pedido);
+  }
+  return graficasConsultadas.get(clave);
 };
+
+/** Se llama al entrar y salir de gráficas, para no mostrar datos viejos si se generó algo nuevo. */
+export const limpiarGraficasConsultadas = () => graficasConsultadas.clear();

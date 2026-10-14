@@ -1,29 +1,13 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
 import { useRol } from '../../../auth/hooks/useRol';
-import { obtenerTodosLosIndicadores } from '../../shared/api/indicadoresInfo';
-import { CAT_COLOR } from '../constantes/colores';
+import { obtenerTodosLosIndicadores, limpiarGraficasConsultadas } from '../../shared/api/indicadoresInfo';
+import { urlIcono } from '../../shared/utils/iconos';
 import FTPGraficasContenido from '../componentes/graficasFTP/FTPGraficasContenido';
 import IAASGraficasContenido from '../../iaas/componentes/IAASGraficasContenido';
 import './ftp.css';
 import '../../shared/estilos/graficas.css';
 
-import iconoCama  from '../../../assets/icono_cama.png';
-import iconoCacu  from '../../../assets/icono_cacu.png';
-import iconoEh    from '../../../assets/icono_eh.png';
-import iconoDm    from '../../../assets/icono_dm.png';
-import iconoMt    from '../../../assets/icono_mt.png';
-import iconoCupn  from '../../../assets/icono_cupn.png';
-import iconoSOb   from '../../../assets/icono_S_Ob.png';
-import iconoCe    from '../../../assets/icono_ce (2).png';
-import iconoIaas  from '../../../assets/icono_iaas.png';
-
-const CAT_ICON = {
-  CAMA: iconoCama, CACU: iconoCacu, EH: iconoEh,  DM: iconoDm,
-  MT:   iconoMt,  CUPN: iconoCupn, S_Ob: iconoSOb, CE: iconoCe,
-  Neonatal: iconoMt,
-  IAAS: iconoIaas,
-};
 
 const MenuIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -41,6 +25,12 @@ const GraficasUnificadasPage = () => {
 
   const modulo = indSel.startsWith('IAAS') ? 'iass' : 'ftp';
 
+  // Lo consultado solo vale mientras se está en gráficas: al entrar y al salir se olvida.
+  useEffect(() => {
+    limpiarGraficasConsultadas();
+    return limpiarGraficasConsultadas;
+  }, []);
+
   useEffect(() => {
     document.title = 'Gráficas | CIAE';
     obtenerTodosLosIndicadores()
@@ -55,8 +45,8 @@ const GraficasUnificadasPage = () => {
 
   // El indice ya viene unificado del backend (ftp e IAAS por igual, con su
   // propio color) -- no hay que separar IAAS a mano ni duplicar su catalogo.
-  const todosGrupos = useMemo(() => todosLosIndicadores.map(({ categoriaIndicador, indicadores, color }) => ({
-    cat: categoriaIndicador, color: color || CAT_COLOR[categoriaIndicador] || '#0b5445', inds: indicadores ?? [],
+  const todosGrupos = useMemo(() => todosLosIndicadores.map(({ categoriaIndicador, indicadores, color, imagen }) => ({
+    cat: categoriaIndicador, color: color || '#0b5445', icono: urlIcono(imagen), inds: indicadores ?? [],
   })), [todosLosIndicadores]);
 
   const indColor = useMemo(() => {
@@ -72,6 +62,8 @@ const GraficasUnificadasPage = () => {
     }
     return null;
   }, [indSel, todosGrupos]);
+
+  const indIcono = useMemo(() => todosGrupos.find(({ cat }) => cat === indCat)?.icono ?? null, [indCat, todosGrupos]);
 
   const indsHermanos = useMemo(() => {
     const grupo = todosGrupos.find(({cat}) => cat === indCat);
@@ -106,8 +98,8 @@ const GraficasUnificadasPage = () => {
             <span className="ig-float-trigger-ind">{indSel || '…'}</span>
           </span>
           <span className="ig-float-trigger-dot" style={{ background: `${indColor}22` }}>
-            {CAT_ICON[indCat] && (
-              <img src={CAT_ICON[indCat]} alt="" className="ig-float-trigger-icon" />
+            {indIcono && (
+              <img src={indIcono} alt="" className="ig-float-trigger-icon" />
             )}
           </span>
         </button>
@@ -151,8 +143,8 @@ const GraficasUnificadasPage = () => {
       </aside>
 
       {/* Contenido según módulo — no renderiza hasta tener indicador */}
-      {indSel && modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} indsHermanos={indsHermanos} />}
-      {indSel && modulo === 'iass' && <IAASGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={CAT_ICON[indCat]} indsHermanos={indsHermanos} />} 
+      {indSel && modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={indIcono} indsHermanos={indsHermanos} colorFamilia={indColor} />}
+      {indSel && modulo === 'iass' && <IAASGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={indIcono} indsHermanos={indsHermanos} />} 
     </div>
   );
 };

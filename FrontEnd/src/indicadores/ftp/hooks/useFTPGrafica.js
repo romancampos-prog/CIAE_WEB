@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { obtenerTodosLosIndicadores, obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
+import { obtenerGraficaIndicador } from '../../shared/api/indicadoresInfo';
 import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_LARGOS_ARR } from '../../shared/constantes/meses';
-import { CAT_COLOR } from '../constantes/colores';
 import {
   buildFTPChartDataUnidad,
   buildFTPChartDataMes,
@@ -15,9 +14,9 @@ import { techoEscala } from '../../shared/utils/escala';
 
 /**
  * Hook principal de gráficas FTP.
- * Carga la lista de indicadores, la ficha y el reporte del indicador seleccionado
- * (los 3 endpoints unificados de /Indicadores) y calcula los datasets para las
- * vistas por unidad y por mes.
+ * Carga la ficha y el reporte del indicador seleccionado (una sola llamada, con
+ * memoria de lo ya consultado) y calcula los datasets para las vistas por unidad
+ * y por mes. La lista de indicadores la pide la página y llega por `familia`.
  *
  * Puede operar en modo controlado (indicador gestionado desde el componente padre)
  * o en modo independiente (el hook gestiona su propio `indSel`).
@@ -25,12 +24,12 @@ import { techoEscala } from '../../shared/utils/escala';
  * @param {number|null} hoveredMes - Mes sobre el que el usuario tiene el cursor (para el semáforo)
  * @param {string} [extIndSel] - Indicador seleccionado externamente (modo controlado)
  * @param {Function} [onExtChange] - Callback al cambiar el indicador en modo controlado
+ * @param {{indsHermanos?: string[], colorFamilia?: string}} [familia] - Indicadores y color de la familia (de la página)
  * @returns {Object} Estado y datos listos para renderizar las gráficas
  */
-export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
+export function useFTPGrafica(hoveredMes, extIndSel, onExtChange, { indsHermanos = [], colorFamilia } = {}) {
   const controlled = extIndSel !== undefined;
   const [anio]                          = useState('2026');
-  const [listaIndicadores, setLista]    = useState([]);
   const [localIndSel, setLocalIndSel]   = useState('');
 
   const indSel    = controlled ? extIndSel    : localIndSel;
@@ -44,54 +43,30 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
   const [mesSel, setMesSel]             = useState('');
   const [acumulado, setAcumulado]       = useState(false);
 
-  /** Carga inicial del índice de indicadores, agrupados por categoría */
-  useEffect(() => {
-    obtenerTodosLosIndicadores().then(lista => {
-      setLista(lista ?? []);
-      if (!controlled) {
-        const primero = lista?.[0]?.indicadores?.[0];
-        if (primero) setLocalIndSel(primero);
-      }
-    }).catch(() => {});
-  }, []);
-
   /**
    * Recarga ficha y reporte cuando cambia el indicador o el año.
    * No limpia `reporte` de inmediato: mientras llega la respuesta se sigue
    * mostrando lo del indicador anterior, para que el cambio no haga parpadear
    * todo el panel. `previos: true` para que el mes en curso (aun sin cerrar)
-   * siga apareciendo como barra parcial via SEMANA.
-   *
-   * La ficha se pide primero (no en paralelo con el reporte) porque el
-   * reporte necesita el "modulo" real del indicador (ficha.modulo: "ftp",
-   * "iaas", "Extractor"...) para que el backend sepa si debe armar
-   * MENSUAL_ACUMULADO (iaas) o filtrar al ultimo corte (Extractor) -- antes
-   * se mandaba 'ftp' fijo para todos, lo cual funcionaba para CACU/CAMA/etc.
-   * pero no para EH 03/DM 04 (modulo "Extractor").
+   * siga apareciendo como barra parcial via SEMANA (el backend lo agrega solo si existe).
+   * El módulo de cada indicador lo resuelve el backend desde el mapeo.
    */
   useEffect(() => {
-    if (!indSel) return;
+    if (!indSel) return undefined;
+    let vigente = true;
     setCargando(true);
-    obtenerFichaIndicador(indSel, anio).catch(() => null).then(ficha => {
-      const moduloReal = ficha?.modulo || 'ftp';
-      return obtenerReporteIndicador(indSel, anio, { modulo: moduloReal, previos: true })
-        .then(r => [r, ficha]);
-    }).then(([r, ficha]) => {
+    obtenerGraficaIndicador(indSel, anio).then(({ ficha, reporte: r }) => {
+      if (!vigente) return;
       setReporte(r);
       setIndInfo(ficha);
       const meses      = mesesDisponiblesDeReporte(r);
       const primerMes  = Object.keys(r?.MESES ?? {})[0];
       setUnidadSel(primerMes ? Object.keys(r.MESES[primerMes]?.Reporte ?? {})[0] ?? '' : '');
       setMesSel(meses.length > 0 ? meses[meses.length - 1] : '');
-    }).finally(() => setCargando(false));
+    }).catch(error => console.error('Error cargando la gráfica:', error))
+      .finally(() => { if (vigente) setCargando(false); });
+    return () => { vigente = false; };
   }, [indSel, anio]);
-
-  /** Lista plana de todos los indicadores (para el selector de la UI) */
-  const todosLosIndicadores = useMemo(() => {
-    const acc = [];
-    listaIndicadores.forEach(cat => (cat.indicadores ?? []).forEach(ind => acc.push(ind)));
-    return acc;
-  }, [listaIndicadores]);
 
   // El backend solo manda MENSUAL_ACUMULADO cuando el mapeo pide mensual + mensual
   // acumulado (suma Ene→mes, como IAAS); los que ya vienen acumulados del FTP no lo traen.
@@ -204,8 +179,9 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     [indInfo, mesParaSem]
   );
 
-  const indColor  = CAT_COLOR[indSel?.split(' ')[0]] ?? '#0b5445';
   const categoria = indSel?.split(' ')[0] ?? '';
+  // El color es el de la familia en el mapeo (catalogos/familias.json); llega de la página.
+  const indColor  = colorFamilia ?? '#0b5445';
 
   /**
    * Descarga el Excel de un indicador específico para un mes dado. Solo lectura:
@@ -229,11 +205,10 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
    * @param {string} mes - Mes en formato "MM"
    */
   const descargarCategoria = async () => {
-    const indicadoresCategoria = listaIndicadores.find(cat => cat.categoriaIndicador === categoria)?.indicadores ?? [];
-    if (!indicadoresCategoria.length || descargando) return;
+    if (!indsHermanos.length || descargando) return;
     setDescargando(true);
     try {
-      const res = await descargarExcelIndicadores(indicadoresCategoria, anio);
+      const res = await descargarExcelIndicadores(indsHermanos, anio);
       descargarB64(res.archivo_b64, res.nombre_archivo);
     } catch { /* silencioso */ }
     finally { setDescargando(false); }
@@ -245,8 +220,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange) {
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel, mesesDisponibles,
     acumulado, setAcumulado, tieneAcumulado,
-    listaIndicadores,
-    todosLosIndicadores, chartData, maxTasa,
+    chartData, maxTasa,
     chartDataMes, maxTasaMes, totalMes, unidadesStatus,
     cumplimientoMes, cumplimientoUltimoMes,
     rangosSem, esSemPorMes, indColor, categoria,

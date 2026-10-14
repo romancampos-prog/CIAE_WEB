@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent / "indicadores"))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from configs.cors import AMBIENTE, ORIGINS
@@ -28,6 +29,9 @@ DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')
 app = FastAPI(title="CIAE Backend", version="2.0.0")
 
 app.add_middleware(ErroresEndpointsMiddleware) ##middleware para todos los endpoitns por si algo truena
+
+# Las respuestas de indicadores/epidemiologia son JSON grandes y se comprimen muy bien (~8x).
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,

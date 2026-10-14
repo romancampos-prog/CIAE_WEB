@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { getUnidadesIAAS } from '../api/IAAS';
 import { descargarExcelIndicadores } from '../../shared/api/excel';
-import { obtenerTodosLosIndicadores, obtenerFichaIndicador, obtenerReporteIndicador } from '../../shared/api/indicadoresInfo';
+import { obtenerGraficaIndicador } from '../../shared/api/indicadoresInfo';
 import { descargarB64 } from '../../shared/utils/download';
 import { MESES_CORTOS } from '../../shared/constantes/meses';
 import { COLOR_IND, HGS_COLOR, HGS_BG } from '../constantes/colores';
@@ -32,9 +32,10 @@ export { TOTAL_KEY };
  *
  * @param {string} [extIndSel] - Indicador seleccionado externamente (modo controlado)
  * @param {Function} [onExtChange] - Callback para notificar cambio de indicador al padre
+ * @param {string[]} [indsHermanos] - Indicadores IAAS (de la página), para descargar "todos"
  * @returns {Object} Estado y datos listos para renderizar las gráficas
  */
-export function useIAASGrafica(extIndSel, onExtChange) {
+export function useIAASGrafica(extIndSel, onExtChange, indsHermanos = []) {
   const controlled = extIndSel !== undefined;
   const [anio]                            = useState('2026');
   const [reporte, setReporte]             = useState(null);
@@ -46,34 +47,24 @@ export function useIAASGrafica(extIndSel, onExtChange) {
   const setIndSel = controlled ? (onExtChange ?? (() => {})) : setLocalIndSel;
   const [cargando, setCargando]           = useState(false);
   const [descargando, setDescargando]     = useState(false);
-  const [listaIndicadores, setLista]      = useState([]);
   const [indInfo, setIndInfo]             = useState(null);
   const [vistaGrafica, setVistaGrafica]   = useState('unidad');
   const [acumulado, setAcumulado]         = useState(false);
   const [mesSel, setMesSel]               = useState('');
 
-  /** Catálogo de unidades (orden en que se muestran) e índice de indicadores IAAS */
+  /** Catálogo de unidades (orden en que se muestran) */
   useEffect(() => {
-    Promise.all([getUnidadesIAAS(), obtenerTodosLosIndicadores({ modulo: 'iaas' })])
-      .then(([unids, lista]) => {
+    getUnidadesIAAS()
+      .then(unids => {
         setUnidades(unids);
-        setLista(lista ?? []);
         if (unids.length > 0) setUnidadSel(actual => actual || unids[0]);
       })
       .catch(error => console.error('Error cargando catálogo IAAS:', error));
   }, []);
 
-  /** Lista plana de todos los indicadores IAAS (para descargar "todos") */
-  const todosLosIndicadores = useMemo(() => {
-    const acc = [];
-    listaIndicadores.forEach(cat => (cat.indicadores ?? []).forEach(ind => acc.push(ind)));
-    return acc;
-  }, [listaIndicadores]);
-
   /**
-   * Ficha y reporte del indicador activo -- mismos 3 pasos que FTP (catálogo, ficha, reporte).
-   * La ficha se pide primero porque trae el módulo y si el indicador tiene mensual
-   * acumulado (el backend arma MENSUAL_ACUMULADO solo si se lo piden). No limpia
+   * Ficha y reporte del indicador activo en una sola llamada (con memoria de lo ya
+   * consultado). El backend decide el mensual acumulado desde el mapeo. No limpia
    * `reporte`/`indInfo` de inmediato para que el cambio de indicador no haga
    * parpadear el panel.
    */
@@ -81,9 +72,8 @@ export function useIAASGrafica(extIndSel, onExtChange) {
     if (!indSel) return undefined;
     let vigente = true;
     setCargando(true);
-    obtenerFichaIndicador(indSel, anio)
-      .then(ficha => obtenerReporteIndicador(indSel, anio, { modulo: ficha.modulo, mensualAcumulado: ficha.mensualAcumulado }).then(r => [r, ficha]))
-      .then(([r, ficha]) => {
+    obtenerGraficaIndicador(indSel, anio)
+      .then(({ ficha, reporte: r }) => {
         if (!vigente) return;
         setReporte(r);
         setIndInfo(ficha);
@@ -101,7 +91,7 @@ export function useIAASGrafica(extIndSel, onExtChange) {
    */
   const _descargar = (indicador = null) => {
     setDescargando(true);
-    descargarExcelIndicadores(indicador ? [indicador] : todosLosIndicadores, anio)
+    descargarExcelIndicadores(indicador ? [indicador] : indsHermanos, anio)
       .then(res => descargarB64(res.archivo_b64, res.nombre_archivo))
       .catch(() => {})
       .finally(() => setDescargando(false));

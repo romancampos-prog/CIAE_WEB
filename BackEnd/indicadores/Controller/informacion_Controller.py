@@ -1,6 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 import logging
 informacionApi = APIRouter()
+
+from auth.services.jwt_utils import solo_roles
+
+# Cualquier usuario con sesion: lista de indicadores, fichas y ficha tecnica (del mapeo).
+ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 
 #mis archivos
 from indicadores.services.indicadorMapeo_Services import AllIndicadores
@@ -10,7 +15,7 @@ from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta
 
 
 @informacionApi.get("/AllIndicadores")
-def IndiceIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None):
+def IndiceIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
     try:
         indice_indicadores = AllIndicadores(campo, modulo)
         if (not indice_indicadores):
@@ -39,6 +44,7 @@ def FichaIndicador(
     previos: bool = False,
     mensual: bool = False,
     mensualAcumulado: bool = False,
+    usuario: dict = Depends(solo_roles(*ROLES_CONSULTA)),
 ):
     payload = IndicadorRequest(
         indicador=indicador, ano=ano, modulo=modulo,
@@ -67,7 +73,7 @@ def FichaIndicador(
 
 
 @informacionApi.get("/ficha-tecnica/{indicador}", response_model=FichaTecnicaCompleta)
-def FichaTecnicaCompletaIndicador(indicador: str):
+def FichaTecnicaCompletaIndicador(indicador: str, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
     """
     Ficha técnica completa de un indicador (título/objetivo/semáforo + cómo
     se calcula) -- usada por el componente compartido FichaTecnicaBoton en
