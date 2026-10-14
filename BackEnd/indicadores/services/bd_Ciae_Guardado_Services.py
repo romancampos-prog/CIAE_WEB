@@ -23,10 +23,6 @@ def validar_ano(ano: str) -> str:
     return str(ano)
 
 
-def existe_carpeta_anio(ano: str) -> bool:
-    return (DATA_INDICADORES / validar_ano(ano)).exists()
-
-
 def _ruta_definitivo(indicador: str, ano: str) -> Path:
     validar_ano(ano)
     familia = indicador.split()[0] if indicador.split() else indicador

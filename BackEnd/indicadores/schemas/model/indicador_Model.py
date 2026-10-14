@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
 from typing import Literal, Dict, Any
-from shared.PERIODICIDAD import PERIODICIDAD
 from shared.reglas_periodicidad import descripcion_periodicidad
 
 
@@ -86,13 +85,6 @@ class InfoIndicador(BaseModel):
         return datos
     
 
-#---------------------------------------------------
-class IndicadorMostrar(BaseModel):
-    indicadorPadre: str
-    indicadorhijo: str
-    info: InfoIndicador
-    reporte: ReporteIndicador
-    
 #---------------------------------------------------
 #Model osolo para trerme la categorias derl indicaodr 
 #ejem: CACU: [CACU 01, CACU 02, CACU 03, etc...]

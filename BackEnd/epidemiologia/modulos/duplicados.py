@@ -6,7 +6,7 @@ import itertools
 import jellyfish
 from sklearn.neural_network       import MLPClassifier
 from sklearn.ensemble             import RandomForestClassifier
-from sklearn.model_selection      import StratifiedKFold, cross_val_score, GridSearchCV
+from sklearn.model_selection      import StratifiedKFold, GridSearchCV
 from sklearn.preprocessing        import StandardScaler
 from sklearn.pipeline             import Pipeline
 from sklearn.metrics              import classification_report

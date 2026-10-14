@@ -1,9 +1,3 @@
-/** IDs de los 6 indicadores IAAS en orden de presentación */
-export const INDICADORES = [
-  'IAAS 01','IAAS 02','IAAS 03',
-  'IAAS 04','IAAS 05','IAAS 06',
-];
-
 /** Color de acento por indicador, usado en gráficas y etiquetas */
 export const COLOR_IND = {
   'IAAS 01': '#1a5276',

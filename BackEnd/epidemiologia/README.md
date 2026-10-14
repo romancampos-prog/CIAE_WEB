@@ -19,7 +19,6 @@ epidemiologia/
 │   ├── depuracion.py             — limpieza de datos
 │   ├── duplicados.py             — detección de registros duplicados
 │   ├── fechas.py                 — utilidades de semana epidemiológica
-│   ├── generador_mapas.py        — construcción de datos para el mapa de brotes
 │   └── series_tiempo.py          — canal endémico y series temporales
 ├── services/
 │   ├── pipeline_service.py       — orquesta el pipeline completo
@@ -54,7 +53,7 @@ Archivos cargados (POST /archivos/operativa, /archivos/siscep)
     ↓
 pipeline_service.iniciar_pipeline()
     ↓
-depuracion → duplicados → clustering → series_tiempo → alertas → generador_mapas
+depuracion → duplicados → clustering → series_tiempo → alertas → mapa_service
     ↓
 Resultados guardados en disco (RUTA_RESULTADOS)
     ↓

@@ -22,7 +22,6 @@ epidemiologia/
 │   ├── contexto/
 │   │   └── PipelineContext.jsx    — estado global del pipeline (corriendo, logs, resultado)
 │   ├── hooks/
-│   │   ├── useDenguePipeline.js   — polling de estado, iniciar pipeline
 │   │   └── useDengueReportes.js   — carga de datos del reporte activo
 │   ├── paginas/                   — una página por sección del sidebar
 │   │   ├── CargaPage.jsx, CanalPage.jsx, MapaPage.jsx

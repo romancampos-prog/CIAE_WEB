@@ -21,12 +21,6 @@ def verificar_token(token: str | None = Cookie(default=None)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
-def solo_admin(payload: dict = Depends(verificar_token)):
-    if payload.get("rol") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso restringido")
-    return payload
-
-
 def solo_roles(*roles):
     """Factory: devuelve una dependencia que exige que el rol esté en la lista."""
     def _dep(payload: dict = Depends(verificar_token)):

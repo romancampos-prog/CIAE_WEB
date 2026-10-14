@@ -61,10 +61,6 @@ def _codigo_base(codigo_reporte: str) -> str:
     return codigo_reporte.split("_")[0].strip().upper()
 
 
-def existe_reporte(codigo_reporte: str) -> bool:
-    return _codigo_base(codigo_reporte) in _SUBCARPETA_POR_REPORTE or es_reporte_de_piramides(codigo_reporte)
-
-
 def es_reporte_de_piramides(codigo_reporte: str) -> bool:
     return _codigo_base(codigo_reporte) in REPORTES_DE_PIRAMIDES
 
@@ -75,7 +71,3 @@ def subcarpeta_de_reporte(codigo_reporte: str) -> str:
     if subcarpeta is None:
         raise ValueError(f"El reporte '{codigo_reporte}' no esta en el catalogo de 1.SIAIS_Reportes.")
     return subcarpeta
-
-
-def reportes_de_subcarpeta(subcarpeta: str) -> tuple[str, ...]:
-    return REPORTES_POR_SUBCARPETA.get(subcarpeta, ())

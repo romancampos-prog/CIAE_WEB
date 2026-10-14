@@ -11,7 +11,7 @@ indicadores/
 ├── reportes_grafica/       ← configuración y descarga de reportes personalizados
 ├── shared/                 ← código compartido entre todos los sub-módulos
 │   ├── componentes/
-│   │   └── graficas/       ← GraficaBarras, PanelUnidades, SemaforoUmbral, VistaToggle
+│   │   └── graficas/       ← GraficaBarras, PanelUnidades, VistaToggle
 │   ├── constantes/         ← meses.js, semaforo.js
 │   └── utils/              ← download.js
 └── routes/
@@ -48,7 +48,7 @@ nombre/
 │   └── Nombre.js          — funciones axios exportadas con nombre (no default)
 ├── componentes/           — componentes React exclusivos de este sub-módulo
 ├── constantes/
-│   └── colores.js         — colores e IDs de indicadores
+│   └── colores.js         — colores propios de las gráficas del sub-módulo (los de cada familia vienen del backend)
 ├── hooks/
 │   └── useNombreGrafica.js — lógica de estado, carga de datos, cálculos
 ├── paginas/

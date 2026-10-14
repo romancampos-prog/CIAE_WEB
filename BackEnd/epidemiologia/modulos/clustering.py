@@ -429,7 +429,7 @@ def ejecutar_clustering(df, ruta_json, ruta_catalogo):
         ruta_catalogo — ruta al CSV datos/catalogos/cp_coordenadas.csv
 
     Devuelve un dict con claves:
-        geojson         — GeoJSON de Guanajuato (para generador_mapas)
+        geojson         — GeoJSON de Guanajuato (para mapa_service)
         df_municipio    — conteo por municipio
         df_confirmados  — conteo confirmados por municipio
         df_unidades     — conteo por unidad médica
