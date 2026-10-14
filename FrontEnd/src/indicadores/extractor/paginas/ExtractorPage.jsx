@@ -4,26 +4,17 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import TopBar from '../../../shared/componentes/TopBar';
 import ModalLoading from '../../../shared/componentes/modal/ModalCargando';
 import {
-  getDetalleIndicadoresExtractor, getEstadoArchivosExtractor, getEstadoExtractor,
+  getIndicadoresExtractor, getEstadoArchivosExtractor, getEstadoExtractor,
   subirArchivoMensualExtractor, subirCruceExtractor,
 } from '../api/extractor';
 import { getMesesGenerados } from '../../reportes_grafica/api/reportes';
 import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { descargarB64 } from '../../shared/utils/download';
 import FichaTecnicaBoton from '../../shared/componentes/FichaTecnica/FichaTecnicaBoton';
-import iconoEH from '../../../assets/icono_eh.png';
-import iconoDM from '../../../assets/icono_dm.png';
-import iconoMT from '../../../assets/icono_mt.png';
-import iconoCama from '../../../assets/icono_cama.png';
-import iconoCacu from '../../../assets/icono_cacu.png';
-import iconoCupn from '../../../assets/icono_cupn.png';
-import iconoSOb from '../../../assets/icono_S_Ob.png';
+import { urlIcono } from '../../shared/utils/iconos';
 import './extractor.css';
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
-// Mismo criterio que GraficasUnificadasPage: el icono sale de la categoría que manda el backend.
-const ICONOS_CATEGORIA = { EH: iconoEH, DM: iconoDM, MT: iconoMT, CAMA: iconoCama, CACU: iconoCacu, CUPN: iconoCupn, S_Ob: iconoSOb, Neonatal: iconoMT };
 
 // Años del selector: el actual y los anteriores, calculados con la fecha (en 2027 aparece solo).
 const ANIOS_HACIA_ATRAS = 1;
@@ -35,6 +26,15 @@ const ESTADO_MES = {
   pendiente:     { clase: 'pendiente', texto: 'Pendiente' },
   sin_principal: { clase: 'bloqueado', texto: 'Falta SUI-13' },
   sin_registro:  { clase: 'previo',   texto: 'Subido antes' },
+};
+const ESTADO_FUTURO = { clase: 'futuro', texto: 'Todavía no llega' };
+
+// Qué dice el panel lateral sobre el mes elegido antes de subir.
+const DESCRIPCION_ESTADO = {
+  completo:     'Este mes ya está subido.',
+  parcial:      'Este mes está incompleto: vuelve a subirlo para generarlo.',
+  pendiente:    'Este mes todavía no se ha subido.',
+  sin_registro: 'Este mes se subió antes de llevar este registro; puedes volver a subirlo.',
 };
 
 const numeroMes = (mes) => String(MESES.indexOf(mes) + 1).padStart(2, '0');
@@ -67,6 +67,16 @@ const IconoCheck = () => (
     <polyline points="5 12.5 10 17 19 7" />
   </svg>
 );
+
+// Un icono por estado: la celda de la tabla no tiene espacio para texto.
+const IconoEstadoMes = ({ clase }) => {
+  const props = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
+  if (clase === 'ok' || clase === 'previo') return <svg {...props}><polyline points="5 12.5 10 17 19 7" /></svg>;
+  if (clase === 'parcial') return <svg {...props} strokeWidth={2}><circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" /></svg>;
+  if (clase === 'bloqueado') return <svg {...props} strokeWidth={2}><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
+  if (clase === 'futuro') return <svg {...props}><line x1="7" y1="12" x2="17" y2="12" /></svg>;
+  return <svg {...props}><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" /></svg>;
+};
 
 const IconoDescarga = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -151,7 +161,7 @@ const ExtractorPage = () => {
   const [mesesGenerados, setMesesGenerados] = useState({});
   const [cargando, setCargando]             = useState(true);
   const [errorCarga, setErrorCarga]         = useState('');
-  const [abierto, setAbierto]               = useState(null);   // { archivo, mes }
+  const [panel, setPanel]                   = useState(null);   // { archivo, tipo, prefijo, mes }
   const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
   const [subiendo, setSubiendo]             = useState(false);
   const [error, setError]                   = useState('');
@@ -162,8 +172,8 @@ const ExtractorPage = () => {
 
   // Qué indicadores maneja el Extractor y qué usa cada uno: todo del mapeo, vía backend.
   useEffect(() => {
-    getDetalleIndicadoresExtractor()
-      .then(lista => setIndicadores(lista.map(i => ({ ...i, icono: ICONOS_CATEGORIA[i.categoria] }))))
+    getIndicadoresExtractor()
+      .then(lista => setIndicadores(lista.map(i => ({ ...i, icono: urlIcono(i.imagen) }))))
       .catch(() => setErrorCarga('No se pudieron cargar los indicadores del Extractor.'));
   }, []);
 
@@ -197,15 +207,30 @@ const ExtractorPage = () => {
   );
 
   const abrir = (archivo, mes) => {
-    const mismo = abierto?.archivo === archivo.archivo && abierto?.mes === mes;
-    setAbierto(mismo ? null : { archivo: archivo.archivo, tipo: archivo.tipo, prefijo: archivo.prefijoArchivo, mes });
+    setPanel({ archivo: archivo.archivo, tipo: archivo.tipo, prefijo: archivo.prefijoArchivo, mes });
     setArchivoSeleccionado(null);
+    setResultado(null);
     setError('');
   };
 
+  const cerrarPanel = useCallback(() => {
+    if (subiendo) return;
+    setPanel(null);
+    setResultado(null);
+    setArchivoSeleccionado(null);
+    setError('');
+  }, [subiendo]);
+
+  useEffect(() => {
+    if (!panel) return;
+    const alPresionar = (e) => { if (e.key === 'Escape') cerrarPanel(); };
+    window.addEventListener('keydown', alPresionar);
+    return () => window.removeEventListener('keydown', alPresionar);
+  }, [panel, cerrarPanel]);
+
   const cambiarAnio = (a) => {
     setAnio(a);
-    setAbierto(null);
+    setPanel(null);
     setResultado(null);
   };
 
@@ -214,18 +239,22 @@ const ExtractorPage = () => {
     setSubiendo(true);
     setError('');
     try {
-      const res = abierto.tipo === 'principal'
-        ? await subirArchivoMensualExtractor(anio, abierto.mes, archivoSeleccionado, null, abierto.prefijo)
-        : await subirCruceExtractor(anio, abierto.mes, archivoSeleccionado);
-      setResultado({ archivo: abierto.archivo, mes: abierto.mes, anio, porIndicador: res.data, mensaje: res.message });
-      setAbierto(null);
+      const res = panel.tipo === 'principal'
+        ? await subirArchivoMensualExtractor(anio, panel.mes, archivoSeleccionado, null, panel.prefijo)
+        : await subirCruceExtractor(anio, panel.mes, archivoSeleccionado);
+      // El resultado se queda en el mismo panel donde se subió, para que no se pierda.
+      setResultado({ archivo: panel.archivo, mes: panel.mes, anio, porIndicador: res.data, mensaje: res.message });
+      setArchivoSeleccionado(null);
       await cargarEstado();
     } catch (e) {
-      setError(e.response?.data?.detail || `Error al procesar el ${abierto.archivo}.`);
+      setError(e.response?.data?.detail || `Error al procesar el ${panel.archivo}.`);
     } finally {
       setSubiendo(false);
     }
   };
+
+  const archivoDelPanel = panel ? archivos.find(a => a.archivo === panel.archivo) : null;
+  const estadoDelPanel = archivoDelPanel?.meses.find(m => m.mes === panel.mes);
 
   // clave: identifica qué botón muestra "Descargando…".
   const descargar = async (clave, claves, anioExcel, mes) => {
@@ -295,118 +324,69 @@ const ExtractorPage = () => {
 
         {errorCarga && <p className="ex-error">{errorCarga}</p>}
 
-        {/* ── Un apartado por archivo ── */}
-        <h2 className="exv-seccion-titulo">Archivos del mes</h2>
+        {/* ── Todo el año en una tabla: filas = archivos, columnas = meses ── */}
+        <h2 className="exv-seccion-titulo">Archivos de {anio}</h2>
         {cargando && !archivos.length && <p className="ex-cargando">Cargando…</p>}
 
-        {archivos.map(archivo => {
-          const subidos = archivo.meses.filter(m => m.estado === 'completo').length;
-          return (
-            <section key={archivo.archivo} className={`exv-panel exv-archivo exv-archivo--${archivo.tipo}`}>
-              <div className="exv-archivo-header">
-                <span className="exv-archivo-icono"><IconoArchivo /></span>
-                <div className="exv-archivo-info">
-                  <div className="exv-archivo-nombre">
-                    <h3>Subir {archivo.archivo}</h3>
-                    <span className={`exv-tag ${archivo.requerido ? 'exv-tag--requerido' : 'exv-tag--opcional'}`}>
-                      {archivo.requerido ? 'Obligatorio cada mes' : 'Opcional'}
-                    </span>
-                  </div>
-                  <p className="exv-archivo-uso">{archivo.uso}</p>
-                  <div className="exv-alimenta">
-                    <span>Alimenta a</span>
-                    {archivo.indicadores.map(c => <ChipIndicador key={c} clave={c} icono={iconoDe[c]} />)}
-                  </div>
-                </div>
-                <p className="exv-archivo-conteo"><strong>{subidos}</strong> de 12<br />meses de {anio}</p>
-              </div>
-
-              <div className="exv-meses">
-                {archivo.meses.map(({ mes, estado, faltan }) => {
-                  const futuro = esFuturo(mes);
-                  const bloqueado = futuro || estado === 'sin_principal';
-                  const visual = ESTADO_MES[estado] ?? ESTADO_MES.pendiente;
-                  const activo = abierto?.archivo === archivo.archivo && abierto?.mes === mes;
-                  const titulo = estado === 'parcial' && faltan?.length
-                    ? `Falta en ${faltan.join(', ')}: vuelve a subirlo para generarlo`
-                    : estado === 'sin_principal' ? 'Primero sube el SUI-13 de este mes'
-                    : estado === 'sin_registro' ? 'Se subió antes de llevar este registro; puedes volver a subirlo'
-                    : undefined;
-                  return (
-                    <button
-                      key={mes}
-                      disabled={bloqueado}
-                      title={titulo}
-                      onClick={() => abrir(archivo, mes)}
-                      className={`exv-mes exv-mes--${futuro ? 'futuro' : visual.clase}${activo ? ' exv-mes--activo' : ''}`}
-                    >
-                      <span className="exv-mes-nombre">{mes.slice(0, 3)}</span>
-                      <span className="exv-mes-estado">
-                        {futuro ? '—' : <>{estado === 'completo' && <IconoCheck />}{visual.texto}</>}
-                      </span>
-                      {estado === 'parcial' && faltan?.length > 0 && <span className="exv-mes-falta">Falta {faltan.join(', ')}</span>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {abierto?.archivo === archivo.archivo && (
-                <div className="exv-subir">
-                  <div className="exv-subir-header">
-                    <h3>{archivo.archivo} de {abierto.mes} {anio}</h3>
-                    <button className="exv-cerrar" onClick={() => setAbierto(null)}>Cerrar</button>
-                  </div>
-
-                  {['completo', 'parcial', 'sin_registro'].includes(archivo.meses.find(m => m.mes === abierto.mes)?.estado) && (
-                    <p className="ex-aviso-reemplazo">
-                      Este mes ya tiene datos. Al procesarlo de nuevo se reemplazan en {archivo.indicadores.join(', ')}
-                      {' '}y se recalculan los cortes cerrados que lo incluyan.
-                      {archivo.tipo === 'principal' && archivos.some(a => a.tipo === 'cruce' && a.indicadores.some(i => archivo.indicadores.includes(i)))
-                        && ' Los indicadores que usan Egresos Pacientes quedan con la vía 2 pendiente: después vuelve a subir el Egresos Pacientes de este mes.'}
-                    </p>
-                  )}
-
-                  <ZonaArchivo
-                    sugerido={`${archivo.prefijoArchivo}_${numeroMes(abierto.mes)}_${anio}`}
-                    archivo={archivoSeleccionado}
-                    onSeleccionar={setArchivoSeleccionado}
-                  />
-
-                  {error && <p className="ex-error">{error}</p>}
-
-                  <div className="ex-uploader-botones">
-                    <button className="ex-boton-confirmar" onClick={procesar} disabled={!archivoSeleccionado}>
-                      {archivo.tipo === 'principal' ? 'Procesar' : 'Cruzar'} {archivo.archivo} de {abierto.mes}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
-          );
-        })}
-
-        {/* ── Qué hizo cada indicador con el último archivo ── */}
-        {resultado && (
-          <section className="exv-resultado">
-            <div className="exv-panel-header">
-              <div>
-                <h2 className="exv-panel-titulo">{resultado.archivo} de {resultado.mes} {resultado.anio} procesado</h2>
-                {resultado.mensaje && <p className="exv-panel-sub">{resultado.mensaje}</p>}
-              </div>
-              <button className="exv-cerrar" onClick={() => setResultado(null)}>Cerrar</button>
+        {archivos.length > 0 && (
+          <section className="exv-panel exa-tabla" aria-label={`Archivos subidos en ${anio}`}>
+            <div className="exa-fila exa-fila--encabezado" aria-hidden>
+              <span className="exa-col-archivo">Archivo</span>
+              {MESES.map(m => <span key={m} className="exa-col-mes">{m.slice(0, 3)}</span>)}
             </div>
-            {Object.entries(resultado.porIndicador).map(([clave, r]) => {
-              const { texto, tono } = resumenIndicador(r);
+
+            {archivos.map(archivo => {
+              const subidos = archivo.meses.filter(m => m.estado === 'completo').length;
               return (
-                <div key={clave} className={`exv-resultado-fila exv-resultado-fila--${tono}`}>
-                  <div className="exv-iconos">{iconoDe[clave] && <img src={iconoDe[clave]} alt="" />}</div>
-                  <div>
-                    <p className="exv-resultado-titulo">{clave}</p>
-                    <p className="exv-resultado-texto">{texto}</p>
+                <div key={archivo.archivo} className={`exa-fila exa-fila--${archivo.tipo}`}>
+                  <div className="exa-col-archivo exa-archivo">
+                    <div className="exa-archivo-nombre">
+                      <strong>{archivo.archivo}</strong>
+                      <span className={`exv-tag ${archivo.requerido ? 'exv-tag--requerido' : 'exv-tag--opcional'}`}>
+                        {archivo.requerido ? 'Obligatorio' : 'Opcional'}
+                      </span>
+                    </div>
+                    <div className="exa-archivo-pie">
+                      <span className="exa-alimenta" title={`Alimenta a ${archivo.indicadores.join(', ')}`}>
+                        {archivo.indicadores.map(c => (
+                          <span key={c} className="exa-mini-ind">{iconoDe[c] && <img src={iconoDe[c]} alt="" />}{c}</span>
+                        ))}
+                      </span>
+                      <span className="exa-conteo">{subidos}/12</span>
+                    </div>
                   </div>
+
+                  {archivo.meses.map(({ mes, estado, faltan }) => {
+                    const futuro = esFuturo(mes);
+                    const bloqueado = futuro || estado === 'sin_principal';
+                    const visual = futuro ? ESTADO_FUTURO : (ESTADO_MES[estado] ?? ESTADO_MES.pendiente);
+                    const activo = panel?.archivo === archivo.archivo && panel?.mes === mes;
+                    const detalle = estado === 'parcial' && faltan?.length ? ` (falta en ${faltan.join(', ')})` : '';
+                    return (
+                      <button
+                        key={mes}
+                        type="button"
+                        disabled={bloqueado}
+                        title={`${mes}: ${visual.texto}${detalle}`}
+                        aria-label={`${archivo.archivo}, ${mes}: ${visual.texto}${detalle}`}
+                        onClick={() => abrir(archivo, mes)}
+                        className={`exa-celda exa-celda--${visual.clase}${activo ? ' exa-celda--activa' : ''}`}
+                      >
+                        <span className="exa-celda-mes">{mes.slice(0, 3)}</span>
+                        <IconoEstadoMes clase={visual.clase} />
+                      </button>
+                    );
+                  })}
                 </div>
               );
             })}
+
+            <ul className="exa-leyenda">
+              {[ESTADO_MES.completo, ESTADO_MES.parcial, ESTADO_MES.pendiente, ESTADO_MES.sin_principal, ESTADO_MES.sin_registro].map(e => (
+                <li key={e.clase}><span className={`exa-celda exa-celda--${e.clase} exa-celda--muestra`}><IconoEstadoMes clase={e.clase} /></span>{e.texto}</li>
+              ))}
+            </ul>
+            <p className="exv-nota-mes">Da clic en un mes para subir o reemplazar su archivo.</p>
           </section>
         )}
 
@@ -509,7 +489,104 @@ const ExtractorPage = () => {
         </div>
       </main>
 
-      <ModalLoading isOpen={subiendo} nota={`Procesando el ${abierto?.archivo ?? 'archivo'} para los indicadores del Extractor...`} />
+      {/* ── Panel lateral para subir el archivo del mes elegido ── */}
+      {panel && archivoDelPanel && (
+        <div className="exa-capa" onClick={cerrarPanel}>
+          <aside
+            className="exa-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exa-panel-titulo"
+            onClick={e => e.stopPropagation()}
+          >
+            <header className="exa-panel-header">
+              <span className={`exv-archivo-icono${panel.tipo === 'cruce' ? ' exa-icono--cruce' : ''}`}><IconoArchivo /></span>
+              <div className="exa-panel-titulos">
+                <h2 id="exa-panel-titulo">{panel.archivo}</h2>
+                <p>{panel.mes} {anio}</p>
+              </div>
+              <button type="button" className="exa-panel-cerrar" onClick={cerrarPanel} aria-label="Cerrar panel" autoFocus>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+              </button>
+            </header>
+
+            <div className="exa-panel-cuerpo">
+              {resultado ? (
+                <>
+                  <div className="exa-resultado-encabezado">
+                    <span className="exa-resultado-ok"><IconoCheck /></span>
+                    <div>
+                      <p className="exa-resultado-titulo">{resultado.archivo} de {resultado.mes} procesado</p>
+                      {resultado.mensaje && <p className="exa-resultado-sub">{resultado.mensaje}</p>}
+                    </div>
+                  </div>
+                  {Object.entries(resultado.porIndicador).map(([clave, r]) => {
+                    const { texto, tono } = resumenIndicador(r);
+                    return (
+                      <div key={clave} className={`exv-resultado-fila exv-resultado-fila--${tono}`}>
+                        <div className="exv-iconos">{iconoDe[clave] && <img src={iconoDe[clave]} alt="" />}</div>
+                        <div>
+                          <p className="exv-resultado-titulo">{clave}</p>
+                          <p className="exv-resultado-texto">{texto}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <>
+                  <p className={`exa-estado-mes exa-estado-mes--${(ESTADO_MES[estadoDelPanel?.estado] ?? ESTADO_MES.pendiente).clase}`}>
+                    <IconoEstadoMes clase={(ESTADO_MES[estadoDelPanel?.estado] ?? ESTADO_MES.pendiente).clase} />
+                    {DESCRIPCION_ESTADO[estadoDelPanel?.estado] ?? DESCRIPCION_ESTADO.pendiente}
+                    {estadoDelPanel?.estado === 'parcial' && estadoDelPanel.faltan?.length > 0 && ` Falta en ${estadoDelPanel.faltan.join(', ')}.`}
+                  </p>
+
+                  <p className="exv-archivo-uso">{archivoDelPanel.uso}</p>
+                  <div className="exv-alimenta">
+                    <span>Alimenta a</span>
+                    {archivoDelPanel.indicadores.map(c => <ChipIndicador key={c} clave={c} icono={iconoDe[c]} />)}
+                  </div>
+
+                  {['completo', 'parcial', 'sin_registro'].includes(estadoDelPanel?.estado) && (
+                    <p className="ex-aviso-reemplazo">
+                      Al procesarlo de nuevo se reemplazan los datos en {archivoDelPanel.indicadores.join(', ')}
+                      {' '}y se recalculan los cortes cerrados que lo incluyan.
+                      {panel.tipo === 'principal' && archivos.some(a => a.tipo === 'cruce' && a.indicadores.some(i => archivoDelPanel.indicadores.includes(i)))
+                        && ' Los indicadores que usan Egresos Pacientes quedan con la vía 2 pendiente: después vuelve a subir el Egresos Pacientes de este mes.'}
+                    </p>
+                  )}
+
+                  <ZonaArchivo
+                    sugerido={`${panel.prefijo}_${numeroMes(panel.mes)}_${anio}`}
+                    archivo={archivoSeleccionado}
+                    onSeleccionar={setArchivoSeleccionado}
+                  />
+
+                  {error && <p className="ex-error">{error}</p>}
+                </>
+              )}
+            </div>
+
+            <footer className="exa-panel-pie">
+              {resultado ? (
+                <>
+                  <button type="button" className="exa-boton-secundario" onClick={() => setResultado(null)}>Subir de nuevo</button>
+                  <button type="button" className="ex-boton-confirmar" onClick={cerrarPanel}>Listo</button>
+                </>
+              ) : (
+                <>
+                  <button type="button" className="exa-boton-secundario" onClick={cerrarPanel}>Cancelar</button>
+                  <button type="button" className="ex-boton-confirmar" onClick={procesar} disabled={!archivoSeleccionado}>
+                    {panel.tipo === 'principal' ? 'Procesar' : 'Cruzar'} {panel.archivo}
+                  </button>
+                </>
+              )}
+            </footer>
+          </aside>
+        </div>
+      )}
+
+      <ModalLoading isOpen={subiendo} nota={`Procesando el ${panel?.archivo ?? 'archivo'} para los indicadores del Extractor...`} />
     </div>
   );
 };

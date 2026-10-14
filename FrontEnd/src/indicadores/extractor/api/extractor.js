@@ -1,30 +1,15 @@
 import api from '../../../shared/api/axiosInstance';
 
 /**
- * Consulta la lista de indicadores que vive en el módulo Extractor
- * (los que usan el motor "extractor" / FILTRO_CONTEO_ACUMULADO en el mapeo).
- * @returns {Promise<string[]>} ej. ["EH 03", "DM 04"]
+ * Indicadores del módulo Extractor: lo común del mapeo (familia, título, periodicidad, ícono y
+ * color de la familia) más si es de corte o mensual, cómo agrupa, de dónde sale el denominador
+ * y qué archivos usa (SUI-13, Egresos) y para qué.
+ * @returns {Promise<Array<{indicador:string, categoria:string, titulo:string, periodicidad:string,
+ *   descripcionPeriodicidad:string|null, imagen:string, color:string, tipo:'corte'|'mensual',
+ *   agrupacion:string, denominador:string, archivos:Array<{archivo:string, requerido:boolean, uso:string}>}>>}
  */
 export const getIndicadoresExtractor = async () => {
-    try {
-        const { data } = await api.get('/Indicadores/extractor/indicadores');
-        return data.data ?? [];
-    } catch (error) {
-        console.error('Error al obtener indicadores del extractor:', error);
-        return [];
-    }
-};
-
-/**
- * Detalle de cada indicador del módulo Extractor, sacado del mapeo: título,
- * periodicidad, si es de corte o mensual, cómo agrupa, de dónde sale el
- * denominador y qué archivos usa (SUI-13, Egresos) y para qué.
- * @returns {Promise<Array<{indicador:string, categoria:string, titulo:string, periodicidad:string,
- *   descripcionPeriodicidad:string|null, tipo:'corte'|'mensual', agrupacion:string, denominador:string,
- *   archivos:Array<{archivo:string, requerido:boolean, uso:string}>}>>}
- */
-export const getDetalleIndicadoresExtractor = async () => {
-    const { data } = await api.get('/Indicadores/extractor/indicadores/detalle');
+    const { data } = await api.get('/Indicadores/extractor/indicadores');
     return data.data ?? [];
 };
 
