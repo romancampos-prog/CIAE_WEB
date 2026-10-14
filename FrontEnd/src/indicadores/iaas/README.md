@@ -17,7 +17,7 @@ iaas/
 │   │   └── ModalUnidadTardia.jsx — captura de unidades con entrega fuera de tiempo
 │   └── IAASGraficasContenido.jsx — gráficas de los 6 indicadores (3 vistas)
 ├── constantes/
-│   └── colores.js        — INDICADORES = ['IAAS 01'…'IAAS 06'], COLOR_IND, HGS_COLOR
+│   └── colores.js        — COLOR_IND, HGS_COLOR
 ├── hooks/
 │   └── useIAASGrafica.js — carga el reporte unificado del indicador (ficha + reporte), calcula chartData por vista
 │                            (unidad / mes / acumulado), maneja descargas
@@ -45,10 +45,10 @@ iaas/
 
 ## Los 6 indicadores
 
-La lista canónica vive en `constantes/colores.js → INDICADORES`. Para agregar un indicador:
+La lista viene del backend (mapeo `IAAS.json`, vía `obtenerTodosLosIndicadores({ modulo: 'iaas' })`). Para agregar un indicador:
 
-1. Añadir su ID en `INDICADORES` y su color en `COLOR_IND`
-2. Registrar su semáforo, extracción, textos de Excel (`excel`) y metadatos en `BackEnd/indicadores/mapeo/IAAS.json`
+1. Añadir su color en `COLOR_IND`
+2. Registrar su semáforo, extracción, textos de Excel (`excel`) y metadatos en `BackEnd/indicadores/mapeo/iaas/IAAS.json`
 3. Agregar la función generadora en `BackEnd/indicadores/iaas/services/generar_iaas.py`
 4. Registrar en `_EXCEL_POR_IND` de `BackEnd/indicadores/iaas/controllers/reportes_controller.py`
 

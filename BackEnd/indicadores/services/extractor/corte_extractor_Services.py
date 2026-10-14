@@ -16,12 +16,12 @@ from schemas.model.generacion_ftp_Model import DatosExtraidosUnidad
 from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
 from services.calculo_indicador_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
 from services.extractor.guardado_extractor_Services import leer_reporte, guardar_reporte
-from services.indicadorMapeo_Services import AllIndicadores, cargar_indicador_extractor
+from services.indicadorMapeo_Services import AllIndicadores, cargar_indicador_extractor, catalogo_archivos_extractor
 from services.poblacion_Services import leer_periodo_poblacion
 from services.ftp.extraccion_indicador_ftp_Services import extraer_poblacion
 from services.ftp.registro_errores_ftp_Services import crear_log_errores
 from shared.MESES import MESES_ESTANDAR
-from shared.reglas_periodicidad import descripcion_periodicidad, es_periodicidad_de_corte
+from shared.reglas_periodicidad import es_periodicidad_de_corte
 from shared.semaforizado_service import SemaforizarReporte
 from shared.unidades_ftp import NOMBREUNIDADESARCHIVO
 
@@ -39,7 +39,7 @@ def indicadores_extractor() -> list[str]:
     no cambia en caliente): esto se consulta en cada lectura de reporte
     (CargarReporteIndicador), no tiene caso rescanear todos los mapeos cada vez.
     """
-    return [ind for categoria in AllIndicadores("mostrarGenerar", "Extractor") for ind in categoria.indicadores]
+    return [ind for categoria in AllIndicadores("mostrarGenerar", "extractor") for ind in categoria.indicadores]
 
 
 @lru_cache(maxsize=None)
@@ -58,64 +58,15 @@ def indicadores_extractor_de_corte() -> list[str]:
     return [ind for ind in indicadores_extractor() if es_indicador_de_corte(ind)]
 
 
-# Nombre legible de cada archivo que el mapeo pide (archivo base o archivoCruce);
-# uno que no este aqui se muestra con su clave tal cual.
-_NOMBRE_ARCHIVO = {
-    "SUI_13": "SUI-13",
-    "EGRESOS_TOCO": "Egresos TOCO",
-    "EGRESOS_NACIMIENTO_TOCO": "Egresos Nacimientos TOCO",
-    "EGRESOS_PACIENTES_DIARIA": "Egresos Pacientes",
-}
-_NOMBRE_AGRUPACION = {"hospitales": "Por hospital que atiende"}
-
-
 def nombre_archivo(clave: str | None) -> str | None:
-    return _NOMBRE_ARCHIVO.get(clave, clave)
+    """Nombre legible de un archivo del Extractor (mapeo/catalogos/archivos_extractor.json); si no esta, su clave."""
+    return catalogo_archivos_extractor().get(clave, {}).get("nombre", clave)
 
 
 def archivo_base(indicador: str) -> str:
     """Clave del archivo que alimenta al indicador (reporte.numerador.archivo del mapeo, SUI_13 por omision)."""
     return cargar_indicador_extractor(indicador).reporte.numerador.archivo
 
-
-def detalle_indicadores_extractor() -> list[dict]:
-    """
-    Lo que la vista del Extractor necesita de cada indicador, sacado de su mapeo:
-    titulo, periodicidad, si es de corte o mensual, como agrupa y que archivos usa
-    (y para que). Asi el front no tiene nada fijo: agregar un indicador al modulo
-    es solo ponerle modulo "Extractor" en el mapeo.
-    """
-    detalle = []
-    for indicador in indicadores_extractor():
-        mapeo = cargar_indicador_extractor(indicador)
-        numerador = mapeo.reporte.numerador
-        denominador_del_archivo = getattr(mapeo.reporte.denominador, "fuente", None) == "extractor"
-
-        archivos = [{
-            "archivo": nombre_archivo(numerador.archivo),
-            "requerido": True,
-            "uso": "Numerador y denominador" if denominador_del_archivo else "Numerador",
-        }]
-        cruce = (numerador.model_extra or {}).get("cruce") or {}
-        if cruce.get("activa"):
-            archivos.append({
-                "archivo": nombre_archivo(cruce.get("archivoCruce")),
-                "requerido": False,
-                "uso": "Cruce para validar la vía 2",
-            })
-
-        detalle.append({
-            "indicador": indicador,
-            "categoria": indicador.split()[0],
-            "titulo": mapeo.informacion.titulo,
-            "periodicidad": mapeo.periodicidad,
-            "descripcionPeriodicidad": descripcion_periodicidad(mapeo.periodicidad),
-            "tipo": "corte" if es_indicador_de_corte(indicador) else "mensual",
-            "agrupacion": _NOMBRE_AGRUPACION.get(numerador.catalogoUnidades, "Por unidad de adscripción (UMF)"),
-            "denominador": nombre_archivo(numerador.archivo) if denominador_del_archivo else "Población adscrita (PAMF)",
-            "archivos": archivos,
-        })
-    return detalle
 
 # Meses en los que la periodicidad "Semestral Anualizado" dispara un corte.
 MESES_CORTE_SEMESTRAL = ["Junio", "Diciembre"]

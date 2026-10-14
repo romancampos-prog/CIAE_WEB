@@ -8,7 +8,6 @@ Usado en: Controller/excel_Controller.py
 """
 import base64
 import io
-import json
 
 import xlsxwriter
 
@@ -20,7 +19,7 @@ from indicadores.services.bd_Ciae_Guardado_Services import leer_semanal_indicado
 from indicadores.services.bd_Ciae_Indicadores_Services import CargarReporteIndicador, _normalizar_semaforo
 from indicadores.services.excel_dibujante_Services import escribir_hoja_indicador, obtener_estilos_excel
 from indicadores.services.extractor.corte_extractor_Services import es_indicador_de_corte
-from indicadores.services.indicadorMapeo_Services import RutaMapeoExiste
+from indicadores.services.indicadorMapeo_Services import bloque_mapeo
 from shared.MESES import MESES_ESTANDAR
 from shared.MESES_ACUMULADOS import AcumulaSumandoMeses, MensualAcumulado
 
@@ -43,11 +42,7 @@ class ExcelSinDatosError(Exception):
 # --------------------------------------------------------------------------- #
 
 def _cargar_metadata(indicador: str) -> tuple[str, MetadataHoja]:
-    ruta = RutaMapeoExiste(indicador)
-    if not ruta:
-        raise ErrorHoja(f"{indicador} no existe en el mapeo.")
-    with open(ruta, "r", encoding="utf-8") as archivo:
-        crudo = json.load(archivo).get(indicador)
+    crudo = bloque_mapeo(indicador)
     if crudo is None:
         raise ErrorHoja(f"{indicador} no existe en el mapeo.")
 

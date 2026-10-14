@@ -19,6 +19,7 @@ from shared.validarArchivo_service import validarPeso_Archivo
 from services.bd_Ciae_Guardado_Services import meses_con_datos
 from services.indicadorMapeo_Services import AllIndicadores
 from services.ftp.generacion_indicador_ftp_Services import consolidar_categoria, generar_indicador_ftp
+from services.ftp.info_ftp_Services import indicadores_para_generar
 from services.poblacion_Services import leer_periodo_poblacion, obtener_ultimo_archivo_poblacion, procesar_archivo_poblacion
 from services.ftp.recalcular_poblacion_ftp_Services import actualizar_historico_con_nueva_poblacion, usa_poblacion
 from services.extractor.corte_extractor_Services import recalcular_cortes_con_poblacion
@@ -71,6 +72,14 @@ async def _generar_categoria(categoria: str, ano: str, mes: str, semana: str | N
 
 
 #Get Indicadores/ftp/meses-generados?indicador=CAMA 01&ano=2026
+@ftpApi.get("/indicadores")
+async def indicadores_ftp_generar(
+    payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")),
+):
+    """Los indicadores de FTP con lo comun del mapeo + los reportes SIAIS que lee cada uno."""
+    return ApiResponse(success=True, message="Indicadores del modulo FTP", data=indicadores_para_generar())
+
+
 @ftpApi.get("/meses-generados")
 async def MesesGenerados(
     indicador: str = Query(...),

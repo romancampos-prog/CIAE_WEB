@@ -1,23 +1,15 @@
 from typing import Dict
-import json
 
 #mis archivos
 from schemas.model.indicador_Model import UnidadDatos
-from services.indicadorMapeo_Services import RutaMapeoExiste
+from services.indicadorMapeo_Services import bloque_mapeo
 from shared.semaforo_service import evaluar_color, umbrales_para
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 
 
 def _obtenerSemaforo(indicador: str) -> dict | None:
     """Busca en el mapeo del indicador el bloque 'semaforo'."""
-    rutaMapeo = RutaMapeoExiste(indicador)
-    if not rutaMapeo:
-        return None
-
-    with open(rutaMapeo, "r", encoding="utf-8") as archivo:
-        data = json.load(archivo)
-
-    return data.get(indicador, {}).get("semaforo")
+    return (bloque_mapeo(indicador) or {}).get("semaforo")
 
 
 def SemaforizarReporte(

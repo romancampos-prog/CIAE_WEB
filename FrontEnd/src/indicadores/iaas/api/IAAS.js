@@ -1,8 +1,9 @@
 import api from '../../../shared/api/axiosInstance';
 
 /**
- * Obtiene la lista de indicadores IAAS disponibles en el sistema.
- * @returns {Promise<Array>} Lista de indicadores con id y descripción
+ * Indicadores IAAS que se generan: lo común del mapeo (indicador, título, periodicidad, ícono
+ * y color de la familia) y los rótulos de columnas del Excel que se sube.
+ * @returns {Promise<Array<{indicador:string, titulo:string, columnaNumerador:string, columnaDenominador:string}>>}
  */
 export const getIndicadoresIAAS = async () => {
     try {

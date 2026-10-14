@@ -14,11 +14,9 @@ ftp/
 │   │   ├── GBarras.jsx / FilterPanel.jsx / ChartTooltip.jsx
 │   └── modalPoblacion/
 │       └── ModalPoblacion.jsx        — edición de cifras de población
-├── constantes/
-│   └── colores.js        — CAT_COLOR {CACU, CAMA, ...}, COLOR_IND, INDICADORES
 ├── hooks/
 │   ├── useFTPGrafica.js  — carga datos históricos, chart data, descargas
-│   └── useIndicadores.js — lista de indicadores disponibles desde la API
+│   └── useIndicadores.js — indicadores de Generar FTP (GET /Indicadores/ftp/indicadores), agrupados por familia
 ├── paginas/
 │   ├── FTPPage.jsx            — hub principal del módulo indicadores (índice visual)
 │   ├── FTPLanding.jsx         — menú FTP: "Ver datos" / "Generar indicadores"
@@ -46,12 +44,12 @@ ftp/
 
 ## Agregar un indicador FTP
 
-Los indicadores llegan del backend automáticamente vía `obtenerTodosLosIndicadores()` (shared/api/indicadoresInfo.js, que lee el mapeo unificado). Para añadir uno:
+Los indicadores llegan del backend: Generar usa `getIndicadoresFTP()` (`api/indicadores.js`) y las gráficas `obtenerTodosLosIndicadores()`; ambos traen el ícono y el color de la familia desde el mapeo. Para añadir uno:
 
-1. Agregar el bloque del indicador en `BackEnd/indicadores/mapeo/{FAMILIA}.json` (ver `mapeo/README.md`); `modulo: "ftp"` y `mostrarGenerar: true` lo hacen aparecer en Generar FTP.
-2. Añadir el color en `constantes/colores.js → CAT_COLOR` si es categoría nueva
+1. Agregar el bloque del indicador en `BackEnd/indicadores/mapeo/ftp/{FAMILIA}.json` (ver `mapeo/README.md`); `mostrarGenerar: true` lo hace aparecer en Generar FTP.
+2. Si es una familia nueva, agregarla en `mapeo/catalogos/familias.json` (nombre, ícono y color) y poner su ícono en `src/assets/`.
 
-No se necesita cambiar código del frontend si la categoría ya tiene color.
+No se necesita cambiar código del frontend.
 
 ## Agregar una página dentro del sub-módulo
 

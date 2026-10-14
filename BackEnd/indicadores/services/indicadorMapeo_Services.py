@@ -1,50 +1,76 @@
-import logging
+import copy
 import json
 from functools import lru_cache
 from pathlib import Path
 
 #mis archivos
-import indicadores
 from indicadores.schemas.model.indicador_Model import IndicesIndicadores
+from schemas.model.indicadorGenerar_Model import IndicadorGenerar
 from schemas.DTO.Indicador_ViewModel import IndicadorRequest
 from schemas.model.indicador_Model import InfoIndicador
 from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
 # Mismo modulo con el que FTP hace isinstance de las fuentes (si se importara por otra ruta seria otra clase).
-from schemas.model.reporte_mapeo_Model import FichaFTPMapeo, IndicadorFTPMapeo, IndicadorIAASMapeo, IndicadorExtractorMapeo
+from schemas.model.reporte_mapeo_Model import IndicadorFTPMapeo, IndicadorIAASMapeo, IndicadorExtractorMapeo
 from shared.semaforo_service import es_agrupado
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
+from shared.reglas_periodicidad import descripcion_periodicidad
 
 
 
 _RUTA_MAPEO = Path(__file__).parent.parent / "mapeo"
 
+# mapeo/{carpeta}/{FAMILIA}.json: la carpeta ES el modulo de sus indicadores (ya no se
+# escribe "modulo" en cada uno). "sin_generar" son los que todavia no se automatizan.
+MODULOS = ("ftp", "iaas", "extractor")
+_CARPETA_SIN_GENERAR = "sin_generar"
+_RUTA_FAMILIAS = _RUTA_MAPEO / "catalogos" / "familias.json"
 
 
-def RutaMapeoExiste(indicador: str) -> str:
+def _archivos_de_indicadores() -> list[tuple[str, Path]]:
+    """(modulo, ruta) de cada JSON de familia, en el orden en que se listan los indicadores."""
+    carpetas = [(modulo, modulo) for modulo in MODULOS] + [("", _CARPETA_SIN_GENERAR)]
+    return [(modulo, ruta) for modulo, carpeta in carpetas for ruta in sorted((_RUTA_MAPEO / carpeta).glob("*.json"))]
+
+
+@lru_cache(maxsize=1)
+def _bloques_leidos(firma: tuple) -> dict[str, dict]:
     """
-    Verifica si existe el archivo JSON de un indicador para un año dado.
-    Parámetros:
-        indicador: nombre de familia + número separados por espacio, ej. "CACU 01".
-    Retorna:
-        dict con ("encontrado": False si el archivo no existe.
-        dict con {"encontrado": True, "ruta": Path} si sí existe.
+    {indicador: bloque} de todo el mapeo, con lo que no va escrito en cada indicador:
+    "modulo" (sale de la carpeta) e "imagen"/"color" (salen de catalogos/familias.json).
+    firma solo sirve para que, si se edita un JSON, se vuelva a leer sin reiniciar.
     """
-    
-    indicadorBuscar = indicador.split()
-    indicadorPadre = indicadorBuscar[0]  #CAMA
-    
-    if (_RUTA_MAPEO.exists() == False):
-        logging.error(f"La ruta de mapeo de indicadores no existe: {_RUTA_MAPEO}")
-        raise FileNotFoundError(f"La ruta de mapeo de indicadores no existe: {_RUTA_MAPEO}")
-   
-    rutaIndicadorMepo = f"{_RUTA_MAPEO / indicadorPadre}.json"
-    
-    if(not Path(rutaIndicadorMepo).exists()):
-        logging.error(f"Ruta incorrecta o archivo incorrecto del indicador=  {indicador}")
-        return None
-    
+    familias = json.loads(_RUTA_FAMILIAS.read_text(encoding="utf-8"))
+    bloques = {}
+    for modulo, ruta in _archivos_de_indicadores():
+        for indicador, bloque in json.loads(ruta.read_text(encoding="utf-8")).items():
+            familia = familias.get(indicador.split()[0], {})
+            bloques[indicador] = {**bloque, "modulo": modulo, "imagen": familia.get("imagen", ""), "color": familia.get("color", "")}
+    return bloques
 
-    return rutaIndicadorMepo
+
+def _todos_los_bloques() -> dict[str, dict]:
+    rutas = [ruta for _, ruta in _archivos_de_indicadores()] + [_RUTA_FAMILIAS]
+    return _bloques_leidos(tuple((str(ruta), ruta.stat().st_mtime_ns) for ruta in rutas))
+
+
+def bloque_mapeo(indicador: str) -> dict | None:
+    """
+    El bloque crudo de un indicador ("CAMA 01") tal como lo usa el resto del codigo; None si
+    no existe. Es la UNICA forma de leer el mapeo de indicadores: solo aqui se sabe en que
+    carpeta y archivo vive cada uno. Copia, para que nadie modifique lo leido.
+    """
+    bloque = _todos_los_bloques().get(indicador)
+    return copy.deepcopy(bloque) if bloque is not None else None
+
+
+def catalogo_familias() -> dict[str, dict]:
+    """catalogos/familias.json: {familia: {nombre, imagen, color}}."""
+    return json.loads(_RUTA_FAMILIAS.read_text(encoding="utf-8"))
+
+
+def catalogo_archivos_extractor() -> dict[str, dict]:
+    """catalogos/archivos_extractor.json: {clave: {nombre, nombreSugerido}} de cada archivo que sube el Extractor."""
+    return json.loads((_RUTA_MAPEO / "catalogos" / "archivos_extractor.json").read_text(encoding="utf-8"))
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -52,70 +78,61 @@ def AllIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None) -> 
     """
     campo: bandera del mapeo que decide que indicadores se listan -- "mostrarGrafica"
            (gráficas/descargas, default) o "mostrarGenerar" (páginas de Generar).
-    modulo: si se manda ("ftp", "iaas", "Extractor"), solo los indicadores de ese módulo
+    modulo: si se manda ("ftp", "iaas", "extractor"), solo los indicadores de ese módulo
             (un indicador sin módulo asignado todavía no está automatizado).
     Las categorías que quedan sin indicadores no se incluyen.
     """
-    #en la caporeta extarer nombre del idnciador y gacer arreglo 
-    
-    
-    if(_RUTA_MAPEO.exists() == False):
-        logging.error(f"La ruta de mapeo de indicadores no existe: {_RUTA_MAPEO}")
-        raise FileNotFoundError(f"La ruta de mapeo de indicadores no existe: {_RUTA_MAPEO}")
-    
-    # POBLACION.json no es una familia de indicadores -- es la config de columnas
-    # del Excel de población, se excluye del glob.
-    categoriaIndicadores = [archivo.stem for archivo in _RUTA_MAPEO.glob("*.json") if archivo.stem != "POBLACION"]
-    
-    indicesIndicadores = []
-    
-    for categoria in categoriaIndicadores:
-        #leer el archivo json
-        rutaArchivo = _RUTA_MAPEO / f"{categoria}.json"
-        with open(rutaArchivo, "r", encoding="utf-8") as archivo:
-            data = json.load(archivo)
-        
-        indicadores = []
-        imagen = ""
-        color = ""
-        #extraer los indicadores del json
-        for indicador, info in data.items():
-            if info.get(campo, True) and (modulo is None or str(info.get("modulo", "")).lower() == modulo.lower()):
-                indicadores.append(indicador)
-            if not imagen:
-                imagen = info.get("imagen", "")
-            if not color:
-                color = info.get("color", "")
+    familias = catalogo_familias()
+    por_familia: dict[str, list[str]] = {}
+    for indicador, bloque in _todos_los_bloques().items():
+        if bloque.get(campo, True) and (modulo is None or bloque["modulo"] == modulo.lower()):
+            por_familia.setdefault(indicador.split()[0], []).append(indicador)
 
-
-        #crear objeto IndicesIndicadores
-        if not indicadores:
-            continue
-
-        indice = IndicesIndicadores(
-            categoriaIndicador=categoria,
-            indicadores=indicadores,
-            imagen=imagen,
-            color=color
+    return [
+        IndicesIndicadores(
+            categoriaIndicador=familia,
+            indicadores=por_familia[familia],
+            imagen=familias.get(familia, {}).get("imagen", ""),
+            color=familias.get(familia, {}).get("color", ""),
         )
-        
-        indicesIndicadores.append(indice)
-        
-    return indicesIndicadores
+        for familia in sorted(por_familia, key=str.lower)
+    ]
+
+
+def indicadores_del_modulo(modulo: str) -> list[IndicadorGenerar]:
+    """
+    Los indicadores que se generan en un modulo ("ftp", "iaas", "extractor"), con lo que
+    las tres paginas de Generar necesitan de cada uno. Cada modulo le agrega lo suyo en
+    su servicio (ver schemas/model/indicadorGenerar_Model.py).
+    """
+    familias = catalogo_familias()
+    lista = []
+    for indicador, bloque in _todos_los_bloques().items():
+        if bloque["modulo"] != modulo or not bloque.get("mostrarGenerar"):
+            continue
+        categoria = indicador.split()[0]
+        lista.append(IndicadorGenerar(
+            indicador=indicador,
+            categoria=categoria,
+            nombreCategoria=familias.get(categoria, {}).get("nombre", categoria),
+            titulo=bloque["informacion"]["titulo"],
+            periodicidad=bloque["periodicidad"],
+            descripcionPeriodicidad=descripcion_periodicidad(bloque["periodicidad"]),
+            peridocidadGenerada=bloque.get("peridocidadGenerada") or {},
+            previos=bloque.get("previos", False),
+            imagen=bloque["imagen"],
+            color=bloque["color"],
+        ))
+    return lista
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 def ObtenerFichaPorIndicador(payload: IndicadorRequest) -> InfoIndicador | None:
     #esta funcion es para obtener la informacion visual del indicador
     #ejem: titulo, objetivo, descripcion del numerador y denominador, semaforo, etc...
-    rutaMapeoIndicador = RutaMapeoExiste(payload.indicador)
-    if (not rutaMapeoIndicador): return None
-    
-    with open(rutaMapeoIndicador, "r", encoding="utf-8") as archivo:
-        data = json.load(archivo)
-        
-    #extraer info del indicador solicitado
-    datoIndicadorJson = data.get(payload.indicador)
+    datoIndicadorJson = bloque_mapeo(payload.indicador)
+    if datoIndicadorJson is None:
+        return None
     fichaIndicador = InfoIndicador.model_validate(datoIndicadorJson)
 
     # Semaforo agrupado (hoy solo IAAS 01, por tipo de hospital) -- el front necesita
@@ -142,14 +159,7 @@ def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
     (mostrarGenerar=false, ej. CACU 02 -- su bloque "reporte" viene vacío {}
     en el mapeo).
     """
-    rutaMapeoIndicador = RutaMapeoExiste(indicador)
-    if not rutaMapeoIndicador:
-        return None
-
-    with open(rutaMapeoIndicador, "r", encoding="utf-8") as archivo:
-        data = json.load(archivo)
-
-    dato = data.get(indicador)
+    dato = bloque_mapeo(indicador)
     if not dato:
         return None
 
@@ -182,24 +192,16 @@ def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
 # Mapeo tipado para los indicadores de FTP (ficha y lo que necesita la extraccion)
 
-def ruta_familia(indicador: str) -> Path:
-    """indicadores/mapeo/{familia}.json de un indicador ("CAMA 01" -> CAMA.json)."""
-    return _RUTA_MAPEO / f"{indicador.split()[0]}.json"
-
-
-def _bloque_crudo(indicador: str) -> dict:
-    with open(ruta_familia(indicador), encoding="utf-8") as archivo:
-        return json.load(archivo)[indicador]
-
-
-def cargar_ficha_ftp(indicador: str) -> FichaFTPMapeo:
-    """Titulo, semaforo, periodicidad y nombre de archivo de un indicador FTP."""
-    return FichaFTPMapeo.model_validate(_bloque_crudo(indicador))
+def _bloque_obligatorio(indicador: str) -> dict:
+    bloque = bloque_mapeo(indicador)
+    if bloque is None:
+        raise KeyError(f"{indicador} no existe en el mapeo")
+    return bloque
 
 
 def cargar_indicador_mapeo(indicador: str) -> IndicadorFTPMapeo:
     """Lo que necesita la extraccion de un indicador FTP: reportes, formulas y semaforo."""
-    return IndicadorFTPMapeo.model_validate(_bloque_crudo(indicador))
+    return IndicadorFTPMapeo.model_validate(_bloque_obligatorio(indicador))
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -207,10 +209,11 @@ def cargar_indicador_mapeo(indicador: str) -> IndicadorFTPMapeo:
 
 @lru_cache(maxsize=None)
 def cargar_mapeo_iaas() -> dict[str, IndicadorIAASMapeo]:
-    """Los 6 indicadores IAAS del mapeo (se lee una sola vez)."""
-    with open(_RUTA_MAPEO / "IAAS.json", encoding="utf-8") as archivo:
-        crudo = json.load(archivo)
-    return {indicador: IndicadorIAASMapeo.model_validate(dato) for indicador, dato in crudo.items()}
+    """Los indicadores del modulo IAAS (se lee una sola vez)."""
+    return {
+        indicador: IndicadorIAASMapeo.model_validate(copy.deepcopy(bloque))
+        for indicador, bloque in _todos_los_bloques().items() if bloque["modulo"] == "iaas"
+    }
 
 
 def cargar_indicador_iaas(indicador: str) -> IndicadorIAASMapeo:
@@ -218,9 +221,8 @@ def cargar_indicador_iaas(indicador: str) -> IndicadorIAASMapeo:
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------#
-# Mapeo tipado para los indicadores del motor Extractor (EH 03, DM 04 -- viven en el
-# mismo archivo de familia que sus hermanos FTP, ej. EH.json, distinguidos por "modulo")
+# Mapeo tipado para los indicadores del motor Extractor (mapeo/extractor/{FAMILIA}.json)
 
 def cargar_indicador_extractor(indicador: str) -> IndicadorExtractorMapeo:
     """Lo que necesita el motor Extractor de un indicador: reportes, formulas y semaforo."""
-    return IndicadorExtractorMapeo.model_validate(_bloque_crudo(indicador))
+    return IndicadorExtractorMapeo.model_validate(_bloque_obligatorio(indicador))

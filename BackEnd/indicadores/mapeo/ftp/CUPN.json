@@ -2,9 +2,6 @@
     "CUPN 01": {
         "nombreArchivoFinal": "CUPN 01",
         "fechaModificacion": "09/10/2026",
-        "imagen": "icono_cupn.png",
-        "color": "#336699",
-        "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
@@ -12,12 +9,6 @@
         "peridocidadGenerada": {
             "mensual": false,
             "mensualAcumulado": true
-        },
-        "criterioGeneracion": {
-            "basadoEn": "guiaSistemas",
-            "comoSeGenera": "CIP01, hoja CIP Unidad Médica, renglón TOTAL: numerador la columna del mes; denominador col. C (ene–jun) o col. R (jul–dic).",
-            "justificacion": "Es lo que indica la Guía.",
-            "diferenciaOficial": "Denominador 41 de 46; numerador en promedio 6% abajo (solo UMF 18 exacta)."
         },
         "informacion": {
             "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
@@ -156,9 +147,6 @@
     "CUPN 04": {
         "nombreArchivoFinal": "CUPN 04",
         "fechaModificacion": "19/08/2026",
-        "imagen": "icono_cupn.png",
-        "color": "#336699",
-        "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
@@ -166,12 +154,6 @@
         "peridocidadGenerada": {
             "mensual": true,
             "mensualAcumulado": false
-        },
-        "criterioGeneracion": {
-            "basadoEn": "guiaSistemas",
-            "comoSeGenera": "IN08, hoja Indicadores, renglón T O T A L E S: numerador col. D (pacientes referidos a segundo nivel, derechohabientes); denominador col. B (total de consultas de Medicina Familiar).",
-            "justificacion": "Es lo que indica la Guía. El resultado es el mismo % que trae el IN08 en su col. E.",
-            "diferenciaOficial": "Numerador 321 de 322; denominador 267 de 322 (ene–jul). UMF 53, 47 y 14 difieren todos los meses."
         },
         "informacion": {
             "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
@@ -223,9 +205,6 @@
     "CUPN 05": {
         "nombreArchivoFinal": "CUPN 05",
         "fechaModificacion": "19/08/2026",
-        "imagen": "icono_cupn.png",
-        "color": "#336699",
-        "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
@@ -233,12 +212,6 @@
         "peridocidadGenerada": {
             "mensual": true,
             "mensualAcumulado": true
-        },
-        "criterioGeneracion": {
-            "basadoEn": "guiaSistemas",
-            "comoSeGenera": "PU01, hoja Parte I, renglón MEDICINA FAMILIAR: numerador col. E (total de consultas); denominador col. C (horas). Acumulado sumando meses.",
-            "justificacion": "Es lo que indica la Guía.",
-            "diferenciaOficial": "Coincide 321 de 322 (ene–jul); UMF 46 enero −694 por archivo duplicado en el FTP."
         },
         "informacion": {
             "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
@@ -287,35 +260,9 @@
             "Esperado": ">= 4.0"
         }
     },
-    "CUPN 06": {
-        "nombreArchivoFinal": "CUPN 06",
-        "fechaModificacion": "19/08/2026",
-        "imagen": "icono_cupn.png",
-        "color": "#336699",
-        "modulo": "",
-        "mostrarGenerar": false,
-        "mostrarGrafica": true,
-        "previos": false,
-        "periodicidad": "Mensual - Mensual Acumulado",
-        "informacion": {
-            "titulo": "CUPN 06 - Porcentaje de niños de 6 meses alimentados con lactancia materna exclusiva.",
-            "objetivo": "Conocer la prevalencia de alimentación con lactancia materna exclusiva en los niños de 6 meses de edad.",
-            "descNum": "Número de niños de 6 meses de edad que mantuvieron alimentación con lactancia materna exclusiva",
-            "descDen": "Número de niños vivos de 6 meses de edad al mes del reporte. (recién nacidos vivos de término, 6 meses previos a la fecha de reporte). menos Defunciones de lactantes clasificados como muerte neonatal e infantil del grupo de edad 0 - 6 meses, durante el periodo de 6 meses anteriores a la fecha del reporte."
-        },
-        "reporte": {},
-        "semaforo": {
-            "Esperado": ">= 50",
-            "Medio": ">= 30 a < 50",
-            "Bajo": "< 30"
-        }
-    },
     "CUPN 07": {
         "nombreArchivoFinal": "CUPN 07",
         "fechaModificacion": "19/08/2026",
-        "imagen": "icono_cupn.png",
-        "color": "#336699",
-        "modulo": "ftp",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "previos": true,
@@ -323,12 +270,6 @@
         "peridocidadGenerada": {
             "mensual": true,
             "mensualAcumulado": true
-        },
-        "criterioGeneracion": {
-            "basadoEn": "guiaSistemas",
-            "comoSeGenera": "PU01, hoja Parte I, renglón ESTOMATOLOGIA: numerador col. E (total de consultas); denominador col. C (horas). Acumulado sumando meses.",
-            "justificacion": "Es lo que indica la Guía.",
-            "diferenciaOficial": "Coincide 175 de 175 (ene–jul)."
         },
         "informacion": {
             "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",

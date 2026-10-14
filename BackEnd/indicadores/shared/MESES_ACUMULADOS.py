@@ -1,9 +1,8 @@
 from typing import Dict
-import json
 
 #mis archivos
 from schemas.model.indicador_Model import MesReporte, UnidadDatos
-from services.indicadorMapeo_Services import RutaMapeoExiste
+from services.indicadorMapeo_Services import bloque_mapeo
 from shared.MESES import MESES_ESTANDAR
 from shared.color_service import es_inconsistente
 from shared.semaforizado_service import SemaforizarReporte
@@ -13,11 +12,7 @@ _CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
 
 
 def _bloque_mapeo(indicador: str) -> dict:
-    rutaMapeo = RutaMapeoExiste(indicador)
-    if not rutaMapeo:
-        return {}
-    with open(rutaMapeo, "r", encoding="utf-8") as archivo:
-        return json.load(archivo).get(indicador, {})
+    return bloque_mapeo(indicador) or {}
 
 
 def _operacionResultado(indicador: str) -> str | None:

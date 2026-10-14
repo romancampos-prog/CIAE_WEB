@@ -72,14 +72,14 @@ const IAASPage = () => {
   useEffect(() => {
     document.title = 'IAAS — Nuevo reporte | CIAE';
     Promise.all([getUnidadesIAAS(), getIndicadoresIAAS()]).then(([unids, inds]) => {
-      const denoms = inds.filter(i => i.id !== 'IAAS 01');
+      const denoms = inds.filter(i => i.indicador !== 'IAAS 01');
       setIndicadores(denoms);
-      setInfoIaas01(inds.find(i => i.id === 'IAAS 01') ?? null);
+      setInfoIaas01(inds.find(i => i.indicador === 'IAAS 01') ?? null);
       setUnidades(unids);
       const d = {};
       unids.forEach(u => {
         d[u] = {};
-        denoms.forEach(ind => { d[u][ind.id] = ''; });
+        denoms.forEach(ind => { d[u][ind.indicador] = ''; });
       });
       setDenominadores(d);
       setCargando(false);
@@ -114,13 +114,13 @@ const IAASPage = () => {
   const setGlobal     = (file) => { if (file?.name.endsWith('.xlsx')) setNumeradores(file); };
   const setUnidadFile = (u, file) => { if (file?.name.endsWith('.xlsx')) setArchivosUnidad(p => ({ ...p, [u]: file })); };
   const setDenom      = (u, id, v) => setDenominadores(p => ({ ...p, [u]: { ...p[u], [id]: v } }));
-  const rowOk         = (u) => !!archivosUnidad[u] && indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
+  const rowOk         = (u) => !!archivosUnidad[u] && indicadores.every(d => (denominadores[u]?.[d.indicador] ?? '') !== '');
   const completos     = unidades.filter(rowOk).length;
 
   /** Excel del año con lo que ya quedo guardado (sale de la BD, no de la respuesta de generar) */
   const descargarExcelGuardado = async () => {
     try {
-      const excel = await descargarExcelIndicadores(indicadores.map(d => d.id), anio);
+      const excel = await descargarExcelIndicadores(indicadores.map(d => d.indicador), anio);
       descargarB64(excel.archivo_b64, excel.nombre_archivo);
     } catch { /* la generacion ya quedo guardada; solo fallo la descarga */ }
   };
@@ -257,8 +257,8 @@ const IAASPage = () => {
                         <small>{infoIaas01?.columnaDenominador}</small>
                       </th>
                       {indicadores.map((d) => (
-                        <th key={d.id} className="ia-col-denom">
-                          <span className="ia-th-ind">{d.id}</span>
+                        <th key={d.indicador} className="ia-col-denom">
+                          <span className="ia-th-ind">{d.indicador}</span>
                           <small>{d.columnaDenominador}</small>
                         </th>
                       ))}
@@ -266,7 +266,7 @@ const IAASPage = () => {
                   </thead>
                   <tbody>
                     {unidades.map((u, i) => {
-                      const okDenom = indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
+                      const okDenom = indicadores.every(d => (denominadores[u]?.[d.indicador] ?? '') !== '');
                       const okNum   = !!archivosUnidad[u];
                       return (
                         <tr key={u} className={`ia-tr ${okDenom && okNum ? 'ia-tr--ok' : ''}`} style={{ animationDelay: `${i * 0.02}s` }}>
@@ -340,18 +340,18 @@ const IAASPage = () => {
                           )}
 
                           {indicadores.map((d, j) => (
-                            <td key={d.id} className="ia-td-denom">
+                            <td key={d.indicador} className="ia-td-denom">
                               <input
                                 type="text"
                                 inputMode="decimal"
-                                className={`ia-num ${(denominadores[u]?.[d.id] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
+                                className={`ia-num ${(denominadores[u]?.[d.indicador] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
                                 placeholder="—"
-                                value={denominadores[u]?.[d.id] ?? ''}
+                                value={denominadores[u]?.[d.indicador] ?? ''}
                                 onChange={e => {
                                   // type="number" del navegador no bloqueaba letras en todos los
                                   // casos -- se valida aquí: solo dígitos y un punto decimal.
                                   const v = e.target.value;
-                                  if (v === '' || /^\d*\.?\d*$/.test(v)) setDenom(u, d.id, v);
+                                  if (v === '' || /^\d*\.?\d*$/.test(v)) setDenom(u, d.indicador, v);
                                 }}
                                 onKeyDown={e => {
                                   // Flechas para moverse por la cuadrícula sin soltar el teclado --
@@ -428,7 +428,7 @@ const IAASPage = () => {
                   {[1,2,3,4].map(i => <div key={i} className="ia-shimmer-row" />)}
                 </div>
               ) : unidades.map(u => {
-                const okDenom = indicadores.every(d => (denominadores[u]?.[d.id] ?? '') !== '');
+                const okDenom = indicadores.every(d => (denominadores[u]?.[d.indicador] ?? '') !== '');
                 const okNum   = !!archivosUnidad[u];
                 return (
                   <div key={u} className={`ia-mcard ${okDenom && okNum ? 'ia-mcard--ok' : ''}`}>
@@ -462,15 +462,15 @@ const IAASPage = () => {
 
                     <div className="ia-mcard-denoms">
                       {indicadores.map(d => (
-                        <label key={d.id} className="ia-mcard-denom-field">
-                          <span className="ia-mcard-denom-label" title={d.columnaDenominador}>{d.id}</span>
+                        <label key={d.indicador} className="ia-mcard-denom-field">
+                          <span className="ia-mcard-denom-label" title={d.columnaDenominador}>{d.indicador}</span>
                           <input
                             type="number"
-                            className={`ia-num ${(denominadores[u]?.[d.id] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
+                            className={`ia-num ${(denominadores[u]?.[d.indicador] ?? '') !== '' ? 'ia-num--lleno' : ''}`}
                             placeholder="—"
                             min="0"
-                            value={denominadores[u]?.[d.id] ?? ''}
-                            onChange={e => setDenom(u, d.id, e.target.value)}
+                            value={denominadores[u]?.[d.indicador] ?? ''}
+                            onChange={e => setDenom(u, d.indicador, e.target.value)}
                           />
                         </label>
                       ))}

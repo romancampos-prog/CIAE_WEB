@@ -1,0 +1,22 @@
+{
+    "CUPN 06": {
+        "nombreArchivoFinal": "CUPN 06",
+        "fechaModificacion": "19/08/2026",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "informacion": {
+            "titulo": "CUPN 06 - Porcentaje de niños de 6 meses alimentados con lactancia materna exclusiva.",
+            "objetivo": "Conocer la prevalencia de alimentación con lactancia materna exclusiva en los niños de 6 meses de edad.",
+            "descNum": "Número de niños de 6 meses de edad que mantuvieron alimentación con lactancia materna exclusiva",
+            "descDen": "Número de niños vivos de 6 meses de edad al mes del reporte. (recién nacidos vivos de término, 6 meses previos a la fecha de reporte). menos Defunciones de lactantes clasificados como muerte neonatal e infantil del grupo de edad 0 - 6 meses, durante el periodo de 6 meses anteriores a la fecha del reporte."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": ">= 50",
+            "Medio": ">= 30 a < 50",
+            "Bajo": "< 30"
+        }
+    }
+}

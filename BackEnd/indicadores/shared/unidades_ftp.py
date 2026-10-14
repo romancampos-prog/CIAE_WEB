@@ -25,11 +25,18 @@ RUTA_MAPEO_POBLACION = _MAPEO_UNIFICADO / "POBLACION.json"
 # Hospitales de 2o nivel por clave presupuestal completa (12 caracteres), con los
 # mismos nombres que IAAS -- para indicadores que se agrupan por el hospital que
 # atiende (ej. MT 03) y no por la UMF de adscripcion.
-CLAVE_HOSPITALES = json.loads((_MAPEO_UNIFICADO / "unidades" / "hospitales.json").read_text(encoding="utf-8"))["CLAVE_HOSPITALES"]
+_hospitales = json.loads((_MAPEO_UNIFICADO / "unidades" / "hospitales.json").read_text(encoding="utf-8"))
+CLAVE_HOSPITALES = _hospitales["CLAVE_HOSPITALES"]
 
 # Catalogos que un indicador del Extractor puede pedir en 'catalogoUnidades' del mapeo.
 CATALOGOS_UNIDADES = {
     "hospitales": CLAVE_HOSPITALES,
+}
+
+# Como se describe cada agrupacion en pantalla; None = sin catalogoUnidades (UMF de adscripcion).
+NOMBRE_AGRUPACION = {
+    None:         _unidades["nombreAgrupacion"],
+    "hospitales": _hospitales["nombreAgrupacion"],
 }
 
 

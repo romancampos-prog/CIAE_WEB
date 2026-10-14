@@ -1,0 +1,18 @@
+{
+    "SUI_13": {
+        "nombre": "SUI-13",
+        "nombreSugerido": "SUI_13_{MM}_{AAAA}.xlsx"
+    },
+    "EGRESOS_TOCO": {
+        "nombre": "Egresos TOCO",
+        "nombreSugerido": "EGRESOS_TOCO_{MM}_{AAAA}.xlsx"
+    },
+    "EGRESOS_NACIMIENTO_TOCO": {
+        "nombre": "Egresos Nacimientos TOCO",
+        "nombreSugerido": "EGRESOS_NACIMIENTO_TOCO_{MM}_{AAAA}.xlsx"
+    },
+    "EGRESOS_PACIENTES_DIARIA": {
+        "nombre": "Egresos Pacientes",
+        "nombreSugerido": "EGRESOS_PACIENTES_DIARIA_{MM}_{AAAA}.xlsx"
+    }
+}

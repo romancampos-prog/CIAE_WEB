@@ -39,7 +39,7 @@ export function calcularFaltantes(numeradores, unidades, archivosUnidad, denomin
   if (!numeradores) lista.push('Falta el Excel global de IAAS 01');
   const sinExcel = unidades.filter(u => !archivosUnidad[u]);
   if (sinExcel.length) lista.push(`${sinExcel.length} unidad(es) sin Excel: ${sinExcel.join(', ')}`);
-  const sinDenom = unidades.filter(u => archivosUnidad[u] && indicadores.some(d => !(denominadores[u]?.[d.id])));
+  const sinDenom = unidades.filter(u => archivosUnidad[u] && indicadores.some(d => !(denominadores[u]?.[d.indicador])));
   if (sinDenom.length) lista.push(`Denominadores incompletos en: ${sinDenom.join(', ')}`);
   return lista;
 }

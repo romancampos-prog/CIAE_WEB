@@ -1,18 +1,35 @@
 # Estructura de los JSON de mapeo
 
-Esta carpeta reemplaza a `indicadores/ftp/mapeo/` y `indicadores/iaas/mapeo/`. Cada
-archivo agrupa una familia de indicadores (`CAMA.json`, `CACU.json`, `IAAS.json`, etc.)
-y todos siguen el mismo sobre (envelope), sin importar de dónde saquen sus datos.
+## Carpetas
 
-El código que lee esta nueva estructura todavía no existe — esto es solo la forma de
-los datos, pendiente de que se conecte al backend.
+```
+mapeo/
+├── ftp/          {FAMILIA}.json   indicadores que se generan desde el FTP
+├── iaas/         IAAS.json        indicadores IAAS (Excel subido + captura)
+├── extractor/    {FAMILIA}.json   indicadores del Extractor (Excel crudo mensual)
+├── sin_generar/  {FAMILIA}.json   indicadores que todavía no se automatizan
+├── catalogos/
+│   ├── familias.json            nombre, ícono y color de cada familia
+│   └── archivos_extractor.json  nombre y nombre sugerido de cada archivo que sube el Extractor
+├── unidades/     ftp.json, iaas.json, hospitales.json (cada uno con su "nombreAgrupacion")
+└── POBLACION.json               columnas del Excel de población
+```
+
+- **La carpeta es el módulo.** Un indicador ya no lleva `"modulo"`: el backend se lo pone
+  según la carpeta donde vive (`ftp`, `iaas`, `extractor`; `""` en `sin_generar`).
+- **Una familia puede estar en varias carpetas** (ej. `ftp/EH.json` con EH 01-02 y
+  `extractor/EH.json` con EH 03).
+- **`imagen` y `color` son de la familia**, no de cada indicador: viven una sola vez en
+  `catalogos/familias.json` y el backend se los pone a cada indicador al leerlo.
+- Todo se lee por `services/indicadorMapeo_Services.py` (`bloque_mapeo`): es el único lugar
+  que sabe en qué carpeta y archivo vive cada indicador. Si se edita un JSON, se vuelve a
+  leer solo (no hace falta reiniciar).
 
 ## Sobre de cada indicador y por estandar maneja estos campos todos los INDICADORES
 
 ```json
 "CAMA 01": {
     "fechaModificacion": "19/08/2026",
-    "modulo": "ftp",
     "mostrarGenerar": true,
     "mostrarGrafica": true,
     "periodicidad": "Mensual Acumulado",
@@ -26,9 +43,6 @@ los datos, pendiente de que se conecte al backend.
     "semaforo": { ... }
 }
 ```
-
-- **`modulo`**: en qué módulo del sistema aparece este indicador (`"ftp"`, `"IAAS"`).
-  Vacío (`""`) en los indicadores que no generan reporte automático "AUN - ESTAN EN ´PROCESO" — ver más abajo.
 
 - **`mostrarGenerar`**: `true` si peude generarse en su  respectivo modulo de GENERACION.
 - **`reporte`**: vacío (`{}`) aqui se definen reglas de extraccion depende el reporte por indicador
@@ -62,7 +76,7 @@ esos datos crudos para llegar al resultado final.
 | `poblacionInfoSalud` | Se lee de `POBLACION.json`, por grupo de sexo y rango de edad | denominadores basados en población |
 | `xlsxWeb` | Un Excel que la persona sube manualmente por la web (no se busca solo) | numerador/denominador de IAAS |
 | `capturaWeb` | El número se captura a mano en un formulario, no viene de ningún archivo | denominador de IAAS 02-06 |
-| `extractor` | Excel crudo (fila por paciente/evento) que la persona sube CADA MES; el numerador de cada mes se acumula en el JSON del indicador, y el corte final (con denominador y semáforo) se dispara solo cuando se junta la ventana completa de meses que pide la periodicidad | EH 03, DM 04 (módulo `indicadores/extractor/`) |
+| `extractor` | Excel crudo (fila por paciente/evento) que la persona sube CADA MES; el numerador de cada mes se acumula en el JSON del indicador, y el corte final (con denominador y semáforo) se dispara solo cuando se junta la ventana completa de meses que pide la periodicidad | EH 03, DM 04, MT 03-05, Neonatal 03 (`extractor/`) |
 
 ## Valores de `modoExtraccion` (fuentes `ftp` / `xlsxWeb`)
 
@@ -104,18 +118,14 @@ define en una llave hermana de `reporte`, al mismo nivel que `fechaModificacion`
 - **`MESES_CIP01`** (`CUPN 01`): el marcador `"MESES_CIP01"` dentro de `columna_dato`
   se reemplaza por la columna del mes del reporte, según el mapa `MESES_CIP01` del
   indicador (`{"1": "D", "2": "F", ...}`).
+- **`COLUMNAS_POR_MES`** (`CUPN 01`): igual que `MESES_CIP01`, pero con nombre propio por
+  marcador (`{"POBLACION_CIP01": {"1": "C", ..., "7": "R"}}`).
 - **`UNIDADES_IAAS`** (`IAAS 01`, dentro de `columnaUnidad`): indica que esa columna no
   se compara contra un valor fijo, sino contra el número de cada unidad médica de la
   lista fija de IAAS 01, una por una.
 
 ## Indicadores sin extracción automática
 
-Los indicadores que no generan reporte solo (antes `generaFTP: false` / sin
-`Denominador` en IAAS) llevan `modulo: ""`, `mostrarGenerar: false` y `reporte: {}`.
-Conservan `periodicidad`, `informacion` y `semaforo` igual que los demás.
-
-## Archivos de esta carpeta
-
-- `CAMA.json`, `CACU.json`, `CE.json`, `CUPN.json`, `DM.json`, `EH.json`, `MT.json`,
-  `S_Ob.json` — familias ftp.
-- `IAAS.json` — familia IAAS (`xlsxWeb` / `capturaWeb`).
+Los indicadores que no generan reporte solo viven en `sin_generar/`, con
+`mostrarGenerar: false` y `reporte: {}`. Conservan `periodicidad`, `informacion` y
+`semaforo` igual que los demás. Al automatizar uno, se mueve su bloque a la carpeta del módulo.

@@ -497,7 +497,6 @@ FrontEnd/src/
 │   ├── ftp/              sub-modulo FTP
 │   │   ├── api/          llamadas axios al backend
 │   │   ├── componentes/  piezas visuales (graficas, modales)
-│   │   ├── constantes/   colores.js
 │   │   ├── hooks/        logica reutilizable con estado
 │   │   ├── paginas/      vistas completas registradas como rutas
 │   │   ├── routes/       FTPRoutes.jsx
@@ -671,23 +670,11 @@ Si algo solo lo usa una pagina y no aparece en routes, va en `componentes/`, no 
 
 #### Sistema de colores por categoria
 
-Los colores de cada categoria de indicador se definen una sola vez en `ftp/constantes/colores.js` y se aplican via CSS custom property `--ic`:
-
-```js
-// ftp/constantes/colores.js
-export const COLORS = {
-  CAMA: '#b54870',  CACU: '#0d9488',  EH: '#691c32',
-  DM:   '#1a3a8f',  MT:   '#065f46',  CUPN: '#336699',
-}
-export const CAT_COLOR = {           // version mas oscura para contraste
-  CAMA: '#8d3456',  CACU: '#0f766e', EH: '#4e1224',
-  DM:   '#5c35a0',  MT:   '#7E0808', CUPN: '#336699',
-}
-```
+El ícono y el color de cada familia vienen del backend (`imagen` y `color`, definidos una sola vez en `BackEnd/indicadores/mapeo/catalogos/familias.json`). El front no tiene tablas por familia: el ícono se traduce con `indicadores/shared/utils/iconos.js` (`urlIcono`) y el color se aplica via CSS custom property `--ic`:
 
 ```jsx
 // En la pagina o componente — pasar el color como CSS variable
-<div className="mi-card" style={{ '--ic': CAT_COLOR[cat] }}>
+<div className="mi-card" style={{ '--ic': familia.color }}>
   <span>{indicador}</span>
 </div>
 ```

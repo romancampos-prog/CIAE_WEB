@@ -246,7 +246,7 @@ export default function ModalUnidadTardia({ isOpen, onClose, anio, mes, unidades
                   const numGuardado = unidad ? numeradoresGuardados[unidad]?.[ind] : undefined;
                   const tieneNum    = numGuardado != null;
                   const esIAAS01    = ind === 'IAAS 01';
-                  const info        = indicadoresInfo.find(i => i.id === ind);
+                  const info        = indicadoresInfo.find(i => i.indicador === ind);
                   const denGuardado = esIAAS01 && unidad ? denominadoresGuardados[unidad]?.[ind] : undefined;
                   const tieneDen    = denGuardado != null;
                   return (

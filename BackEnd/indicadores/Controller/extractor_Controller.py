@@ -1,6 +1,6 @@
 """
 Recibe y procesa el Excel mensual crudo de los indicadores del motor Extractor
-(modulo "Extractor" en indicadores/mapeo/: EH 03, DM 04, MT 03). Un solo
+(indicadores/mapeo/extractor/). Un solo
 Excel del mes (+ su cruce con Egresos) alimenta a TODOS los indicadores del
 extractor a la vez -- ver corte_extractor_Services.indicadores_extractor(); cada
 uno decide que hacer segun su periodicidad (generacion_extractor_Services).
@@ -13,25 +13,19 @@ from configs.response import ApiResponse
 from shared.validarArchivo_service import validarPeso_Archivo
 from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
-from services.extractor.corte_extractor_Services import indicadores_extractor, estado_ventanas, detalle_indicadores_extractor
+from services.extractor.corte_extractor_Services import estado_ventanas
+from services.extractor.info_extractor_Services import indicadores_para_generar
 from services.extractor.generacion_extractor_Services import aplicar_cruce_mes, estado_archivos, procesar_archivo_mensual
 
 extractorApi = APIRouter()
 
 
 @extractorApi.get("/indicadores")
-async def listar_indicadores_extractor(
+async def indicadores_extractor_generar(
     payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "visitante")),
 ):
-    return ApiResponse(success=True, message="Indicadores del modulo Extractor", data=indicadores_extractor())
-
-
-@extractorApi.get("/indicadores/detalle")
-async def detalle_indicadores(
-    payload: dict = Depends(solo_roles("admin", "trabajador_ftp", "visitante")),
-):
-    """Por indicador: titulo, periodicidad, corte/mensual, agrupacion y que archivos usa -- todo del mapeo."""
-    return ApiResponse(success=True, message="Detalle de indicadores del modulo Extractor", data=detalle_indicadores_extractor())
+    """Los indicadores del Extractor con lo comun del mapeo + corte/mensual, agrupacion y archivos que usan."""
+    return ApiResponse(success=True, message="Indicadores del modulo Extractor", data=indicadores_para_generar())
 
 
 @extractorApi.get("/estado")

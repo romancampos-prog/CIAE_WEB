@@ -15,21 +15,7 @@ import { useEffect, useState } from 'react';
 import SidebarCategorias from '../componentes/SidebarCategorias';
 import PeriodoReporte from '../componentes/PeriodoReporte';
 import { textoAcento } from '../../../shared/utils/colorAcento';
-
-import iconoCama  from '../../../assets/icono_cama.png';
-import iconoCacu  from '../../../assets/icono_cacu.png';
-import iconoEh    from '../../../assets/icono_eh.png';
-import iconoDm    from '../../../assets/icono_dm.png';
-import iconoMt    from '../../../assets/icono_mt.png';
-import iconoCupn  from '../../../assets/icono_cupn.png';
-import iconoSOb   from '../../../assets/icono_S_Ob.png';
-import iconoCe    from '../../../assets/icono_ce (2).png';
-
-const CAT_ICON = {
-  CAMA: iconoCama, CACU: iconoCacu, EH: iconoEh,  DM: iconoDm,
-  MT:   iconoMt,  CUPN: iconoCupn, S_Ob: iconoSOb, CE: iconoCe,
-  Neonatal: iconoMt,
-};
+import { urlIcono } from '../../shared/utils/iconos';
 
 const IcoDownload = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -63,7 +49,7 @@ const IndicadoresPage = () => {
     regenerarModo, regenerando, errorRegenerar, confirmarRegenerar,
   } = useIndicadores(user);
 
-  const catIcon = CAT_ICON[categoria];
+  const catIcon = urlIcono(categorias.find(c => c.categoriaIndicador === categoria)?.imagen);
 
   /* Colapsado por default en pantallas angostas para no robarle ancho al
      contenido; el usuario lo expande con el botón toggle si lo necesita

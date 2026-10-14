@@ -1,0 +1,79 @@
+{
+    "CACU 02": {
+        "nombreArchivoFinal": "CACU 02",
+        "fechaModificacion": "19/08/2026",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual Semestralizado",
+        "informacion": {
+            "titulo": "CACU 02 - Tiempo promedio para el diagnóstico de cáncer cérvico uterino a partir de la sospecha por citología cérvico vaginal de tamizaje.",
+            "objetivo": "Medir el tiempo promedio en días que emplea el Institución Mexicano del Seguro Social para emitir el diagnóstico de cáncer cérvico uterino una vez que se establece la sospecha a través de la citología cérvico vaginal de tamizaje",
+            "descNum": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
+            "descDen": "Total de pacientes que cuenten con fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y con fecha de toma de citología cérvico vaginal de tamizaje con reporte de lesión."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": "<= 30",
+            "Medio": "> 30 a <= 60 ",
+            "Bajo": "> 60"
+        }
+    },
+    "CACU 03": {
+        "nombreArchivoFinal": "CACU 03",
+        "fechaModificacion": "19/08/2026",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual Semestralizado",
+        "informacion": {
+            "titulo": "CACU 03 - Tiempo promedio para el inicio del tratamiento en cáncer cérvico uterino.",
+            "objetivo": "Medir el tiempo promedio en días que emplea el Instituto Mexicano del Seguro Social para iniciar el tratamiento del cáncer cérvico uterino una vez que se establece el diagnóstico histopatológico de cáncer cérvico uterino.",
+            "descNum": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y la fecha de la toma de citología cervicovaginal de tamizaje con reporte de lesión.",
+            "descDen": "Total de pacientes que cuentan con fecha de diagnóstico histopatológico con tipo de conducta “malignos” y con fecha de inicio de tratamiento por cualquiera de las modalidades durante el periodo a evaluar."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Esperado": "<= 30",
+            "Medio": null,
+            "Bajo": "> 30"
+        }
+    },
+    "CACU 04": {
+        "nombreArchivoFinal": "CACU 04",
+        "fechaModificacion": "19/08/2026",
+        "mostrarGenerar": false,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Trimestral Acumulado",
+        "informacion": {
+            "titulo": "CACU 04 - Tasa de incidencia de invalidez por cáncer cérvico uterino por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora.",
+            "objetivo": "Medir el impacto de los programas de prevención y detección oportuna del cáncer cérvico uterino, así como de las acciones de atención médica para el tratamiento oportuno y adecuado de las trabajadoras, para evitar que las complicaciones resulten en la imposibilidad de que las trabajadoras aseguradas en el ramo de invalidez y vida continúen realizando sus actividades laborales.",
+            "descNum": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de cáncer cérvico uterino, según OOAD de origen acumulados al trimestre del reporte.",
+            "descDen": "Promedio de trabajadoras aseguradas en invalidez y vida en el OOAD de origen, al trimestre del reporte."
+        },
+        "reporte": {},
+        "semaforo": {
+            "Marzo": {
+                "Esperado": "<= 0.00",
+                "Medio": "> 0.00 a <= 1.52",
+                "Bajo": "> 1.52"
+            },
+            "Junio": {
+                "Esperado": "<= 0.00",
+                "Medio": "> 0.00 a <= 2.37",
+                "Bajo": "> 2.37"
+            },
+            "Septiembre": {
+                "Esperado": "<= 1.25",
+                "Medio": "> 1.25 a <= 3.01",
+                "Bajo": "> 3.01"
+            },
+            "Diciembre": {
+                "Esperado": "<= 1.44",
+                "Medio": "> 1.44 a <= 4.32",
+                "Bajo": "> 4.32"
+            }
+        }
+    }
+}

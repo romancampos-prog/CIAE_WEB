@@ -1,11 +1,21 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
-import { obtenerTodosLosIndicadores, obtenerFichaIndicador } from '../../shared/api/indicadoresInfo';
+import { obtenerFichaIndicador } from '../../shared/api/indicadoresInfo';
+import { getIndicadoresFTP } from '../api/indicadores';
 import { getReporte, getMesesGenerados, generarCategoria, regenerarReporteFinal, regenerarCategoria } from '../../reportes_grafica/api/reportes';
 import { descargarB64 } from '../../shared/utils/download';
 import { descargarExcelIndicadores } from '../../shared/api/excel';
 import { MESES_LARGOS } from '../../shared/constantes/meses';
-import { COLORS } from '../constantes/colores';
 import { calcularMesesDisponibles, calcularSemDataFTP } from '../utils/calculos';
+
+// La página navega por familia: se agrupan los indicadores que manda el backend, en su orden.
+const agruparPorFamilia = (lista) => Object.values(lista.reduce((familias, ind) => {
+  familias[ind.categoria] ??= {
+    categoriaIndicador: ind.categoria, nombreCategoria: ind.nombreCategoria,
+    imagen: ind.imagen, color: ind.color, indicadores: [],
+  };
+  familias[ind.categoria].indicadores.push(ind.indicador);
+  return familias;
+}, {}));
 
 /**
  * Hook de generaciÃ³n de indicadores FTP.
@@ -54,8 +64,9 @@ export function useIndicadores(user) {
    *  por FTP (mostrarGenerar + módulo ftp) -- esta es la página de Generar FTP,
    *  no la de gráficas. */
   useEffect(() => {
-    obtenerTodosLosIndicadores({ campo: 'mostrarGenerar', modulo: 'ftp' })
-      .then(lista => {
+    getIndicadoresFTP()
+      .then(indicadoresFTP => {
+        const lista = agruparPorFamilia(indicadoresFTP);
         setCategorias(lista);
         if (!lista.some(c => c.categoriaIndicador === categoria) && lista.length > 0)
           setCategoria(lista[0].categoriaIndicador);
@@ -137,7 +148,7 @@ export function useIndicadores(user) {
     [infoIndicador, datos.mes]
   );
 
-  const catColor    = COLORS[categoria] ?? '#0b5445';
+  const catColor    = catData?.color ?? '#0b5445';
   const canGenerar  = !!indicadorSel && !!datos.mes && !cargando && !cargandoBatch;
   const canBatch    = !!datos.mes && !cargando && !cargandoBatch && indicadores.length > 0;
 

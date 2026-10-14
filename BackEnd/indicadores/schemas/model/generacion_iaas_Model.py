@@ -9,14 +9,6 @@ from pydantic import BaseModel, Field
 from schemas.model.generacion_ftp_Model import UnidadSemaforizada
 
 
-class IndicadorGenerarIAAS(BaseModel):
-    """Un indicador IAAS en la pagina de Generar (rotulos de columnas del Excel subido)."""
-    id:                 str
-    titulo:              str
-    columnaNumerador:    str
-    columnaDenominador:  str
-
-
 class MesesGuardadosIAAS(BaseModel):
     meses: list[str]  # "01".."12"
 
