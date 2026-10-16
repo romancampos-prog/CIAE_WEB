@@ -61,6 +61,32 @@ def leer_pendiente_cruce(indicador: str, anio: int, mes_nombre: str) -> dict | N
     return json.loads(ruta.read_text(encoding="utf-8")).get(mes_nombre)
 
 
+def ruta_partes_mes(indicador: str, anio: int) -> Path:
+    """BD_CIAE/INDICADORES/{anio}/EXTRACTOR_PARTES/Neonatal_06.json -- conteos de indicadores con numerador y denominador en archivos distintos."""
+    familia, numero = indicador.split()
+    return DATA_INDICADORES / str(anio) / "EXTRACTOR_PARTES" / f"{familia}_{numero}.json"
+
+
+def leer_partes(indicador: str, anio: int) -> dict:
+    """{mes: {"numerador": {unidad: n}, "denominador": {unidad: n}}} -- cada lado solo si ya se subio su archivo."""
+    ruta = ruta_partes_mes(indicador, anio)
+    return json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else {}
+
+
+def guardar_parte_mes(indicador: str, anio: int, mes_nombre: str, lado: str, conteo_por_unidad: dict) -> dict:
+    """
+    Guarda (o reemplaza) el conteo de un lado del mes y regresa las partes de ese mes.
+    Se conserva aunque el mes ya se haya generado: si despues se corrige solo uno de
+    los dos archivos, el otro lado sigue aqui y el mes se recalcula sin volver a subirlo.
+    """
+    partes = leer_partes(indicador, anio)
+    partes.setdefault(mes_nombre, {})[lado] = conteo_por_unidad
+    ruta = ruta_partes_mes(indicador, anio)
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    ruta.write_text(json.dumps(partes, ensure_ascii=False, indent=2), encoding="utf-8")
+    return partes[mes_nombre]
+
+
 def guardar_numerador_mes(indicador: str, anio: int, mes_nombre: str, conteo_por_unidad: dict, cruce_aplicado: bool | None = None) -> None:
     """
     Guarda (o reemplaza, si se re-sube el mismo mes) el numerador crudo de un

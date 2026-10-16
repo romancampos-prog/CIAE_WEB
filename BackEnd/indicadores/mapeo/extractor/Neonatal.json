@@ -1,4 +1,87 @@
 {
+    "Neonatal 02": {
+        "nombreArchivoFinal": "Neonatal 02",
+        "fechaModificacion": "16/10/2026",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": true
+        },
+        "informacion": {
+            "titulo": "Neonatal 02 - Porcentaje de personas recién nacidas de término (con 37 semanas o más de gestación), que son alimentadas mediante lactancia materna exclusiva al egreso de la Unidad de Segundo o de Tercer Nivel de atención.",
+            "objetivo": "Conocer el porcentaje de personas recién nacidas de término (con 37 semanas o más de gestación), que nacen en las Unidades de Segundo o de Tercer Nivel de atención y que son alimentados al egreso mediante lactancia materna exclusiva.",
+            "descNum": "Total de personas recién nacidas de término (con 37 semanas o más de gestación), alimentadas mediante lactancia materna exclusiva al egreso de la unidad, durante el periodo a evaluar.",
+            "descDen": "Total de personas recién nacidas de término (con 37 semanas o más de gestación), egresadas de unidades de segundo o de tercer nivel de atención, durante el periodo a evaluar."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor",
+                "archivo": "EGRESOS_NACIMIENTO_TOCO",
+                "hoja": "Hoja1",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "cvePresupuestal",
+                "catalogoUnidades": "hospitales",
+                "columnasPeriodo": {
+                    "mes": "mesm",
+                    "anio": "aniom"
+                },
+                "filtroColumna": {
+                    "T": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            37,
+                            99
+                        ],
+                        "nombreColumna": "SEMGES"
+                    },
+                    "AY": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            1
+                        ],
+                        "nombreColumna": "cve_alimentacion_rn"
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "extractor",
+                "archivo": "EGRESOS_NACIMIENTO_TOCO",
+                "hoja": "Hoja1",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "cvePresupuestal",
+                "catalogoUnidades": "hospitales",
+                "columnasPeriodo": {
+                    "mes": "mesm",
+                    "anio": "aniom"
+                },
+                "filtroColumna": {
+                    "T": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            37,
+                            99
+                        ],
+                        "nombreColumna": "SEMGES"
+                    }
+                }
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "denominador",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": ">= 90.0",
+            "Medio": "> 80.0 a < 90.0",
+            "Bajo": "<= 80.0"
+        }
+    },
     "Neonatal 03": {
         "nombreArchivoFinal": "Neonatal 03",
         "fechaModificacion": "08/10/2026",
@@ -87,6 +170,135 @@
             "Esperado": "<= 1.4",
             "Medio": "> 1.4 a < 2.5",
             "Bajo": ">= 2.5"
+        }
+    },
+    "Neonatal 06": {
+        "nombreArchivoFinal": "Neonatal 06",
+        "fechaModificacion": "16/10/2026",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual Anualizado",
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": false
+        },
+        "informacion": {
+            "titulo": "Neonatal 06 - Tasa de mortalidad hospitalaria por síndrome de dificultad respiratoria del recién nacido (Tipo I) y sus complicaciones.",
+            "objetivo": "Muestra la oportunidad, calidad y la estructura disponible de los servicios de salud para la atención del prematuro menor de 28 días, con diagnóstico de Síndrome de Dificultad Respiratoria del Recién Nacido y sus complicaciones.",
+            "descNum": "Defunciones de recién nacidos vivos sucedidas desde el nacimiento hasta antes de los 28 días de vida, por Síndrome de Dificultad Respiratoria del Recién Nacido y sus complicaciones (CIE 10: P22.0, P22.8, P22.9, P25, P26, P52.0, P52.1, P52.2, P52.3).",
+            "descDen": "Total de recién nacidos vivos."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor",
+                "archivo": "DEFUNCIONES",
+                "hoja": 0,
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "IMUNI_ATEN",
+                "catalogoUnidades": "hospitales",
+                "columnasPeriodo": {
+                    "mes": "mesm",
+                    "anio": "aniom"
+                },
+                "filtroColumna": {
+                    "R": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            0,
+                            36.99
+                        ],
+                        "nombreColumna": "DEFSEMGESTA"
+                    },
+                    "AH": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            2,
+                            "02"
+                        ],
+                        "nombreColumna": "DEFDERECHO"
+                    }
+                },
+                "filtroGrupoColumnas": [
+                    {
+                        "coincidencia": "CUALQUIERA",
+                        "tipo": "PREFIJO",
+                        "filtro": [
+                            "P220",
+                            "P228",
+                            "P229",
+                            "P25",
+                            "P26",
+                            "P520",
+                            "P521",
+                            "P522",
+                            "P523"
+                        ],
+                        "columnas": {
+                            "CY": "DEFCAUSABAS",
+                            "BF": "CAUSA1",
+                            "BN": "CAUSA2",
+                            "BV": "CAUSA3",
+                            "CD": "CAUSA4",
+                            "CL": "CAUSA5",
+                            "CT": "CAUSA6"
+                        }
+                    },
+                    {
+                        "coincidencia": "NINGUNA",
+                        "tipo": "PREFIJO",
+                        "filtro": [
+                            "P36",
+                            "P37",
+                            "P38",
+                            "P39"
+                        ],
+                        "columnas": {
+                            "CY": "DEFCAUSABAS",
+                            "BF": "CAUSA1",
+                            "BN": "CAUSA2",
+                            "BV": "CAUSA3",
+                            "CD": "CAUSA4",
+                            "CL": "CAUSA5",
+                            "CT": "CAUSA6"
+                        }
+                    }
+                ]
+            },
+            "denominador": {
+                "fuente": "extractor",
+                "archivo": "EGRESOS_NACIMIENTO_TOCO",
+                "hoja": "Hoja1",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "cvePresupuestal",
+                "catalogoUnidades": "hospitales",
+                "columnasPeriodo": {
+                    "mes": "mesm",
+                    "anio": "aniom"
+                },
+                "filtroColumna": {
+                    "U": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            1
+                        ],
+                        "nombreColumna": "ESTADORN"
+                    }
+                },
+                "ceroEsSinDato": true
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "denominador",
+                "resultado": "round((numerador / denominador) * 1000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": "<= 3.0",
+            "Medio": "> 3.0 a < 5.0",
+            "Bajo": ">= 5.0"
         }
     }
 }

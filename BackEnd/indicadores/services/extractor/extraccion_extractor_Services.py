@@ -32,7 +32,7 @@ class LectorExcel:
         self._contenido = contenido_bytes
         self._hojas: dict[tuple[str, int], pd.DataFrame] = {}
 
-    def hoja(self, nombre: str, encabezado: int = 1) -> pd.DataFrame:
+    def hoja(self, nombre: str | int, encabezado: int = 1) -> pd.DataFrame:
         clave = (nombre, encabezado)
         if clave not in self._hojas:
             self._hojas[clave] = pd.read_excel(io.BytesIO(self._contenido), sheet_name=nombre, header=encabezado - 1)
@@ -105,7 +105,9 @@ def contar_por_unidad(lector: LectorExcel, config: dict, anio: int, mes_nombre: 
         raise KeyError(f"La columna de agrupacion '{col_agrupacion}' no existe en la hoja '{hoja}'")
 
     mascara = mascara_filtros(df, DetalleFiltroConteo.model_validate(config))
-    unidades = df.loc[mascara, col_agrupacion].astype(str).str.strip().map(catalogo).dropna()
+    # Una clave numerica con celdas vacias en la columna llega como float ("110804012151.0").
+    claves = df.loc[mascara, col_agrupacion].astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
+    unidades = claves.map(catalogo).dropna()
     conteo = unidades.value_counts()
     return {nombre: int(conteo.get(nombre, 0)) for nombre in catalogo.values()}
 

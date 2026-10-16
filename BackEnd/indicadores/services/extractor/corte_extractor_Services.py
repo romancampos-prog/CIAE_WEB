@@ -68,6 +68,18 @@ def archivo_base(indicador: str) -> str:
     return cargar_indicador_extractor(indicador).reporte.numerador.archivo
 
 
+def archivo_denominador_aparte(indicador: str) -> str | None:
+    """Clave del archivo del denominador si es OTRO archivo del Extractor (Neonatal 06: Nacimientos); None si sale del mismo o de poblacion."""
+    reporte = cargar_indicador_extractor(indicador).reporte
+    archivo = getattr(reporte.denominador, "archivo", None) if getattr(reporte.denominador, "fuente", None) == "extractor" else None
+    return archivo if archivo and archivo != reporte.numerador.archivo else None
+
+
+def archivos_del_indicador(indicador: str) -> list[str]:
+    """Todos los archivos del Extractor que hay que subir para el indicador (el base y, si aplica, el del denominador)."""
+    return [archivo_base(indicador), *filter(None, [archivo_denominador_aparte(indicador)])]
+
+
 # Meses en los que la periodicidad "Semestral Anualizado" dispara un corte.
 MESES_CORTE_SEMESTRAL = ["Junio", "Diciembre"]
 

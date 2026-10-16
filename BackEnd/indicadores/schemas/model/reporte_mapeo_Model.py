@@ -85,7 +85,11 @@ class FuenteExtractor(BaseModel):
     catalogoUnidades: con que catalogo se agrupa (ver shared/unidades_ftp.CATALOGOS_UNIDADES);
     sin el, se agrupa por las UMF de FTP (lo de EH 03/DM 04).
     archivo: que archivo base alimenta al indicador (SUI_13, EGRESOS_TOCO...) -- la vista
-    muestra un apartado por archivo y al subir uno solo se procesan sus indicadores.
+    muestra un apartado por archivo y al subir uno solo se procesan sus indicadores. Si el
+    denominador trae otro archivo (Neonatal 06: Defunciones / Nacimientos), cada uno se sube
+    por separado y el mes se genera cuando ya estan los dos.
+    ceroEsSinDato (extra, en el denominador): unidad con denominador 0 = no tuvo a quien
+    medir (ej. hospital sin partos) -> sale Gris, no "0 = Esperado".
     columnasPeriodo: columnas del propio archivo con su mes/año, para validar que se suba
     el mes correcto sin depender del nombre del archivo.
     """
@@ -93,7 +97,7 @@ class FuenteExtractor(BaseModel):
 
     fuente:            Literal["extractor"]
     archivo:            str = "SUI_13"
-    hoja:               str
+    hoja:               str | int   # 0 = la primera hoja, para archivos que el usuario convierte y nombra a mano
     modoExtraccion:     ModoExtraccion
     encabezado:         int = 1
     agrupacion:         str

@@ -273,8 +273,9 @@ const ExtractorPage = () => {
   // Lo que pasó con un indicador al procesar el archivo, en una línea.
   const resumenIndicador = (r) => {
     if (r.error) return { texto: r.error, tono: 'error' };
+    if (r.pendiente) return { texto: r.pendiente, tono: 'progreso' };
     if (r.tipo === 'mensual' && r.total) {
-      return { texto: `${r.total.numerador} / ${r.total.denominador} = ${r.total['%']}% (${r.total.desempeno}). Mes generado.`, tono: 'completo' };
+      return { texto: `${r.total.numerador} / ${r.total.denominador} = ${r.total['%']} (${r.total.desempeno}). Mes generado.${r.detalle ? ` ${r.detalle}` : ''}`, tono: 'completo' };
     }
     const casos = Object.values(r.numerador_por_unidad ?? {}).reduce((a, b) => a + b, 0);
     const via2 = r.validados_via2 ? ` (${r.validados_via2} por vía 2)` : '';
@@ -457,7 +458,7 @@ const ExtractorPage = () => {
                       <p className="exv-corte-titulo">
                         {generados.length
                           ? `${generados.length} ${generados.length === 1 ? 'mes generado' : 'meses generados'} de ${anio}`
-                          : `Sin meses generados en ${anio}: sube el ${ind.archivos[0]?.archivo ?? 'archivo'}`}
+                          : `Sin meses generados en ${anio}: sube ${ind.archivos.filter(a => a.requerido).map(a => a.archivo).join(' y ') || 'el archivo'}`}
                       </p>
                       {ultimo && (
                         <button className="exv-boton-excel" onClick={() => descargar(`${ind.indicador}-${ultimo}`, [ind.indicador], anio, ultimo)}
