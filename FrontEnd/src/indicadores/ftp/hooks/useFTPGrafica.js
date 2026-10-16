@@ -36,6 +36,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange, { indsHermanos
   const setIndSel = controlled ? (onExtChange ?? (() => {})) : setLocalIndSel;
   const [indInfo, setIndInfo]           = useState(null);
   const [reporte, setReporte]           = useState(null);
+  const [estadisticas, setEstadisticas] = useState(null);
   const [unidadSel, setUnidadSel]       = useState('');
   const [cargando, setCargando]         = useState(false);
   const [descargando, setDescargando]   = useState(false);
@@ -55,9 +56,10 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange, { indsHermanos
     if (!indSel) return undefined;
     let vigente = true;
     setCargando(true);
-    obtenerGraficaIndicador(indSel, anio).then(({ ficha, reporte: r }) => {
+    obtenerGraficaIndicador(indSel, anio).then(({ ficha, reporte: r, estadisticas: e }) => {
       if (!vigente) return;
       setReporte(r);
+      setEstadisticas(e);
       setIndInfo(ficha);
       const meses      = mesesDisponiblesDeReporte(r);
       const primerMes  = Object.keys(r?.MESES ?? {})[0];
@@ -216,7 +218,7 @@ export function useFTPGrafica(hoveredMes, extIndSel, onExtChange, { indsHermanos
 
   return {
     anio, indSel, setIndSel, indInfo,
-    reporte, unidadSel, setUnidadSel,
+    reporte, estadisticas, unidadSel, setUnidadSel,
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel, mesesDisponibles,
     acumulado, setAcumulado, tieneAcumulado,

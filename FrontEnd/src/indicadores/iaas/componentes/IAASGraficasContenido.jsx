@@ -8,7 +8,11 @@ import VistaToggle    from '../../shared/componentes/graficas/VistaToggle';
 import TotalTile        from '../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../shared/componentes/graficas/CumplimientoTile';
 import MenuDescarga     from '../../shared/componentes/graficas/MenuDescarga';
-import { MESES_CORTOS, MESES_LARGOS } from '../../shared/constantes/meses';
+import { MESES_CORTOS, MESES_LARGOS, MESES_LARGOS_ARR } from '../../shared/constantes/meses';
+import ResumenKpis from '../../shared/componentes/graficas/ResumenKpis';
+import MapaCalor from '../../shared/componentes/graficas/MapaCalor';
+import BrechaMeta from '../../shared/componentes/graficas/BrechaMeta';
+import { resumenDelMes } from '../../shared/utils/resumenDelMes';
 import { useEsMovil } from '../../shared/utils/useEsMovil';
 import { textoAcento } from '../../../shared/utils/colorAcento';
 
@@ -28,7 +32,7 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
   const [pagina, setPagina]           = useState(0);
 
   const {
-    anio, mesesConDatos, indSel,
+    anio, mesesConDatos, indSel, estadisticas,
     unidadSel, setUnidadSel,  
     cargando, descargando, handleDescargar, handleDescargarInd,
     vistaGrafica, setVistaGrafica,
@@ -48,6 +52,13 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
   } = useIAASGrafica(extIndSel, onIndSelChange, indsHermanos);
 
   const esTotal = unidadSel === TOTAL_KEY;
+
+  const { resumen, mesAnterior } = resumenDelMes(
+    estadisticas?.resumenPorMes,
+    vistaGrafica === 'mes' && mesSel ? MESES_LARGOS_ARR[parseInt(mesSel, 10) - 1] : null,
+  );
+  // El mapa de calor usa el nombre de la unidad; en IAAS el total se elige con TOTAL_KEY aparte.
+  const verUnidad = (unidad) => { setUnidadSel(unidad); setVistaGrafica('unidad'); };
 
   // El filtro de color es una selección de la vista, no del indicador — se limpia al cambiar de indicador.
   useEffect(() => { setColorFiltro(null); }, [indSel]);
@@ -134,6 +145,12 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
           {[220, 320, 260, 180, 290, 240, 310, 200, 270, 230, 300, 250].map((h, i) => (
             <div key={i} className="ig-skeleton-bar" style={{ height: `${h}px` }} />
           ))}
+        </div>
+      )}
+
+      {resumen && (
+        <div style={{ '--ic': indColor }}>
+          <ResumenKpis resumen={resumen} mesAnterior={mesAnterior} />
         </div>
       )}
 
@@ -344,6 +361,13 @@ const IAASGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, ind
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {estadisticas && resumen && (
+        <div className="ige-detalle">
+          <MapaCalor mapa={estadisticas.mapaCalor} unidadSel={unidadSel} mesActivo={resumen.mes} onSelectUnidad={verUnidad} />
+          <BrechaMeta brechas={estadisticas.brechas[resumen.mes]} mes={resumen.mes} aplica={resumen.brechaAplica} onSelectUnidad={verUnidad} />
         </div>
       )}
 

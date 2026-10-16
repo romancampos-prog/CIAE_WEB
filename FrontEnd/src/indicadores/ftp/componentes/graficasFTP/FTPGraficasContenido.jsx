@@ -7,7 +7,11 @@ import VistaToggle    from '../../../shared/componentes/graficas/VistaToggle';
 import TotalTile        from '../../../shared/componentes/graficas/TotalTile';
 import CumplimientoTile from '../../../shared/componentes/graficas/CumplimientoTile';
 import MenuDescarga     from '../../../shared/componentes/graficas/MenuDescarga';
-import { MESES_CORTOS, MESES_LARGOS } from '../../../shared/constantes/meses';
+import ResumenKpis      from '../../../shared/componentes/graficas/ResumenKpis';
+import MapaCalor        from '../../../shared/componentes/graficas/MapaCalor';
+import BrechaMeta       from '../../../shared/componentes/graficas/BrechaMeta';
+import { resumenDelMes } from '../../../shared/utils/resumenDelMes';
+import { MESES_CORTOS, MESES_LARGOS, MESES_LARGOS_ARR } from '../../../shared/constantes/meses';
 import { etiquetaMesLarga, etiquetaMesCorta } from '../../utils/calculos';
 import { useEsMovil } from '../../../shared/utils/useEsMovil';
 import { textoAcento } from '../../../../shared/utils/colorAcento';
@@ -38,7 +42,7 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
 
   const {
     anio, indSel, indInfo,
-    reporte, unidadSel, setUnidadSel,
+    reporte, estadisticas, unidadSel, setUnidadSel,
     cargando, descargando, vistaGrafica, setVistaGrafica,
     mesSel, setMesSel, mesesDisponibles,
     acumulado, setAcumulado, tieneAcumulado,
@@ -48,6 +52,12 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
     rangosSem, esSemPorMes, indColor, categoria,
     descargarIndicador, descargarCategoria,
   } = useFTPGrafica(hoveredMes, extIndSel, onIndSelChange, { indsHermanos, colorFamilia });
+
+  const { resumen, mesAnterior } = resumenDelMes(
+    estadisticas?.resumenPorMes,
+    vistaGrafica === 'mes' && mesSel ? MESES_LARGOS_ARR[parseInt(mesSel, 10) - 1] : null,
+  );
+  const verUnidad = (unidad) => { setUnidadSel(unidad); setVistaGrafica('unidad'); };
 
   const rangosSemConMes  = rangosSem && esSemPorMes ? rangosSem : rangosSem ? { ...rangosSem, _mes: undefined } : null;
 
@@ -125,6 +135,12 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               {ind}
             </button>
           ))}
+        </div>
+      )}
+
+      {resumen && (
+        <div style={{ '--ic': indColor }}>
+          <ResumenKpis resumen={resumen} mesAnterior={mesAnterior} />
         </div>
       )}
 
@@ -317,6 +333,13 @@ const FTPGraficasContenido = ({ indSel: extIndSel, onIndSelChange, iconSrc, inds
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {estadisticas && resumen && (
+        <div className="ige-detalle">
+          <MapaCalor mapa={estadisticas.mapaCalor} unidadSel={unidadSel} mesActivo={resumen.mes} onSelectUnidad={verUnidad} />
+          <BrechaMeta brechas={estadisticas.brechas[resumen.mes]} mes={resumen.mes} aplica={resumen.brechaAplica} onSelectUnidad={verUnidad} />
         </div>
       )}
 

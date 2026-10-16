@@ -39,6 +39,7 @@ export function useIAASGrafica(extIndSel, onExtChange, indsHermanos = []) {
   const controlled = extIndSel !== undefined;
   const [anio]                            = useState('2026');
   const [reporte, setReporte]             = useState(null);
+  const [estadisticas, setEstadisticas]   = useState(null);
   const [unidades, setUnidades]           = useState([]);
   const [unidadSel, setUnidadSel]         = useState('');
   const [localIndSel, setLocalIndSel]     = useState('IAAS 02');
@@ -73,9 +74,10 @@ export function useIAASGrafica(extIndSel, onExtChange, indsHermanos = []) {
     let vigente = true;
     setCargando(true);
     obtenerGraficaIndicador(indSel, anio)
-      .then(({ ficha, reporte: r }) => {
+      .then(({ ficha, reporte: r, estadisticas: e }) => {
         if (!vigente) return;
         setReporte(r);
+        setEstadisticas(e);
         setIndInfo(ficha);
         const meses = mesesConDatosDeReporte(r);
         setMesSel(meses.length > 0 ? meses[meses.length - 1] : '');
@@ -240,7 +242,7 @@ export function useIAASGrafica(extIndSel, onExtChange, indsHermanos = []) {
   const hayDatos = !cargando && mesesConDatos.length > 0;
 
   return {
-    anio, indSel, setIndSel, mesesConDatos,
+    anio, indSel, setIndSel, mesesConDatos, estadisticas,
     unidadSel, setUnidadSel,
     cargando, descargando, handleDescargar, handleDescargarInd,
     vistaGrafica, setVistaGrafica,

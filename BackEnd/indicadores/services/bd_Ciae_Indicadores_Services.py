@@ -11,6 +11,7 @@ from shared.MESES_ACUMULADOS import AcumulaSumandoMeses, MensualAcumulado
 from shared.UNIDADES import nombre_canonico_iaas
 from services.extractor.corte_extractor_Services import indicadores_extractor_de_corte
 from services.indicadorMapeo_Services import ObtenerFichaPorIndicador, bloque_mapeo
+from services.estadisticas_grafica_Services import estadisticas_de_reporte
 
 #ruta  a la BD_CIAE 
 
@@ -199,7 +200,7 @@ def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
 
 def ConsultarGraficaIndicador(indicador: str, ano: str) -> dict | None:
     """
-    Ficha + reporte de un indicador para las graficas, en una sola consulta. El modulo sale
+    Ficha + reporte + estadisticas de un indicador para las graficas, en una sola consulta. El modulo sale
     del mapeo (la carpeta del indicador), no de lo que mande el front. previos va siempre
     en True: el semanal del mes en curso se muestra si existe en BD_CIAE (solo aplica a FTP,
     que es el unico modulo con semanal).
@@ -212,4 +213,9 @@ def ConsultarGraficaIndicador(indicador: str, ano: str) -> dict | None:
         indicador=indicador, ano=ano, modulo=bloque["modulo"],
         previos=True, mensual=False, mensualAcumulado=False,
     )
-    return {"ficha": ObtenerFichaPorIndicador(payload), "reporte": IndicadorConsultarReporte(payload)}
+    reporte = IndicadorConsultarReporte(payload)
+    return {
+        "ficha": ObtenerFichaPorIndicador(payload),
+        "reporte": reporte,
+        "estadisticas": estadisticas_de_reporte(reporte, bloque),
+    }
