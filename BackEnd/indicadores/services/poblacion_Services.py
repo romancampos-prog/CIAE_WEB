@@ -1,48 +1,141 @@
 """
-Procesa el Excel de población nacional, filtra Guanajuato y guarda POBLACION.json
--- compartido entre FTP (varios indicadores dependen de ella para su denominador,
-ver reporte.denominador "poblacionInfoSalud" en el mapeo) y Extractor (EH 03,
-DM 04 la usan igual para el denominador de su corte semestral).
-Usado en: Controller/ftp_Controller.py, services/extractor/corte_extractor_Services.py
+Poblacion InfoSalud (BD_CIAE/POBLACION_INFOSALUD/POBLACION_{año}.json): carga del Excel
+nacional (se filtra Guanajuato) y lectura por unidad para el denominador de los indicadores
+que dependen de ella (fuente "poblacionInfoSalud" en el mapeo). Compartido entre FTP y
+Extractor (EH 03, DM 04 la usan en su corte semestral).
+Usado en: Controller/ftp_Controller.py, services/ftp/*, services/extractor/corte_extractor_Services.py
 """
+import datetime
 import io
-import re
 import json
+import re
+from pathlib import Path
+
 import pandas as pd
+from fastapi import HTTPException
+
+from configs.settings import DATA_POBLACION_INFOSALUD
+from schemas.model.generacion_Model import DatosExtraidosUnidad, ResultadoCargaPoblacion
+from services.calculo_indicador_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
+from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
-from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, ruta_poblacion, RUTA_MAPEO_POBLACION
+from shared.UNIDADES import NOMBREUNIDADESARCHIVO
+from shared.validarArchivo_service import validar_archivo_subido
 
 DELEGACION_FILTRO = "Guanajuato"
+RUTA_MAPEO_POBLACION = Path(__file__).parent.parent / "mapeo" / "POBLACION.json"
 
 _REGEX_MES_ANIO_TITULO = re.compile(r'(' + '|'.join(MESES_ESTANDAR) + r')\s+(\d{4})', re.IGNORECASE)
 
 
-def obtener_ultimo_archivo_poblacion(anio: str | int | None = None) -> str | None:
-    """Nombre (sin extensión) del último Excel de población subido, o None si no hay ninguno."""
+def ruta_poblacion(anio: str | int | None = None) -> Path:
+    """POBLACION_{anio}.json; si no se especifica año, el año en curso."""
+    return DATA_POBLACION_INFOSALUD / f"POBLACION_{anio or datetime.date.today().year}.json"
+
+
+##--------------------------------------
+
+def _leer_poblacion(anio: str | int | None) -> dict:
     ruta = ruta_poblacion(anio)
     if not ruta.exists():
-        return None
+        return {}
     with open(ruta, encoding="utf-8") as f:
-        return json.load(f).get("ARCHIVO") or None
+        return json.load(f)
 
+
+##--------------------------------------
 
 def leer_periodo_poblacion(anio: str | int | None = None) -> tuple[str | None, int | None]:
-    """
-    Mes/año detectado del título del reporte vigente (ver _detectar_mes_anio_titulo),
-    o (None, None) si no hay población guardada o no se pudo detectar al subirla.
-    """
-    ruta = ruta_poblacion(anio)
-    if not ruta.exists():
-        return None, None
-    with open(ruta, encoding="utf-8") as f:
-        datos = json.load(f)
+    """Mes/año detectado del titulo del reporte vigente, o (None, None) si no hay o no se pudo detectar al subirla."""
+    datos = _leer_poblacion(anio)
     return datos.get("MES_DETECTADO"), datos.get("ANIO_DETECTADO")
 
+
+##--------------------------------------
+
+def texto_poblacion_vigente(anio: str | int | None) -> str | None:
+    """"Mes Año" de la poblacion vigente, para dejar registrado con que poblacion se calculo cada mes."""
+    mes, anio_detectado = leer_periodo_poblacion(anio)
+    return f"{mes} {anio_detectado}" if mes and anio_detectado else None
+
+
+##--------------------------------------
+
+def archivo_poblacion_actual(anio: str | None) -> dict:
+    """Nombre (sin extension) del ultimo Excel de poblacion subido y el mes/año que se detecto de el."""
+    datos = _leer_poblacion(anio)
+    return {
+        "nombre_sin_ext": datos.get("ARCHIVO") or None,
+        "mes_detectado":  datos.get("MES_DETECTADO"),
+        "anio_detectado": datos.get("ANIO_DETECTADO"),
+    }
+
+
+##--------------------------------------
+
+def extraer_poblacion(sexo: dict[str, list[str]], ano: str, extraidos: dict[str, DatosExtraidosUnidad]) -> list[tuple[str, str, str]]:
+    """
+    Llena extraidos[unidad].denominador[grupo] con los valores por columna de POBLACION_{año}.json.
+    Regresa los errores como (unidad, grupo, mensaje) para quien los quiera registrar (FTP).
+    """
+    ruta = ruta_poblacion(ano)
+    if not ruta.exists():
+        for datos in extraidos.values():
+            for grupo in sexo:
+                datos.denominador[grupo] = None
+        return [(unidad, "poblacion", f"No existe {ruta}") for unidad in extraidos]
+
+    poblacion = _leer_poblacion(ano).get("POBLACION", {})
+    errores = []
+    for unidad, datos in extraidos.items():
+        for grupo, columnas in sexo.items():
+            try:
+                datos.denominador[grupo] = [float(poblacion[unidad][grupo][columna]) for columna in columnas]
+            except KeyError as error:
+                errores.append((unidad, grupo, f"No existe {error} en POBLACION"))
+                datos.denominador[grupo] = None
+    return errores
+
+
+##--------------------------------------
+
+def denominador_de_poblacion(sexo: dict[str, list[str]], formula_denominador: str, ano: str | int) -> dict[str, int | None]:
+    """{unidad: denominador} de las 46 unidades, con la formula del mapeo sobre la poblacion del año."""
+    extraidos = {unidad: DatosExtraidosUnidad() for unidad in NOMBREUNIDADESARCHIVO}
+    extraer_poblacion(sexo, str(ano), extraidos)
+    denominadores = {}
+    for unidad, datos in extraidos.items():
+        try:
+            denominadores[unidad] = evaluar_lado(formula_denominador, datos.denominador, UMBRAL_SUBE_REDONDEO)
+        except Exception as error:
+            print(f"[Poblacion] Error evaluando el denominador de {unidad}: {error}")
+            denominadores[unidad] = None
+    return denominadores
+
+
+##--------------------------------------
+
+def subir_poblacion(usuario: str | None, nombre_archivo: str, contenido: bytes, peso: int, anio: str | None) -> tuple[str, dict]:
+    """Endpoint de subir la poblacion: (mensaje, datos) para la respuesta."""
+    # 1. Validar que sea Excel y que pese lo que dijo el front
+    validar_archivo_subido(contenido, peso, nombre_archivo)
+    # 2. Leer el Excel nacional y guardar lo de Guanajuato
+    resultado = procesar_archivo_poblacion(contenido, nombre_archivo, anio)
+    if not resultado["ok"]:
+        raise HTTPException(status_code=422, detail=resultado["detalle"])
+    # 3. Auditar
+    registrar("SUBIDA_ARCHIVO", usuario=usuario, detalle=f"archivo=poblacion({nombre_archivo}) bytes={len(contenido)}")
+    return resultado["detalle"], ResultadoCargaPoblacion(**resultado).model_dump()
+
+
+##--------------------------------------
 
 def _cargar_mapeo() -> dict:
     with open(RUTA_MAPEO_POBLACION, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
+##--------------------------------------
 
 def _buscar_columna(fila, texto: str):
     for idx, val in enumerate(fila):
@@ -51,10 +144,14 @@ def _buscar_columna(fila, texto: str):
     return None
 
 
+##--------------------------------------
+
 def _cel_str(v):
     s = str(v).strip()
     return s[:-2] if (s.endswith('.0') and s[:-2].lstrip('-').isdigit()) else s
 
+
+##--------------------------------------
 
 def _limpiar(v):
     if v is None:
@@ -65,10 +162,14 @@ def _limpiar(v):
     return None if s in ('', 'nan', 'NaN', 'None') else v
 
 
+##--------------------------------------
+
 def _extraer_numero(nombre: str):
     m = re.search(r'\b0*(\d+)\b', nombre)
     return m.group(1) if m else None
 
+
+##--------------------------------------
 
 def _detectar_mes_anio_titulo(fila_titulo) -> tuple[str | None, int | None]:
     """
@@ -85,6 +186,8 @@ def _detectar_mes_anio_titulo(fila_titulo) -> tuple[str | None, int | None]:
             return coincidencia.group(1).capitalize(), int(coincidencia.group(2))
     return None, None
 
+
+##--------------------------------------
 
 def _sugerir_alias(no_encontradas: list, extras: list) -> dict:
     sugeridos = {}
@@ -103,6 +206,8 @@ def _sugerir_alias(no_encontradas: list, extras: list) -> dict:
                 break
     return sugeridos
 
+
+##--------------------------------------
 
 def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio: str | int | None = None) -> dict:
     try:

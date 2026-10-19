@@ -17,8 +17,7 @@ de tronar a medio pandas. Cubre los 6 modoExtraccion reales de hoy -- agregar
 uno nuevo es agregar su modelo + funcion + entrada en los dos diccionarios,
 no tocar el resto del archivo.
 
-Usado en: extractor_service.py, ftp_extraer_unificado.py, iaas/extraccion_unificada.py,
-          shared/validarArchivo_service.py
+Usado en: services/{ftp,iaas,extractor}/extraccion_*, shared/validarArchivo_service.py
 """
 import inspect
 import re
@@ -47,6 +46,8 @@ class ResultadoExtraccion(NamedTuple):
     mensaje:  str | None
 
 
+##--------------------------------------
+
 def letra_a_numero(letra: str) -> int:
     """Letra de columna de Excel a indice 0-based ("A" -> 0, "AA" -> 26)."""
     numero = 0
@@ -54,6 +55,8 @@ def letra_a_numero(letra: str) -> int:
         numero = numero * 26 + (ord(c) - ord('A') + 1)
     return numero - 1
 
+
+##--------------------------------------
 
 def _a_numero(valor):
     """Convierte una celda a float, aceptando comas de miles; None si no se puede."""
@@ -66,11 +69,10 @@ def _a_numero(valor):
         return None
 
 
-# --------------------------------------------------------------------------- #
+##--------------------------------------
+
 # Modelos del "detalle" -- uno por modoExtraccion, solo con lo que cada modo
 # de verdad usa (ver indicadores/mapeo/README.md).
-# --------------------------------------------------------------------------- #
-
 class CondicionFiltro(BaseModel):
     """
     Una entrada de filtroColumna/columnaUnidad. Puede venir en formato
@@ -83,6 +85,8 @@ class CondicionFiltro(BaseModel):
     tipo:          Literal['LISTA', 'RANGO', 'PREFIJO', 'SUFIJO'] | None = None
     nombreColumna: str | None = None
 
+
+##--------------------------------------
 
 class GrupoColumnas(BaseModel):
     """
@@ -101,21 +105,29 @@ class GrupoColumnas(BaseModel):
         return CondicionFiltro(filtro=self.filtro, tipo=self.tipo)
 
 
+##--------------------------------------
+
 class DetalleInterseccionColumna(BaseModel):
     columna:      str
     buscar:       str
     columna_dato: list[str]
 
 
+##--------------------------------------
+
 class DetalleInterseccionFila(BaseModel):
     columna_dato: list[str]
     fila:         list[int]
 
 
+##--------------------------------------
+
 class DetalleUltimaFila(BaseModel):
     columna_dato: list[str]
     encabezado:   int = 0
 
+
+##--------------------------------------
 
 class DetalleFiltroConteo(BaseModel):
     """
@@ -130,6 +142,8 @@ class DetalleFiltroConteo(BaseModel):
     encabezado:          int | None = None
 
 
+##--------------------------------------
+
 class DetalleFiltroUnidadValor(BaseModel):
     columnaUnidad: dict[str, CondicionFiltro]
     tomarValor:    dict[str, str]
@@ -137,12 +151,11 @@ class DetalleFiltroUnidadValor(BaseModel):
     encabezado:    int | None = None
 
 
-# --------------------------------------------------------------------------- #
+##--------------------------------------
+
 # Modos "formula" -- mismo algoritmo que ya probo la extraccion de FTP, solo se
 # renombran para que coincidan con el modoExtraccion real del mapeo (antes
 # "INTERSECCION"/"FINAL", ahora "INTERSECCION_COLUMNA"/"ULTIMA_FILA").
-# --------------------------------------------------------------------------- #
-
 def _interseccion_columna(
     df, detalle: DetalleInterseccionColumna,
     mes: int | str | None = None,
@@ -186,6 +199,8 @@ def _interseccion_columna(
     return valores, None, None
 
 
+##--------------------------------------
+
 def _interseccion_fila(df, detalle: DetalleInterseccionFila):
     valores = []
     for f in detalle.fila:
@@ -204,6 +219,8 @@ def _interseccion_fila(df, detalle: DetalleInterseccionFila):
     return valores, None, None
 
 
+##--------------------------------------
+
 def _ultima_fila(df, detalle: DetalleUltimaFila):
     indices = [letra_a_numero(l) for l in detalle.columna_dato]
     bloque  = df.iloc[detalle.encabezado:, indices]
@@ -220,15 +237,16 @@ def _ultima_fila(df, detalle: DetalleUltimaFila):
     return valores, None, None
 
 
-# --------------------------------------------------------------------------- #
-# Modos "filtro" -- basados en cumple_condicion de extractor_service.py, que
+##--------------------------------------
+
+# Modos "filtro" -- basados en cumple_condicion, que
 # ya entiende filtroColumna con tipo LISTA/RANGO del mapeo nuevo, con
 # fallback al formato simple (match exacto o "^prefijo") que ya usaba IAAS.
-# --------------------------------------------------------------------------- #
-
 def _es_vacio(valor) -> bool:
     return valor is None or (not isinstance(valor, str) and pd.isna(valor))
 
+
+##--------------------------------------
 
 def cumple_condicion(valor, cfg: CondicionFiltro) -> bool:
     if _es_vacio(valor):
@@ -273,6 +291,8 @@ def cumple_condicion(valor, cfg: CondicionFiltro) -> bool:
     return valor_texto.strip().upper() == texto.strip().upper()
 
 
+##--------------------------------------
+
 def fila_cumple(fila, filtro_columna: dict[str, CondicionFiltro]) -> bool:
     for letra, cfg in filtro_columna.items():
         idx = letra_a_numero(letra)
@@ -281,12 +301,16 @@ def fila_cumple(fila, filtro_columna: dict[str, CondicionFiltro]) -> bool:
     return True
 
 
+##--------------------------------------
+
 def _columna_cumple(df, letra: str, cfg: CondicionFiltro) -> pd.Series:
     idx = letra_a_numero(letra)
     if idx >= df.shape[1]:
         raise KeyError(f"La columna {letra} no existe en la hoja")
     return df.iloc[:, idx].map(lambda v, c=cfg: cumple_condicion(v, c)).astype(bool)
 
+
+##--------------------------------------
 
 def mascara_filtros(df, detalle: DetalleFiltroConteo) -> pd.Series:
     """
@@ -314,6 +338,8 @@ def mascara_filtros(df, detalle: DetalleFiltroConteo) -> pd.Series:
     return mascara
 
 
+##--------------------------------------
+
 def _filtro_conteo(df, detalle: DetalleFiltroConteo):
     try:
         mascara = mascara_filtros(df, detalle)
@@ -321,6 +347,8 @@ def _filtro_conteo(df, detalle: DetalleFiltroConteo):
         return None, "COLUMNA_NO_ENCONTRADA", str(e)
     return int(mascara.sum()), None, None
 
+
+##--------------------------------------
 
 def coincide_unidad(valor, nombre_unidad: str) -> bool:
     """
@@ -331,6 +359,8 @@ def coincide_unidad(valor, nombre_unidad: str) -> bool:
     partes = nombre_unidad.split()
     return len(partes) > 1 and re.search(rf'\b{re.escape(partes[1])}\b', str(valor)) is not None
 
+
+##--------------------------------------
 
 def _filtro_unidad_valor(df, detalle: DetalleFiltroUnidadValor, nombre_unidad_buscada: str | None = None):
     """
@@ -363,7 +393,7 @@ EXTRACTORES = {
     "INTERSECCION_FILA":       _interseccion_fila,
     "ULTIMA_FILA":             _ultima_fila,
     "FILTRO_CONTEO":           _filtro_conteo,
-    "FILTRO_CONTEO_ACUMULADO": _filtro_conteo,  # el conteo base es igual; el cruce vive aparte (ver extractor_service.py)
+    "FILTRO_CONTEO_ACUMULADO": _filtro_conteo,  # el conteo base es igual; el cruce vive aparte (ver services/extractor/extraccion_extractor_Services.py)
     "FILTRO_UNIDAD_VALOR":     _filtro_unidad_valor,
 }
 
@@ -376,6 +406,8 @@ MODELOS_DETALLE = {
     "FILTRO_UNIDAD_VALOR":     DetalleFiltroUnidadValor,
 }
 
+
+##--------------------------------------
 
 def columnas_esperadas(modo_extraccion: str, detalle: dict) -> dict[str, str]:
     """
@@ -397,6 +429,8 @@ def columnas_esperadas(modo_extraccion: str, detalle: dict) -> dict[str, str]:
     esperadas.update(getattr(modelo, "tomarValor", None) or {})
     return esperadas
 
+
+##--------------------------------------
 
 def extraer(df, modo_extraccion: str, detalle: dict, **kwargs) -> ResultadoExtraccion:
     """

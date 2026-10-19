@@ -19,7 +19,6 @@
         "reporte": {
             "numerador": {
                 "fuente": "extractor",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "unidad",
@@ -64,7 +63,6 @@
             },
             "denominador": {
                 "fuente": "extractor",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "unidad",
@@ -138,7 +136,6 @@
             "numerador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -224,7 +221,6 @@
             "denominador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -309,7 +305,6 @@
             "numerador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -339,7 +334,6 @@
             "denominador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",

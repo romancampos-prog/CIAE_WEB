@@ -18,7 +18,6 @@
         "reporte": {
             "numerador": {
                 "fuente": "extractor",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO_ACUMULADO",
                 "encabezado": 1,
                 "agrupacion": "undadAdscripcion",
@@ -117,17 +116,16 @@
                         "T383"
                     ],
                     "archivoCruce": "EGRESOS_PACIENTES_DIARIA",
-                    "hoja": "Hoja1",
                     "encabezado": 1,
                     "columnaLlave": "AFILIACION",
-                    "columnasDiagnostico": [
-                        "AC",
-                        "AD",
-                        "AE",
-                        "AF",
-                        "AG",
-                        "AH"
-                    ],
+                    "columnasDiagnostico": {
+                        "AC": "DiagPrincipalEgreso",
+                        "AD": "PrimerDiagSecundarioEgreso",
+                        "AE": "SegundoDiagSecundarioEgr",
+                        "AF": "TercerDiagSecundario",
+                        "AG": "CuartoDiagSecundario",
+                        "AH": "QuintoDiagSecundario"
+                    },
                     "codigosValidos": [
                         "E100",
                         "E101",

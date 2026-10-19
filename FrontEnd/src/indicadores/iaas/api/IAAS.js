@@ -71,7 +71,7 @@ export const generarIAAS = async (anio, mes, numerador, denominador, excel_denom
  */
 export const getSesionIAAS = async (anio, mes) => {
     try {
-        const { data } = await api.get('/Indicadores/iaas/sesion', { params: { anio, mes } });
+        const { data } = await api.get('/Indicadores/iaas/estado-mes', { params: { anio, mes } });
         return data.data ?? null;
     } catch {
         return null;
@@ -117,7 +117,7 @@ export const completarUnidadTardia = async (anio, mes, unidad, indicadores, deno
  */
 export const getIAASMesesGuardados = async (anio) => {
     try {
-        const { data } = await api.get('/Indicadores/iaas/meses-guardados', { params: { anio } });
+        const { data } = await api.get('/Indicadores/iaas/meses-generados', { params: { anio } });
         return data.data?.meses ?? [];
     } catch {
         return [];

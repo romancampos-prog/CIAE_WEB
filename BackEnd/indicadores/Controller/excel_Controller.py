@@ -1,25 +1,22 @@
-from fastapi import APIRouter, HTTPException, Query, status
+"""
+/Indicadores/excel: Excel de uno o varios indicadores (FTP, IAAS o Extractor), armado desde
+lo que ya esta guardado en BD_CIAE.
+"""
 import logging
 
-#mis archivos
-from configs.response import ApiResponse
-from indicadores.schemas.model.excel_Model import SolicitudExcel
-from indicadores.services.excel_Services import generar_excel, ExcelSinDatosError
+from fastapi import APIRouter, HTTPException, Query, status
 
-#/Indicadores/excel
+from configs.response import ApiResponse
+from services.excel_Services import ExcelSinDatosError, generar_excel
+
 excelApi = APIRouter()
 
 
 #Get Indicadores/excel?indicadores=EH 03&indicadores=DM 04&ano=2026&mes=Junio (mes es opcional)
 @excelApi.get("")
-async def Obtener_Excel(
-    ano: int,
-    indicadores: list[str] = Query(...),
-    mes: str | None = None,
-):
+async def excel_de_indicadores(ano: int, indicadores: list[str] = Query(...), mes: str | None = None):
     try:
-        solicitud = SolicitudExcel(indicadores=indicadores, ano=ano, mes=mes)
-        excel = generar_excel(solicitud)
+        mensaje, datos = generar_excel(indicadores, ano, mes)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except ExcelSinDatosError as error:
@@ -27,8 +24,4 @@ async def Obtener_Excel(
     except Exception as error:
         logging.exception(f"Ocurrio un Error al generar el Excel: {error}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se pudo generar el Excel")
-
-    mensaje = f"Excel generado: {', '.join(excel.completados)}"
-    if excel.errores:
-        mensaje += f" -- sin datos: {', '.join(excel.errores)}"
-    return ApiResponse(success=True, message=mensaje, data=excel.model_dump())
+    return ApiResponse(success=True, message=mensaje, data=datos)

@@ -17,7 +17,7 @@ import api from '../../../shared/api/axiosInstance';
  * @returns {Promise<Array<{categoriaIndicador:string, indicadores:string[], imagen:string, color:string}>>}
  */
 export const obtenerTodosLosIndicadores = async ({ campo, modulo } = {}) => {
-  const { data } = await api.get('/Indicadores/informacion/AllIndicadores', { params: { campo, modulo } });
+  const { data } = await api.get('/Indicadores/informacion/indicadores', { params: { campo, modulo } });
   return data;
 };
 

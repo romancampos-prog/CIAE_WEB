@@ -20,7 +20,6 @@
             "numerador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -50,7 +49,6 @@
             "denominador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -103,7 +101,6 @@
             "numerador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -141,7 +138,6 @@
             "denominador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
@@ -193,7 +189,6 @@
             "numerador": {
                 "fuente": "extractor",
                 "archivo": "DEFUNCIONES",
-                "hoja": 0,
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "IMUNI_ATEN",
@@ -269,7 +264,6 @@
             "denominador": {
                 "fuente": "extractor",
                 "archivo": "EGRESOS_NACIMIENTO_TOCO",
-                "hoja": "Hoja1",
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",

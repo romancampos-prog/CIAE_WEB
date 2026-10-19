@@ -1,21 +1,20 @@
+"""
+Lectura del mapeo de indicadores (indicadores/mapeo/): es lo unico que sabe en que carpeta
+y archivo vive cada indicador. La carpeta es el modulo (ftp/, iaas/, extractor/; sin_generar/
+son los que todavia no se automatizan) y catalogos/ trae lo comun de cada familia.
+Usado en: services/*, Controller/informacion_Controller.py
+"""
 import copy
 import json
 from functools import lru_cache
 from pathlib import Path
 
-#mis archivos
-from indicadores.schemas.model.indicador_Model import IndicesIndicadores
-from schemas.model.indicadorGenerar_Model import IndicadorGenerar
-from schemas.DTO.Indicador_ViewModel import IndicadorRequest
-from schemas.model.indicador_Model import InfoIndicador
-from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta, ReporteFicha, FuenteCalculo
-# Mismo modulo con el que FTP hace isinstance de las fuentes (si se importara por otra ruta seria otra clase).
-from schemas.model.reporte_mapeo_Model import IndicadorFTPMapeo, IndicadorIAASMapeo, IndicadorExtractorMapeo
+from schemas.model.generacion_Model import IndicadorGenerar
+from schemas.model.indicador_Model import FichaTecnicaCompleta, FuenteCalculo, IndicesIndicadores, InfoIndicador, ReporteFicha
+from schemas.model.reporte_mapeo_Model import IndicadorExtractorMapeo, IndicadorFTPMapeo, IndicadorIAASMapeo
+from shared.reglas_periodicidad import descripcion_periodicidad
 from shared.semaforo_service import es_agrupado
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
-from shared.reglas_periodicidad import descripcion_periodicidad
-
-
 
 _RUTA_MAPEO = Path(__file__).parent.parent / "mapeo"
 
@@ -31,6 +30,8 @@ def _archivos_de_indicadores() -> list[tuple[str, Path]]:
     carpetas = [(modulo, modulo) for modulo in MODULOS] + [("", _CARPETA_SIN_GENERAR)]
     return [(modulo, ruta) for modulo, carpeta in carpetas for ruta in sorted((_RUTA_MAPEO / carpeta).glob("*.json"))]
 
+
+##--------------------------------------
 
 @lru_cache(maxsize=1)
 def _bloques_leidos(firma: tuple) -> dict[str, dict]:
@@ -48,10 +49,14 @@ def _bloques_leidos(firma: tuple) -> dict[str, dict]:
     return bloques
 
 
+##--------------------------------------
+
 def _todos_los_bloques() -> dict[str, dict]:
     rutas = [ruta for _, ruta in _archivos_de_indicadores()] + [_RUTA_FAMILIAS]
     return _bloques_leidos(tuple((str(ruta), ruta.stat().st_mtime_ns) for ruta in rutas))
 
+
+##--------------------------------------
 
 def bloque_mapeo(indicador: str) -> dict | None:
     """
@@ -63,18 +68,23 @@ def bloque_mapeo(indicador: str) -> dict | None:
     return copy.deepcopy(bloque) if bloque is not None else None
 
 
+##--------------------------------------
+
 def catalogo_familias() -> dict[str, dict]:
     """catalogos/familias.json: {familia: {nombre, imagen, color}}."""
     return json.loads(_RUTA_FAMILIAS.read_text(encoding="utf-8"))
 
 
+##--------------------------------------
+
 def catalogo_archivos_extractor() -> dict[str, dict]:
     """catalogos/archivos_extractor.json: {clave: {nombre, nombreSugerido}} de cada archivo que sube el Extractor."""
     return json.loads((_RUTA_MAPEO / "catalogos" / "archivos_extractor.json").read_text(encoding="utf-8"))
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-def AllIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None) -> list[IndicesIndicadores]:
+##--------------------------------------
+
+def todos_los_indicadores(campo: str = "mostrarGrafica", modulo: str | None = None) -> list[IndicesIndicadores]:
     """
     campo: bandera del mapeo que decide que indicadores se listan -- "mostrarGrafica"
            (gráficas/descargas, default) o "mostrarGenerar" (páginas de Generar).
@@ -99,11 +109,13 @@ def AllIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None) -> 
     ]
 
 
+##--------------------------------------
+
 def indicadores_del_modulo(modulo: str) -> list[IndicadorGenerar]:
     """
     Los indicadores que se generan en un modulo ("ftp", "iaas", "extractor"), con lo que
     las tres paginas de Generar necesitan de cada uno. Cada modulo le agrega lo suyo en
-    su servicio (ver schemas/model/indicadorGenerar_Model.py).
+    su servicio (ver schemas/model/generacion_Model.py).
     """
     familias = catalogo_familias()
     lista = []
@@ -125,12 +137,12 @@ def indicadores_del_modulo(modulo: str) -> list[IndicadorGenerar]:
         ))
     return lista
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-def ObtenerFichaPorIndicador(payload: IndicadorRequest) -> InfoIndicador | None:
-    #esta funcion es para obtener la informacion visual del indicador
-    #ejem: titulo, objetivo, descripcion del numerador y denominador, semaforo, etc...
-    datoIndicadorJson = bloque_mapeo(payload.indicador)
+##--------------------------------------
+
+def obtener_ficha_indicador(indicador: str) -> InfoIndicador | None:
+    """Lo visual del indicador: titulo, objetivo, descripcion de numerador y denominador, semaforo..."""
+    datoIndicadorJson = bloque_mapeo(indicador)
     if datoIndicadorJson is None:
         return None
     fichaIndicador = InfoIndicador.model_validate(datoIndicadorJson)
@@ -147,12 +159,13 @@ def ObtenerFichaPorIndicador(payload: IndicadorRequest) -> InfoIndicador | None:
 
     return fichaIndicador
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
 
-def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
+##--------------------------------------
+
+def obtener_ficha_tecnica_completa(indicador: str) -> FichaTecnicaCompleta | None:
     """
     Ficha técnica completa (para el panel compartido FichaTecnicaBoton, usado
-    en FTP/IAAS/Extractor): igual que ObtenerFichaPorIndicador pero además
+    en FTP/IAAS/Extractor): igual que obtener_ficha_indicador pero además
     incluye reporte.numerador/denominador/operacion -- lo que necesita la
     pestaña "Cálculo" para explicar cómo se saca el indicador.
     reporte queda en None cuando el indicador no está automatizado todavía
@@ -166,8 +179,11 @@ def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
     repCrudo = dato.get("reporte") or {}
     reporte = None
     if repCrudo:
-        num = repCrudo["numerador"]
-        den = repCrudo["denominador"]
+        # Extractor ya no dice hoja (se busca por encabezados): la ficha muestra el nombre del archivo.
+        archivos = catalogo_archivos_extractor()
+        con_nombre = lambda f: {**f, "nombreArchivo": archivos.get(f.get("archivo"), {}).get("nombre", f.get("archivo"))} if f.get("fuente") == "extractor" else f
+        num = con_nombre(repCrudo["numerador"])
+        den = con_nombre(repCrudo["denominador"])
         reporte = ReporteFicha(
             numerador=FuenteCalculo(fuente=num.get("fuente", ""), modoExtraccion=num.get("modoExtraccion"), detalle=num),
             denominador=FuenteCalculo(fuente=den.get("fuente", ""), modoExtraccion=den.get("modoExtraccion"), detalle=den),
@@ -189,8 +205,7 @@ def ObtenerFichaTecnicaCompleta(indicador: str) -> FichaTecnicaCompleta | None:
     )
 
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
-# Mapeo tipado para los indicadores de FTP (ficha y lo que necesita la extraccion)
+##--------------------------------------
 
 def _bloque_obligatorio(indicador: str) -> dict:
     bloque = bloque_mapeo(indicador)
@@ -199,30 +214,21 @@ def _bloque_obligatorio(indicador: str) -> dict:
     return bloque
 
 
+##--------------------------------------
+
+# Mapeo tipado de cada modulo: lo que necesita su extraccion (reportes, formulas y semaforo)
 def cargar_indicador_mapeo(indicador: str) -> IndicadorFTPMapeo:
-    """Lo que necesita la extraccion de un indicador FTP: reportes, formulas y semaforo."""
     return IndicadorFTPMapeo.model_validate(_bloque_obligatorio(indicador))
 
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
-# Mapeo tipado para los indicadores de IAAS
+##--------------------------------------
 
 @lru_cache(maxsize=None)
-def cargar_mapeo_iaas() -> dict[str, IndicadorIAASMapeo]:
-    """Los indicadores del modulo IAAS (se lee una sola vez)."""
-    return {
-        indicador: IndicadorIAASMapeo.model_validate(copy.deepcopy(bloque))
-        for indicador, bloque in _todos_los_bloques().items() if bloque["modulo"] == "iaas"
-    }
-
-
 def cargar_indicador_iaas(indicador: str) -> IndicadorIAASMapeo:
-    return cargar_mapeo_iaas()[indicador]
+    return IndicadorIAASMapeo.model_validate(_bloque_obligatorio(indicador))
 
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
-# Mapeo tipado para los indicadores del motor Extractor (mapeo/extractor/{FAMILIA}.json)
+##--------------------------------------
 
 def cargar_indicador_extractor(indicador: str) -> IndicadorExtractorMapeo:
-    """Lo que necesita el motor Extractor de un indicador: reportes, formulas y semaforo."""
     return IndicadorExtractorMapeo.model_validate(_bloque_obligatorio(indicador))

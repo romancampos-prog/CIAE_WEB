@@ -379,7 +379,7 @@ export const descripcionFiltro = (modoExtraccion, detalle) => {
   const partes = descriptor
     ? descriptor(detalle)
     : { condiciones: [`Modo de extracción "${modoExtraccion}" sin descripción todavía.`], cruce: null };
-  return { hoja: detalle.hoja, ...partes };
+  return { hoja: detalle.hoja ?? detalle.nombreArchivo, ...partes };
 };
 
 const MODOS_FILTRO = ['FILTRO_CONTEO', 'FILTRO_CONTEO_ACUMULADO', 'FILTRO_UNIDAD_VALOR'];

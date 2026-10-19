@@ -11,17 +11,15 @@ import io
 
 import xlsxwriter
 
-from indicadores.schemas.model.excel_Model import (
-    ExcelGenerado, HojaIndicador, MetadataHoja, SolicitudExcel,
-)
-from indicadores.schemas.model.indicador_Model import ReportePrevio, UnidadDatos
-from indicadores.services.bd_Ciae_Guardado_Services import leer_semanal_indicador
-from indicadores.services.bd_Ciae_Indicadores_Services import CargarReporteIndicador, _normalizar_semaforo
-from indicadores.services.excel_dibujante_Services import escribir_hoja_indicador, obtener_estilos_excel
-from indicadores.services.extractor.corte_extractor_Services import es_indicador_de_corte
-from indicadores.services.indicadorMapeo_Services import bloque_mapeo
+from schemas.model.excel_Model import ExcelGenerado, HojaIndicador, MetadataHoja, SolicitudExcel
+from schemas.model.indicador_Model import UnidadDatos
+from services.bd_Ciae_Indicadores_Services import cargar_reporte_indicador, cargar_semanal
+from services.calculo_indicador_Services import acumula_sumando_meses, calcular_mensual_acumulado
+from services.excel_dibujante_Services import escribir_hoja_indicador, obtener_estilos_excel
+from services.extractor.corte_extractor_Services import es_indicador_de_corte
+from services.iaas.excel_iaas_Services import excel_iaas
+from services.indicadorMapeo_Services import bloque_mapeo
 from shared.MESES import MESES_ESTANDAR
-from shared.MESES_ACUMULADOS import AcumulaSumandoMeses, MensualAcumulado
 
 _MAXIMO_NOMBRES_EN_ARCHIVO = 3
 
@@ -30,6 +28,8 @@ class ErrorHoja(Exception):
     """Un indicador no se pudo leer -- no detiene a los demas de la misma solicitud."""
 
 
+##--------------------------------------
+
 class ExcelSinDatosError(Exception):
     """Ninguno de los indicadores pedidos tenia datos -- errores: {indicador: motivo}."""
     def __init__(self, errores: dict[str, str]):
@@ -37,9 +37,7 @@ class ExcelSinDatosError(Exception):
         self.errores = errores
 
 
-# --------------------------------------------------------------------------- #
-# 1) Lectura: BD_CIAE -> HojaIndicador
-# --------------------------------------------------------------------------- #
+##--------------------------------------
 
 def _cargar_metadata(indicador: str) -> tuple[str, MetadataHoja]:
     crudo = bloque_mapeo(indicador)
@@ -59,13 +57,7 @@ def _cargar_metadata(indicador: str) -> tuple[str, MetadataHoja]:
     return crudo.get("modulo") or "FTP", metadata
 
 
-def _cargar_semanal(indicador: str, ano: str) -> ReportePrevio | None:
-    crudo = leer_semanal_indicador(indicador, ano)
-    if not crudo.get("MES"):
-        return None
-    crudo["MES"] = _normalizar_semaforo(crudo["MES"])
-    return ReportePrevio.model_validate(crudo)
-
+##--------------------------------------
 
 def leer_hoja(indicador: str, solicitud: SolicitudExcel) -> HojaIndicador:
     """
@@ -79,13 +71,13 @@ def leer_hoja(indicador: str, solicitud: SolicitudExcel) -> HojaIndicador:
     ano = str(solicitud.ano)
 
     por_corte = modulo.lower() == "extractor" and es_indicador_de_corte(indicador)
-    cargado = CargarReporteIndicador(indicador, ano)
+    cargado = cargar_reporte_indicador(indicador, ano)
     if por_corte:
         definitivos = cargado[1] if cargado else {}
     else:
         definitivos = dict(cargado[0].MESES) if cargado else {}
 
-    semanal = _cargar_semanal(indicador, ano) if modulo.lower() == "ftp" else None
+    semanal = cargar_semanal(indicador, ano) if modulo.lower() == "ftp" else None
     disponibles = set(definitivos) | (set(semanal.MES) if semanal else set())
 
     if not disponibles:
@@ -111,9 +103,7 @@ def leer_hoja(indicador: str, solicitud: SolicitudExcel) -> HojaIndicador:
     )
 
 
-# --------------------------------------------------------------------------- #
-# 2) Dibujo: HojaIndicador -> Excel
-# --------------------------------------------------------------------------- #
+##--------------------------------------
 
 def _a_formato_excel(unidades: dict[str, UnidadDatos]) -> dict[str, dict]:
     # El escritor (escribir_hoja_indicador) lee "resultado" y "color", no "%" y "desempeno".
@@ -127,6 +117,8 @@ def _a_formato_excel(unidades: dict[str, UnidadDatos]) -> dict[str, dict]:
         for unidad, datos in unidades.items()
     }
 
+
+##--------------------------------------
 
 def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndicador) -> None:
     historicos: dict[str, dict[int, dict]] = {}
@@ -144,9 +136,9 @@ def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndic
     # Mensual + mensual acumulado en el mapeo: bloque acumulado debajo, sumando los
     # meses guardados hasta el mes activo (mismo calculo que la grafica). El semanal no aplica.
     acumulado_por_mes = None
-    if hoja.semana is None and AcumulaSumandoMeses(hoja.indicador):
+    if hoja.semana is None and acumula_sumando_meses(hoja.indicador):
         hasta = MESES_ESTANDAR.index(hoja.mesActivo)
-        acumulado = MensualAcumulado({m: r for m, r in hoja.meses.items() if MESES_ESTANDAR.index(m) <= hasta}, hoja.indicador) or {}
+        acumulado = calcular_mensual_acumulado({m: r for m, r in hoja.meses.items() if MESES_ESTANDAR.index(m) <= hasta}, hoja.indicador) or {}
         acumulado_por_mes = {MESES_ESTANDAR.index(m): _a_formato_excel(r.Reporte) for m, r in acumulado.items()}
 
     metadata = hoja.metadata
@@ -168,6 +160,8 @@ def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndic
     )
 
 
+##--------------------------------------
+
 def _armar_excel_estandar(hojas: list[HojaIndicador]) -> bytes:
     salida = io.BytesIO()
     libro = xlsxwriter.Workbook(salida)
@@ -179,17 +173,11 @@ def _armar_excel_estandar(hojas: list[HojaIndicador]) -> bytes:
     return salida.getvalue()
 
 
+##--------------------------------------
+
 def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]:
     # IAAS dibuja su propio libro (matriz por mes + acumulado/anual) y relee la BD
     # por su cuenta; uno solo -> su Excel, varios -> el libro completo de los 6.
-    from services.iaas.dibujante_excel_iaas_Services import (
-        Excel_IAAS01, Excel_IAAS02, Excel_IAAS03, Excel_IAAS04, Excel_IAAS05, Excel_IAAS06,
-        Excel_IAAS_Completo,
-    )
-    por_indicador = {
-        "IAAS 01": Excel_IAAS01, "IAAS 02": Excel_IAAS02, "IAAS 03": Excel_IAAS03,
-        "IAAS 04": Excel_IAAS04, "IAAS 05": Excel_IAAS05, "IAAS 06": Excel_IAAS06,
-    }
     # El Excel de IAAS siempre trae el año completo (matriz por mes + acumulado),
     # pero el NOMBRE si puede traer el ultimo mes con datos de cada indicador --
     # mismo criterio que FTP (ver _nombre_archivo): solo se agrega si todas las
@@ -198,12 +186,13 @@ def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]
     meses_en_hojas = {h.mesActivo for h in hojas}
     sufijo_mes = f"_{meses_en_hojas.pop()}" if len(meses_en_hojas) == 1 else ""
 
-    if len(hojas) == 1 and hojas[0].indicador in por_indicador:
+    if len(hojas) == 1:
         indicador = hojas[0].indicador
-        contenido = por_indicador[indicador](str(ano)).getvalue()
-        return contenido, f"IAAS_{indicador.replace('IAAS ', '').zfill(2)}{sufijo_mes}_{ano}.xlsx"
-    return Excel_IAAS_Completo(str(ano), "0", {}).getvalue(), f"IAAS{sufijo_mes}_{ano}.xlsx"
+        return excel_iaas(str(ano), [indicador]), f"IAAS_{indicador.replace('IAAS ', '').zfill(2)}{sufijo_mes}_{ano}.xlsx"
+    return excel_iaas(str(ano), []), f"IAAS{sufijo_mes}_{ano}.xlsx"
 
+
+##--------------------------------------
 
 def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
     familias = dict.fromkeys(h.indicador.split()[0] for h in hojas)  # ej. {"CAMA": None} o {"EH": None, "DM": None}
@@ -234,11 +223,12 @@ def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
     return f"{base}{sufijo_mes}{sufijo_semana}_{ano}.xlsx"
 
 
-# --------------------------------------------------------------------------- #
-# 3) Punto de entrada
-# --------------------------------------------------------------------------- #
+##--------------------------------------
 
-def generar_excel(solicitud: SolicitudExcel) -> ExcelGenerado:
+def generar_excel(indicadores: list[str], ano: int, mes: str | None) -> tuple[str, dict]:
+    """Endpoint del Excel: (mensaje, ExcelGenerado). ValueError (400) o ExcelSinDatosError (404) si no se puede."""
+    # 1. Leer de la BD cada indicador pedido (los que no tienen datos van a errores)
+    solicitud = SolicitudExcel(indicadores=indicadores, ano=ano, mes=mes)
     hojas: list[HojaIndicador] = []
     errores: dict[str, str] = {}
     for indicador in solicitud.indicadores:
@@ -250,6 +240,7 @@ def generar_excel(solicitud: SolicitudExcel) -> ExcelGenerado:
     if not hojas:
         raise ExcelSinDatosError(errores)
 
+    # 2. Dibujar: IAAS con su formato, FTP/Extractor con el estandar
     modulos = {hoja.modulo for hoja in hojas}
     if "IAAS" in modulos and modulos != {"IAAS"}:
         raise ValueError("IAAS todavia no se puede combinar con FTP o Extractor en un mismo Excel.")
@@ -259,9 +250,14 @@ def generar_excel(solicitud: SolicitudExcel) -> ExcelGenerado:
     else:
         contenido, nombre = _armar_excel_estandar(hojas), _nombre_archivo(hojas, solicitud.ano)
 
-    return ExcelGenerado(
+    # 3. Armar la respuesta
+    excel = ExcelGenerado(
         archivo_b64=base64.b64encode(contenido).decode("utf-8"),
         nombre_archivo=nombre,
         completados=[hoja.indicador for hoja in hojas],
         errores=errores,
     )
+    mensaje = f"Excel generado: {', '.join(excel.completados)}"
+    if excel.errores:
+        mensaje += f" -- sin datos: {', '.join(excel.errores)}"
+    return mensaje, excel.model_dump()

@@ -23,7 +23,7 @@ export const getIndicadoresExtractor = async () => {
  */
 export const getEstadoExtractor = async (anio) => {
     try {
-        const { data } = await api.get('/Indicadores/extractor/estado', { params: { anio } });
+        const { data } = await api.get('/Indicadores/extractor/estado-cortes', { params: { anio } });
         return data.data ?? null;
     } catch (error) {
         console.error('Error al obtener el estado del extractor:', error);
@@ -62,7 +62,7 @@ export const subirCruceExtractor = async (anio, mes, archivo) => {
     form.append('mes', mes);
     form.append('archivo', archivo);
     form.append('pesoArchivo', archivo.size);
-    const { data } = await api.post('/Indicadores/extractor/subir-cruce', form);
+    const { data } = await api.post('/Indicadores/extractor/completar-cruce', form);
     return data;
 };
 
@@ -87,6 +87,6 @@ export const subirArchivoMensualExtractor = async (anio, mes, archivo, archivoCr
         form.append('archivoCruce', archivoCruce);
         form.append('pesoArchivoCruce', archivoCruce.size);
     }
-    const { data } = await api.post('/Indicadores/extractor/subir', form);
+    const { data } = await api.post('/Indicadores/extractor/generar', form);
     return data;
 };

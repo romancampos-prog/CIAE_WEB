@@ -1,31 +1,26 @@
 """
-Deteccion y calculo del corte "Semestral Anualizado" del motor Extractor (EH 03,
-DM 04): cuando ya estan los 12 meses de numerador crudo de una ventana, se suma,
-se trae el denominador de poblacion y se semaforiza -- exclusivo de Extractor.
-
-El denominador se lee con el mismo motor generico que usa FTP (extraer_poblacion,
-segun reporte.denominador.sexo del mapeo) y se evalua con la misma formula del
-mapeo (evaluar_lado) -- antes sumaba columnas de edad hardcodeadas en vez de leer
-la formula, lo que hubiera hecho pasar por alto un cambio en reporte.operacion.denominador.
-Usado en: services/extractor/generacion_extractor_Services.py, Controller/extractor_Controller.py
+Indicadores del motor Extractor (cuales son, que archivos usan) y el corte "Semestral
+Anualizado" (EH 03, DM 04): cuando ya estan los 12 meses de numerador crudo de una ventana,
+se suma, se trae el denominador de poblacion (misma lectura y formula del mapeo que FTP) y se
+semaforiza -- exclusivo de Extractor.
+Usado en: services/extractor/generacion_extractor_Services.py, services/bd_Ciae_Indicadores_Services.py,
+          services/excel_Services.py, services/ftp/generacion_indicador_ftp_Services.py
 """
 from functools import lru_cache
 
 from schemas.model.indicador_Model import UnidadDatos
-from schemas.model.generacion_ftp_Model import DatosExtraidosUnidad
-from schemas.model.reporte_mapeo_Model import FuentePoblacionInfoSalud
-from services.calculo_indicador_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
-from services.extractor.guardado_extractor_Services import leer_reporte, guardar_reporte
-from services.indicadorMapeo_Services import AllIndicadores, cargar_indicador_extractor, catalogo_archivos_extractor
-from services.poblacion_Services import leer_periodo_poblacion
-from services.ftp.extraccion_indicador_ftp_Services import extraer_poblacion
-from services.ftp.registro_errores_ftp_Services import crear_log_errores
+from services.bd_Ciae_Guardado_Services import guardar_reporte_extractor, leer_reporte_extractor
+from services.calculo_indicador_Services import evaluar_formula
+from services.indicadorMapeo_Services import todos_los_indicadores, cargar_indicador_extractor, catalogo_archivos_extractor
+from services.poblacion_Services import denominador_de_poblacion, texto_poblacion_vigente
 from shared.MESES import MESES_ESTANDAR
 from shared.reglas_periodicidad import es_periodicidad_de_corte
-from shared.semaforizado_service import SemaforizarReporte
-from shared.unidades_ftp import NOMBREUNIDADESARCHIVO
+from shared.semaforo_service import semaforizar_reporte
+from shared.UNIDADES import NOMBREUNIDADESARCHIVO
 
-_CONTEXTO_PERMITIDO = {"round": round, "sum": sum, "abs": abs}
+# Meses en los que la periodicidad "Semestral Anualizado" dispara un corte.
+MESES_CORTE_SEMESTRAL = ["Junio", "Diciembre"]
+
 
 @lru_cache(maxsize=1)
 def indicadores_extractor() -> list[str]:
@@ -34,13 +29,15 @@ def indicadores_extractor() -> list[str]:
     su cruce con Egresos) alimenta a todos al mismo tiempo, cada uno con su
     propia lista de codigos/filtros (ver su bloque "reporte" en indicadores/mapeo/).
     Se calcula del mapeo (modulo="Extractor" + mostrarGenerar=true), mismo
-    mecanismo que ya usan FTP/IAAS (AllIndicadores) -- agregar o desactivar un
+    mecanismo que ya usan FTP/IAAS (todos_los_indicadores) -- agregar o desactivar un
     indicador de Extractor es tocar el mapeo, no este archivo. Cacheado (el mapeo
     no cambia en caliente): esto se consulta en cada lectura de reporte
-    (CargarReporteIndicador), no tiene caso rescanear todos los mapeos cada vez.
+    (cargar_reporte_indicador), no tiene caso rescanear todos los mapeos cada vez.
     """
-    return [ind for categoria in AllIndicadores("mostrarGenerar", "extractor") for ind in categoria.indicadores]
+    return [ind for categoria in todos_los_indicadores("mostrarGenerar", "extractor") for ind in categoria.indicadores]
 
+
+##--------------------------------------
 
 @lru_cache(maxsize=None)
 def es_indicador_de_corte(indicador: str) -> bool:
@@ -52,21 +49,22 @@ def es_indicador_de_corte(indicador: str) -> bool:
     return es_periodicidad_de_corte(cargar_indicador_extractor(indicador).periodicidad)
 
 
+##--------------------------------------
+
 @lru_cache(maxsize=1)
 def indicadores_extractor_de_corte() -> list[str]:
     """Solo los indicadores del Extractor que trabajan por corte (los que tienen MESES crudo + CORTES)."""
     return [ind for ind in indicadores_extractor() if es_indicador_de_corte(ind)]
 
 
+##--------------------------------------
+
 def nombre_archivo(clave: str | None) -> str | None:
     """Nombre legible de un archivo del Extractor (mapeo/catalogos/archivos_extractor.json); si no esta, su clave."""
     return catalogo_archivos_extractor().get(clave, {}).get("nombre", clave)
 
 
-def archivo_base(indicador: str) -> str:
-    """Clave del archivo que alimenta al indicador (reporte.numerador.archivo del mapeo, SUI_13 por omision)."""
-    return cargar_indicador_extractor(indicador).reporte.numerador.archivo
-
+##--------------------------------------
 
 def archivo_denominador_aparte(indicador: str) -> str | None:
     """Clave del archivo del denominador si es OTRO archivo del Extractor (Neonatal 06: Nacimientos); None si sale del mismo o de poblacion."""
@@ -75,14 +73,14 @@ def archivo_denominador_aparte(indicador: str) -> str | None:
     return archivo if archivo and archivo != reporte.numerador.archivo else None
 
 
+##--------------------------------------
+
 def archivos_del_indicador(indicador: str) -> list[str]:
     """Todos los archivos del Extractor que hay que subir para el indicador (el base y, si aplica, el del denominador)."""
-    return [archivo_base(indicador), *filter(None, [archivo_denominador_aparte(indicador)])]
+    return [cargar_indicador_extractor(indicador).reporte.numerador.archivo, *filter(None, [archivo_denominador_aparte(indicador)])]
 
 
-# Meses en los que la periodicidad "Semestral Anualizado" dispara un corte.
-MESES_CORTE_SEMESTRAL = ["Junio", "Diciembre"]
-
+##--------------------------------------
 
 def ventana_corte(mes_corte: str, anio: int) -> list[tuple[str, int]]:
     """
@@ -101,17 +99,7 @@ def ventana_corte(mes_corte: str, anio: int) -> list[tuple[str, int]]:
     raise ValueError(f"Mes de corte desconocido para Semestral Anualizado: {mes_corte!r}")
 
 
-def _denominador_por_unidad(anio: int, denominador: FuentePoblacionInfoSalud, formula_denominador: str) -> dict[str, float]:
-    """Denominador por unidad para el corte, leido de POBLACION_{anio}.json (misma extraccion que FTP)."""
-    extraidos = {unidad: DatosExtraidosUnidad() for unidad in NOMBREUNIDADESARCHIVO}
-    extraer_poblacion(denominador.sexo, str(anio), extraidos, crear_log_errores())
-    resultado: dict[str, float] = {}
-    for unidad, datos in extraidos.items():
-        valor = evaluar_lado(formula_denominador, datos.denominador, UMBRAL_SUBE_REDONDEO)
-        if valor is not None:
-            resultado[unidad] = valor
-    return resultado
-
+##--------------------------------------
 
 def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict | None:
     """
@@ -133,8 +121,8 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
 
     for mes, anio_mes in ventana:
         if anio_mes not in reportes_cache:
-            reportes_cache[anio_mes] = leer_reporte(indicador, anio_mes)
-        # MESES siempre es el dato crudo (ver guardado_extractor_Services.guardar_numerador_mes)
+            reportes_cache[anio_mes] = leer_reporte_extractor(indicador, anio_mes)
+        # MESES siempre es el dato crudo (ver bd_Ciae_Guardado_Services.guardar_numerador_mes)
         # -- nunca lo sobreescribe un cierre de corte, ni siquiera para el propio mes de
         # corte, asi que sirve igual si "mes" es Junio/Diciembre o cualquier otro.
         datos_mes = reportes_cache[anio_mes]["MESES"].get(mes)
@@ -150,11 +138,9 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
     # Jul[anio-1]-Jun[anio] cae mayormente en anio-1), Diciembre usa la del
     # mismo año (corte Ene-Dic[anio]).
     anio_poblacion = anio - 1 if mes_nombre == "Junio" else anio
-    denominador_por_unidad = _denominador_por_unidad(anio_poblacion, mapeo.reporte.denominador, mapeo.reporte.operacion.denominador)
+    denominador_por_unidad = denominador_de_poblacion(mapeo.reporte.denominador.sexo, mapeo.reporte.operacion.denominador, anio_poblacion)
     formula_resultado = mapeo.reporte.operacion.resultado
-
-    mes_pob, anio_pob = leer_periodo_poblacion(anio_poblacion)
-    poblacion_usada = f"{mes_pob} {anio_pob}" if mes_pob and anio_pob else None
+    poblacion_usada = texto_poblacion_vigente(anio_poblacion)
 
     bloque_corte: dict[str, UnidadDatos] = {}
     total_num = total_den = 0
@@ -166,39 +152,35 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
 
         total_num += numerador
         total_den += denominador
-        contexto = {**_CONTEXTO_PERMITIDO, "numerador": numerador, "denominador": denominador}
-        resultado = eval(formula_resultado, {"__builtins__": None}, contexto)
+        resultado = evaluar_formula(formula_resultado, numerador, denominador)
 
         # UnidadDatos.resultado usa alias "%" sin populate_by_name -- hay que
         # construirlo con el alias, si no el valor se descarta silenciosamente.
         bloque_corte[unidad] = UnidadDatos(**{"numerador": numerador, "denominador": denominador, "%": resultado, "desempeno": "Gris"})
 
     if total_den:
-        contexto_total = {**_CONTEXTO_PERMITIDO, "numerador": total_num, "denominador": total_den}
-        resultado_total = eval(formula_resultado, {"__builtins__": None}, contexto_total)
+        resultado_total = evaluar_formula(formula_resultado, total_num, total_den)
         bloque_corte["TOTAL_OOAD"] = UnidadDatos(**{"numerador": total_num, "denominador": total_den, "%": resultado_total, "desempeno": "Gris"})
 
-    bloque_semaforizado = SemaforizarReporte(bloque_corte, indicador, mes=mes_nombre)
+    bloque_semaforizado = semaforizar_reporte(bloque_corte, mapeo.semaforo, mes=mes_nombre)
 
     # El corte se guarda en CORTES.MESES, no en MESES -- ver guardar_numerador_mes.
     # En un indicador "Semestral Anualizado" como este, CORTES.MESES solo tiene
     # (a lo mas) las llaves "Junio" y "Diciembre", nunca los otros 10 meses.
     reporte_anio_corte = reportes_cache[anio]
-    reporte_anio_corte.setdefault("CORTES", {}).setdefault("MESES", {})[mes_nombre] = {
+    cortes = reporte_anio_corte.setdefault("CORTES", {})
+    cortes.setdefault("MESES", {})[mes_nombre] = {
         "Poblacion": poblacion_usada,
         "Reporte": {unidad: dato.model_dump(by_alias=True) for unidad, dato in bloque_semaforizado.items()},
     }
-    guardar_reporte(indicador, anio, reporte_anio_corte)
+    guardar_reporte_extractor(indicador, anio, reporte_anio_corte)
 
     return reporte_anio_corte["CORTES"]["MESES"][mes_nombre]
 
 
-def _corte_ya_generado(indicador: str, anio_corte: int, mes_corte: str) -> bool:
-    bloque = leer_reporte(indicador, anio_corte).get("CORTES", {}).get("MESES", {}).get(mes_corte)
-    return bool(bloque and "TOTAL_OOAD" in (bloque.get("Reporte") or {}))
+##--------------------------------------
 
-
-def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] | None = None) -> list[dict]:
+def recalcular_cortes_con_poblacion(anio_poblacion: int) -> list[dict]:
     """
     Cuando se sube una poblacion nueva para 'anio_poblacion', refresca los cortes
     ya generados que la usan. A diferencia de FTP (que recalcula mes a mes), aqui
@@ -215,13 +197,11 @@ def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] 
     poblacion que alcanzo, sigue ajustandose cada vez que se sube una nueva y se
     dispara el recalculo, hasta que el usuario decida que ya es la definitiva.
     """
-    indicadores = indicadores or indicadores_extractor_de_corte()
-    candidatos  = [("Diciembre", anio_poblacion), ("Junio", anio_poblacion + 1)]
     recalculados = []
-
-    for indicador in indicadores:
-        for mes_corte, anio_corte in candidatos:
-            if not _corte_ya_generado(indicador, anio_corte, mes_corte):
+    for indicador in indicadores_extractor_de_corte():
+        for mes_corte, anio_corte in [("Diciembre", anio_poblacion), ("Junio", anio_poblacion + 1)]:
+            bloque = leer_reporte_extractor(indicador, anio_corte).get("CORTES", {}).get("MESES", {}).get(mes_corte)
+            if not (bloque and "TOTAL_OOAD" in (bloque.get("Reporte") or {})):
                 continue
             if intentar_generar_corte(indicador, anio_corte, mes_corte) is not None:
                 recalculados.append({"indicador": indicador, "corte": f"{mes_corte} {anio_corte}"})
@@ -229,18 +209,9 @@ def recalcular_cortes_con_poblacion(anio_poblacion: int, indicadores: list[str] 
     return recalculados
 
 
-def _ventanas_de_mes(mes_nombre: str, anio: int) -> list[tuple[str, int]]:
-    """
-    Los cortes (mes_corte, anio_corte) cuya ventana de 12 meses "Semestral
-    Anualizado" incluye a mes_nombre/anio -- Diciembre(anio) siempre, y
-    Junio(anio) o Junio(anio+1) segun si mes_nombre cae en Ene-Jun o Jul-Dic.
-    Sirve para saber que cortes hay que revisar si se corrige este mes.
-    """
-    anio_junio = anio if MESES_ESTANDAR.index(mes_nombre) < 6 else anio + 1
-    return [("Junio", anio_junio), ("Diciembre", anio)]
+##--------------------------------------
 
-
-def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) -> dict:
+def estado_ventanas(anio_referencia: int) -> dict:
     """
     Para los cortes de Junio y Diciembre del anio de referencia (y el Junio
     siguiente, para ver que sigue despues), reporta cuantos de los 12 meses
@@ -258,7 +229,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
     todavia no se cierra el corte de Diciembre 2026 -- no tiene caso mostrar
     una ventana en 0/12 cuando ni siquiera empezo su turno.
     """
-    indicadores = indicadores or indicadores_extractor_de_corte()
+    indicadores = indicadores_extractor_de_corte()
     cache: dict[tuple[str, int], dict] = {}
     resultado = {}
     anterior_generado = True
@@ -276,7 +247,7 @@ def estado_ventanas(anio_referencia: int, indicadores: list[str] | None = None) 
             for indicador in indicadores:
                 clave_cache = (indicador, anio_mes)
                 if clave_cache not in cache:
-                    cache[clave_cache] = leer_reporte(indicador, anio_mes)
+                    cache[clave_cache] = leer_reporte_extractor(indicador, anio_mes)
                 if cache[clave_cache]["MESES"].get(mes) is None:
                     presente_en_todos = False
             if presente_en_todos:

@@ -1,12 +1,12 @@
 """
-Peticiones y respuestas de los endpoints de generacion de FTP.
-Usado en: Controller/ftp_Controller.py
+Peticiones de los endpoints de indicadores. Los endpoints que suben archivos
+reciben Form/File directo en el controller (FastAPI no mezcla bien un BaseModel con
+UploadFile en el mismo cuerpo multipart).
+Usado en: Controller/*, services/*
 """
 from typing import Annotated
 
-from pydantic import BaseModel, Field, StringConstraints
-
-from schemas.model.generacion_ftp_Model import LogErrores
+from pydantic import BaseModel, StringConstraints
 
 TextoObligatorio = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -18,12 +18,16 @@ class GenerarIndicadorRequest(BaseModel):
     semana:    str | None = None         # con semana se genera un mes previo (semanal)
 
 
+##--------------------------------------
+
 class RegenerarIndicadorRequest(BaseModel):
     indicador: TextoObligatorio
     ano:       TextoObligatorio
     mes:       TextoObligatorio
     password:  TextoObligatorio          # regenerar sobrescribe datos: exige la contrasena del usuario
 
+
+##--------------------------------------
 
 class GenerarCategoriaRequest(BaseModel):
     categoria: TextoObligatorio
@@ -32,6 +36,8 @@ class GenerarCategoriaRequest(BaseModel):
     semana:    str | None = None
 
 
+##--------------------------------------
+
 class RegenerarCategoriaRequest(BaseModel):
     categoria: TextoObligatorio
     ano:       TextoObligatorio
@@ -39,19 +45,14 @@ class RegenerarCategoriaRequest(BaseModel):
     password:  TextoObligatorio
 
 
+##--------------------------------------
+
 class RecalcularPoblacionRequest(BaseModel):
     ano: TextoObligatorio
 
 
-class MesesGeneradosResponse(BaseModel):
-    meses: list[str]                     # "01".."12"
+##--------------------------------------
 
-
-class GeneracionIndicadorResponse(BaseModel):
-    restricciones: LogErrores = Field(default_factory=dict)
-
-
-class GeneracionCategoriaResponse(BaseModel):
-    completados:   list[str]
-    errores:       dict[str, str | LogErrores] = Field(default_factory=dict)
-    restricciones: LogErrores = Field(default_factory=dict)
+class EstadoMesIAASRequest(BaseModel):
+    anio: TextoObligatorio
+    mes:  TextoObligatorio

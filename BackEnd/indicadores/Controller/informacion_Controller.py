@@ -1,99 +1,41 @@
+"""
+/Indicadores/informacion: lo que sale del mapeo (lista de indicadores, ficha y ficha tecnica)
+para cualquier usuario con sesion. Responde el dato directo (sin ApiResponse): el front lo usa asi.
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
-import logging
-informacionApi = APIRouter()
 
 from auth.services.jwt_utils import solo_roles
+from schemas.model.indicador_Model import FichaTecnicaCompleta
+from services.indicadorMapeo_Services import todos_los_indicadores, obtener_ficha_indicador, obtener_ficha_tecnica_completa
 
-# Cualquier usuario con sesion: lista de indicadores, fichas y ficha tecnica (del mapeo).
+informacionApi = APIRouter()
+
 ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 
-#mis archivos
-from indicadores.services.indicadorMapeo_Services import AllIndicadores
-from schemas.DTO.Indicador_ViewModel import IndicadorRequest
-from indicadores.services.indicadorMapeo_Services import ObtenerFichaPorIndicador, ObtenerFichaTecnicaCompleta
-from indicadores.schemas.model.ficha_tecnica_Model import FichaTecnicaCompleta
+
+#Get Indicadores/informacion/indicadores?campo=mostrarGenerar&modulo=ftp  (familias con sus indicadores)
+@informacionApi.get("/indicadores")
+def lista_indicadores(campo: str = "mostrarGrafica", modulo: str | None = None, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+    indicadores = todos_los_indicadores(campo, modulo)
+    if not indicadores:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se encontraron indicadores")
+    return indicadores
 
 
-@informacionApi.get("/AllIndicadores")
-def IndiceIndicadores(campo: str = "mostrarGrafica", modulo: str | None = None, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
-    try:
-        indice_indicadores = AllIndicadores(campo, modulo)
-        if (not indice_indicadores):
-            raise HTTPException(
-                status_code = status.HTTP_400_BAD_REQUEST,
-                detail = "No se encontraron indicadores"
-            )
-            
-        return indice_indicadores
-    
-    except Exception as error:
-        #print para el desarrolador 
-        logging.exception(f"Ocurrio un Error al Consultar el indice de Indicador: {error}", exc_info=True)
-        #Mensaje para el Usuario
-        raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = "Error al Consultar el indice de indicador"
-        )
+##--------------------------------------
 
-
+#Get Indicadores/informacion/ficha/{indicador}  (titulo, objetivo, semaforo, periodicidad)
 @informacionApi.get("/ficha/{indicador}")
-def FichaIndicador(
-    indicador: str,
-    ano: str,
-    modulo: str | None = None,
-    previos: bool = False,
-    mensual: bool = False,
-    mensualAcumulado: bool = False,
-    usuario: dict = Depends(solo_roles(*ROLES_CONSULTA)),
-):
-    payload = IndicadorRequest(
-        indicador=indicador, ano=ano, modulo=modulo,
-        previos=previos, mensual=mensual, mensualAcumulado=mensualAcumulado,
-    )
-    try:
-        
-        if (not payload.indicador or not payload):
-            raise HTTPException (
-                status_code = status.HTTP_400_BAD_REQUEST,
-                detail = "El Campo Indicador viene vacio"
-            )
-            
-        ficha_indicador = ObtenerFichaPorIndicador(payload)
-        
-        return ficha_indicador
-    
-    except Exception as error:
-        #print para el desarrolador
-        logging.exception(f"Ocurrio un Error al Consultar el Indicador: {error}", exc_info=True)
-        #Mensaje para el Usuario
-        raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = "Error al Consultar el indicador"
-        )
+def ficha_indicador(indicador: str, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+    return obtener_ficha_indicador(indicador)
 
 
+##--------------------------------------
+
+#Get Indicadores/informacion/ficha-tecnica/{indicador}  (la ficha mas como se calcula, para FichaTecnicaBoton)
 @informacionApi.get("/ficha-tecnica/{indicador}", response_model=FichaTecnicaCompleta)
-def FichaTecnicaCompletaIndicador(indicador: str, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
-    """
-    Ficha técnica completa de un indicador (título/objetivo/semáforo + cómo
-    se calcula) -- usada por el componente compartido FichaTecnicaBoton en
-    las páginas de generar de FTP, IAAS y Extractor. Lee directo del mapeo
-    unificado (indicadores/mapeo/), ya no del mapeo viejo por módulo.
-    """
-    try:
-        ficha = ObtenerFichaTecnicaCompleta(indicador)
-        if not ficha:
-            raise HTTPException(
-                status_code = status.HTTP_404_NOT_FOUND,
-                detail = f"No se encontró el indicador: {indicador}"
-            )
-        return ficha
-
-    except HTTPException:
-        raise
-    except Exception as error:
-        logging.exception(f"Ocurrio un Error al Consultar la ficha tecnica del Indicador: {error}", exc_info=True)
-        raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = "Error al Consultar la ficha técnica del indicador"
-        )
+def ficha_tecnica_indicador(indicador: str, usuario: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+    ficha = obtener_ficha_tecnica_completa(indicador)
+    if not ficha:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se encontró el indicador: {indicador}")
+    return ficha

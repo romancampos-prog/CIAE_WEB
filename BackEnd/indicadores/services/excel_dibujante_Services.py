@@ -8,10 +8,10 @@ import re
 
 import xlsxwriter
 
-from shared.unidades_ftp import NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS
 from shared.MESES import MESES_ESTANDAR as MESES_LISTA
 from shared.reglas_periodicidad import descripcion_periodicidad, indices_de_meses
 from shared.semaforo_service import evaluar_color, numero_de_umbral
+from shared.UNIDADES import NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS
 
 
 def _es_descendente(limites: dict) -> bool:
@@ -29,6 +29,8 @@ def _es_descendente(limites: dict) -> bool:
     return isinstance(esperado, str) and esperado.strip().startswith(("<=", "<"))
 
 
+##--------------------------------------
+
 def _texto_medio(v_esp, v_critico, descendente) -> str:
     """
     Texto de la leyenda MEDIO -- vacio si Esperado y el umbral critico son el
@@ -42,10 +44,14 @@ def _texto_medio(v_esp, v_critico, descendente) -> str:
     return f"MEDIO: > {v_esp} y < {v_critico}" if descendente else f"MEDIO: < {v_esp} y > {v_critico}"
 
 
+##--------------------------------------
+
 def _es_rango_compuesto(texto) -> bool:
     """Umbral de dos lados en el mapeo, ej. ">= 5.0 a <= 8.0" o "<= 3.9 o >= 10.0" (MT 03)."""
     return isinstance(texto, str) and len(re.findall(r"\d+(?:\.\d+)?", texto)) > 1
 
+
+##--------------------------------------
 
 def _leyendas_semaforo(limites: dict) -> tuple[str, str, str]:
     """
@@ -69,9 +75,9 @@ def _leyendas_semaforo(limites: dict) -> tuple[str, str, str]:
     return f"ESPERADO: >= {v_esp}", _texto_medio(v_esp, v_critico, False), f"BAJO: <= {v_critico}"
 
 
+##--------------------------------------
+
 def _calcular_color(valor, idx_mes, indicadorSemaforo):
-    MESES_LISTA = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
     if valor == "" or valor is None:
         return 'Gris'
     try:
@@ -82,6 +88,8 @@ def _calcular_color(valor, idx_mes, indicadorSemaforo):
         return 'Gris'
 
 
+##--------------------------------------
+
 def _estilo_valor(fmt, clave_base, valor):
     """Formato de una celda de numerador/denominador dentro de una fila Gris.
     Si el valor sí existe (no None/""), usa la variante gris RGB(49,134,155)
@@ -91,6 +99,8 @@ def _estilo_valor(fmt, clave_base, valor):
         return fmt.get(f"{clave_base}_incompleto", fmt[clave_base])
     return fmt[clave_base]
 
+
+##--------------------------------------
 
 def obtener_estilos_excel(workbook):
     C_VERDE       = '#0B5445'
@@ -135,6 +145,8 @@ def obtener_estilos_excel(workbook):
     }
 
 
+##--------------------------------------
+
 def _escribir_encabezado_meses(ws, fmt, r, checkpoints, semaforo, etiqueta_mes) -> None:
     """Fila r: nombre de cada columna de mes; r+1..r+3: leyenda del semaforo; r+4: NUM / DEN / %."""
     ws.merge_range(r, 0, r + 4, 0, "UNIDAD MEDICA", fmt['columna_unidad_header'])
@@ -154,6 +166,8 @@ def _escribir_encabezado_meses(ws, fmt, r, checkpoints, semaforo, etiqueta_mes) 
         ws.write(r + 4, sc + 2, "%",   fmt['header_sub'])
 
 
+##--------------------------------------
+
 def _nombre_oficial(unidad_id: str, lista_tecnica: list) -> str:
     if unidad_id == "TOTAL_OOAD":
         return "TOTAL"
@@ -162,6 +176,8 @@ def _nombre_oficial(unidad_id: str, lista_tecnica: list) -> str:
     except Exception:
         return unidad_id
 
+
+##--------------------------------------
 
 def _escribir_celdas_mes(ws, fmt, fila, col, clave_base, num, den, res, color) -> None:
     """NUM / DEN / % de una unidad en un mes. Sin resultado (Gris = dato incompleto) se muestra
@@ -179,9 +195,13 @@ def _escribir_celdas_mes(ws, fmt, fila, col, clave_base, num, den, res, color) -
         ws.write(fila, col + 2, res, fmt.get(f"{color}_Capsula", fmt['dato_normal']))
 
 
+##--------------------------------------
+
 def _clave_base_fila(idx_fila: int, es_total: bool) -> str:
     return 'total_gris_80' if es_total else ('fila_par' if idx_fila % 2 == 0 else 'dato_normal')
 
+
+##--------------------------------------
 
 def _escribir_bloque_acumulado(ws, fmt, fila_titulo, ultima_col, checkpoints, semaforo,
                                acumulado_por_mes: dict[int, dict], unidades: list, lista_tecnica: list,
@@ -213,6 +233,8 @@ def _escribir_bloque_acumulado(ws, fmt, fila_titulo, ultima_col, checkpoints, se
                 for i in range(3):
                     ws.write(fila_excel, col + i, "", fmt[clave_base])
 
+
+##--------------------------------------
 
 def escribir_hoja_indicador(wb: xlsxwriter.Workbook, fmt: dict,
                              indicador: str, diccionarioPrevio: dict,

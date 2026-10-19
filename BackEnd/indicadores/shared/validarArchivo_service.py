@@ -1,78 +1,177 @@
 """
-Al moento de que pasan un arhvivo se valida si el tmañoque mando es aceptado
-para evitar que la memoria ram se llene en el servido
+Validaciones de lo que manda el usuario en una solicitud: archivos subidos (peso, tipo y la
+hoja que trae las columnas del mapeo) y la contraseña para sobrescribir datos. Si algo no
+cuadra se levanta HTTPException con el codigo que corresponde.
 
-Tambien trae un runner generico de validaciones de CONTENIDO (no de peso):
-cada modulo que recibe archivos subidos (IAAS, Extractor -- FTP no aplica,
-a el nadie le sube nada) arma su propia lista de checks especificos (headers
-esperados, mes/anio declarado, etc.) y se la pasa a ejecutar_validaciones.
-El runner no sabe que esta validando, solo corre la lista y junta los
-mensajes de error -- por eso es compartible aunque los checks sean distintos.
+Los Excel que se suben (Extractor e IAAS) los convierte el usuario con distintas versiones y
+cada una nombra la hoja diferente ("Hoja1", "Sheet1", "reporte_defunciones"...): por eso la
+hoja no se busca por nombre sino por su contenido. Las columnas siguen por letra, con el
+nombreColumna del mapeo para confirmar. FTP no pasa por aqui: sus reportes llegan tal cual.
+Usado en: services/*, epidemiologia (validarPeso_Archivo)
 """
-from typing import Callable
+import io
+
+import pandas as pd
+from fastapi import HTTPException
+from openpyxl.utils import get_column_letter
+
+from auth.services.auth_service import verificar_credenciales
+from services.metodos_extraccion_excel import letra_a_numero
+
+PESO_MAXIMO = 10 * 1024 * 1024  # 10 MB, para que un archivo no llene la RAM del servidor
+_EXTENSIONES_EXCEL = (".xlsx", ".xls")
 
 
-def ejecutar_validaciones(validadores: list[Callable[[], str | list[str] | None]]) -> list[str]:
-    """
-    Corre una lista de validaciones y junta los mensajes de error.
-    Cada validador es una funcion sin argumentos (ya con sus propios datos
-    capturados por closure) que regresa:
-      - None                si paso
-      - un string            si fallo con un solo mensaje
-      - una lista de strings si fallo con varios mensajes (ej. una validacion
-        que revisa columna por columna y quiere reportarlas todas de una vez)
-    Si un validador ya existente avienta una excepcion en vez de regresar un
-    mensaje (ej. _validar_mes_anio_archivo de Extractor), tambien se captura
-    -- asi el runner sirve con validadores viejos sin tener que reescribirlos.
-    """
-    errores: list[str] = []
-    for validar in validadores:
-        try:
-            resultado = validar()
-        except Exception as e:
-            errores.append(str(e))
-            continue
-        if not resultado:
-            continue
-        errores.extend(resultado) if isinstance(resultado, list) else errores.append(resultado)
-    return errores
+class HojaNoEncontrada(ValueError):
+    """Ninguna hoja trae las columnas del mapeo; mensajes = lo que se le muestra al usuario, renglon por renglon."""
+
+    def __init__(self, mensajes: list[str]):
+        super().__init__("\n".join(mensajes))
+        self.mensajes = mensajes
 
 
-def validar_columnas_esperadas(nombres_reales: list, esperadas: dict[str, str], prefijo: str = "") -> list[str]:
+##--------------------------------------
+
+def validarPeso_Archivo(contenido: bytes, pesoArchivo: int | None) -> bool:
+    """True si el archivo pesa lo que el front declaro (archivo.size en JS) y no pasa del maximo."""
+    return len(contenido) == pesoArchivo and pesoArchivo <= PESO_MAXIMO
+
+
+##--------------------------------------
+
+def validar_archivo_subido(contenido: bytes, peso_declarado: int | None, nombre_archivo: str | None = None, etiqueta: str | None = None) -> None:
     """
-    Compara los encabezados reales del Excel contra {letra: nombre esperado}
-    (sin distinguir mayusculas) -- ver services.metodos_extraccion_excel.columnas_esperadas.
+    Revisa un archivo subido: que sea Excel (solo si se da nombre_archivo; IAAS manda como
+    nombre la unidad, no el del archivo) y que pese lo que el front dijo.
     """
-    from services.metodos_extraccion_excel import letra_a_numero
+    if nombre_archivo is not None and not nombre_archivo.endswith(_EXTENSIONES_EXCEL):
+        raise HTTPException(400, f"{etiqueta}: solo se aceptan archivos Excel (.xlsx, .xls)" if etiqueta
+                            else "Solo se aceptan archivos Excel (.xlsx, .xls)")
+    if not validarPeso_Archivo(contenido, peso_declarado):
+        raise HTTPException(413, f"{etiqueta}: archivo demasiado grande o tamaño inconsistente" if etiqueta
+                            else "Archivo demasiado grande o tamaño inconsistente")
+
+
+##--------------------------------------
+
+def exigir_contrasena(usuario: str | None, password: str) -> None:
+    """Sobrescribir datos ya guardados (regenerar, completar una unidad) pide otra vez la contraseña del usuario."""
+    if not verificar_credenciales(usuario, password):
+        raise HTTPException(401, "Contraseña incorrecta")
+
+
+##--------------------------------------
+
+def validar_columnas_esperadas(nombres_reales: list, esperadas: dict[str, str]) -> list[str]:
+    """
+    Compara los encabezados reales del Excel contra {letra: nombre esperado} (sin distinguir
+    mayusculas); regresa un mensaje por columna que no cuadra.
+    """
+    encabezados = [str(nombre).strip().upper() for nombre in nombres_reales]
+
+    def donde_quedo(esperado: str) -> str:
+        # No se usa la columna encontrada: solo se le dice al usuario donde quedo para que revise el archivo.
+        posiciones = [get_column_letter(i + 1) for i, nombre in enumerate(encabezados) if nombre == esperado.strip().upper()]
+        return f" '{esperado}' está en la columna {', '.join(posiciones)}: parece que se recorrieron las columnas." if posiciones else ""
 
     errores = []
     for letra, esperado in esperadas.items():
         idx = letra_a_numero(letra)
         if idx >= len(nombres_reales):
-            errores.append(f"{prefijo}Falta la columna '{letra}' (se esperaba '{esperado}').")
+            errores.append(f"Falta la columna '{letra}' (se esperaba '{esperado}').{donde_quedo(esperado)}")
             continue
         real = str(nombres_reales[idx]).strip()
         if real.upper() != esperado.strip().upper():
-            errores.append(f"{prefijo}Columna '{letra}': dice '{real}' (se esperaba '{esperado}').")
+            errores.append(f"Columna '{letra}': dice '{real}' (se esperaba '{esperado}').{donde_quedo(esperado)}")
     return errores
 
 
-def validarPeso_Archivo(contenido, pesoArchivo):
-    """
-    Valida que el archivo no supere el peso máximo permitido.
-    Parámetros:
-        contenido: bytes reales ya leídos del archivo (len(contenido) = peso real).
-        pesoArchivo: el peso que el front dijo que pesaba (archivo.size en JS).
-    Retorna:
-        True si el archivo es válido, False si supera el peso máximo o si el
-        peso real no coincide con lo que el front declaró.
-    """
-    # primero validar que sea cierto que el archivo pesa lo que dijo el front
-    if len(contenido) != pesoArchivo:
-        return False
+##--------------------------------------
 
-    pesoPermitdo = 10 * 1024 * 1024  # 10 MB en bytes
-    if pesoArchivo > pesoPermitdo:
-        return False
+class LectorExcel:
+    """
+    Lee cada hoja del Excel subido UNA sola vez aunque varios indicadores la pidan
+    (EH 03, DM 04 y MT 03 salen del mismo SUI-13 del mes).
+    """
 
-    return True
+    def __init__(self, contenido_bytes: bytes):
+        self._libro = pd.ExcelFile(io.BytesIO(contenido_bytes))
+        self._hojas: dict[tuple[str, int], pd.DataFrame] = {}
+        self._encabezados: dict[tuple[str, int], list] = {}
+
+
+    ##--------------------------------------
+
+    def _hoja(self, nombre: str, encabezado: int) -> pd.DataFrame:
+        clave = (nombre, encabezado)
+        if clave not in self._hojas:
+            self._hojas[clave] = pd.read_excel(self._libro, sheet_name=nombre, header=encabezado - 1)
+        return self._hojas[clave]
+
+
+    ##--------------------------------------
+
+    def _encabezado(self, nombre: str, encabezado: int) -> list:
+        """Solo la fila del encabezado (no toda la hoja), para revisar rapido cada hoja."""
+        clave = (nombre, encabezado)
+        if clave not in self._encabezados:
+            filas = pd.read_excel(self._libro, sheet_name=nombre, header=None, nrows=encabezado)
+            self._encabezados[clave] = list(filas.iloc[encabezado - 1]) if len(filas) >= encabezado else []
+        return self._encabezados[clave]
+
+
+    ##--------------------------------------
+
+    def hoja_con_columnas(self, esperadas: dict[str, str], encabezado: int = 1, nombres: list[str] | None = None) -> pd.DataFrame:
+        """
+        La primera hoja que trae, en cada letra de 'esperadas' ({letra: encabezado}), ese
+        encabezado, y ademas las columnas de 'nombres' en cualquier posicion (las que el codigo
+        usa por nombre, ej. la de unidad). Si ninguna cuadra, el error explica la que mas se parecio.
+        """
+        if not esperadas and not nombres:
+            raise HojaNoEncontrada(["El mapeo no dice qué columnas trae el archivo: no se puede saber qué hoja leer."])
+        revisadas = []
+        for nombre in self._libro.sheet_names:
+            reales = self._encabezado(nombre, encabezado)
+            reales_upper = {str(r).strip().upper() for r in reales}
+            errores = validar_columnas_esperadas(reales, esperadas)
+            errores += [f"No trae la columna '{n}'." for n in (nombres or []) if n.strip().upper() not in reales_upper]
+            if not errores:
+                return self._hoja(nombre, encabezado)
+            revisadas.append((nombre, errores))
+
+        hoja, errores = min(revisadas, key=lambda r: len(r[1]))
+        raise HojaNoEncontrada([
+            "Ninguna hoja del archivo trae las columnas que pide el indicador; revisa que sea el archivo correcto. "
+            f"La que más se parece es '{hoja}':",
+            *errores,
+        ])
+
+
+##--------------------------------------
+
+def numeros_escritos_como_texto(df: pd.DataFrame, detalle: dict) -> pd.DataFrame:
+    """
+    Los filtros RANGO solo comparan celdas numericas: si al convertir el archivo un numero
+    quedo como texto ("36"), la fila no contaba y el indicador daba 0 sin avisar. Se
+    convierten a numero las columnas que usa un RANGO, sobre una copia porque la hoja se
+    comparte con otros indicadores que pueden leer esa columna como texto.
+    """
+    letras = [l for l, c in detalle.get("filtroColumna", {}).items() if isinstance(c, dict) and c.get("tipo") == "RANGO"]
+    letras += [l for alt in detalle.get("filtroAlternativas", []) for l, c in alt.items() if isinstance(c, dict) and c.get("tipo") == "RANGO"]
+    letras += [l for g in detalle.get("filtroGrupoColumnas", []) if g.get("tipo") == "RANGO" for l in g["columnas"]]
+
+    copia = None
+    for letra in dict.fromkeys(letras):
+        idx = letra_a_numero(letra)
+        if idx >= df.shape[1]:
+            continue   # la falta de columna ya la reporta el motor
+        columna = df.iloc[:, idx]
+        if not columna.map(lambda v: isinstance(v, str)).any():
+            continue
+        numeros = pd.to_numeric(columna, errors="coerce")
+        if numeros.notna().sum() == 0:
+            raise ValueError(f"La columna {letra} ('{df.columns[idx]}') no trae números: revisa cómo se convirtió el archivo a Excel.")
+        copia = df.copy() if copia is None else copia
+        copia[copia.columns[idx]] = numeros
+    return df if copia is None else copia

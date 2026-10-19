@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from indicadores.schemas.model.indicador_Model import MesReporte
+from schemas.model.indicador_Model import MesReporte
 from shared.MESES import MESES_ESTANDAR
 
 Modulo = Literal["FTP", "IAAS", "Extractor"]
@@ -36,6 +36,8 @@ class SolicitudExcel(BaseModel):
         raise ValueError(f"Mes invalido: '{valor}' -- usa 1-12 o el nombre ({MESES_ESTANDAR[0]}..{MESES_ESTANDAR[-1]})")
 
 
+##--------------------------------------
+
 class MetadataHoja(BaseModel):
     titulo:                 str
     descripcionNumerador:   str
@@ -44,6 +46,8 @@ class MetadataHoja(BaseModel):
     semaforo:               dict[str, Any]
     periodicidad:           str | None = None
 
+
+##--------------------------------------
 
 class HojaIndicador(BaseModel):
     """
@@ -64,6 +68,8 @@ class HojaIndicador(BaseModel):
     def _modulo_canonico(cls, valor: Any) -> Any:
         return _MODULO_CANONICO.get(str(valor).lower(), valor)
 
+
+##--------------------------------------
 
 class ExcelGenerado(BaseModel):
     archivo_b64:    str

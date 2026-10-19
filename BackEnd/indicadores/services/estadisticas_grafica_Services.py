@@ -4,23 +4,20 @@ las reglas del mapeo (semaforo y formula): el front solo las pinta.
   - resumenPorMes: estatal, cambio contra el mes anterior, meta, unidades por semaforo y acumulado
   - mapaCalor:     resultado y semaforo de cada unidad en cada mes
   - brechas:       por mes, cuantos casos le faltan (o le sobran) a cada unidad para llegar a Esperado
-Usado en: services/bd_Ciae_Indicadores_Services.py (ConsultarGraficaIndicador)
+Usado en: services/bd_Ciae_Indicadores_Services.py (consultar_grafica_indicador)
 """
-import math
-
 from schemas.model.indicador_Model import ReporteIndicador
+from services.calculo_indicador_Services import CLAVE_TOTAL as TOTAL, evaluar_formula
 from shared.MESES import MESES_ESTANDAR
 from shared.semaforo_service import evaluar_color, umbrales_para, _RE_UMBRAL
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 
-TOTAL = "TOTAL_OOAD"
-# Mismas funciones que puede usar la formula de resultado del mapeo (ver shared/MESES_ACUMULADOS.py).
-_CONTEXTO_FORMULA = {"round": round, "sum": sum, "abs": abs}
-
 
 def _resultado_con(formula: str, numerador: float, denominador: float) -> float:
-    return round(eval(formula, {"__builtins__": None}, {**_CONTEXTO_FORMULA, "numerador": numerador, "denominador": denominador}), 2)
+    return round(evaluar_formula(formula, numerador, denominador), 2)
 
+
+##--------------------------------------
 
 def _meta_esperado(umbrales: dict) -> tuple[str, float] | None:
     """
@@ -39,6 +36,8 @@ def _meta_esperado(umbrales: dict) -> tuple[str, float] | None:
     operador, valor = coincidencia.groups()
     return ("mas" if operador in (">=", ">") else "menos", float(valor))
 
+
+##--------------------------------------
 
 def _brecha_unidad(formula: str, umbrales: dict, numerador: float, denominador: float) -> dict | None:
     """
@@ -87,6 +86,8 @@ def _brecha_unidad(formula: str, umbrales: dict, numerador: float, denominador: 
     return {"sentido": "sobran", "casos": int(numerador - bajo)}
 
 
+##--------------------------------------
+
 def _texto_meta(umbrales: dict) -> str | None:
     esperado = umbrales.get("Esperado")
     if esperado is None:
@@ -95,6 +96,8 @@ def _texto_meta(umbrales: dict) -> str | None:
         return f"{'<=' if 'Alto' in umbrales else '>='} {esperado}"
     return str(esperado)
 
+
+##--------------------------------------
 
 def estadisticas_de_reporte(reporte: ReporteIndicador | None, bloque: dict) -> dict | None:
     """Ver docstring del modulo. None si no hay reporte guardado."""

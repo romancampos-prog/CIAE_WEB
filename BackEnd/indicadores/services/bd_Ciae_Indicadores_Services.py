@@ -1,221 +1,122 @@
-#librerias
-import logging
+"""
+Consulta tipada de lo guardado en BD_CIAE para las graficas y el Excel: el reporte del año
+(con sus cortes del Extractor), el semanal de FTP y la grafica completa de un indicador.
+Usado en: Controller/reportes_Controller.py, services/excel_Services.py
+"""
 import json
 
-#mis archivos
-from indicadores.schemas.model.indicador_Model import ReporteIndicador,ReportePrevio,UnidadDatos,MesReporte
-from configs.settings import DATA_INDICADORES
-from shared.MESES import MESES_ESTANDAR
-from schemas.DTO.Indicador_ViewModel import IndicadorRequest
-from shared.MESES_ACUMULADOS import AcumulaSumandoMeses, MensualAcumulado
-from shared.UNIDADES import nombre_canonico_iaas
-from services.extractor.corte_extractor_Services import indicadores_extractor_de_corte
-from services.indicadorMapeo_Services import ObtenerFichaPorIndicador, bloque_mapeo
+from schemas.model.indicador_Model import MesReporte, ReporteIndicador, ReportePrevio
+from services.bd_Ciae_Guardado_Services import leer_semanal_indicador, ruta_definitivo
+from services.calculo_indicador_Services import acumula_sumando_meses, calcular_mensual_acumulado
 from services.estadisticas_grafica_Services import estadisticas_de_reporte
+from services.extractor.corte_extractor_Services import indicadores_extractor_de_corte
+from services.indicadorMapeo_Services import obtener_ficha_indicador, bloque_mapeo
+from shared.MESES import MESES_ESTANDAR
+from shared.UNIDADES import nombre_canonico_iaas
 
-#ruta  a la BD_CIAE 
 
-
-#REGLA: cada indicador para ser enconbtrado debe llegar asi CACU 01 , par ahacer split y solo encontrar CAMA
-#ExisteIndicador? true , no existe false
-def IndicadorExiste(indicador: str, ano: str, rutaprevio: bool) -> str:
+def normalizar_meses(bloque_meses: dict, envuelto: bool = True) -> dict:
     """
-    Verifica si existe el archivo JSON de un indicador para un año dado.
-    Parámetros:
-        indicador: nombre de familia + número separados por espacio, ej. "CACU 01".
-        ano: año a buscar, ej. "2026".
-        previo: si es previo sacamos ruta del reporte previo del indicador
-
-    Retorna:
-        dict con ("encontrado": False si el archivo no existe.
-        dict con {"encontrado": True, "ruta": Path} si sí existe.
-    """
-    
-    indicadorBuscar = indicador.split()
-    indicadorPadre = indicadorBuscar[0]  #CAMA
-    numeroIndicador = indicadorBuscar[1] #01
-    
-    if(not rutaprevio):
-        rutaIndicador = DATA_INDICADORES / ano / indicadorPadre
-        nombreJsonIndicador = f"{indicadorPadre}_{numeroIndicador}.json"
-        rutaArchivo = rutaIndicador / nombreJsonIndicador
-    
-    elif (rutaprevio): 
-        rutaIndicador = DATA_INDICADORES / ano / "SEMANAL"
-                
-        nombreJsonIndicador = f"{indicadorPadre}_{numeroIndicador}_2026_semana.json"
-        rutaArchivo = rutaIndicador / nombreJsonIndicador
-    
-    if (not rutaArchivo.exists()):
-        logging.error(f"Ruta incorrecta o archivo incorrecto del indicador=  {indicador} del año= {ano}")
-        return None
-
-    return rutaArchivo
-
-#-----------------------------------------------------------------------------------------------------------------------------------------------------#
-def _normalizar_semaforo(bloque_meses: dict) -> dict:
-    """
-    El pipeline de FTP guarda el semaforo de cada unidad como "color" (ver
-    services/calculo_indicador_Services.py); IAAS y Extractor ya lo guardan como
-    "desempeno" (shared/semaforizado_service.py). El modelo unificado
-    (UnidadDatos) siempre exige "desempeno" -- se traduce aqui, en la
-    lectura, para no tener que igualar el formato de guardado en cada modulo.
-    Cada mes viene envuelto como {"Poblacion": ..., "Reporte": {unidad: datos}}
-    (ver MesReporte) -- se normaliza el "Reporte" y se conserva "Poblacion" tal cual.
+    {mes: {"Poblacion", "Reporte": {unidad: datos}}} con el semaforo siempre como "desempeno"
+    (algunos meses viejos de FTP lo guardaron como "color"). envuelto=False es el MESES crudo
+    del Extractor de corte, que se guarda plano ({mes: {unidad: datos}}): se envuelve aqui,
+    solo en memoria.
     """
     return {
         mes: {
-            "Poblacion": mes_reporte.get("Poblacion"),
+            "Poblacion": contenido.get("Poblacion") if envuelto else None,
             "Reporte": {
                 unidad: (
                     {**vals, "desempeno": vals["color"]}
                     if isinstance(vals, dict) and "color" in vals and "desempeno" not in vals
                     else vals
                 )
-                for unidad, vals in mes_reporte.get("Reporte", {}).items()
+                for unidad, vals in (contenido.get("Reporte", {}) if envuelto else contenido).items()
             },
         }
-        for mes, mes_reporte in bloque_meses.items()
+        for mes, contenido in bloque_meses.items()
     }
 
 
-def _normalizar_y_envolver_plano(bloque_meses: dict) -> dict:
-    """
-    Igual que _normalizar_semaforo, pero para el MESES crudo de Extractor -- ese
-    NUNCA se guarda envuelto en {"Poblacion", "Reporte"} (es solo numerador, nunca
-    usa poblacion, ver guardado_extractor_Services.guardar_numerador_mes), asi que
-    aqui se envuelve nada mas para la lectura, en memoria, sin tocar el archivo.
-    """
-    return {
-        mes: {
-            "Poblacion": None,
-            "Reporte": {
-                unidad: (
-                    {**vals, "desempeno": vals["color"]}
-                    if isinstance(vals, dict) and "color" in vals and "desempeno" not in vals
-                    else vals
-                )
-                for unidad, vals in unidades.items()
-            },
-        }
-        for mes, unidades in bloque_meses.items()
-    }
+##--------------------------------------
 
-
-def CargarReporteIndicador(indicador: str, ano: str) -> tuple[ReporteIndicador, dict[str, MesReporte]] | None:
+def cargar_reporte_indicador(indicador: str, ano: str) -> tuple[ReporteIndicador, dict[str, MesReporte]] | None:
     """
-    Lee y valida el JSON de un indicador/año: regresa (reporte, cortes) o None si no existe.
-    cortes es CORTES.MESES ya tipado -- solo Extractor lo trae (ver
-    corte_extractor_Services.intentar_generar_corte); en los demas queda {}.
-    Usado en: IndicadorConsultarReporte (graficas) y services/excel_Services.py (Excel).
+    (reporte, cortes) de un indicador/año, o None si no existe. cortes es CORTES.MESES ya
+    tipado (solo el Extractor de corte lo trae; en los demas queda {}).
     """
-    rutaIndicador = IndicadorExiste(indicador, ano, False)
-    if (not rutaIndicador): return None
-
-    with open(rutaIndicador, "r", encoding = "utf-8") as archivoJson:
-        datosJson = json.load(archivoJson) #todo el json leido
-        # MESES de un indicador Extractor DE CORTE solo trae el numerador crudo de cada mes,
-        # guardado PLANO (nunca envuelto en Poblacion/Reporte -- ver guardado_extractor_Services);
-        # el corte ya cerrado vive aparte en CORTES.MESES y no es parte de ReporteIndicador.
-        # Los Extractor mensuales (MT 03) se guardan como FTP/IAAS, ya envueltos.
-        if datosJson.get("INDICADOR") in indicadores_extractor_de_corte():
-            datosJson["MESES"] = _normalizar_y_envolver_plano(datosJson.get("MESES", {}))
-        else:
-            datosJson["MESES"] = _normalizar_semaforo(datosJson.get("MESES", {}))
-        cortesCrudos = _normalizar_semaforo(datosJson.get("CORTES", {}).get("MESES", {}))
-        reporte = ReporteIndicador.model_validate(datosJson)
-
-    if (not reporte): return None
-    if ((not reporte.INDICADOR == indicador) and (not reporte.ANIO == ano)):
-        logging.error(f"El json y reporte existen, pero no coincide con el indicador o año solicitado")
+    ruta = ruta_definitivo(indicador, ano)
+    if not ruta.exists():
         return None
+    with open(ruta, "r", encoding="utf-8") as archivo:
+        datos = json.load(archivo)
 
-    cortes = {mes: MesReporte.model_validate(mes_reporte) for mes, mes_reporte in cortesCrudos.items()}
+    datos["MESES"] = normalizar_meses(datos.get("MESES", {}), envuelto=datos.get("INDICADOR") not in indicadores_extractor_de_corte())
+    reporte = ReporteIndicador.model_validate(datos)
+    if reporte.INDICADOR != indicador:
+        return None
+    cortes_guardados = normalizar_meses(datos.get("CORTES", {}).get("MESES", {}))
+    cortes = {mes: MesReporte.model_validate(contenido) for mes, contenido in cortes_guardados.items()}
     return reporte, cortes
 
 
-def IndicadorConsultarReporte(payload: IndicadorRequest) -> ReporteIndicador:
-    cargado = CargarReporteIndicador(payload.indicador, payload.ano)
-    if (not cargado): return None
-    reporte, cortesMes = cargado
+##--------------------------------------
 
-    # IAAS: el dato guardado a veces trae el alias HGSZ de una unidad HGS -- se unifica al
-    # nombre del catalogo para que la unidad no aparezca duplicada ni "sin datos".
-    modulo = (payload.modulo or "").lower()  # la ficha trae "IAAS"/"Extractor", el front a veces manda "iaas"
-
-    if (modulo == "iaas"):
-        reporte.MESES = {
-            mes: MesReporte(
-                Poblacion=mes_reporte.Poblacion,
-                Reporte={nombre_canonico_iaas(unidad): datos for unidad, datos in mes_reporte.Reporte.items()},
-            )
-            for mes, mes_reporte in reporte.MESES.items()
-        }
-
-    #si previos true, cuneta con reporte semanal y si es ftp al mismo timepo 
-    if (payload.previos and modulo == "ftp"):
-        rutaIndicadorPrevio = IndicadorExiste(payload.indicador, payload.ano, payload.previos) #en payload previos si el indicador si contiene reportes semanales ´previos debria estar en true 
-        if (not rutaIndicadorPrevio):return reporte #si no existe el reporte previo, retornamos el reporte normal sin previo
-        with open(rutaIndicadorPrevio, "r", encoding = "utf-8") as archivoJsonPrevio:
-            datosJsonPrevio = json.load(archivoJsonPrevio) #todo el json leido
-            datosJsonPrevio["MES"] = _normalizar_semaforo(datosJsonPrevio.get("MES", {}))
-            reportePrevio = ReportePrevio.model_validate(datosJsonPrevio)
-            
-        ultimoMesReporte = MESES_ESTANDAR.index(list(reporte.MESES.keys())[-1]) + 1
-        mesPrevio = MESES_ESTANDAR.index(list(reportePrevio.MES)[-1]) + 1
-        
-        #el reporte previo solo peude ser del mes siguiente no peude ser de dos mese siguientes
-        if(  ultimoMesReporte + 2 > mesPrevio > ultimoMesReporte): 
-            reporte.SEMANA = reportePrevio
-            
-    
-    # Mensual + mensual acumulado en el mapeo (IAAS, MT 03-05 del Extractor): el
-    # acumulado se arma sumando meses. Lo decide el mapeo, no lo que mande el front.
-    if AcumulaSumandoMeses(payload.indicador):
-        reporteAcumulado = MensualAcumulado(reporte.MESES, payload.indicador)
-
-        if(not reporteAcumulado):
-            logging.error("El mensual acumulado no calculo nada")
-            return reporte
-        reporte.MENSUAL_ACUMULADO = reporteAcumulado
-        return reporte
-
-    # Extractor de corte (EH 03, DM 04, periodicidad "Semestral Anualizado"):
-    # MESES siempre trae solo el numerador crudo de cada mes (nunca se
-    # sobreescribe al cerrar un corte); los cortes ya generados (con
-    # TOTAL_OOAD) viven aparte en CORTES.MESES. Se muestra solo el ultimo corte
-    # cerrado, para que la grafica muestre el ultimo resultado oficial en vez
-    # de una linea plana en 0 o los numeradores crudos sueltos. Un Extractor
-    # mensual (MT 03) ya tiene cada mes calculado y se regresa tal cual.
-    if (modulo == "extractor" and payload.indicador in indicadores_extractor_de_corte()):
-        if not cortesMes:
-            reporte.MESES = {}
-            return reporte
-        ultimoMesCorte = max(cortesMes, key=lambda m: MESES_ESTANDAR.index(m))
-        reporte.MESES = {ultimoMesCorte: cortesMes[ultimoMesCorte]}
-        return reporte
-
-    return reporte
+def cargar_semanal(indicador: str, ano: str) -> ReportePrevio | None:
+    """El semanal (previo) de FTP del año, o None si no hay ningun mes semanal guardado."""
+    crudo = leer_semanal_indicador(indicador, ano)
+    if not crudo.get("MES"):
+        return None
+    crudo["MES"] = normalizar_meses(crudo["MES"])
+    return ReportePrevio.model_validate(crudo)
 
 
-def ConsultarGraficaIndicador(indicador: str, ano: str) -> dict | None:
+##--------------------------------------
+
+def consultar_grafica_indicador(indicador: str, ano: str) -> dict | None:
     """
-    Ficha + reporte + estadisticas de un indicador para las graficas, en una sola consulta. El modulo sale
-    del mapeo (la carpeta del indicador), no de lo que mande el front. previos va siempre
-    en True: el semanal del mes en curso se muestra si existe en BD_CIAE (solo aplica a FTP,
-    que es el unico modulo con semanal).
-    None si el indicador no existe en el mapeo.
+    Ficha + reporte + estadisticas de un indicador para las graficas. El modulo sale del
+    mapeo (la carpeta del indicador), no de lo que mande el front. None si no existe en el mapeo.
     """
+    # 1. Leer el mapeo y el reporte guardado del año
     bloque = bloque_mapeo(indicador)
     if bloque is None:
         return None
-    payload = IndicadorRequest(
-        indicador=indicador, ano=ano, modulo=bloque["modulo"],
-        previos=True, mensual=False, mensualAcumulado=False,
-    )
-    reporte = IndicadorConsultarReporte(payload)
+    modulo = bloque["modulo"]
+    cargado = cargar_reporte_indicador(indicador, ano)
+    reporte = cargado[0] if cargado else None
+
+    if reporte is not None:
+        # 2. IAAS: el dato guardado a veces trae el alias HGSZ de una unidad HGS -- se unifica al
+        #    nombre del catalogo para que la unidad no aparezca duplicada ni "sin datos".
+        if modulo == "iaas":
+            reporte.MESES = {
+                mes: MesReporte(Poblacion=contenido.Poblacion, Reporte={nombre_canonico_iaas(u): d for u, d in contenido.Reporte.items()})
+                for mes, contenido in reporte.MESES.items()
+            }
+
+        # 3. FTP: el semanal se muestra si es del mes siguiente al ultimo definitivo
+        semanal = cargar_semanal(indicador, ano) if modulo == "ftp" else None
+        if semanal:
+            ultimo_mes = MESES_ESTANDAR.index(list(reporte.MESES)[-1]) + 1
+            mes_semanal = MESES_ESTANDAR.index(list(semanal.MES)[-1]) + 1
+            if ultimo_mes + 2 > mes_semanal > ultimo_mes:
+                reporte.SEMANA = semanal
+
+        # 4. Mensual + mensual acumulado en el mapeo: el acumulado se arma sumando meses
+        if acumula_sumando_meses(indicador):
+            reporte.MENSUAL_ACUMULADO = calcular_mensual_acumulado(reporte.MESES, indicador) or None
+
+        # 5. Extractor de corte: MESES trae el numerador crudo; la grafica muestra solo el
+        #    ultimo corte cerrado (CORTES.MESES), el ultimo resultado oficial.
+        elif modulo == "extractor" and indicador in indicadores_extractor_de_corte():
+            cortes = cargado[1]
+            ultimo_corte = max(cortes, key=MESES_ESTANDAR.index) if cortes else None
+            reporte.MESES = {ultimo_corte: cortes[ultimo_corte]} if ultimo_corte else {}
+
+    # 6. Juntar ficha, reporte y estadisticas
     return {
-        "ficha": ObtenerFichaPorIndicador(payload),
+        "ficha": obtener_ficha_indicador(indicador),
         "reporte": reporte,
         "estadisticas": estadisticas_de_reporte(reporte, bloque),
     }

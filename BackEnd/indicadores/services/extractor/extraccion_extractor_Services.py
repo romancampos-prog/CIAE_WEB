@@ -5,48 +5,23 @@ que sea el archivo correcto). El chequeo celda-por-celda (LISTA/RANGO/match simp
 vive en services/metodos_extraccion_excel.py (capa 2, compartida con FTP e IAAS).
 Usado en: services/extractor/generacion_extractor_Services.py
 """
-import io
-
-import pandas as pd
-
-from shared.unidades_ftp import CATALOGOS_UNIDADES, CLAVE_UNIDADES_F
-from shared.MESES import MESES_ESTANDAR
-from shared.validarArchivo_service import ejecutar_validaciones, validar_columnas_esperadas
 from services.metodos_extraccion_excel import (
-    columnas_esperadas,
-    CondicionFiltro,
-    cumple_condicion,
-    DetalleFiltroConteo,
-    fila_cumple,
-    letra_a_numero,
-    mascara_filtros,
+    CondicionFiltro, DetalleFiltroConteo, columnas_esperadas, cumple_condicion, fila_cumple, letra_a_numero, mascara_filtros,
 )
+from shared.MESES import MESES_ESTANDAR
+from shared.UNIDADES import CATALOGOS_UNIDADES, CLAVE_UNIDADES_F
+from shared.validarArchivo_service import LectorExcel, numeros_escritos_como_texto
 
 
-class LectorExcel:
-    """
-    Lee cada hoja del Excel subido UNA sola vez aunque varios indicadores la pidan
-    (EH 03, DM 04 y MT 03 salen del mismo SUI-13 del mes).
-    """
-    def __init__(self, contenido_bytes: bytes):
-        self._contenido = contenido_bytes
-        self._hojas: dict[tuple[str, int], pd.DataFrame] = {}
-
-    def hoja(self, nombre: str | int, encabezado: int = 1) -> pd.DataFrame:
-        clave = (nombre, encabezado)
-        if clave not in self._hojas:
-            self._hojas[clave] = pd.read_excel(io.BytesIO(self._contenido), sheet_name=nombre, header=encabezado - 1)
-        return self._hojas[clave]
+def _columnas_por_nombre(config: dict) -> list[str]:
+    """Columnas que el codigo usa por nombre (no por letra): la de unidad y la llave del cruce."""
+    nombres = [config["agrupacion"]] if config.get("agrupacion") else []
+    if (config.get("cruce") or {}).get("activa"):
+        nombres.append(config.get("columnaLlaveCruce", "numeroAfiliacion"))
+    return nombres
 
 
-def _tipar_filtro_columna(filtro_columna: dict) -> dict[str, CondicionFiltro]:
-    return {
-        letra: cfg if isinstance(cfg, CondicionFiltro) else CondicionFiltro.model_validate(
-            cfg if isinstance(cfg, dict) else {"filtro": cfg}
-        )
-        for letra, cfg in filtro_columna.items()
-    }
-
+##--------------------------------------
 
 def _validar_mes_anio_archivo(df, anio: int, mes_nombre: str, columnas: dict | None = None) -> None:
     """
@@ -77,6 +52,8 @@ def _validar_mes_anio_archivo(df, anio: int, mes_nombre: str, columnas: dict | N
         )
 
 
+##--------------------------------------
+
 def contar_por_unidad(lector: LectorExcel, config: dict, anio: int, mes_nombre: str) -> dict[str, int]:
     """
     Cuenta, por unidad, las filas que pasan los filtros del bloque del mapeo
@@ -91,19 +68,12 @@ def contar_por_unidad(lector: LectorExcel, config: dict, anio: int, mes_nombre: 
     if catalogo is None:
         raise ValueError(f"catalogoUnidades '{nombre_catalogo}' no existe -- opciones: {list(CATALOGOS_UNIDADES)}")
 
-    hoja = config["hoja"]
-    df = lector.hoja(hoja, config.get("encabezado", 1))
-    errores = ejecutar_validaciones([
-        lambda: validar_columnas_esperadas(list(df.columns), columnas_esperadas("FILTRO_CONTEO", config)),
-        lambda: _validar_mes_anio_archivo(df, anio, mes_nombre, config.get("columnasPeriodo")),
-    ])
-    if errores:
-        raise ValueError("\n".join(errores))
+    # La hoja elegida ya trae los encabezados del mapeo en sus letras (y la columna de unidad).
+    df = lector.hoja_con_columnas(columnas_esperadas("FILTRO_CONTEO", config), config.get("encabezado", 1), _columnas_por_nombre(config))
+    df = numeros_escritos_como_texto(df, config)
+    _validar_mes_anio_archivo(df, anio, mes_nombre, config.get("columnasPeriodo"))
 
     col_agrupacion = config["agrupacion"]
-    if col_agrupacion not in df.columns:
-        raise KeyError(f"La columna de agrupacion '{col_agrupacion}' no existe en la hoja '{hoja}'")
-
     mascara = mascara_filtros(df, DetalleFiltroConteo.model_validate(config))
     # Una clave numerica con celdas vacias en la columna llega como float ("110804012151.0").
     claves = df.loc[mascara, col_agrupacion].astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
@@ -112,7 +82,9 @@ def contar_por_unidad(lector: LectorExcel, config: dict, anio: int, mes_nombre: 
     return {nombre: int(conteo.get(nombre, 0)) for nombre in catalogo.values()}
 
 
-def contar_filtro_conteo_acumulado(lector: LectorExcel, config_numerador: dict, anio: int | None = None, mes_nombre: str | None = None) -> tuple[dict, list[dict]]:
+##--------------------------------------
+
+def contar_filtro_conteo_acumulado(lector: LectorExcel, config_numerador: dict, anio: int, mes_nombre: str) -> tuple[dict, list[dict]]:
     """
     Filtra y cuenta el Excel del mes segun 'reporte.numerador' del mapeo.
 
@@ -123,31 +95,28 @@ def contar_filtro_conteo_acumulado(lector: LectorExcel, config_numerador: dict, 
         filas que no cumplen via 1 pero si tienen uno de los codigosCandidatos
         de 'cruce' -- pendientes de validar contra un segundo archivo.
     """
-    hoja = config_numerador["hoja"]
     encabezado = config_numerador.get("encabezado", 1)
     filtro_columna = config_numerador["filtroColumna"]
     col_agrupacion = config_numerador["agrupacion"]
     cruce_cfg = config_numerador.get("cruce")
 
-    df = lector.hoja(hoja, encabezado)
+    # La hoja elegida ya trae los encabezados del mapeo en sus letras (y la de unidad, ej. "undadAdscripcion").
+    df = lector.hoja_con_columnas(
+        columnas_esperadas("FILTRO_CONTEO_ACUMULADO", config_numerador), encabezado, _columnas_por_nombre(config_numerador),
+    )
+    df = numeros_escritos_como_texto(df, config_numerador)
 
-    errores = ejecutar_validaciones([
-        lambda: validar_columnas_esperadas(list(df.columns), columnas_esperadas("FILTRO_CONTEO_ACUMULADO", config_numerador)),
-        lambda: _validar_mes_anio_archivo(df, anio, mes_nombre, config_numerador.get("columnasPeriodo")) if anio is not None and mes_nombre is not None else None,
-    ])
-    if errores:
-        raise ValueError("\n".join(errores))
-
-    # columna de agrupacion (ej. "undadAdscripcion") -> se busca por nombre en el encabezado real
-    if col_agrupacion not in df.columns:
-        raise KeyError(f"La columna de agrupacion '{col_agrupacion}' no existe en la hoja '{hoja}'")
+    _validar_mes_anio_archivo(df, anio, mes_nombre, config_numerador.get("columnasPeriodo"))
 
     conteo_por_unidad: dict[str, int] = {}
     candidatos_cruce: list[dict] = []
 
     # Se tipa una sola vez fuera del loop (no por fila) -- CondicionFiltro.model_validate
     # tiene costo real si se repite miles de veces en un SUI-13 grande.
-    filtro_columna_tipado = _tipar_filtro_columna(filtro_columna)
+    filtro_columna_tipado = {
+        letra: CondicionFiltro.model_validate(cfg if isinstance(cfg, dict) else {"filtro": cfg})
+        for letra, cfg in filtro_columna.items()
+    }
 
     diag_letra = next((l for l, c in filtro_columna.items() if isinstance(c, dict) and c.get("nombreColumna") == "diagnosticoPrincipal"), None)
     diag_idx = letra_a_numero(diag_letra) if diag_letra else None
@@ -180,6 +149,8 @@ def contar_filtro_conteo_acumulado(lector: LectorExcel, config_numerador: dict, 
     return conteo_por_unidad, candidatos_cruce
 
 
+##--------------------------------------
+
 def validar_candidatos_cruce(candidatos_cruce: list[dict], contenido_excel_cruce: LectorExcel, cruce_cfg: dict) -> dict:
     """
     Cruza los candidatos (via 2) contra el archivo del mismo mes indicado en
@@ -190,12 +161,9 @@ def validar_candidatos_cruce(candidatos_cruce: list[dict], contenido_excel_cruce
     if not candidatos_cruce:
         return {}
 
-    hoja = cruce_cfg.get("hoja", "Hoja1")
-    encabezado = cruce_cfg.get("encabezado", 1)
-    df = contenido_excel_cruce.hoja(hoja, encabezado)
-
     col_llave = cruce_cfg["columnaLlave"]
-    cols_diag = cruce_cfg["columnasDiagnostico"]
+    cols_diag = cruce_cfg["columnasDiagnostico"]   # {letra: encabezado}
+    df = contenido_excel_cruce.hoja_con_columnas(cols_diag, cruce_cfg.get("encabezado", 1), [col_llave])
     codigos_validos = set(cruce_cfg["codigosValidos"])
 
     diag_por_paciente: dict[str, set] = {}

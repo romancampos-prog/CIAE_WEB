@@ -19,7 +19,7 @@ export const subirArchivoPoblacion = async (archivo) => {
  * @returns {Promise<Object>} Resultado del recálculo
  */
 export const recalcularPoblacion = async (ano = '2026') => {
-    const respuesta = await api.post('/Indicadores/ftp/recalcular-poblacion', { ano });
+    const respuesta = await api.post('/Indicadores/ftp/poblacion/recalcular', { ano });
     return respuesta.data;
 };
 
