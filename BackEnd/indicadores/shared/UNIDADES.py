@@ -22,15 +22,27 @@ CLAVE_UNIDADES_F      = _ftp["CLAVE_UNIDADES_F"]
 
 CLAVE_HOSPITALES = _hospitales["CLAVE_HOSPITALES"]
 
+# Neonatal 06 y 04 llevan las unidades de Guanajuato de su reporte oficial (con UMAE).
+CLAVE_HOSPITALES_NEONATAL_06 = _hospitales["CLAVE_HOSPITALES_NEONATAL_06"]
+CLAVE_HOSPITALES_NEONATAL_04 = _hospitales["CLAVE_HOSPITALES_NEONATAL_04"]
+
+# {catalogo: unidades que se calculan y se muestran pero no suman al TOTAL_OOAD}: el oficial
+# de Neonatal 06 evalua al HGP 48 aparte, el de Neonatal 04 si lo suma a Guanajuato.
+FUERA_DEL_TOTAL_OOAD = _hospitales.get("FUERA_DEL_TOTAL_OOAD", {})
+
 # Catalogos que un indicador del Extractor puede pedir en 'catalogoUnidades' del mapeo.
 CATALOGOS_UNIDADES = {
-    "hospitales": CLAVE_HOSPITALES,
+    "hospitales":             CLAVE_HOSPITALES,
+    "hospitales_neonatal_06": CLAVE_HOSPITALES_NEONATAL_06,
+    "hospitales_neonatal_04": CLAVE_HOSPITALES_NEONATAL_04,
 }
 
 # Como se describe cada agrupacion en pantalla; None = sin catalogoUnidades (UMF de adscripcion).
 NOMBRE_AGRUPACION = {
-    None:         _ftp["nombreAgrupacion"],
-    "hospitales": _hospitales["nombreAgrupacion"],
+    None:                     _ftp["nombreAgrupacion"],
+    "hospitales":             _hospitales["nombreAgrupacion"],
+    "hospitales_neonatal_06": _hospitales["nombreAgrupacion"],
+    "hospitales_neonatal_04": _hospitales["nombreAgrupacion"],
 }
 
 ORDEN_IAAS01        = _iaas["ORDEN_IAAS01"]

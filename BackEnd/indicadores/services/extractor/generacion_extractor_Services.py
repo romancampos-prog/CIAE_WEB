@@ -19,7 +19,7 @@ from services.bd_Ciae_Guardado_Services import (
     guardar_mes_definitivo, guardar_numerador_mes, guardar_parte_mes, guardar_pendiente_cruce, leer_partes,
     leer_pendiente_cruce, leer_reporte_extractor,
 )
-from services.calculo_indicador_Services import CLAVE_TOTAL, calcular_unidades
+from services.calculo_indicador_Services import CLAVE_TOTAL, calcular_unidades, evaluar_formula
 from services.extractor.corte_extractor_Services import (
     archivo_denominador_aparte, archivos_del_indicador, es_indicador_de_corte, indicadores_extractor, intentar_generar_corte,
     nombre_archivo,
@@ -30,7 +30,7 @@ from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
 from shared.reglas_periodicidad import clave_periodicidad, es_periodicidad_de_corte
 from shared.semaforo_service import semaforizar_unidades
-from shared.UNIDADES import NOMBRE_AGRUPACION
+from shared.UNIDADES import FUERA_DEL_TOTAL_OOAD, NOMBRE_AGRUPACION
 from shared.validarArchivo_service import LectorExcel, validar_archivo_subido
 
 # Lo que el Extractor sabe procesar hoy; otra periodicidad en un indicador
@@ -149,8 +149,18 @@ def _procesar_corte(indicador: str, mapeo: IndicadorExtractorMapeo, anio: int, m
 def _calcular_y_guardar_mes(indicador: str, mapeo: IndicadorExtractorMapeo, anio: int, mes_nombre: str,
                             numerador: dict, denominador: dict) -> dict:
     """Indicador mensual: resultado y semaforo del mes con los conteos ya hechos, guardado como FTP/IAAS."""
+    # Si el mapeo arma el numerador con una formula (Neonatal 04: nacidos vivos - defunciones),
+    # se aplica por unidad; 'numerador' y 'denominador' son los conteos de cada archivo.
+    formula_numerador = mapeo.reporte.operacion.numerador.strip()
+    if formula_numerador != "numerador":
+        conteos = numerador
+        numerador = {}
+        for unidad in dict.fromkeys([*conteos, *denominador]):
+            numerador[unidad] = evaluar_formula(formula_numerador, conteos.get(unidad, 0), denominador.get(unidad, 0))
+
     resultados = calcular_unidades(
         numerador, denominador, mapeo.reporte.operacion.resultado,
+        excluidas_del_total=FUERA_DEL_TOTAL_OOAD.get(mapeo.reporte.denominador.catalogoUnidades, []),
         cero_es_sin_dato=bool((mapeo.reporte.denominador.model_extra or {}).get("ceroEsSinDato")),
     )
     mes_num = MESES_ESTANDAR.index(mes_nombre) + 1

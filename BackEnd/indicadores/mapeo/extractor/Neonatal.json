@@ -168,6 +168,112 @@
             "Bajo": ">= 2.5"
         }
     },
+    "Neonatal 04": {
+        "nombreArchivoFinal": "Neonatal 04",
+        "fechaModificacion": "20/10/2026",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "previos": false,
+        "periodicidad": "Mensual - Mensual Acumulado",
+        "peridocidadGenerada": {
+            "mensual": true,
+            "mensualAcumulado": true
+        },
+        "informacion": {
+            "titulo": "Neonatal 04 - Porcentaje de sobrevida a 28 días de recién nacidos prematuros con peso menor o igual a 1,200 g al nacimiento.",
+            "objetivo": "Medir el porcentaje de sobrevida de los recién nacidos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g. al nacimiento, para establecer acciones de atención integral que incrementen la sobrevida a 28 días de recién nacidos con peso extremadamente bajo, principal causa de morbilidad y mortalidad en los neonatos.",
+            "descNum": "Total de recién nacidos prematuros vivos (menor de 37 semanas), con peso menor o igual a 1,200 g, al nacimiento en un periodo y área geográfica determinados, menos el total de defunciones de recién nacidos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g, al nacimiento en un periodo y área geográfica determinados.",
+            "descDen": "Total de recién nacidos vivos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g al nacimiento en un periodo y área geográfica determinados."
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor",
+                "archivo": "DEFUNCIONES",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "IMUNI_ATEN",
+                "catalogoUnidades": "hospitales_neonatal_04",
+                "columnasPeriodo": {
+                    "mes": "mesm",
+                    "anio": "aniom"
+                },
+                "filtroColumna": {
+                    "R": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            0,
+                            36.99
+                        ],
+                        "nombreColumna": "DEFSEMGESTA"
+                    },
+                    "S": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            0,
+                            1200
+                        ],
+                        "nombreColumna": "DEFPESO"
+                    },
+                    "AH": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            2,
+                            "02"
+                        ],
+                        "nombreColumna": "DEFDERECHO"
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "extractor",
+                "archivo": "EGRESOS_NACIMIENTO_TOCO",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "cvePresupuestal",
+                "catalogoUnidades": "hospitales_neonatal_04",
+                "columnasPeriodo": {
+                    "mes": "mesm",
+                    "anio": "aniom"
+                },
+                "filtroColumna": {
+                    "U": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            1
+                        ],
+                        "nombreColumna": "ESTADORN"
+                    },
+                    "T": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            0,
+                            36.99
+                        ],
+                        "nombreColumna": "SEMGES"
+                    },
+                    "O": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            0,
+                            1200
+                        ],
+                        "nombreColumna": "PESO"
+                    }
+                },
+                "ceroEsSinDato": true
+            },
+            "operacion": {
+                "numerador": "denominador - numerador",
+                "denominador": "denominador",
+                "resultado": "round((numerador / denominador) * 100, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": ">= 75.0",
+            "Medio": "> 64.9 a < 75.0",
+            "Bajo": "<= 64.9"
+        }
+    },
     "Neonatal 06": {
         "nombreArchivoFinal": "Neonatal 06",
         "fechaModificacion": "16/10/2026",
@@ -192,7 +298,7 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "IMUNI_ATEN",
-                "catalogoUnidades": "hospitales",
+                "catalogoUnidades": "hospitales_neonatal_06",
                 "columnasPeriodo": {
                     "mes": "mesm",
                     "anio": "aniom"
@@ -267,7 +373,7 @@
                 "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "cvePresupuestal",
-                "catalogoUnidades": "hospitales",
+                "catalogoUnidades": "hospitales_neonatal_06",
                 "columnasPeriodo": {
                     "mes": "mesm",
                     "anio": "aniom"
