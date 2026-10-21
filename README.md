@@ -17,6 +17,9 @@ Este sistema fue creado por un par de ingenieros expertos en el analisis de dato
 | Arreglar el venv tras mover/renombrar la carpeta | [Seccion 6.1](#seccion-61--arreglar-el-venv-tras-mover-o-renombrar-la-carpeta) |
 | Modulo Epidemiologia | [Seccion 7](#seccion-7--modulo-epidemiologia-dengue) |
 | Entender la estructura de carpetas | [Estructura del proyecto](#estructura-del-proyecto) |
+| Arquitectura del backend | [Seccion 9](#seccion-9--arquitectura-del-backend) |
+| Procesos de indicadores (FTP, IAAS, Extractor) | [BackEnd/indicadores/README.md](BackEnd/indicadores/README.md) |
+| Configurar o agregar un indicador (mapeo) | [BackEnd/indicadores/mapeo/README.md](BackEnd/indicadores/mapeo/README.md) |
 
 ---
 
@@ -72,7 +75,7 @@ No hay un proceso separado para el frontend en produccion.
 
 ```
 Navegador → https://OCC00486WSIAIS5:8005
-               ├── /auth, /ftp, /in-ass...  → API (FastAPI)
+               ├── /auth, /Indicadores/..., /epidemiologia/...  → API (FastAPI)
                └── cualquier otra ruta      → dist/index.html (React)
 ```
 
@@ -711,197 +714,91 @@ const mesStr = String(mes).padStart(2, '0')
 
 ## SECCION 9 — ARQUITECTURA DEL BACKEND
 
+> Esta sección es un resumen. El detalle del módulo de indicadores está en:
+> - [BackEnd/indicadores/README.md](BackEnd/indicadores/README.md): mapa de archivos, endpoints, procesos de FTP, IAAS y Extractor, cómo se guarda en BD_CIAE, gráficas, Excel y excepciones.
+> - [BackEnd/indicadores/mapeo/README.md](BackEnd/indicadores/mapeo/README.md): los JSON de configuración de cada indicador, campo por campo, y cómo agregar uno nuevo.
+> - [BackEnd/epidemiologia/README.md](BackEnd/epidemiologia/README.md): módulo de epidemiología.
+
 ### Mapa de carpetas
 
 ```
 BackEnd/
-│
-├── configs/              configuracion global del sistema
-│   ├── cors.py           origenes CORS permitidos (cambiar hostname aqui)
-│   └── settings.py       DATA_DIR, variables de entorno (.env)
-│
-├── auth/                 autenticacion JWT
-│   ├── controllers/      auth_controller.py
-│   ├── models/
-│   └── services/
-│
+├── configs/              configuracion global (cors.py, settings.py, response.py = ApiResponse)
+├── auth/                 autenticacion JWT (controllers/, services/ con solo_roles)
+├── middleware/           captura de errores de los endpoints
 ├── indicadores/          MODULO: Indicadores Medicos
-│   ├── __init__.py       expone ROUTERS — main.py los registra desde aqui
-│   ├── ftp/              sub-modulo FTP (descarga archivos del servidor FTP)
-│   │   ├── controllers/  un archivo por dominio, no por metodo HTTP
-│   │   ├── models/       esquemas Pydantic para validar entrada/salida
-│   │   ├── services/     logica de negocio pura
-│   │   ├── mapeo/        JSON de configuracion por indicador
-│   │   └── config.py     rutas de BD_CIAE/, constantes del sub-modulo
-│   └── iaas/             sub-modulo IAAS (carga manual de Excel)
-│       ├── controllers/
-│       ├── services/
-│       └── config.py
-│
-├── epidemiologia/        MODULO: Epidemiologia
-│   ├── __init__.py       expone ROUTERS
-│   ├── controllers/
-│   ├── modulos/          algoritmos de negocio (clustering, canal, alertas)
-│   ├── services/         orquestacion de los modulos
-│   └── config.py
-│
-├── main.py               punto de entrada — registra todos los routers
+│   ├── Routes/           indicadores_Route.py: junta los controllers bajo /Indicadores
+│   ├── Controller/       ftp, iaas, extractor, reportes, informacion, excel (*_Controller.py)
+│   ├── services/         logica compartida (calculo, guardado en BD_CIAE, Excel, mapeo, poblacion)
+│   │   ├── ftp/          logica exclusiva de FTP
+│   │   ├── iaas/         logica exclusiva de IAAS
+│   │   └── extractor/    logica exclusiva del Extractor
+│   ├── shared/           meses, unidades, semaforo, periodicidad, validar archivos, auditoria
+│   ├── schemas/          DTO/ (peticiones) y model/ (modelos internos)
+│   └── mapeo/            JSON de configuracion de cada indicador
+├── epidemiologia/        MODULO: Epidemiologia (expone ROUTERS)
+├── main.py               punto de entrada: registra los routers y sirve el frontend
 └── requirements.txt
 ```
 
----
+`main.py` agrega `indicadores/` al `sys.path`; por eso dentro de indicadores los imports son
+planos (`from services...`, `from shared...`, `from schemas...`).
 
-### Como fluye una peticion
+### Como fluye una peticion (ejemplo FTP)
 
 ```
-Navegador  →  POST /ftp/generar?indicador=CAMA C1&ano=2025&mes=06
+Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
                       │
                       ▼
-            ftp_controller.py       recibe, valida parametros con Pydantic
+   Controller/ftp_Controller.py                  recibe, valida rol y parametros
                       │
                       ▼
-            ftp_service.py          orquesta el proceso completo
-              │         │
-              ▼         ▼
-        ftp_extraer.py   reporte_final.py
-        (descarga Excel  (calcula numerador/
-         del servidor)    denominador/resultado)
+   services/ftp/generacion_indicador_ftp_Services.py   orquesta los pasos
+     ├─ indicadorMapeo_Services          lee el mapeo del indicador
+     ├─ ftp/extraccion_indicador_ftp_    baja los reportes del FTP y extrae
+     ├─ calculo_indicador_Services       aplica las formulas del mapeo
+     ├─ shared/semaforo_service          pone el color
+     └─ bd_Ciae_Guardado_Services        guarda en BD_CIAE
                       │
                       ▼
-            datos_json_service.py   guarda historico en JSON
-                      │
-                      ▼
-            generar_excel.py        construye el .xlsx
-                      │
-                      ▼
-            FileResponse con el archivo generado
+   ApiResponse(success, message, data)   (el Excel se pide aparte a /Indicadores/excel)
 ```
-
----
-
-### Como crear un nuevo endpoint
-
-Ejemplo: agregar `GET /ftp/resumen` que devuelve un resumen de meses generados.
-
-**1. Crear el service** (logica pura, sin saber que es HTTP)
-
-```python
-# indicadores/ftp/services/resumen_service.py
-from ftp.services.datos_json_service import leer_datos_indicador
-
-def obtener_resumen(indicador: str, ano: str) -> dict:
-    datos = leer_datos_indicador(indicador, ano)
-    meses = list(datos.get("MESES", {}).keys())
-    return {"indicador": indicador, "ano": ano, "meses_generados": meses}
-```
-
-**2. Crear o agregar al controller** (solo HTTP: recibir, llamar service, responder)
-
-```python
-# indicadores/ftp/controllers/ftp_controller.py
-from fastapi import APIRouter
-from ftp.services.resumen_service import obtener_resumen
-
-router = APIRouter()
-
-@router.get("/resumen")
-def resumen(indicador: str, ano: str):
-    return obtener_resumen(indicador, ano)
-```
-
-**3. Verificar que el router ya esta registrado en `__init__.py`**
-
-```python
-# indicadores/__init__.py
-from ftp.controllers.ftp_controller import router as ftp_router
-
-ROUTERS = [
-    (ftp_router, "/ftp"),   # ya registrado — nada mas que hacer
-    ...
-]
-```
-
-El endpoint queda disponible en `/ftp/resumen?indicador=CAMA C1&ano=2025`.
-
----
-
-### Como agregar un modulo nuevo
-
-Ejemplo: modulo `vacunacion/`.
-
-```
-BackEnd/vacunacion/
-├── __init__.py
-├── config.py
-├── controllers/
-│   └── vacunacion_controller.py
-└── services/
-    └── vacunacion_service.py
-```
-
-```python
-# vacunacion/__init__.py
-from vacunacion.controllers.vacunacion_controller import router as vac_router
-
-ROUTERS = [
-    (vac_router, "/vacunacion"),
-]
-```
-
-```python
-# main.py — agregar estas tres lineas
-import vacunacion as vac_module
-
-for _router, _prefix in vac_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
-```
-
----
 
 ### Responsabilidad por capa
 
 | Capa | Regla |
 |---|---|
-| `controller` | Solo HTTP: recibir parametros, llamar al service, devolver respuesta. Sin logica de negocio. |
-| `service` | Solo logica: calculos, lectura/escritura de archivos, llamadas FTP. No sabe que es HTTP. |
-| `config.py` | Solo constantes y rutas de archivos del modulo. No importa otros modulos. |
+| `Controller` | Solo HTTP: recibir parametros, validar rol con `solo_roles`, llamar al servicio y responder `ApiResponse`. Sin logica de negocio. |
+| `services` | Solo logica: extraer, calcular, leer/escribir archivos, FTP. Lo de un solo modulo va en `services/<modulo>/`; lo compartido en la raiz de `services/`. |
+| `mapeo` | Las reglas de cada indicador (archivos, columnas, filtros, formulas, semaforo). No se escriben en el codigo. |
 
-Un controller por dominio, nunca por metodo HTTP:
-
-```
-# CORRECTO
-ftp_controller.py        — todo lo relacionado con extraccion FTP
-reportes_controller.py   — todo lo relacionado con reportes
-poblacion_controller.py  — todo lo relacionado con poblacion
-
-# INCORRECTO
-get_controller.py
-post_controller.py
-```
-
----
+Pasos para crear un endpoint nuevo: ver [BackEnd/indicadores/README.md, seccion 12](BackEnd/indicadores/README.md#12-cómo-escribir-un-endpoint-nuevo).
 
 ### Estructura del historico JSON
 
-Los datos de cada indicador se persisten en `BD_CIAE/INDICADORES/FTP/{ano}/{categoria}/{indicador}.json`:
+Cada indicador se guarda en `BD_CIAE/INDICADORES/{año}/{FAMILIA}/{FAMILIA}_{NN}.json`
+(ej. `BD_CIAE/INDICADORES/2026/CAMA/CAMA_01.json`):
 
 ```json
 {
-  "INDICADOR": "CAMA C1",
-  "ANO": "2025",
+  "INDICADOR": "CAMA 01",
+  "ANIO": "2026",
   "MESES": {
-    "ENERO": {
-      "HGZ01": { "numerador": 120, "denominador": 500, "%": 24.0 },
-      "HGZ02": { "numerador":  88, "denominador": 420, "%": 20.9 }
-    },
-    "FEBRERO": {
-      "HGZ01": { "numerador": 135, "denominador": 512, "%": 26.4 }
+    "Enero": {
+      "Poblacion": null,
+      "Reporte": {
+        "UMF 46 GUANAJUATO": { "numerador": 12, "denominador": 900, "%": 1.33, "desempeno": "Esperado" },
+        "TOTAL_OOAD":        { "numerador": 480, "denominador": 41000, "%": 1.17, "desempeno": "Medio" }
+      }
     }
   }
 }
 ```
 
-Para leer o escribir estos archivos usar siempre `ftp/services/datos_json_service.py` — nunca acceder al JSON directamente desde un controller o service ajeno.
+Para leer o escribir estos archivos usar siempre `services/bd_Ciae_Guardado_Services.py` (y
+`bd_Ciae_Indicadores_Services.py` para las consultas). El semanal de FTP, los cortes del
+Extractor (`CORTES`) y las carpetas `EXTRACTOR_CRUCE` / `EXTRACTOR_PARTES` estan explicados en
+[BackEnd/indicadores/README.md, seccion 5](BackEnd/indicadores/README.md#5-cómo-se-guarda-en-bd_ciae).
 
 ---
 
