@@ -8,7 +8,7 @@ import json
 from schemas.model.indicador_Model import MesReporte, ReporteIndicador, ReportePrevio
 from services.bd_Ciae_Guardado_Services import leer_semanal_indicador, ruta_definitivo
 from services.calculo_indicador_Services import acumula_sumando_meses, calcular_mensual_acumulado
-from services.estadisticas_grafica_Services import estadisticas_de_reporte
+from services.estadisticas_grafica_Services import estadisticas_de_reporte, perfil_de_indicador
 from services.extractor.corte_extractor_Services import indicadores_extractor_de_corte
 from services.indicadorMapeo_Services import obtener_ficha_indicador, bloque_mapeo
 from shared.MESES import MESES_ESTANDAR
@@ -73,9 +73,39 @@ def cargar_semanal(indicador: str, ano: str) -> ReportePrevio | None:
 
 ##--------------------------------------
 
+def serie_de_cortes(indicador: str, ano: str) -> dict:
+    """
+    Extractor de corte (EH 03, DM 04): los cortes cerrados de una unidad y los casos crudos de cada
+    mes, de este año y del anterior (el corte de junio junta julio-diciembre del año pasado).
+      cortes:      [{mes, anio, unidades: {unidad: {resultado, desempeno, numerador, denominador}}}]
+      casosPorMes: [{mes, anio, enCurso, unidades: {unidad: numerador}}]; enCurso = cuenta para el
+                   siguiente corte (va despues del ultimo corte cerrado)
+    """
+    cortes, casos = [], []
+    for anio in (int(ano) - 1, int(ano)):
+        cargado = cargar_reporte_indicador(indicador, str(anio))
+        if cargado is None:
+            continue
+        reporte, cortes_del_anio = cargado
+        for mes in sorted(cortes_del_anio, key=MESES_ESTANDAR.index):
+            cortes.append({"mes": mes, "anio": anio, "unidades": {
+                u: {"resultado": d.resultado, "desempeno": d.desempeno, "numerador": d.numerador, "denominador": d.denominador}
+                for u, d in cortes_del_anio[mes].Reporte.items()
+            }})
+        for mes in sorted(reporte.MESES, key=MESES_ESTANDAR.index):
+            casos.append({"mes": mes, "anio": anio, "unidades": {u: d.numerador for u, d in reporte.MESES[mes].Reporte.items()}})
+
+    ultimo = (cortes[-1]["anio"], MESES_ESTANDAR.index(cortes[-1]["mes"])) if cortes else None
+    for mes in casos:
+        mes["enCurso"] = ultimo is None or (mes["anio"], MESES_ESTANDAR.index(mes["mes"])) > ultimo
+    return {"cortes": cortes, "casosPorMes": casos}
+
+
+##--------------------------------------
+
 def consultar_grafica_indicador(indicador: str, ano: str) -> dict | None:
     """
-    Ficha + reporte + estadisticas de un indicador para las graficas. El modulo sale del
+    Ficha + reporte + estadisticas + perfil de un indicador para las graficas. El modulo sale del
     mapeo (la carpeta del indicador), no de lo que mande el front. None si no existe en el mapeo.
     """
     # 1. Leer el mapeo y el reporte guardado del año
@@ -114,9 +144,18 @@ def consultar_grafica_indicador(indicador: str, ano: str) -> dict | None:
             ultimo_corte = max(cortes, key=MESES_ESTANDAR.index) if cortes else None
             reporte.MESES = {ultimo_corte: cortes[ultimo_corte]} if ultimo_corte else {}
 
-    # 6. Juntar ficha, reporte y estadisticas
+    # 6. Perfil: lo que la grafica necesita saber del indicador (meta, niveles, unidad de medida...)
+    unidades = []
+    for contenido in (reporte.MESES.values() if reporte else []):
+        unidades += [u for u in contenido.Reporte if u not in unidades]
+    perfil = perfil_de_indicador(bloque, unidades)
+    if modulo == "extractor" and indicador in indicadores_extractor_de_corte():
+        perfil["serieCortes"] = serie_de_cortes(indicador, ano)
+
+    # 7. Juntar ficha, reporte, estadisticas y perfil
     return {
         "ficha": obtener_ficha_indicador(indicador),
         "reporte": reporte,
         "estadisticas": estadisticas_de_reporte(reporte, bloque),
+        "perfil": perfil,
     }

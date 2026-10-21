@@ -3,8 +3,7 @@ import TopBar from '../../../shared/componentes/TopBar';
 import { useRol } from '../../../auth/hooks/useRol';
 import { obtenerTodosLosIndicadores, limpiarGraficasConsultadas } from '../../shared/api/indicadoresInfo';
 import { urlIcono } from '../../shared/utils/iconos';
-import FTPGraficasContenido from '../componentes/graficasFTP/FTPGraficasContenido';
-import IAASGraficasContenido from '../../iaas/componentes/IAASGraficasContenido';
+import GraficaIndicador from '../../shared/componentes/graficas/GraficaIndicador';
 import './ftp.css';
 import '../../shared/estilos/graficas.css';
 
@@ -22,8 +21,6 @@ const GraficasUnificadasPage = () => {
   const [indSel, setIndSel]       = useState('');
   const [drawerOpen, setDrawer]   = useState(false);
   const [todosLosIndicadores, setTodosLosIndicadores] = useState([]);
-
-  const modulo = indSel.startsWith('IAAS') ? 'iass' : 'ftp';
 
   // Lo consultado solo vale mientras se está en gráficas: al entrar y al salir se olvida.
   useEffect(() => {
@@ -142,9 +139,8 @@ const GraficasUnificadasPage = () => {
         </div>
       </aside>
 
-      {/* Contenido según módulo — no renderiza hasta tener indicador */}
-      {indSel && modulo === 'ftp'  && <FTPGraficasContenido  indSel={indSel} onIndSelChange={setIndSel} iconSrc={indIcono} indsHermanos={indsHermanos} colorFamilia={indColor} />}
-      {indSel && modulo === 'iass' && <IAASGraficasContenido indSel={indSel} onIndSelChange={setIndSel} iconSrc={indIcono} indsHermanos={indsHermanos} />} 
+      {/* El mismo contenido para FTP, IAAS y Extractor: el backend dice cómo es cada indicador. No renderiza hasta tener indicador. */}
+      {indSel && <GraficaIndicador indSel={indSel} onIndSelChange={setIndSel} iconSrc={indIcono} indsHermanos={indsHermanos} colorFamilia={indColor} />}
     </div>
   );
 };

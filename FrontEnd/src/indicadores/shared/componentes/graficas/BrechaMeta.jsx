@@ -17,8 +17,9 @@ const formato = (valor) => (valor == null ? '—' : Number(valor).toLocaleString
  *   mes             — "Julio"
  *   aplica          — false cuando la meta es un rango y no hay brecha que calcular
  *   onSelectUnidad  — fn(unidad)
+ *   tipoMeta        — perfil.tipoMeta, para explicar por qué no hay brecha
  */
-const BrechaMeta = ({ brechas = [], mes, aplica, onSelectUnidad }) => {
+const BrechaMeta = ({ brechas = [], mes, aplica, onSelectUnidad, tipoMeta }) => {
   const [verTodas, setVerTodas] = useState(false);
   const lista = verTodas ? brechas : brechas.slice(0, VISIBLES);
   const mayor = brechas[0]?.casos || 1;
@@ -30,7 +31,13 @@ const BrechaMeta = ({ brechas = [], mes, aplica, onSelectUnidad }) => {
         <p className="ige-tarjeta-sub">Casos que tendrían que cambiar en el numerador, con el mismo denominador, para que la unidad llegue a Esperado.</p>
       </header>
 
-      {!aplica && <p className="ige-vacio">La meta de este indicador es un rango, así que no hay un número de casos que falte.</p>}
+      {!aplica && (
+        <p className="ige-vacio">
+          {tipoMeta === 'rango'
+            ? 'La meta de este indicador es un rango, así que no hay un número de casos que falte.'
+            : 'Para este indicador no se puede calcular cuántos casos faltan (no tiene fórmula o meta de un solo valor).'}
+        </p>
+      )}
       {aplica && brechas.length === 0 && <p className="ige-vacio">Todas las unidades con dato están en Esperado este mes.</p>}
 
       {aplica && brechas.length > 0 && (

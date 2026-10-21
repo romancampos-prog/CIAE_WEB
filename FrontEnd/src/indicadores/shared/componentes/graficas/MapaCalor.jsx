@@ -2,7 +2,6 @@
 import { COLOR_SEMAFORO } from '../../constantes/semaforo';
 import './estadisticas.css';
 
-const ESTADOS = ['Esperado', 'Medio', 'Bajo', 'Gris'];
 const corto = (mes) => mes.slice(0, 3);
 const formato = (valor) => (valor == null ? '—' : Number(valor).toLocaleString('es-MX', { maximumFractionDigits: 1 }));
 
@@ -16,10 +15,13 @@ const formato = (valor) => (valor == null ? '—' : Number(valor).toLocaleString
  *   unidadSel        — unidad resaltada
  *   mesActivo        — mes resaltado ("Julio")
  *   onSelectUnidad   — fn(unidad) al dar clic en una fila
+ *   niveles          — niveles del semáforo de este indicador (perfil.niveles): la leyenda solo muestra esos
  */
-const MapaCalor = ({ mapa, unidadSel, mesActivo, onSelectUnidad }) => {
+const MapaCalor = ({ mapa, unidadSel, mesActivo, onSelectUnidad, niveles = ['Esperado', 'Medio', 'Bajo'] }) => {
   if (!mapa?.filas?.length) return null;
   const { meses, filas } = mapa;
+  const conGris = filas.some(f => f.valores.some(v => (v?.desempeno ?? 'Gris') === 'Gris'));
+  const estados = conGris ? [...niveles, 'Gris'] : niveles;
 
   return (
     <section className="ige-tarjeta ige-mapa">
@@ -68,7 +70,7 @@ const MapaCalor = ({ mapa, unidadSel, mesActivo, onSelectUnidad }) => {
       </div>
 
       <ul className="ige-leyenda" aria-label="Leyenda del semáforo">
-        {ESTADOS.map(estado => (
+        {estados.map(estado => (
           <li key={estado}>
             <span className="ige-leyenda-muestra" style={{ '--status': COLOR_SEMAFORO[estado] }} />
             {estado === 'Gris' ? 'Sin dato' : estado}

@@ -4,13 +4,23 @@ las reglas del mapeo (semaforo y formula): el front solo las pinta.
   - resumenPorMes: estatal, cambio contra el mes anterior, meta, unidades por semaforo y acumulado
   - mapaCalor:     resultado y semaforo de cada unidad en cada mes
   - brechas:       por mes, cuantos casos le faltan (o le sobran) a cada unidad para llegar a Esperado
+Y el perfil del indicador (perfil_de_indicador): tipo de meta, niveles del semaforo, meta por mes,
+unidad de medida, si es por corte y el umbral de denominador chico, para que el front no deduzca
+reglas por su cuenta.
 Usado en: services/bd_Ciae_Indicadores_Services.py (consultar_grafica_indicador)
 """
 from schemas.model.indicador_Model import ReporteIndicador
 from services.calculo_indicador_Services import CLAVE_TOTAL as TOTAL, evaluar_formula
 from shared.MESES import MESES_ESTANDAR
-from shared.semaforo_service import evaluar_color, umbrales_para, _RE_UMBRAL
-from shared.UNIDADES import UNIDAD_TIPO_IAAS01
+from shared.reglas_periodicidad import es_periodicidad_de_corte
+from shared.semaforo_service import es_agrupado, es_formato_explicito, evaluar_color, umbrales_para, _RE_UMBRAL, _RE_UMBRAL_COMPUESTO
+from shared.UNIDADES import UNIDAD_TIPO_IAAS01, grupo_de_unidad_iaas01
+
+# Con menos casos que esto en el denominador, un solo caso mueve mucho el resultado: la grafica lo avisa.
+UMBRAL_DENOMINADOR_CHICO = 20
+
+# Lo que vale la formula con numerador = denominador = 1 dice en que se expresa el resultado.
+_UNIDAD_POR_FACTOR = {1: "promedio", 100: "%", 1000: "por 1,000", 100000: "por 100,000"}
 
 
 def _resultado_con(formula: str, numerador: float, denominador: float) -> float:
@@ -95,6 +105,94 @@ def _texto_meta(umbrales: dict) -> str | None:
     if isinstance(esperado, (int, float)):
         return f"{'<=' if 'Alto' in umbrales else '>='} {esperado}"
     return str(esperado)
+
+
+##--------------------------------------
+
+def _meta_numerica(umbrales: dict) -> dict | None:
+    """
+    La meta (Esperado) con sus numeros, para dibujarla: {"texto": ">= 1.3", "valor": 1.3} si es
+    un limite, {"texto": ">= 4 a <= 7", "minimo": 4, "maximo": 7} si es un rango. None si no hay.
+    """
+    texto = _texto_meta(umbrales)
+    if texto is None:
+        return None
+    limite = _meta_esperado(umbrales)
+    if limite:
+        return {"texto": texto, "valor": limite[1]}
+    rango = _RE_UMBRAL_COMPUESTO.match(texto)
+    if rango and rango.group(3) == "a":
+        return {"texto": texto, "minimo": float(rango.group(2)), "maximo": float(rango.group(5))}
+    return {"texto": texto}
+
+
+##--------------------------------------
+
+def _tipo_meta(umbrales: dict) -> str | None:
+    """"mas" / "menos" (que direccion es mejor), "rango" (Esperado entre dos valores) o None."""
+    limite = _meta_esperado(umbrales)
+    if limite:
+        return limite[0]
+    meta = _meta_numerica(umbrales)
+    return "rango" if meta and "minimo" in meta else None
+
+
+##--------------------------------------
+
+def _niveles_semaforo(semaforo: dict) -> list[str]:
+    """
+    Los niveles que de verdad puede tomar el indicador. Medio solo si algun bloque del mapeo lo
+    define (CACU 03, EH 03 no lo tienen); en el formato legado (numeros) siempre hay Medio.
+    """
+    if not semaforo:
+        return []
+    bloques = list(semaforo.values()) if any(isinstance(v, dict) for v in semaforo.values()) else [semaforo]
+    tiene_medio = any(b.get("Medio") or not es_formato_explicito(b) for b in bloques)
+    return ["Esperado", "Medio", "Bajo"] if tiene_medio else ["Esperado", "Bajo"]
+
+
+##--------------------------------------
+
+def _unidad_de_medida(formula: str | None) -> str | None:
+    """"%", "por 1,000", "por 100,000" o "promedio" segun la formula del mapeo; None sin formula."""
+    if not formula:
+        return None
+    factor = evaluar_formula(formula, 1, 1)
+    return _UNIDAD_POR_FACTOR.get(int(factor)) if factor == int(factor) else None
+
+
+##--------------------------------------
+
+def perfil_de_indicador(bloque: dict, unidades: list[str]) -> dict:
+    """
+    Lo que la grafica necesita saber del indicador, sacado del mapeo:
+      tipoMeta (mas/menos/rango/None), niveles del semaforo, meta de cada mes (y de cada unidad
+      cuando el semaforo va por grupo, IAAS 01), unidad de medida, si se publica por corte y el
+      umbral de denominador chico (solo en porcentajes y tasas: en un promedio el denominador no
+      son casos, ej. dias laborados).
+    """
+    semaforo = bloque.get("semaforo") or {}
+    formula = (bloque.get("reporte") or {}).get("operacion", {}).get("resultado")
+    unidad_medida = _unidad_de_medida(formula)
+    meta_por_mes = {mes: _meta_numerica(umbrales_para(semaforo, mes, "OOAD")) for mes in MESES_ESTANDAR} if semaforo else {}
+    # El semaforo por mes puede no traer todos los meses (trimestrales: solo marzo, junio...).
+    tipos = [_tipo_meta(umbrales_para(semaforo, mes, "OOAD")) for mes in MESES_ESTANDAR] if semaforo else []
+    tipo_meta = next((tipo for tipo in tipos if tipo), None)
+
+    meta_de_unidad = None
+    if es_agrupado(semaforo):
+        meta_de_unidad = {u: _meta_numerica(umbrales_para(semaforo, None, grupo_de_unidad_iaas01(u))) for u in unidades}
+
+    return {
+        "tipoMeta": tipo_meta,
+        "niveles": _niveles_semaforo(semaforo),
+        "metaPorMes": meta_por_mes,
+        "metaDeUnidad": meta_de_unidad,
+        "unidadMedida": unidad_medida,
+        "esCorte": es_periodicidad_de_corte(bloque.get("periodicidad")),
+        "umbralDenominadorChico": UMBRAL_DENOMINADOR_CHICO if unidad_medida in ("%", "por 1,000", "por 100,000") else None,
+        "serieCortes": None,
+    }
 
 
 ##--------------------------------------

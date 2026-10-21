@@ -24,10 +24,15 @@ const Estado = ({ desempeno }) => (
  * Props:
  *   resumen      — un elemento de resumenPorMes
  *   mesAnterior  — nombre del mes anterior ("Junio") para rotular el cambio, o null
+ *   niveles      — niveles del semáforo de este indicador (perfil.niveles): solo esos se nombran
+ *   unidadMedida — "%", "por 1,000"... (perfil.unidadMedida)
+ *   esCorte      — true en indicadores por corte (rotula "corte" en vez de "mes")
  */
-const ResumenKpis = ({ resumen, mesAnterior }) => {
+const ResumenKpis = ({ resumen, mesAnterior, niveles = ['Esperado', 'Medio', 'Bajo'], unidadMedida, esCorte }) => {
   if (!resumen) return null;
   const { mes, estatal, desempenoEstatal, cambio, meta, mejora, unidades, unidadesConDato, acumulado, desempenoAcumulado } = resumen;
+  const sufijo = unidadMedida === '%' ? ' %' : '';
+  const otrosNiveles = niveles.filter(n => n !== 'Esperado').map(n => `${unidades[n] ?? 0} en ${n}`);
 
   // El color del cambio depende de si en este indicador subir es bueno ("mas") o malo ("menos").
   const tonoCambio = cambio == null || cambio === 0 || !mejora
@@ -37,18 +42,19 @@ const ResumenKpis = ({ resumen, mesAnterior }) => {
   return (
     <section className="ige-kpis" aria-label={`Resumen de ${mes}`}>
       <div className="ige-kpi ige-kpi--principal">
-        <p className="ige-kpi-etiqueta">Estatal {mes.toLowerCase()}</p>
-        <p className="ige-kpi-valor">{formato(estatal)}</p>
+        <p className="ige-kpi-etiqueta">Estatal {esCorte ? 'corte de ' : ''}{mes.toLowerCase()}</p>
+        <p className="ige-kpi-valor">{formato(estatal)}{estatal != null && sufijo}</p>
         <Estado desempeno={desempenoEstatal} />
+        {unidadMedida && unidadMedida !== '%' && <p className="ige-kpi-nota">{unidadMedida}</p>}
       </div>
 
       <div className="ige-kpi">
-        <p className="ige-kpi-etiqueta">Cambio vs {mesAnterior ? mesAnterior.toLowerCase() : 'mes anterior'}</p>
+        <p className="ige-kpi-etiqueta">Cambio vs {mesAnterior ? mesAnterior.toLowerCase() : esCorte ? 'corte anterior' : 'mes anterior'}</p>
         <p className={`ige-kpi-valor ige-kpi-valor--${tonoCambio}`}>
           {cambio == null ? '—' : <>{cambio !== 0 && <IconoFlecha sube={cambio > 0} />}{cambio > 0 ? '+' : ''}{formato(cambio)}</>}
         </p>
         <p className="ige-kpi-nota">
-          {tonoCambio === 'bueno' ? 'Mejoró' : tonoCambio === 'malo' ? 'Empeoró' : cambio == null ? 'Sin mes anterior' : 'Sin cambio'}
+          {tonoCambio === 'bueno' ? 'Mejoró' : tonoCambio === 'malo' ? 'Empeoró' : cambio == null ? (esCorte ? 'Sin corte anterior' : 'Sin mes anterior') : cambio === 0 ? 'Sin cambio' : cambio > 0 ? 'Subió' : 'Bajó'}
         </p>
       </div>
 
@@ -63,7 +69,7 @@ const ResumenKpis = ({ resumen, mesAnterior }) => {
         <p className="ige-kpi-valor">
           {unidades.Esperado}<span className="ige-kpi-de"> de {unidadesConDato}</span>
         </p>
-        <p className="ige-kpi-nota">{unidades.Medio} en Medio · {unidades.Bajo} en Bajo{unidades.Gris ? ` · ${unidades.Gris} sin dato` : ''}</p>
+        <p className="ige-kpi-nota">{otrosNiveles.join(' · ')}{unidades.Gris ? ` · ${unidades.Gris} sin dato` : ''}</p>
       </div>
 
       {acumulado != null && (
