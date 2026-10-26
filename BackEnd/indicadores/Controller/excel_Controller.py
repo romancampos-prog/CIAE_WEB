@@ -7,7 +7,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Query, status
 
 from configs.response import ApiResponse
-from services.excel_Services import ExcelSinDatosError, generar_excel
+from services.excel.generar_excel_Services import ExcelSinDatosError, generar_excel
 
 excelApi = APIRouter()
 
@@ -24,4 +24,5 @@ async def excel_de_indicadores(ano: int, indicadores: list[str] = Query(...), me
     except Exception as error:
         logging.exception(f"Ocurrio un Error al generar el Excel: {error}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se pudo generar el Excel")
+
     return ApiResponse(success=True, message=mensaje, data=datos)

@@ -1,9 +1,9 @@
-﻿"""
-Módulo  : alertas_service.py
-Carpeta : epidemiologia/services/
-Qué hace: Procesa alertas del SisCep — muestras rechazadas, pendientes, graves sin muestra.
-Usado en: pipeline_service.py
 """
+Alertas de SisCep para el front: muestras rechazadas, pendientes, recibidas adecuadas, sin
+muestra, graves sin muestra y negativos por unidad.
+Usado en: services/pipeline/pasos_pipeline_service.py
+"""
+from epidemiologia.modulos.alertas import ejecutar_alertas_siscep
 
 COLS_CASO = ["VEC_ID", "DES_UNI_MED_NOTIF", "IDE_NOM",
              "IDE_APE_PAT", "IDE_APE_MAT", "DES_DIAG_PROBABLE", "SEM"]
@@ -17,9 +17,9 @@ def _df_to_records(df, columnas):
     return df[cols_existentes].fillna("").astype(str).to_dict(orient="records")
 
 
-def procesar_alertas(df, año: int) -> dict:
-    from epidemiologia.modulos.alertas import ejecutar_alertas_siscep
+##--------------------------------------
 
+def procesar_alertas(df, año: int) -> dict:
     resultado   = ejecutar_alertas_siscep(df)
     tabla_neg   = resultado["tabla_negativos"]
     negativos   = tabla_neg.to_dict(orient="records") if not tabla_neg.empty else []

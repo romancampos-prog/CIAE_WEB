@@ -1,22 +1,18 @@
 """
 /Indicadores/ftp: generacion de los indicadores que salen de los reportes SIAIS del FTP (al
-terminar quedan guardados en BD_CIAE; el Excel se pide aparte a /Indicadores/excel) y la
-poblacion InfoSalud que usan como denominador.
+terminar quedan guardados en BD_CIAE; el Excel se pide aparte a /Indicadores/excel). La
+poblacion InfoSalud que usan como denominador esta en poblacion_Controller.py.
 """
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Depends, Query
 
 from auth.services.jwt_utils import solo_roles
 from configs.response import ApiResponse
-from schemas.DTO.indicadores_ViewModel import (
-    GenerarCategoriaRequest, GenerarIndicadorRequest, RecalcularPoblacionRequest, RegenerarCategoriaRequest,
-    RegenerarIndicadorRequest,
+from schemas.DTO.ftp_ViewModel import (
+    GenerarCategoriaRequest, GenerarIndicadorRequest, RegenerarCategoriaRequest, RegenerarIndicadorRequest,
 )
-from services.bd_Ciae_Guardado_Services import meses_con_datos
-from services.ftp.generacion_indicador_ftp_Services import (
-    generar_categoria, generar_indicador, indicadores_para_generar, recalcular_poblacion, regenerar_categoria,
-    regenerar_indicador,
-)
-from services.poblacion_Services import archivo_poblacion_actual, subir_poblacion
+from services.ftp.generar_categoria_ftp_Services import generar_categoria, regenerar_categoria
+from services.ftp.generar_indicador_ftp_Services import generar_indicador, regenerar_indicador
+from services.ftp.pagina_generar_ftp_Services import indicadores_para_generar, meses_generados_ftp
 
 ftpApi = APIRouter()
 
@@ -34,8 +30,8 @@ async def indicadores_ftp(payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
 
 #Get Indicadores/ftp/meses-generados?indicador=CAMA 01&ano=2026
 @ftpApi.get("/meses-generados")
-async def meses_generados_ftp(indicador: str = Query(...), ano: str = Query(...), payload: dict = Depends(solo_roles(*ROLES_FTP))):
-    return ApiResponse(success=True, message="Meses con datos obtenidos", data={"meses": meses_con_datos(indicador, ano)})
+async def meses_generados(indicador: str = Query(...), ano: str = Query(...), payload: dict = Depends(solo_roles(*ROLES_FTP))):
+    return ApiResponse(success=True, message="Meses con datos obtenidos", data={"meses": meses_generados_ftp(indicador, ano)})
 
 
 ##--------------------------------------
@@ -74,34 +70,3 @@ def generar_categoria_ftp(solicitud: GenerarCategoriaRequest, payload: dict = De
 def regenerar_categoria_ftp(solicitud: RegenerarCategoriaRequest, payload: dict = Depends(solo_roles(*ROLES_FTP))):
     exito, mensaje, datos = regenerar_categoria(payload.get("sub"), solicitud.password, solicitud.categoria, solicitud.ano, solicitud.mes)
     return ApiResponse(success=exito, message=mensaje, data=datos)
-
-
-##--------------------------------------
-
-#Get Indicadores/ftp/poblacion/archivo-actual?anio=2026
-@ftpApi.get("/poblacion/archivo-actual")
-async def archivo_poblacion(anio: str | None = None, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
-    return ApiResponse(success=True, message="Archivo de población actual", data=archivo_poblacion_actual(anio))
-
-
-##--------------------------------------
-
-#Post Indicadores/ftp/poblacion/subir
-@ftpApi.post("/poblacion/subir")
-async def subir_archivo_poblacion(
-    archivo:     UploadFile = File(...),
-    pesoArchivo: int        = Form(...),
-    anio:        str | None = Form(None),
-    payload:     dict       = Depends(solo_roles(*ROLES_FTP)),
-):
-    mensaje, datos = subir_poblacion(payload.get("sub"), archivo.filename, await archivo.read(), pesoArchivo, anio)
-    return ApiResponse(success=True, message=mensaje, data=datos)
-
-
-##--------------------------------------
-
-#Post Indicadores/ftp/poblacion/recalcular
-@ftpApi.post("/poblacion/recalcular")
-def recalcular_con_poblacion(solicitud: RecalcularPoblacionRequest, payload: dict = Depends(solo_roles(*ROLES_FTP))):
-    mensaje, datos = recalcular_poblacion(solicitud.ano)
-    return ApiResponse(success=True, message=mensaje, data=datos)

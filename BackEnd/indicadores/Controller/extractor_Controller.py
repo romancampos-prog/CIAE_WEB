@@ -6,8 +6,11 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from auth.services.jwt_utils import solo_roles
 from configs.response import ApiResponse
-from services.extractor.corte_extractor_Services import estado_ventanas
-from services.extractor.generacion_extractor_Services import completar_cruce, estado_archivos, generar_archivo_mensual, indicadores_para_generar
+from services.extractor.completar_cruce_Services import completar_cruce
+from services.extractor.estado_archivos_Services import estado_archivos
+from services.extractor.estado_cortes_Services import estado_ventanas
+from services.extractor.pagina_generar_extractor_Services import indicadores_para_generar
+from services.extractor.subir_archivo_extractor_Services import generar_archivo_mensual
 
 extractorApi = APIRouter()
 
@@ -61,6 +64,7 @@ async def generar_mes_extractor(
 ):
     contenido = await archivo.read()
     contenido_cruce = await archivoCruce.read() if archivoCruce is not None else None
+
     try:
         mensaje, datos = generar_archivo_mensual(
             payload.get("sub"), anio, mes, archivo.filename, contenido, pesoArchivo, archivoBase,
@@ -68,6 +72,7 @@ async def generar_mes_extractor(
         )
     except ERRORES_DE_DATOS as error:
         raise HTTPException(status_code=422, detail=str(error))
+
     return ApiResponse(success=True, message=mensaje, data=datos)
 
 

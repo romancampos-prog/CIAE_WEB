@@ -222,6 +222,13 @@
                         ],
                         "nombreColumna": "DEFDERECHO"
                     }
+                },
+                "mesDelReporte": {
+                    "columnaFechaNacimiento": "DEFFECH_NAC",
+                    "columnaFechaDefuncion": "DEFFECH_DEF",
+                    "diaDeCorte": 26,
+                    "desfaseMeses": 1,
+                    "edadMaximaDias": 28
                 }
             },
             "denominador": {
@@ -260,7 +267,10 @@
                         "nombreColumna": "PESO"
                     }
                 },
-                "ceroEsSinDato": true
+                "ceroEsSinDato": true,
+                "mesDelReporte": {
+                    "desfaseMeses": 1
+                }
             },
             "operacion": {
                 "numerador": "denominador - numerador",

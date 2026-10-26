@@ -5,8 +5,9 @@ para cualquier usuario con sesion. Responde el dato directo (sin ApiResponse): e
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from auth.services.jwt_utils import solo_roles
-from schemas.model.indicador_Model import FichaTecnicaCompleta
-from services.indicadorMapeo_Services import todos_los_indicadores, obtener_ficha_indicador, obtener_ficha_tecnica_completa
+from schemas.model.ficha_indicador_Model import FichaTecnicaCompleta
+from services.informacion.ficha_indicador_Services import obtener_ficha_indicador, obtener_ficha_tecnica_completa
+from services.informacion.lista_indicadores_Services import todos_los_indicadores
 
 informacionApi = APIRouter()
 

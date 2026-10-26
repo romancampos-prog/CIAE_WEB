@@ -1,8 +1,7 @@
-﻿"""
-Módulo  : mapa_service.py
-Carpeta : epidemiologia/services/
-Qué hace: Transforma resultados de clustering en estructura GeoJSON para el mapa Leaflet del front.
-Usado en: pipeline_service.py
+"""
+Transforma los resultados del clustering en el GeoJSON (con casos por municipio) y las listas
+que pinta el mapa Leaflet del front.
+Usado en: services/pipeline/pasos_pipeline_service.py
 """
 import copy
 
@@ -18,6 +17,7 @@ def procesar_mapa(clust: dict, tipo: str, año: int) -> dict:
     lookup = dict(zip(df_mpo["MPO_NORM"], df_mpo["N_CASOS"]))
 
     geojson = copy.deepcopy(clust["geojson"])
+
     for feat in geojson["features"]:
         mpo    = feat["properties"].get("MUNICIPIO", "")
         nombre = feat["properties"].get("mun_name", mpo.title())

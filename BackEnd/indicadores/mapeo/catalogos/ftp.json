@@ -1,0 +1,211 @@
+{
+    "rutas": {
+        "definitivo": "01. DATAMARTEM/ArchsDataMart_{anio}/{anio}{mes}/{unidad}/1.SIAIS_Reportes/{carpeta}",
+        "semanal": "01. DATAMARTEM/ArchsData_Previos_{anio}/{anio}{mes}/{unidad}/1.SIAIS_Reportes/Semana_{semana}/{carpeta}_S{semana}",
+        "piramides": "01. DATAMARTEM/ArchsDataMart_{anio}/Piramides para {anio} por unidades"
+    },
+    "periodoEnNombre": "{mesAnterior}{anioMesAnterior}{mes}{anio}",
+    "carpetas": {
+        "Estomatologia": {
+            "nombresEnFtp": [
+                "Estomatologia"
+            ],
+            "archivos": {
+                "EST01": "",
+                "EST02": "",
+                "EST03": ""
+            }
+        },
+        "Indicadores": {
+            "nombresEnFtp": [
+                "Indicadores"
+            ],
+            "archivos": {
+                "IN01": "Cruzada nacional indice de atencion al paciente hipertenso",
+                "IN02": "Cruzada nacional indice de atencion al paciente diabetico",
+                "IN03": "Cruzada nacional indice de atencion medica - atencion prenatal",
+                "IN04": "Cruzada nacional indice de organización de los servicios",
+                "IN05": "Porcentaje de consultas otorgadas a derechohabientes atendidos a través de cita previa, horario concertado y espontáneos sin cita en la consulta de medicina familiar",
+                "IN06": "Porcentaje de consultas otorgadas a derechohabientes según tiempo de espera para recibir consulta de medicina familiar en las modalidades cita previa, horario concertado y espontaneo sin cita",
+                "IN07": "Porcentaje de derechohabientes que esperan menos de 30 minutos para recibir consulta de medcina familiar en la modalidad cita previa, horario concertado y espontaneo sin cita",
+                "IN08": "Porcentaje de derechohabientes referidos a segundo nivel",
+                "IN09": "Porcentaje de derechohabientes en control adecuado de hipertension arterial en medicina familiar",
+                "IN10": "Porcentaje de derechohabientes en control adecuado de diabetes mellitus tipo 2 en medicina familiar",
+                "IN11": "Porcentaje de derechohabientes embarazadas con auscultacion de la frecuencia cardiaca fetal",
+                "IN12": "Indicadores de impacto indice de consultas por servicio",
+                "IN13": "Porcentaje de derechohabientes en control adecuado de hipertension arterial en medicina familiar - mmim 2012",
+                "IN14": "Porcentaje de derechohabientes en control adecuado de diabetes mellitus tipo 2 en medicina familiar - mmim 2012",
+                "IN15": "Porcentaje de derechohabientes con obesidad (imc) en medicina familiar - mmim 2012",
+                "IN16": "Porcentaje de derechohabientes en control adecuado de hipertension arterial en medicina familiar - indicadores de proceso 2014",
+                "IN17": "Porcentaje de derechohabientes en control adecuado de diabetes mellitus tipo 2 en medicina familiar - indicadores de proceso 2014",
+                "IN18": "Listado de derechohabientes sin cita atendidos mediante unifila",
+                "IN19": "Principales motivos de consulta - referencia a segundo nivel (frecuencia)",
+                "IN20": "",
+                "IN21": "Porcentaje de derechohabientes espontaneo sin cita atendidos mediante unifila según tiempo de espera para recibir consulta de medicina familiar",
+                "IN22": "Porcentaje de derechohabientes en control adecuado de hipertension arterial en medicina familiar - mmim 2018",
+                "IN23": "Porcentaje de derechohabientes en control adecuado de diabetes mellitus tipo 2 en medicina familiar - mmim 2018",
+                "IN24": "",
+                "IN25": "Porcentaje de derechohabientes en control adecuado de diabetes mellitus tipo 2 - servicio dm.-diabetimss",
+                "IN26": "Seguimiento de resultados e indicadores por servicio y unidad médica",
+                "IN27": "Indice confirmacion diagnostica de obesidad por medicina familiar en pacientes derechohabientes de 20 año y mas",
+                "IN28": "Porcentaje de derechohabientes de 20 años y mas con obesidad de primera vez que iniciaron tratamiento en medicina familiar",
+                "IN29": "Porcentaje derechohabientes de 20 años y mas con diabetes mellitus tipo 2 de primera vez que iniciaron tratamiento en medicina familiar",
+                "IN30": "Derechohabientes con registro de tension arterial y control adecuado de hipertension arterial en medicina familiar",
+                "IN31": "Derechohabientes con registro de glucemia y control adecuado de diabetes mellitus tipo 2 en medicina familiar",
+                "IN32": "Derechohabientes con registro de glucemia y control adecuado de diabetes mellitus tipo 2 en dm.-cadimss",
+                "IN33": "Derechohabientes con registro de hemoglobina glucosilada (hba1c) y control adecuado de diabetes mellitus en medicina familiar"
+            }
+        },
+        "Otros reportes": {
+            "nombresEnFtp": [
+                "Otros reportes"
+            ],
+            "archivos": {
+                "LAPI01": "Listado de validación de componentes a.p.i.",
+                "OC02": "",
+                "OC05": "Detalle de atenciones por servicio (citas y atención al daño)",
+                "OC08": "",
+                "OC19": "Detalle de acciones de promoción, prevención y actividades del personal paramédico por servicio - rais",
+                "OC20": "",
+                "OC21": "",
+                "OC22": "",
+                "OC27": "Listado de atenciones sin motivo de demanda en la consulta externa (sin dx principal o con mas de un dx principal)",
+                "OC28": "Listado de acciones de promocion, prevencion y personal paramedico",
+                "OC29": "",
+                "OC30": "Listado de acciones de promocion, prevencion y personal paramedico",
+                "OC31": "",
+                "OC33": "Por matricula, fecha y derechohabiente",
+                "OC34": "Por fecha, servicio y derechohabiente",
+                "OC35": "",
+                "OC36": "Por matricula, fecha y derechohabiente",
+                "OC38": "",
+                "OC47": "",
+                "OC48": "Deteccion, sospecha, control, seguimiento, confirmación diagnostica",
+                "OC49": "Listado de atenciones inconsistentes (sin dx principal o con mas de un dx principal)",
+                "OC50": "",
+                "OC51": "",
+                "OC52": "",
+                "OC53": "",
+                "OC54": "",
+                "OC55": "",
+                "OC56": ""
+            }
+        },
+        "Planificación Familiar": {
+            "nombresEnFtp": [
+                "Planificación Familiar",
+                "Planificacion Familiar"
+            ],
+            "archivos": {
+                "PF01": "Aceptantes por tipo de metodo anticonceptivo y grupo de edad",
+                "PF02": "Consultas subsecuentes por medico familiar, segun tipo de metodo anticonceptivo",
+                "PF03": "Consultas subsecuentes por enfermeria, segun tipo de metodo anticonceptivo",
+                "PF04": "Consultas subsecuentes por medico familiar y enfermeria, segun tipo de metodo anticonceptivo",
+                "PF05": "Consumo de metodos anticonceptivos",
+                "PF06": "Aceptantes del programa de planificacion familiar en consulta externa de medicina familiar",
+                "PF07": "Acciones de educacion para la salud reproductiva en materia de planificacion familiar y aceptantes de métodos anticonceptivos en programas especiales",
+                "PF08": "Consultas subsecuentes de métodos anticonceptivos otorgadas por personal médico, enfermería y parteras rurales consumo mensual de productos anticonceptivos y nivel de inversión",
+                "PF09": "Aceptantes de metodos anticonceptivos por programa especial en población derechohabiente, por grupo de edad",
+                "PF10": "Total de aceptantes de métodos anticonceptivos en programas especiales de la unidad médica",
+                "PF11": "Usuaria(o)s activa(o)s - poblacion dh por sexo, grupo de edad y metodo - totales por servicio y matricula",
+                "PF12": "Consumo de metodos anticonceptivos - poblacion dh por sexo, grupo de edad y metodo - totales por servicio y matricula",
+                "PF13": "Usuaria(o)s - poblacion abierta por sexo, grupo de edad y metodo - totales por servicio y matricula",
+                "PF14": "Consumo de metodos anticonceptivos - poblacion abierta por sexo, grupo de edad y metodo - totales por servicio y matricula"
+            }
+        },
+        "Productividad": {
+            "nombresEnFtp": [
+                "Productividad"
+            ],
+            "archivos": {
+                "PM01": "Principales motivos de consulta",
+                "PM02": "Principales motivos de consulta a detalle",
+                "PM03": "Principales motivos de consulta por lista mexicana",
+                "PM04": "Principales motivos de consulta - servicios paramedicos (frecuencia)",
+                "PM05": "Principales motivos de consulta -estudiantes (frecuencia)",
+                "PM06": "",
+                "PM07": "Principales motivos de consulta a detalle por medico",
+                "PM08": "Principales motivos de consulta - referencia",
+                "PU01": "Informe mensual de los servicios medicos parte 1 por servicios",
+                "PU02": "Informe mensual de los servicios medicos parte 1 por médicos",
+                "PU03": "Informe mensual de los servicios medicos parte 1 - productividad acumulada por servicios",
+                "PU04": "Informe mensual de los servicios paramedicos (parte 1) por servicios",
+                "PU05": "Informe mensual de los servicios paramedicos (parte 1) por prestador de la atencion",
+                "PU06": "Informe mensual de los servicios paramedicos (parte 1) - productividad acumulada por servicios",
+                "PU07": "",
+                "PU08": "Informe mensual de servicios (parte 1) por prestador de la atencion - estudiantes",
+                "PU09": "Informe mensual de servicios (parte 1) por servicios - estudiantes",
+                "PU10": "Informe mensual de servicios - estudiantes (parte 1) - productividad acumulada por servicios",
+                "PU11": "Informe mensual de los servicios - parte 1 productividad fines de semana por médicos por servicios - especialidades",
+                "PU12": "Informe mensual de los servicios medicos parte 1 por fecha de atención, consultorio y turno"
+            }
+        },
+        "Salud en el Trabajo": {
+            "nombresEnFtp": [
+                "Salud en el Trabajo"
+            ],
+            "archivos": {
+                "ST01": "Días de incapacidad por pacientes que recibieron incapacidades (certificados)",
+                "ST02": "Días de incapacidad por pacientes que recibieron incapacidades (certificados) * enfermedad general",
+                "ST03": "Días de incapacidad por pacientes que recibieron incapacidades (certificados) * riesgo de trabajo",
+                "ST05": "Total de motivos de atencion (por lista mexicana) que generaron días de incapacidad",
+                "ST06": "Total de motivos de atencion (cie-10) que generaron días de incapacidad"
+            }
+        },
+        "Salud Materna": {
+            "nombresEnFtp": [
+                "Salud Materna"
+            ],
+            "archivos": {
+                "MT01": "Atencion del embarazo, puerperio y sus complicaciones, en medicina familiar",
+                "MT02": "Atencion al climaterio y menopausia en medicina familiar",
+                "MT03": "Actividades de vigilancia materna en medicina familiar",
+                "MT06": "Listado de derechohabientes mujeres con registro de vigilancia prenatal y/o puerperal"
+            }
+        },
+        "Salud Pública": {
+            "nombresEnFtp": [
+                "Salud Pública"
+            ],
+            "archivos": {
+                "CHK01": "",
+                "CHK02": "Total derechohabientes atendidos por sexo y grupo de edad - chequeo prevenimss",
+                "CHK03": "Chequeo prevenimss en estudiantes - listado de derechohabientes atendidos",
+                "CHK04": "Total derechohabientes atendidos por sexo y grupo de edad - chequeo prevenimss en estudiantes",
+                "CHK05": "Chequeo prevenimss en empresas - listado de derechohabientes atendidos",
+                "CHK06": "Total derechohabientes atendidos por sexo y grupo de edad - chequeo prevenimss en empresas",
+                "CIP01": "Cobertura de derechohabientes con atención integral prevenimss",
+                "CP01": "Promoción de la salud niños incorporados a protocolos de atención preventiva",
+                "CP02": "",
+                "CP03": "",
+                "CP04": "Confirmacion de sospechas hipertension arterial en poblacion 20 años y mas",
+                "IAP01": "Número de consultas de atención preventiva y porcentaje de derechohabientes con atención integrada (a.p.i.)",
+                "IAP02": "Número de consultas de atención preventiva y porcentaje de derechohabientes con atención integrada (a.p.i.) enfermera especialista en medicina familiar",
+                "IAP03": "Atenciones por personal de enfermería según servicio y grupos prevenimss"
+            }
+        },
+        "Validaciones": {
+            "nombresEnFtp": [
+                "Validaciones",
+                "Validacione"
+            ],
+            "archivos": {
+                "VA01": "",
+                "VA02": "",
+                "VA03": "",
+                "VA04": "",
+                "VA05": ""
+            }
+        },
+        "Piramides": {
+            "ruta": "piramides",
+            "archivos": {
+                "PB02": "Pirámide de población adscrita por grupo de edad y sexo"
+            }
+        }
+    },
+    "notas": {
+        "nombres": "Nombre del reporte tomado de su hoja 'Ficha' (fila Titulo) o de sus primeras filas; los vacios no traen titulo legible: llenarlos a mano.",
+        "carpetasSinCatalogar": "Vistas en junio 2026 en una sola unidad: '1.SIAIS_Reportes' (TS01, TS02), 'Trabajo Social' (TS01, TS02), 'Estadisticas' (EI04-EI06), '6.Med Fis y Rehab'. Tampoco se catalogan '2.DataMartEM E Integrador' (.txt/.accdb/.zip), '3.SIMO', '4.SubSistema 12' y '5.Cedula de Validación' (archivos de cada unidad, no reportes SIAIS)."
+    }
+}

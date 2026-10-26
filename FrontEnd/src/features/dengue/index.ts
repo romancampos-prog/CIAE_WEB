@@ -1,0 +1,24 @@
+// API publica de la feature dengue: lo unico que se puede usar fuera de features/dengue/.
+export { default as SeccionAlerta } from './components/alertas/SeccionAlerta';
+export { default as AlertaCanal } from './components/canal/AlertaCanal';
+export { default as CanalChart } from './components/canal/CanalChart';
+export { default as CorgiOverlay } from './components/carga/CorgiOverlay';
+export { default as UploadCard } from './components/carga/UploadCard';
+export { default as PanelDeslizante } from './components/comun/PanelDeslizante';
+export { default as ReporteToast } from './components/comun/ReporteToast';
+export { default as Spinner } from './components/comun/Spinner';
+export { default as SeccionDuplicados } from './components/duplicados/SeccionDuplicados';
+export { default as SeccionPosiblesDuplicados } from './components/duplicados/SeccionPosiblesDuplicados';
+export { default as BrotesPanel } from './components/mapa/BrotesPanel';
+export { default as MapaLeaflet } from './components/mapa/MapaLeaflet';
+export { default as TablaUnidades } from './components/mapa/TablaUnidades';
+export { default as DengueLayout } from './components/plantilla/Layout';
+export { COLOR_DUPLICADOS, COLOR_POSIBLES } from './constants/clasificacion';
+export { SECCIONES_ALERTAS } from './constants/seccionesAlertas';
+export { SEMAFORO_MAPA } from './constants/semaforoMapa';
+export { ZONAS_CANAL } from './constants/zonasCanal';
+export { PipelineProvider, usePipeline } from './context/PipelineContext';
+export { useCargaBases } from './hooks/useCargaBases';
+export { useAlertasSiscep, useCanal, useDuplicados, useMapaDengue, usePosiblesDuplicados } from './hooks/useDengueReportes';
+export { agruparPorMetodo, calcularKpisAlertas, calcularKpisCanal, getTemaMapa } from './utils/calculos';
+export type { TipoMapa } from './tipos';

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from auth.services.jwt_utils import solo_roles
 from configs.response import ApiResponse
-from services.bd_Ciae_Indicadores_Services import consultar_grafica_indicador
+from services.grafica.grafica_indicador_Services import consultar_grafica_indicador
 
 reportesApi = APIRouter()
 

@@ -1,12 +1,12 @@
 """
 Modelos del Excel generico (uno o varios indicadores, de cualquier modulo).
-Usado en: services/excel_Services.py, Controller/excel_Controller.py
+Usado en: services/excel/*, Controller/excel_Controller.py
 """
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from schemas.model.indicador_Model import MesReporte
+from schemas.model.reporte_guardado_Model import MesReporte
 from shared.MESES import MESES_ESTANDAR
 
 Modulo = Literal["FTP", "IAAS", "Extractor"]
@@ -28,11 +28,14 @@ class SolicitudExcel(BaseModel):
     def _mes_a_nombre(cls, valor: str | None) -> str | None:
         if valor is None or valor.strip() == "":
             return None
+
         valor = valor.strip()
+
         if valor.isdigit() and 1 <= int(valor) <= 12:
             return MESES_ESTANDAR[int(valor) - 1]
         if valor in MESES_ESTANDAR:
             return valor
+
         raise ValueError(f"Mes invalido: '{valor}' -- usa 1-12 o el nombre ({MESES_ESTANDAR[0]}..{MESES_ESTANDAR[-1]})")
 
 

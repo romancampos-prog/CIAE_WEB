@@ -10,7 +10,7 @@ aquí.
 > [../README.md#excepciones-y-casos-especiales](../README.md#excepciones-y-casos-especiales).
 
 **Regla de oro:** nunca abras estos JSON a mano desde el código. Se leen siempre con
-`services/indicadorMapeo_Services.py` (`bloque_mapeo`, `cargar_indicador_mapeo`,
+`datos/lectura_mapeo/` (`bloque_mapeo`, `cargar_indicador_ftp`,
 `cargar_indicador_iaas`, `cargar_indicador_extractor`, `todos_los_indicadores`,
 `indicadores_del_modulo`). Es el único archivo que sabe en qué carpeta vive cada indicador.
 
@@ -66,6 +66,43 @@ mapeo/
 `nombre` se muestra en las páginas de Generar (`nombreCategoria`); `imagen` y `color` los
 pinta el front (ícono con `urlIcono`, color con la variable CSS `--ic`).
 
+### `catalogos/ftp.json`
+
+El mapa del FTP: dónde vive cada reporte SIAIS. Lo lee `datos/ftp/catalogo_reportes_ftp_Datos.py`
+**al arrancar** (si lo cambias, reinicia el backend).
+
+```json
+{
+    "rutas": {
+        "definitivo": "01. DATAMARTEM/ArchsDataMart_{anio}/{anio}{mes}/{unidad}/1.SIAIS_Reportes/{carpeta}",
+        "semanal":    "01. DATAMARTEM/ArchsData_Previos_{anio}/{anio}{mes}/{unidad}/1.SIAIS_Reportes/Semana_{semana}/{carpeta}_S{semana}",
+        "piramides":  "01. DATAMARTEM/ArchsDataMart_{anio}/Piramides para {anio} por unidades"
+    },
+    "periodoEnNombre": "{mesAnterior}{anioMesAnterior}{mes}{anio}",
+    "carpetas": {
+        "Planificación Familiar": {
+            "nombresEnFtp": ["Planificación Familiar", "Planificacion Familiar"],
+            "archivos": { "PF06": "Aceptantes del programa de planificacion familiar ..." }
+        },
+        "Piramides": { "ruta": "piramides", "archivos": { "PB02": "..." } }
+    }
+}
+```
+
+- `rutas`: plantillas; lo único que cambia es `{anio}`, `{mes}`, `{semana}`, `{unidad}` (la carpeta de la
+  unidad, de `unidades/ftp.json`) y `{carpeta}`.
+- `carpetas.<nombre>.archivos`: cada reporte por su **prefijo** (el archivo se llama
+  `{CODIGO}U...`) con su nombre legible (de la hoja "Ficha" del reporte; los vacíos se llenan a mano).
+- `nombresEnFtp`: cómo se llama esa carpeta de verdad en el FTP, en orden; se prueba cada uno. En el
+  semanal `Planificacion Familiar` va sin acento y algunas semanas traen errores de dedo
+  (`Validacione_S1`, `Salud en el Trabajp_S3`).
+- `ruta` (opcional): usa otra plantilla (`piramides`, sin mes ni semana; ahí el archivo se busca por la
+  clave de la unidad).
+- `periodoEnNombre`: si una carpeta trae dos archivos del mismo reporte, se usa el que termina con el
+  periodo del mes (junio 2026 → `052026062026`, del 26 de mayo al 25 de junio).
+- `notas`: lo que hay en el FTP y no se cataloga (DataMart/Integrador, SIMO, Subsistema 12, Cédula de
+  Validación, carpetas que solo aparecen en una unidad).
+
 ### `catalogos/archivos_extractor.json`
 
 Una entrada por cada archivo que se sube en el Extractor. La **clave** (`SUI_13`,
@@ -99,7 +136,7 @@ Dice cómo leer el Excel nacional de población InfoSalud: `hoja`, `fila_titulo`
 el mes/año del reporte), `fila_grupos`, `fila_encabezados`, `encabezados_edad` (los nombres
 exactos de las columnas de edad, ej. `"20 a 24"`, `"25  a 29"` con doble espacio),
 `bloques_edad` (`Todos`, `Hombres`, `Mujeres`) y `alias` (nombre en el Excel → nombre en el
-sistema; `null` = ignorar esa fila). Lo usa `services/poblacion_Services.py`.
+sistema; `null` = ignorar esa fila). Lo usa `datos/excel_subido/excel_poblacion_Datos.py`.
 
 ---
 
@@ -125,7 +162,7 @@ Todos los indicadores, de cualquier carpeta, tienen la misma forma por fuera. Ej
 
 | Campo | Qué es | Valores | Quién lo usa |
 |---|---|---|---|
-| `nombreArchivoFinal` | Nombre del indicador en el nombre del Excel descargado | texto | `excel_Services.py` |
+| `nombreArchivoFinal` | Nombre del indicador en el nombre del Excel descargado | texto | `services/excel/generar_excel_Services.py` |
 | `fechaModificacion` | Fecha en que se cambió la ficha | `"dd/mm/aaaa"` | ficha técnica (`/informacion/ficha-tecnica`) |
 | `mostrarGenerar` | Si aparece en la página de Generar de su módulo | `true` / `false` | `indicadores_del_modulo`, `todos_los_indicadores("mostrarGenerar")`. Si falta, `todos_los_indicadores` lo toma como `true` |
 | `mostrarGrafica` | Si aparece en Gráficas / descargas | `true` / `false` | `todos_los_indicadores("mostrarGrafica")` (default de `/informacion/indicadores`) |
@@ -217,9 +254,8 @@ es el nombre que se usa en la fórmula.
 ```
 *(DM 01)*
 
-- La **subcarpeta** del FTP donde vive cada código (`Salud Pública`, `Indicadores`...) está en
-  `REPORTES_POR_SUBCARPETA` de `services/ftp/navegacion_ftp_Services.py`. Si usas un reporte
-  nuevo que no está ahí, hay que agregarlo en ese archivo.
+- La **carpeta** del FTP donde vive cada código (`Salud Pública`, `Indicadores`...) está en
+  `catalogos/ftp.json`. Si usas un reporte nuevo que no está ahí, agrégalo en su carpeta.
 - `PB02` es especial: no está en la carpeta de cada unidad sino en
   `ArchsDataMart_{año}/Piramides para {año} por unidades`, un archivo por unidad que se
   encuentra por su clave (`PB02U{clave}...`).
@@ -286,7 +322,7 @@ grupo se vuelve un nombre que se usa en la fórmula del denominador:
 
 ## 4. Modos de extracción (`modoExtraccion`)
 
-El motor único es `services/metodos_extraccion_excel.py`. Recibe la hoja ya cargada y el
+El motor único es `services/compartido/extraccion/motor_extraccion_Services.py`. Recibe la hoja ya cargada y el
 bloque del mapeo, lo **valida** contra un modelo (si al mapeo le falta un campo, falla con
 `DETALLE_INVALIDO` antes de leer) y extrae.
 
@@ -303,7 +339,8 @@ desde 1, igual que en Excel.
 | `FILTRO_UNIDAD_VALOR` | Ubica la fila de una unidad y toma un valor | `columnaUnidad`, `tomarValor`, `filtroColumna` | un número |
 
 Agregar un modo nuevo = un modelo `Detalle...` + una función + una entrada en `EXTRACTORES`
-y en `MODELOS_DETALLE` (y en el `Literal ModoExtraccion` de `schemas/model/indicador_Model.py`).
+y en `MODELOS_DETALLE` (y en el `Literal ModoExtraccion` de `schemas/model/ficha_indicador_Model.py`; el modelo del detalle va en
+`schemas/model/detalle_extraccion_Model.py` y la funcion en `modos_por_posicion_Services.py` o `modos_por_filtro_Services.py`).
 
 ### INTERSECCION_COLUMNA
 
@@ -385,7 +422,7 @@ Solo EH 03 y DM 04 (Extractor, por corte). Cuenta igual que `FILTRO_CONTEO` pero
   `cruce.codigosCandidatos` → queda como *candidato* y solo cuenta si el archivo de Egresos
   lo confirma (ver [`cruce`](#cruce)).
 
-Diferencias con `FILTRO_CONTEO` (están en `services/extractor/extraccion_extractor_Services.py`,
+Diferencias con `FILTRO_CONTEO` (están en `services/extractor/conteo_con_cruce_Services.py`,
 `contar_filtro_conteo_acumulado`):
 - La unidad sale de los **primeros 6 caracteres** de la columna `agrupacion`
   (`undadAdscripcion`) buscados en `CLAVE_UNIDADES_F` de `unidades/ftp.json` (las 46 UMF). No
@@ -439,7 +476,7 @@ columnas"). En Extractor e IAAS también sirve para elegir la hoja (sección 9).
 
 Detalle útil: si al convertir el archivo un número quedó como texto (`"36"`), las columnas
 que usa un `RANGO` se convierten a número antes de filtrar
-(`numeros_escritos_como_texto`, en `shared/validarArchivo_service.py`). Si la columna no trae
+(`numeros_escritos_como_texto`, en `datos/excel_subido/lector_excel_Datos.py`). Si la columna no trae
 ningún número, el archivo se rechaza.
 
 ### `filtroGrupoColumnas`
@@ -526,7 +563,7 @@ Solo en el numerador de EH 03 y DM 04 (`FILTRO_CONTEO_ACUMULADO`). Es la **vía 
 
 ## 7. `operacion`: las fórmulas
 
-Tres fórmulas en texto que evalúa `services/calculo_indicador_Services.py`:
+Tres fórmulas en texto que evalúa `services/compartido/calculo/` (`formulas_Services.py`):
 
 | Fórmula | Con qué nombres trabaja |
 |---|---|
@@ -569,7 +606,7 @@ Reglas que aplica el código (no se escriben en el mapeo):
 ## 8. `semaforo`
 
 Cuatro colores: **Esperado** (verde), **Medio** (amarillo), **Bajo** (rojo) y **Gris** (sin
-dato). Lo evalúa `shared/semaforo_service.py`.
+dato). Lo evalúa `services/compartido/semaforo/`.
 
 ### Cómo se escribe un umbral
 
@@ -635,12 +672,12 @@ para IAAS 01: otro indicador con semáforo por grupo necesitaría generalizar
 - **FTP**: los reportes SIAIS los genera el sistema del IMSS y siempre traen las mismas
   pestañas con el mismo nombre. Por eso cada código lleva `"hoja"` y se lee por **letras
   fijas**, sin revisar encabezados (`extraer_lados_del_excel` en
-  `services/ftp/extraccion_indicador_ftp_Services.py`). Si la hoja no existe → error
+  `services/ftp/extraer_reporte_ftp_Services.py`). Si la hoja no existe → error
   `HOJA_NO_ENCONTRADA`.
 - **Extractor e IAAS**: los archivos los convierte el usuario a Excel con distintas versiones
   de programas, y cada una nombra la pestaña diferente (`Hoja1`, `Sheet1`,
   `reporte_defunciones`...). Por eso **no llevan `hoja`**: `LectorExcel.hoja_con_columnas`
-  (en `shared/validarArchivo_service.py`) revisa cada pestaña y se queda con la **primera
+  (en `datos/excel_subido/lector_excel_Datos.py`) revisa cada pestaña y se queda con la **primera
   que trae, en cada letra, el encabezado que dice el mapeo** (`nombreColumna`, `columnas` de
   los grupos, `tomarValor`) y, además, las columnas que se usan por nombre (`agrupacion`,
   `columnaLlaveCruce`). Si ninguna cuadra, el error explica la pestaña que más se pareció.
@@ -676,8 +713,7 @@ Sin ningún encabezado esperado, el sistema no sabe qué hoja leer y rechaza el 
 ### FTP
 
 1. Busca el reporte en el FTP y en `WEB_CIAE/encabezados_reportes/` para ver hojas y letras.
-2. Si el código del reporte no está en `REPORTES_POR_SUBCARPETA`
-   (`services/ftp/navegacion_ftp_Services.py`), agrégalo en su subcarpeta.
+2. Si el código del reporte no está en `catalogos/ftp.json`, agrégalo en su carpeta (y reinicia el backend).
 3. Escribe `reporte.numerador`/`denominador` con `fuente: "ftp"`, `hoja` y el modo que
    corresponda (casi siempre `INTERSECCION_COLUMNA` con `buscar: "TOTAL DE LA UNIDAD"`).
 4. Escribe `operacion` usando los códigos como nombres.
@@ -687,7 +723,7 @@ Sin ningún encabezado esperado, el sistema no sabe qué hoja leer y rechaza el 
 ### IAAS
 
 IAAS hoy tiene **fijos en el código** sus 6 indicadores (`INDICADORES_IAAS` en
-`services/iaas/generacion_iaas_Services.py` y en `services/iaas/excel_iaas_Services.py`) y
+`services/iaas/catalogo_iaas_Services.py`, que usan la generacion y el Excel de IAAS) y
 la regla del denominador (IAAS 01 = Excel global, los demás = captura). Agregar un IAAS 07
 requiere **cambiar código**, no solo el mapeo. En el mapeo: `xlsxWeb` + `FILTRO_CONTEO` con
 `encabezado` y `filtroColumna` (cada uno con `nombreColumna`), `capturaWeb` en el
@@ -701,7 +737,7 @@ denominador, y el bloque `excel`.
    `modoExtraccion: "FILTRO_CONTEO"`, `encabezado`, `agrupacion`,
    `catalogoUnidades: "hospitales"`, `columnasPeriodo` si el archivo no usa `mes`/`anio`, y
    los filtros con `nombreColumna`.
-3. Elige la `periodicidad`. El Extractor solo acepta (`generacion_extractor_Services.py`):
+3. Elige la `periodicidad`. El Extractor solo acepta (`subir_archivo_extractor_Services.py`):
    - de corte: `Semestral Anualizado` (con denominador de población, como EH 03).
    - mensuales: `Mensual`, `Mensual - Mensual Acumulado`, `Mensual Anualizado`.
    Otra periodicidad da un error claro al subir el archivo.

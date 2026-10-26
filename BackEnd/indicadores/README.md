@@ -32,26 +32,32 @@ main.py
  ├─ sys.path.insert(0, "indicadores/")      ← por eso aquí los imports son "planos"
  └─ app.include_router(indicadores_Route.routesIndicadores, prefix="/Indicadores")
         Routes/indicadores_Route.py
-         ├─ /ftp          → Controller/ftp_Controller.py
-         ├─ /iaas         → Controller/iaas_Controller.py
-         ├─ /extractor    → Controller/extractor_Controller.py
-         ├─ /reportes     → Controller/reportes_Controller.py
-         ├─ /informacion  → Controller/informacion_Controller.py
-         └─ /excel        → Controller/excel_Controller.py
+         ├─ /ftp            → Controller/ftp_Controller.py
+         ├─ /ftp/poblacion  → Controller/poblacion_Controller.py
+         ├─ /iaas           → Controller/iaas_Controller.py
+         ├─ /extractor      → Controller/extractor_Controller.py
+         ├─ /reportes       → Controller/reportes_Controller.py
+         ├─ /informacion    → Controller/informacion_Controller.py
+         └─ /excel          → Controller/excel_Controller.py
 ```
 
 Como `indicadores/` está en `sys.path`, dentro de este módulo se importa así:
-`from services.calculo_indicador_Services import ...`, `from shared.UNIDADES import ...`,
-`from schemas.model... import ...` (sin `indicadores.` adelante).
+`from services.compartido.calculo.formulas_Services import ...`, `from datos.bd_ciae.guardar_mes_Datos import ...`,
+`from shared.UNIDADES import ...` (sin `indicadores.` adelante).
+
+**Un archivo por responsabilidad:** cada archivo hace una sola cosa y se llama como lo que hace;
+adentro trae su función pública y, si las necesita, sus auxiliares privadas (`_algo`).
 
 Las capas:
 
 | Carpeta | Qué va | Regla |
 |---|---|---|
-| `Controller/` | Endpoints | Delgados: reciben, llaman a un servicio y responden. Sin lógica |
-| `services/` (raíz) | Lógica que comparten varios módulos | No sabe de HTTP (salvo lanzar `HTTPException` en validaciones) |
-| `services/ftp/`, `iaas/`, `extractor/` | Lógica exclusiva de ese módulo | Un módulo no importa la carpeta de otro, salvo el recálculo de población (FTP llama a `corte_extractor_Services`) y el Excel (llama a `iaas/excel_iaas_Services`) |
-| `shared/` | Utilidades transversales | Meses, unidades, semáforo, periodicidad, validar archivos, auditoría |
+| `Controller/` | Endpoints (`nombre_Controller.py`) | Delgados: reciben, llaman a **un** servicio y responden. Sin lógica |
+| `services/ftp/`, `iaas/`, `extractor/` | Lógica exclusiva de ese módulo (`nombre_Services.py`) | El servicio de cada endpoint orquesta con pasos numerados y regresa `(mensaje, datos)` |
+| `services/compartido/` | Lo que usan los tres módulos: cálculo, semáforo, motor de extracción, reporte guardado | No sabe de qué módulo vienen los datos |
+| `services/informacion/`, `poblacion/`, `grafica/`, `excel/` | Fichas y listas del mapeo, población, gráficas y Excel | Compartidos por todos los módulos |
+| `datos/` | **Lo único** que lee y escribe: BD_CIAE, el mapeo JSON, el FTP y los Excel subidos (`nombre_Datos.py`) | Sin reglas de negocio |
+| `shared/` | Utilidades transversales | Meses, unidades, periodicidad, letras de columna, validar archivos, auditoría |
 | `schemas/DTO/` | Lo que reciben los endpoints | Pydantic |
 | `schemas/model/` | Modelos internos | Pydantic |
 | `mapeo/` | Configuración (JSON) | Ver [mapeo/README.md](mapeo/README.md) |
@@ -64,62 +70,121 @@ Las capas:
 
 | Archivo | Qué hace |
 |---|---|
-| `Routes/indicadores_Route.py` | Junta los 6 controllers bajo `/Indicadores/<prefijo>` |
-| `Controller/ftp_Controller.py` | Generar/regenerar FTP (indicador o categoría), meses generados, subir población y recalcular |
+| `Routes/indicadores_Route.py` | Junta los 7 controllers bajo `/Indicadores/<prefijo>` |
+| `Controller/ftp_Controller.py` | Indicadores y meses generados de FTP, generar/regenerar (indicador o categoría) |
+| `Controller/poblacion_Controller.py` | Población InfoSalud: archivo cargado, subir, recalcular (sigue bajo `/ftp/poblacion`) |
 | `Controller/iaas_Controller.py` | Unidades e indicadores IAAS, estado del mes, generar el mes, completar una unidad tardía |
 | `Controller/extractor_Controller.py` | Indicadores del Extractor, estado de cortes y archivos, subir el Excel del mes, completar el cruce con Egresos |
 | `Controller/reportes_Controller.py` | Datos de la gráfica de un indicador |
 | `Controller/informacion_Controller.py` | Lista de indicadores, ficha y ficha técnica (sale del mapeo) |
 | `Controller/excel_Controller.py` | Excel de uno o varios indicadores |
 
-### services/ (compartido)
+### datos/ (leer y escribir)
 
 | Archivo | Qué hace |
 |---|---|
-| `indicadorMapeo_Services.py` | **Único** lector del mapeo: bloques, listas por módulo, fichas, modelos tipados |
-| `metodos_extraccion_excel.py` | Motor de extracción: los 6 `modoExtraccion` y los filtros (`cumple_condicion`, `mascara_filtros`) |
-| `calculo_indicador_Services.py` | Evalúa las fórmulas, reglas de Gris, `TOTAL_OOAD` y mensual acumulado |
-| `poblacion_Services.py` | Sube el Excel de población InfoSalud y lo lee como denominador |
-| `bd_Ciae_Guardado_Services.py` | **Único** que arma rutas y lee/escribe en `BD_CIAE/INDICADORES` |
-| `bd_Ciae_Indicadores_Services.py` | Lectura tipada para gráficas y Excel; arma la respuesta de la gráfica |
-| `estadisticas_grafica_Services.py` | Estadísticas de la gráfica: resumen por mes, mapa de calor, brechas |
-| `excel_Services.py` | Orquesta el Excel genérico (lee la BD por módulo y elige dibujante) |
-| `excel_dibujante_Services.py` | Dibuja la hoja estándar (FTP y Extractor) |
+| `bd_ciae/archivos_bd_ciae_Datos.py` | **Único** que arma rutas de `BD_CIAE/INDICADORES` y lee/escribe sus JSON |
+| `bd_ciae/historico_indicador_Datos.py` | Meses guardados de un indicador, su histórico crudo y sus numeradores |
+| `bd_ciae/guardar_mes_Datos.py` | Guardar el mes definitivo (formato de disco: `%` y `desempeno`) |
+| `bd_ciae/semanal_Datos.py` | Semanal de FTP: guardar, leer y borrar el mes al llegar el definitivo |
+| `bd_ciae/extractor_reporte_Datos.py` | JSON del Extractor de corte: leer, guardar y guardar el numerador crudo del mes |
+| `bd_ciae/extractor_cruce_Datos.py` | `EXTRACTOR_CRUCE`: vía 1 + candidatos que dejó el SUI-13 |
+| `bd_ciae/extractor_partes_Datos.py` | `EXTRACTOR_PARTES`: conteo de cada archivo por mes (Neonatal 04 y 06) |
+| `bd_ciae/poblacion_Datos.py` | `POBLACION_{año}.json`: leer, su periodo y guardar |
+| `lectura_mapeo/mapeo_indicadores_Datos.py` | **Único** lector del mapeo: `bloque_mapeo`, catálogos de familias y de archivos del Extractor |
+| `lectura_mapeo/mapeo_por_modulo_Datos.py` | El mapeo tipado de cada módulo: `cargar_indicador_ftp`, `cargar_indicador_iaas`, `cargar_indicador_extractor` |
+| `lectura_mapeo/mapeo_poblacion_Datos.py` | `mapeo/POBLACION.json` (cómo viene el Excel nacional) |
+| `ftp/catalogo_reportes_ftp_Datos.py` | Lee `mapeo/catalogos/ftp.json`: carpeta de cada reporte, plantillas de ruta y periodo en el nombre |
+| `ftp/conexion_ftp_Datos.py` | Conectar y desconectar el FTP |
+| `ftp/navegacion_ftp_Datos.py` | Rutas de cada unidad (prueba cada nombre de carpeta), navegar con diagnóstico, listar, elegir el archivo del periodo y bajarlo |
+| `excel_subido/lector_excel_Datos.py` | `LectorExcel` (busca la hoja por su contenido), validar encabezados, números escritos como texto |
+| `excel_subido/excel_poblacion_Datos.py` | Lee el Excel nacional de población, filtra Guanajuato y lo guarda |
+
+### services/compartido/ (lo que usan los tres módulos)
+
+| Archivo | Qué hace |
+|---|---|
+| `calculo/formulas_Services.py` | Evalúa las fórmulas del mapeo y el redondeo propio (≥ 0.60) |
+| `calculo/resultado_unidades_Services.py` | Reglas de Gris, resultado por unidad, `TOTAL_OOAD` (`calcular_unidades`) |
+| `calculo/mensual_acumulado_Services.py` | Mensual acumulado sumando meses (gráfica y Excel) |
+| `semaforo/umbrales_semaforo_Services.py` | Leer los umbrales del mapeo (legado/explícito, por mes, por grupo, rangos) |
+| `semaforo/color_semaforo_Services.py` | Color de un resultado y semaforizar unidades/reportes |
+| `extraccion/motor_extraccion_Services.py` | Motor único: valida el detalle del mapeo y llama al modo (`extraer`) |
+| `extraccion/modos_por_posicion_Services.py` | `INTERSECCION_COLUMNA`, `INTERSECCION_FILA`, `ULTIMA_FILA` (FTP) |
+| `extraccion/modos_por_filtro_Services.py` | `FILTRO_CONTEO`, `FILTRO_UNIDAD_VALOR` y la regla "esta fila cuenta" (`cumple_condicion`, `mascara_filtros`) |
+| `extraccion/valores_celda_Services.py` | Celda a número y celda vacía |
+| `reporte_guardado_Services.py` | Lectura tipada del reporte y del semanal para gráficas y Excel |
+
+### services/informacion/, poblacion/, grafica/, excel/
+
+| Archivo | Qué hace |
+|---|---|
+| `informacion/lista_indicadores_Services.py` | Indicadores por familia y por módulo (lo común de las páginas de Generar) |
+| `informacion/ficha_indicador_Services.py` | Ficha y ficha técnica completa |
+| `poblacion/archivo_poblacion_Services.py` | Archivo de población cargado y subir uno nuevo |
+| `poblacion/denominador_poblacion_Services.py` | Denominador de población por unidad con la fórmula del mapeo |
+| `poblacion/recalcular_poblacion_Services.py` | Recalcular FTP y los cortes del Extractor con la población nueva |
+| `grafica/grafica_indicador_Services.py` | Arma la respuesta de la gráfica (reglas de cada módulo) |
+| `grafica/estadisticas_grafica_Services.py` | Resumen por mes, mapa de calor, brechas |
+| `grafica/perfil_indicador_Services.py` | Perfil: tipo de meta, niveles, unidad de medida... |
+| `grafica/metas_semaforo_Services.py` | La meta (Esperado) leída para la gráfica |
+| `grafica/serie_cortes_Services.py` | Cortes y casos por mes del Extractor de corte |
+| `excel/generar_excel_Services.py` | Orquesta el Excel genérico y su nombre de archivo |
+| `excel/leer_hoja_excel_Services.py` | Lee de la BD lo de cada pestaña con la regla de su módulo |
+| `excel/hoja_estandar_excel_Services.py` | Libro estándar (FTP y Extractor): prepara histórico y acumulado |
+| `excel/escribir_hoja_indicador_Services.py` | Dibuja la pestaña estándar |
+| `excel/estilos_excel_Services.py`, `excel/leyendas_semaforo_excel_Services.py` | Estilos y leyendas del semáforo del Excel estándar |
+| `excel/excel_iaas_Services.py` | Excel propio de IAAS (orquesta), con `excel_iaas_calculo_Services.py` (datos) y `excel_iaas_dibujo_Services.py` (formato) |
 
 ### services/ftp/, iaas/, extractor/
 
 | Archivo | Qué hace |
 |---|---|
-| `ftp/navegacion_ftp_Services.py` | Conexión al FTP, ruta de cada unidad, subcarpeta de cada reporte, listar/bajar archivos y diagnóstico de carpetas |
-| `ftp/extraccion_indicador_ftp_Services.py` | Recorre las 46 unidades, baja cada reporte una vez, extrae los dos lados y junta los errores |
-| `ftp/generacion_indicador_ftp_Services.py` | Servicios de los endpoints FTP: generar, regenerar, categoría, recálculo por población |
-| `iaas/extraccion_excel_iaas_Services.py` | Lee y valida los Excel de IAAS (hoja, encabezados, unidad) y cuenta numerador/denominador |
-| `iaas/generacion_iaas_Services.py` | Servicios de los endpoints IAAS: generar el mes, estado del mes, unidad tardía |
-| `iaas/excel_iaas_Services.py` | Excel propio de IAAS (matriz por mes + acumulado + anual) |
-| `extractor/extraccion_extractor_Services.py` | Cuenta filas por unidad, vía 1 / vía 2 y el cruce con Egresos; valida mes/año del archivo |
-| `extractor/corte_extractor_Services.py` | Qué indicadores y archivos tiene el Extractor; corte Semestral Anualizado; recálculo de cortes; estado de ventanas |
-| `extractor/generacion_extractor_Services.py` | Servicios de los endpoints del Extractor: subir un archivo del mes, completar cruce, estado de archivos |
+| `ftp/pagina_generar_ftp_Services.py` | Indicadores de la página Generar FTP y meses ya generados |
+| `ftp/extraer_indicador_ftp_Services.py` | Agrupa por reporte, conecta y junta lo leído + población |
+| `ftp/extraer_reporte_ftp_Services.py` | Recorre las 46 unidades, baja cada reporte una vez y extrae los dos lados |
+| `ftp/errores_extraccion_ftp_Services.py` | Catálogo de errores ("restricciones") y registrar uno |
+| `ftp/calcular_indicador_ftp_Services.py` | Fórmulas por unidad + `TOTAL_OOAD` |
+| `ftp/generar_indicador_ftp_Services.py` | Generar / regenerar un indicador |
+| `ftp/generar_categoria_ftp_Services.py` | Generar / regenerar una categoría |
+| `iaas/catalogo_iaas_Services.py` | Los 6 indicadores IAAS y qué unidades lleva cada uno |
+| `iaas/pagina_generar_iaas_Services.py` | Indicadores y unidades de la página Generar IAAS |
+| `iaas/leer_excel_iaas_Services.py` | Lee y valida el Excel de una unidad (hoja, encabezados, columna E) |
+| `iaas/numerador_denominador_iaas_Services.py` | Numerador por unidad y denominador de IAAS 01 |
+| `iaas/estado_mes_iaas_Services.py` | Lo guardado del mes, pendientes y meses generados |
+| `iaas/generar_mes_iaas_Services.py` | Generar los 6 IAAS del mes |
+| `iaas/completar_unidad_iaas_Services.py` | Completar una unidad tardía |
+| `extractor/catalogo_extractor_Services.py` | Qué indicadores y archivos tiene el Extractor, cuáles van por corte, cruce y desfase |
+| `extractor/pagina_generar_extractor_Services.py` | Indicadores de la página Generar Extractor |
+| `extractor/leer_archivo_extractor_Services.py` | Hoja del Excel, mes/año del archivo, filas que cuentan y fechas |
+| `extractor/conteo_por_unidad_Services.py` | Conteo por unidad (y por mes de nacimiento, Neonatal 04) |
+| `extractor/conteo_con_cruce_Services.py` | Vía 1 / vía 2 y el cruce con Egresos (EH 03, DM 04) |
+| `extractor/subir_archivo_extractor_Services.py` | Subir un archivo del mes: decide el flujo de cada indicador |
+| `extractor/generar_corte_Services.py` | Mes de un indicador de corte (+ cortes que lo incluyen) |
+| `extractor/corte_semestral_Services.py` | Corte Semestral Anualizado y su recálculo con población |
+| `extractor/generar_mensual_Services.py` | Resultado mensual (calcular, semaforizar, guardar) |
+| `extractor/generar_por_partes_Services.py` | Dos archivos y anualizado (Neonatal 06) |
+| `extractor/generar_con_desfase_Services.py` | Sobrevida con desfase (Neonatal 04) |
+| `extractor/completar_cruce_Services.py` | Subir el Egresos después del SUI-13 |
+| `extractor/estado_archivos_Services.py`, `estado_cortes_Services.py` | Tablas de archivos subidos y de meses por corte |
 
-### shared/
+### shared/ y schemas/
 
 | Archivo | Qué hace |
 |---|---|
-| `MESES.py` | `MESES_ESTANDAR` = `["Enero", ..., "Diciembre"]` |
-| `UNIDADES.py` | Carga `mapeo/unidades/*.json` (listas de unidades, claves, grupos IAAS, alias HGSZ) |
-| `semaforo_service.py` | Color de un resultado contra el semáforo del mapeo (fijo, por mes o por grupo) |
-| `reglas_periodicidad.py` | Qué meses muestra cada periodicidad y su texto de ayuda |
-| `validarArchivo_service.py` | Peso y tipo del archivo subido, contraseña, `LectorExcel` (busca la hoja por su contenido) |
-| `auditoria_service.py` | Escribe eventos en `BD_CIAE/auditoria.log` |
-
-### schemas/
-
-| Archivo | Qué hace |
-|---|---|
-| `DTO/indicadores_ViewModel.py` | Peticiones de generar/regenerar FTP, recalcular población, estado del mes IAAS |
-| `model/reporte_mapeo_Model.py` | Forma del mapeo que lee cada módulo (`IndicadorFTPMapeo`, `IndicadorIAASMapeo`, `IndicadorExtractorMapeo`) |
-| `model/indicador_Model.py` | Lo guardado en BD_CIAE (`UnidadDatos`, `MesReporte`, `ReporteIndicador`) y las fichas |
-| `model/generacion_Model.py` | Valores por unidad (extraído → calculado → semaforizado), errores, páginas de Generar, población |
-| `model/excel_Model.py` | Solicitud, hoja y respuesta del Excel |
+| `shared/MESES.py` | `MESES_ESTANDAR`, `nombre_del_mes`, `mes_desplazado` |
+| `shared/UNIDADES.py` | Carga `mapeo/unidades/*.json` (listas de unidades, claves, grupos IAAS, alias HGSZ) |
+| `shared/reglas_periodicidad.py` | Qué meses muestra cada periodicidad y su texto de ayuda |
+| `shared/columnas_excel.py` | `letra_a_numero` ("A" → 0) |
+| `shared/validarArchivo_service.py` | Peso y tipo del archivo subido, contraseña (epidemiología usa `validarPeso_Archivo`) |
+| `shared/auditoria_service.py` | Escribe eventos en `BD_CIAE/auditoria.log` (también lo usan auth y epidemiología) |
+| `schemas/DTO/*_ViewModel.py` | Peticiones de FTP, población e IAAS (`comun_ViewModel.TextoObligatorio`) |
+| `schemas/model/mapeo_{comun,ftp,iaas,extractor}_Model.py` | Forma del mapeo que lee cada módulo (`IndicadorFTPMapeo`, `IndicadorIAASMapeo`, `IndicadorExtractorMapeo`) |
+| `schemas/model/detalle_extraccion_Model.py` | El `detalle` de cada `modoExtraccion` |
+| `schemas/model/reporte_guardado_Model.py` | Lo guardado en BD_CIAE (`UnidadDatos`, `MesReporte`, `ReporteIndicador`) |
+| `schemas/model/ficha_indicador_Model.py` | Fichas y lista por familia |
+| `schemas/model/unidad_resultado_Model.py` | Valores por unidad (extraído → calculado → semaforizado) |
+| `schemas/model/pagina_generar_Model.py`, `generacion_ftp_Model.py`, `iaas_Model.py`, `poblacion_Model.py`, `excel_Model.py` | Lo propio de cada página o proceso |
 
 ---
 
@@ -134,31 +199,31 @@ incluye `trabajador_IAAS`); generar FTP/Extractor = `admin`, `trabajador_ftp`; g
 
 | Método y ruta | Para qué | Servicio |
 |---|---|---|
-| `GET /ftp/indicadores` | Indicadores de la página Generar FTP | `ftp/generacion_indicador_ftp_Services.indicadores_para_generar` |
-| `GET /ftp/meses-generados?indicador=&ano=` | Meses ya guardados (`"01".."12"`) | `bd_Ciae_Guardado_Services.meses_con_datos` |
-| `GET /ftp/generar?indicador=&ano=&mes=&semana=` | Generar un indicador (semanal si trae `semana`) | `generar_indicador` |
+| `GET /ftp/indicadores` | Indicadores de la página Generar FTP | `ftp/pagina_generar_ftp_Services.indicadores_para_generar` |
+| `GET /ftp/meses-generados?indicador=&ano=` | Meses ya guardados (`"01".."12"`) | `ftp/pagina_generar_ftp_Services.meses_generados_ftp` |
+| `GET /ftp/generar?indicador=&ano=&mes=&semana=` | Generar un indicador (semanal si trae `semana`) | `ftp/generar_indicador_ftp_Services.generar_indicador` |
 | `POST /ftp/regenerar` | Igual, pidiendo contraseña | `regenerar_indicador` |
-| `POST /ftp/generar-categoria` | Todos los indicadores FTP de una familia | `generar_categoria` |
+| `POST /ftp/generar-categoria` | Todos los indicadores FTP de una familia | `ftp/generar_categoria_ftp_Services.generar_categoria` |
 | `POST /ftp/regenerar-categoria` | Igual, pidiendo contraseña | `regenerar_categoria` |
-| `GET /ftp/poblacion/archivo-actual?anio=` | Qué población está cargada | `poblacion_Services.archivo_poblacion_actual` |
-| `POST /ftp/poblacion/subir` | Subir el Excel de población | `poblacion_Services.subir_poblacion` |
-| `POST /ftp/poblacion/recalcular` | Recalcular con la población nueva | `recalcular_poblacion` |
-| `GET /iaas/unidades` | Hospitales de IAAS | `shared/UNIDADES.ORDEN_DEMAS_IAAS` |
-| `GET /iaas/indicadores` | Indicadores de la página Generar IAAS | `iaas/generacion_iaas_Services.indicadores_para_generar` |
-| `GET /iaas/meses-generados?anio=` | Meses ya guardados | `meses_generados_iaas` |
-| `GET /iaas/estado-mes?anio=&mes=` | Lo guardado y las unidades pendientes | `estado_del_mes` |
-| `POST /iaas/generar` | Generar los 6 IAAS del mes | `generar_iaas` |
-| `POST /iaas/completar-unidad` | Completar una unidad que entregó tarde | `completar_unidad_tardia` |
-| `GET /extractor/indicadores` | Indicadores de la página Generar Extractor | `extractor/generacion_extractor_Services.indicadores_para_generar` |
-| `GET /extractor/estado-cortes?anio=` | Cuántos de los 12 meses de cada corte van | `corte_extractor_Services.estado_ventanas` |
-| `GET /extractor/estado-archivos?anio=` | Por archivo y mes: completo / parcial / pendiente | `estado_archivos` |
-| `POST /extractor/generar` | Subir el Excel de un mes de un archivo | `generar_archivo_mensual` |
-| `POST /extractor/completar-cruce` | Subir el Egresos después del SUI-13 | `completar_cruce` |
-| `GET /reportes/{indicador}/grafica?ano=` | Ficha + reporte + estadísticas | `bd_Ciae_Indicadores_Services.consultar_grafica_indicador` |
-| `GET /informacion/indicadores?campo=&modulo=` | Familias con sus indicadores | `indicadorMapeo_Services.todos_los_indicadores` |
-| `GET /informacion/ficha/{indicador}` | Título, objetivo, semáforo, periodicidad | `obtener_ficha_indicador` |
+| `GET /ftp/poblacion/archivo-actual?anio=` | Qué población está cargada | `poblacion/archivo_poblacion_Services.archivo_poblacion_actual` |
+| `POST /ftp/poblacion/subir` | Subir el Excel de población | `poblacion/archivo_poblacion_Services.subir_poblacion` |
+| `POST /ftp/poblacion/recalcular` | Recalcular con la población nueva | `poblacion/recalcular_poblacion_Services.recalcular_poblacion` |
+| `GET /iaas/unidades` | Hospitales de IAAS | `iaas/pagina_generar_iaas_Services.unidades_iaas` |
+| `GET /iaas/indicadores` | Indicadores de la página Generar IAAS | `iaas/pagina_generar_iaas_Services.indicadores_para_generar` |
+| `GET /iaas/meses-generados?anio=` | Meses ya guardados | `iaas/estado_mes_iaas_Services.meses_generados_iaas` |
+| `GET /iaas/estado-mes?anio=&mes=` | Lo guardado y las unidades pendientes | `iaas/estado_mes_iaas_Services.estado_del_mes` |
+| `POST /iaas/generar` | Generar los 6 IAAS del mes | `iaas/generar_mes_iaas_Services.generar_iaas` |
+| `POST /iaas/completar-unidad` | Completar una unidad que entregó tarde | `iaas/completar_unidad_iaas_Services.completar_unidad_tardia` |
+| `GET /extractor/indicadores` | Indicadores de la página Generar Extractor | `extractor/pagina_generar_extractor_Services.indicadores_para_generar` |
+| `GET /extractor/estado-cortes?anio=` | Cuántos de los 12 meses de cada corte van | `extractor/estado_cortes_Services.estado_ventanas` |
+| `GET /extractor/estado-archivos?anio=` | Por archivo y mes: completo / parcial / pendiente | `extractor/estado_archivos_Services.estado_archivos` |
+| `POST /extractor/generar` | Subir el Excel de un mes de un archivo | `extractor/subir_archivo_extractor_Services.generar_archivo_mensual` |
+| `POST /extractor/completar-cruce` | Subir el Egresos después del SUI-13 | `extractor/completar_cruce_Services.completar_cruce` |
+| `GET /reportes/{indicador}/grafica?ano=` | Ficha + reporte + estadísticas | `grafica/grafica_indicador_Services.consultar_grafica_indicador` |
+| `GET /informacion/indicadores?campo=&modulo=` | Familias con sus indicadores | `informacion/lista_indicadores_Services.todos_los_indicadores` |
+| `GET /informacion/ficha/{indicador}` | Título, objetivo, semáforo, periodicidad | `informacion/ficha_indicador_Services.obtener_ficha_indicador` |
 | `GET /informacion/ficha-tecnica/{indicador}` | La ficha + cómo se calcula | `obtener_ficha_tecnica_completa` |
-| `GET /excel?indicadores=&indicadores=&ano=&mes=` | Excel en base64 | `excel_Services.generar_excel` |
+| `GET /excel?indicadores=&indicadores=&ano=&mes=` | Excel en base64 | `excel/generar_excel_Services.generar_excel` |
 
 > `GET /excel` hoy **no** tiene `Depends(solo_roles(...))`: cualquiera que llegue al servidor
 > puede pedir el Excel sin sesión. **Por confirmar** si es intencional.
@@ -173,11 +238,11 @@ Los servicios de los tres módulos siguen los mismos pasos y los marcan con come
 | Paso | Qué pasa | Dónde |
 |---|---|---|
 | 1. Validar | Mes/año, peso y tipo de archivo, contraseña si se sobrescribe | `shared/validarArchivo_service.py` |
-| 2. Mapeo | Se lee el bloque del indicador | `indicadorMapeo_Services.cargar_indicador_*` |
-| 3. Extracción | Se cargan los Excel y se sacan numerador y denominador por unidad | capa 1 en `services/<modulo>/`, capa 2 en `metodos_extraccion_excel.py` |
-| 4. Cálculo | Fórmulas del mapeo por unidad + `TOTAL_OOAD` | `calculo_indicador_Services.py` |
-| 5. Semáforo | Color de cada unidad | `shared/semaforo_service.py` |
-| 6. Guardado | En `BD_CIAE/INDICADORES/...` | `bd_Ciae_Guardado_Services.py` |
+| 2. Mapeo | Se lee el bloque del indicador | `datos/lectura_mapeo/mapeo_por_modulo_Datos.cargar_indicador_*` |
+| 3. Extracción | Se cargan los Excel y se sacan numerador y denominador por unidad | capa 1 en `services/<modulo>/` (+ `datos/ftp/`, `datos/excel_subido/`), capa 2 en `services/compartido/extraccion/` |
+| 4. Cálculo | Fórmulas del mapeo por unidad + `TOTAL_OOAD` | `services/compartido/calculo/` |
+| 5. Semáforo | Color de cada unidad | `services/compartido/semaforo/color_semaforo_Services.py` |
+| 6. Guardado | En `BD_CIAE/INDICADORES/...` | `datos/bd_ciae/` |
 | 7. Auditoría y respuesta | `auditoria.log` + mensaje | `shared/auditoria_service.py` |
 
 "Capa 1" = cómo llega el archivo (bajarlo del FTP, leer el Excel subido, elegir la hoja,
@@ -192,7 +257,7 @@ aparte a `/Indicadores/excel`.
 ## 5. Cómo se guarda en BD_CIAE
 
 `BD_CIAE` es carpeta hermana del repositorio (la calcula `configs/settings.py`). Nunca se
-escribe a mano: todo pasa por `services/bd_Ciae_Guardado_Services.py`.
+escribe a mano: todo pasa por `datos/bd_ciae/`.
 
 ```
 BD_CIAE/
@@ -200,7 +265,7 @@ BD_CIAE/
 │   ├── {FAMILIA}/{FAMILIA}_{NN}.json     definitivo (ej. CAMA/CAMA_40-49.json, S_Ob/S_Ob_01.json)
 │   ├── SEMANAL/{IND}_{año}_semana.json   semanal de FTP (solo meses sin definitivo)
 │   ├── EXTRACTOR_CRUCE/{IND}.json        vía 1 + candidatos de la vía 2 (EH 03, DM 04)
-│   └── EXTRACTOR_PARTES/{IND}.json       conteo de cada archivo por mes (Neonatal 06)
+│   └── EXTRACTOR_PARTES/{IND}.json       conteo de cada archivo por mes (Neonatal 04 y 06)
 ├── POBLACION_INFOSALUD/POBLACION_{año}.json
 └── auditoria.log
 ```
@@ -278,13 +343,13 @@ el definitivo de un mes, ese mes se borra del semanal (y el archivo, si se queda
 ## 6. Proceso FTP
 
 **Endpoint:** `GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=07[&semana=3]`.
-**Servicio:** `services/ftp/generacion_indicador_ftp_Services.py` → `generar_indicador_ftp`.
+**Servicio:** `services/ftp/generar_indicador_ftp_Services.py` → `generar_indicador_ftp`.
 Los endpoints que generan son `def` (no `async`): FastAPI los corre en otro hilo y la descarga
 del FTP no congela el servidor.
 
 1. **Validar.** `semana` vacía, `"None"` o ausente = mes definitivo.
-2. **Mapeo.** `cargar_indicador_mapeo(indicador)`.
-3. **Extracción** (`extraccion_indicador_ftp_Services.extraer_indicador`):
+2. **Mapeo.** `cargar_indicador_ftp(indicador)`.
+3. **Extracción** (`extraer_indicador_ftp_Services.extraer_indicador`, que recorre las unidades con `extraer_reporte_ftp_Services`):
    - Agrupa lo que pide el mapeo **por reporte real** (`IN33_MF` e `IN33_40` son el mismo
      `IN33`): cada archivo se baja **una sola vez** por unidad, aunque lo usen numerador y
      denominador o dos hojas.
@@ -294,8 +359,9 @@ del FTP no congela el servidor.
      - PB02: `01. DATAMARTEM/ArchsDataMart_{año}/Piramides para {año} por unidades`, archivo
        `PB02U{clave}...` (no depende del mes ni de la semana).
 
-     `{carpeta}` sale de `UNIDADES_FINALES` (o `UNIDADES_PREVIOS` si es semanal); `{subcarpeta}`
-     de `REPORTES_POR_SUBCARPETA`.
+     Las plantillas de ruta y la carpeta de cada reporte (con los nombres que tiene de verdad en el
+     FTP, ej. `Planificacion Familiar` sin acento en el semanal) salen de `mapeo/catalogos/ftp.json`;
+     la carpeta de la unidad, de `UNIDADES_FINALES` (o `UNIDADES_PREVIOS` si es semanal).
    - Entra carpeta por carpeta; si una falla, `diagnosticar_segmento` explica por qué
      (espacios de más, mayúsculas, carpeta parecida...).
    - Busca el Excel cuyo nombre **empieza** con el código, lo baja a memoria (no se guarda en
@@ -303,7 +369,7 @@ del FTP no congela el servidor.
    - Si el denominador es `poblacionInfoSalud`, lo lee de `POBLACION_{año}.json`.
    - Un error en una unidad no detiene a las demás: esa unidad queda sin dato (Gris) y el error
      se anota.
-4. **Cálculo.** `calcular_indicador`: fórmulas del mapeo por unidad + `TOTAL_OOAD`. Si una
+4. **Cálculo.** `calcular_indicador` (`calcular_indicador_ftp_Services`): fórmulas del mapeo por unidad + `TOTAL_OOAD`. Si una
    fórmula truena, la unidad queda Gris y se agrega el error `CALCULO_FALLIDO`.
 5. **Semáforo.** `semaforizar_unidades(resultados, semaforo, mes)` (el mes elige el umbral en
    los semáforos por mes).
@@ -328,12 +394,12 @@ Tipos de error ("restricciones") que puede devolver: `RUTA_INVALIDA`, `ARCHIVO_N
 
 ### Población y recálculo
 
-1. `POST /ftp/poblacion/subir` (`poblacion_Services.subir_poblacion`): lee el Excel nacional
+1. `POST /ftp/poblacion/subir` (`poblacion/archivo_poblacion_Services.subir_poblacion`, que lee con `datos/excel_subido/excel_poblacion_Datos.py`): lee el Excel nacional
    con `mapeo/POBLACION.json`, se queda con las filas de **Guanajuato**, valida que las
    columnas de edad sean las esperadas, traduce nombres de unidad con `alias`, detecta
    "Mes Año" del título y guarda `POBLACION_{año}.json` (año del formulario o el actual).
    Responde unidades no encontradas, sobrantes, celdas vacías y alias sugeridos.
-2. `POST /ftp/poblacion/recalcular` (`recalcular_poblacion`): **no se dispara solo** al subir.
+2. `POST /ftp/poblacion/recalcular` (`poblacion/recalcular_poblacion_Services.recalcular_poblacion`): **no se dispara solo** al subir.
    - Indicadores FTP con denominador de población: recalcula los meses guardados **desde el
      mes detectado de la población hacia adelante** (si la población es de Julio 2026, solo
      Julio–Diciembre 2026; si no se detectó el mes, todos). El numerador es el guardado, no se
@@ -346,7 +412,7 @@ Tipos de error ("restricciones") que puede devolver: `RUTA_INVALIDA`, `ARCHIVO_N
 ## 7. Proceso IAAS
 
 Seis indicadores fijos (`IAAS 01`..`IAAS 06`, en `INDICADORES_IAAS`) que siempre se generan
-juntos. **Servicio:** `services/iaas/generacion_iaas_Services.py`.
+juntos (`services/iaas/catalogo_iaas_Services.py`). **Servicio:** `services/iaas/generar_mes_iaas_Services.py`.
 
 **Endpoint:** `POST /Indicadores/iaas/generar` (multipart):
 - `numerador[]`: un Excel **por hospital**; el **nombre del archivo es el nombre de la
@@ -356,7 +422,7 @@ juntos. **Servicio:** `services/iaas/generacion_iaas_Services.py`.
 
 1. **Validar** peso de cada archivo (`validar_archivo_subido`).
 2. Para cada indicador: **mapeo** (`cargar_indicador_iaas`).
-3. **Extracción** (`iaas/extraccion_excel_iaas_Services.py`):
+3. **Extracción** (`iaas/leer_excel_iaas_Services.py` y `iaas/numerador_denominador_iaas_Services.py`):
    - Numerador: de cada Excel elige la hoja por sus encabezados, confirma que la **columna E**
      sea de la unidad declarada y cuenta filas con `FILTRO_CONTEO`. Si cualquier archivo está
      mal, responde 400 con **todos** los mensajes.
@@ -391,7 +457,7 @@ eso es lo deseado.
 ## 8. Proceso Extractor
 
 Excel crudos mensuales (una fila por paciente o evento) que el usuario descarga, convierte a
-Excel y sube **un archivo a la vez**. **Servicio:** `services/extractor/generacion_extractor_Services.py`.
+Excel y sube **un archivo a la vez**. **Servicio:** `services/extractor/subir_archivo_extractor_Services.py`.
 
 **Endpoint:** `POST /Indicadores/extractor/generar` (multipart): `anio`, `mes` (`"Enero"`..),
 `archivo` + `pesoArchivo`, `archivoBase` (clave del archivo: `SUI_13`, `EGRESOS_TOCO`,
@@ -479,35 +545,34 @@ indicadores tienen `mensual` y `mensualAcumulado` en `peridocidadGenerada`.
        (se detiene en el primer mes que falte).
      - Extractor de corte: `MESES` se reemplaza por **el último corte cerrado** (no los
        numeradores crudos).
-   - `estadisticas` (`estadisticas_grafica_Services.py`, con la fórmula y el semáforo del
+   - `estadisticas` (`grafica/estadisticas_grafica_Services.py`, con la fórmula y el semáforo del
      mapeo): `resumenPorMes` (estatal, cambio contra el mes anterior, meta, unidades por color,
      acumulado), `mapaCalor` (resultado y color de cada unidad en cada mes) y `brechas`
      (cuántos casos le faltan o sobran a cada unidad para llegar a Esperado; no aplica a metas
      en rango como IAAS). `null` si no hay datos.
 
-   La interfaz de gráficas se está rehaciendo y la respuesta puede traer campos nuevos (ej. un
-   `perfil` con la meta y la unidad de medida). Para la lista exacta, revisa
-   `consultar_grafica_indicador` y `estadisticas_grafica_Services.py`.
+   - `perfil` (`grafica/perfil_indicador_Services.py`): tipo de meta, niveles del semáforo, meta
+     por mes, unidad de medida, si es por corte y, en el Extractor de corte, `serieCortes`.
 
 ---
 
 ## 10. Excel
 
 `GET /Indicadores/excel?indicadores=EH 03&indicadores=DM 04&ano=2026&mes=Junio`
-(`services/excel_Services.py`). `mes` es opcional (`"06"` o `"Junio"`); sin mes, cada
+(`services/excel/generar_excel_Services.py`). `mes` es opcional (`"06"` o `"Junio"`); sin mes, cada
 indicador usa su último mes con datos.
 
-1. **Leer** cada indicador de BD_CIAE (`leer_hoja`), con la regla de su módulo:
+1. **Leer** cada indicador de BD_CIAE (`excel/leer_hoja_excel_Services.leer_hoja`), con la regla de su módulo:
    - Extractor de corte: sus meses son los cortes (`CORTES.MESES`).
    - FTP: si el mes más reciente solo existe como semanal, se usa ese (y su semana).
    - IAAS y Extractor mensual: los meses guardados.
    Un indicador sin datos no detiene a los demás: va en `errores`.
 2. **Dibujar:**
-   - FTP y Extractor → hoja estándar (`excel_dibujante_Services.escribir_hoja_indicador`): una
+   - FTP y Extractor → hoja estándar (`excel/escribir_hoja_indicador_Services.escribir_hoja_indicador`): una
      pestaña por indicador, histórico de meses, leyenda de población por mes, leyendas del
      semáforo y, si aplica, bloque de mensual acumulado. Las periodicidades de corte solo
      muestran sus meses de corte.
-   - Solo IAAS → su propio libro (`iaas/excel_iaas_Services.excel_iaas`): matriz por mes,
+   - Solo IAAS → su propio libro (`excel/excel_iaas_Services.excel_iaas`): matriz por mes,
      acumulado desde febrero y anual. Un indicador → su hoja; varios → los 6.
    - IAAS mezclado con FTP/Extractor → error 400 (todavía no se puede).
 3. **Responder** `{archivo_b64, nombre_archivo, completados, errores}`. El nombre lleva la
@@ -524,14 +589,14 @@ está claro en el código y conviene revisarlo.
 
 | Caso | Indicadores | Qué pasa | Dónde |
 |---|---|---|---|
-| Semáforo por tipo de hospital | IAAS 01 | Umbral distinto para HGS / HGZ / HGR / HGO / HGP; el total usa `OOAD`. La ficha manda `grupoDeUnidad` al front | `semaforo_service.umbrales_para`, `UNIDADES.UNIDAD_TIPO_IAAS01` |
+| Semáforo por tipo de hospital | IAAS 01 | Umbral distinto para HGS / HGZ / HGR / HGO / HGP; el total usa `OOAD`. La ficha manda `grupoDeUnidad` al front | `umbrales_semaforo_Services.umbrales_para`, `UNIDADES.UNIDAD_TIPO_IAAS01` |
 | Semáforo por mes | CACU 01, CAMA 01/40-49/50-69, CUPN 01, DM 01, EH 01, S_Ob 01 | La meta crece mes a mes (acumulado desde enero) | mapeo |
-| Sin nivel Medio | EH 03, DM 04 | `"Medio": null`: solo verde o rojo; el Excel no imprime leyenda Medio | mapeo, `excel_dibujante_Services._texto_medio` |
-| Metas en rango | IAAS, MT 03 | `">= 4 a <= 7"`, `"< 1 o > 7"`. En gráficas no se calcula brecha | `semaforo_service._condicion_de_umbral` |
+| Sin nivel Medio | EH 03, DM 04 | `"Medio": null`: solo verde o rojo; el Excel no imprime leyenda Medio | mapeo, `leyendas_semaforo_excel_Services._texto_medio` |
+| Metas en rango | IAAS, MT 03 | `">= 4 a <= 7"`, `"< 1 o > 7"`. En gráficas no se calcula brecha | `umbrales_semaforo_Services.condicion_de_umbral` |
 | Promedios, no porcentajes | CE 01, CE 02, CUPN 05, CUPN 07 | `resultado` sin `* 100`. En CUPN 05/07 el acumulado suma numeradores y denominadores (promedio ponderado) | mapeo |
 | Tasas | IAAS 01/03-06, Neonatal 06 (x1,000); EH 03, DM 04 (x100,000) | Solo cambia la fórmula | mapeo |
-| Redondeo propio | FTP y población | Numerador y denominador suben de entero solo con decimal ≥ 0.60 | `calculo_indicador_Services.redondeo_personalizado` |
-| Denominador 0 = sin dato | Neonatal 06 (`ceroEsSinDato`) | Un hospital sin nacimientos sale **Gris**, no "0 = Esperado". El caso que lo motivó fue un hospital sin nacimientos (se ha mencionado HGZMF 21; por confirmar) | `calcular_unidades(cero_es_sin_dato=...)` |
+| Redondeo propio | FTP y población | Numerador y denominador suben de entero solo con decimal ≥ 0.60 | `formulas_Services.redondeo_personalizado` |
+| Denominador 0 = sin dato | Neonatal 04 y 06 (`ceroEsSinDato`) | Un hospital sin nacimientos sale **Gris**, no "0 = Esperado" (HGZMF 21) | `calcular_unidades(cero_es_sin_dato=...)` |
 | Fuera del TOTAL_OOAD | IAAS: HGSMF 7, HGSMF 15, HGSMF 20 (menos de 20 camas) | Se calculan y se muestran, pero no suman al total | `iaas.json → UNIDADES_SIN_OOAD_IAAS` |
 | Unidades sin PAMF en el corte | EH 03, DM 04 | Una unidad sin denominador de población no aparece en el corte | `intentar_generar_corte` |
 
@@ -572,13 +637,14 @@ está claro en el código y conviene revisarlo.
 | Carpeta del FTP ≠ clave de la unidad | Salvatierra: carpeta `11130220 UMFH 08` (empieza con 111302) pero su clave en `CLAVE_UNIDADES_F` es `111303`. Por eso PB02 se busca con la clave del catálogo, no con la carpeta (`_CLAVE_POR_UNIDAD`) |
 | Carpeta semanal ≠ carpeta definitiva | `UNIDADES_PREVIOS` usa `11050602 HGSMF 2` y `11090220 UMFH 6`; `UNIDADES_FINALES` usa `HGZMF 02` y `UMFH 06` |
 | Nombres distintos entre fuentes | Población: `alias` en `POBLACION.json` (ej. `"hgzmf 2 irapuato"` → `"HGSMF 2 IRAPUATO"`). IAAS: `HGSZ`/`HGSZMF` se unifica a `HGS`/`HGSMF` (`UNIDADES.alias_hgsz`) |
-| Archivo duplicado en el FTP | Si hay más de un archivo con el mismo prefijo, se usa **el primero que lista el servidor** y se avisa `ARCHIVO_DUPLICADO`. El orden no es alfabético ni por fecha: **por confirmar** cuál debería usarse |
+| Archivo duplicado en el FTP | Si hay más de un archivo con el mismo prefijo, se usa el que termina con el **periodo del mes** (`periodoEnNombre` de `catalogos/ftp.json`: junio 2026 → `...052026062026`); si ninguno lo trae, el primero que lista el servidor. Igual se avisa `ARCHIVO_DUPLICADO` |
 | Población solo para el Extractor | Hoy ningún indicador de FTP tiene `poblacionInfoSalud`; el recálculo por población solo cambia los cortes de EH 03/DM 04 |
 
 ### Pendientes que no están en el mapeo
 
-- **CUPN 03** (sin meta POA) y **Neonatal 05** no existen todavía en ninguna carpeta del mapeo.
-  **Por confirmar** cómo se van a configurar.
+- **CUPN 03**: el numerador sale del FTP (PF06, F42/T42) pero la meta POA del denominador no viene en
+  el FTP (la celda META del PF06 llega en 0) ni en el Extractor: hay que capturarla.
+- **Neonatal 05** no existe todavía en ninguna carpeta del mapeo.
 
 ---
 
@@ -590,7 +656,7 @@ from fastapi import APIRouter, Depends
 
 from auth.services.jwt_utils import solo_roles
 from configs.response import ApiResponse
-from services.bd_Ciae_Guardado_Services import meses_con_datos
+from services.ftp.pagina_generar_ftp_Services import meses_generados_ftp
 
 ejemploApi = APIRouter()
 
@@ -600,7 +666,7 @@ ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 #Get Indicadores/ejemplo/meses?indicador=CAMA 01&ano=2026
 @ejemploApi.get("/meses")
 async def meses(indicador: str, ano: str, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
-    return ApiResponse(success=True, message="Meses con datos", data=meses_con_datos(indicador, ano))
+    return ApiResponse(success=True, message="Meses con datos", data=meses_generados_ftp(indicador, ano))
 ```
 
 Y registrarlo en `Routes/indicadores_Route.py`:
@@ -611,10 +677,10 @@ routesIndicadores.include_router(ejemplo_Controller.ejemploApi, prefix="/ejemplo
 ```
 
 Reglas:
-- El controller no tiene lógica: llama a **un** servicio.
+- El controller no tiene lógica: llama a **un** servicio (nunca a `datos/` directo).
 - Siempre `Depends(solo_roles(...))`.
 - Siempre `ApiResponse(success, message, data)` (salvo `/informacion`, que ya responde directo,
   y epidemiología, que es otro módulo).
 - Los servicios regresan `(mensaje, datos)` y el controller los envuelve.
-- Archivos: `nombre_Controller.py`, `nombre_Services.py`; nombres en español y descriptivos.
+- Archivos: `nombre_Controller.py`, `nombre_Services.py`, `nombre_Datos.py`; un archivo por responsabilidad, nombres en español y descriptivos.
 - Endpoints que tardan (FTP) se declaran con `def`, no `async def`.

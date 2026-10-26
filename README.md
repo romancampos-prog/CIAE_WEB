@@ -753,12 +753,12 @@ Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
    Controller/ftp_Controller.py                  recibe, valida rol y parametros
                       │
                       ▼
-   services/ftp/generacion_indicador_ftp_Services.py   orquesta los pasos
-     ├─ indicadorMapeo_Services          lee el mapeo del indicador
-     ├─ ftp/extraccion_indicador_ftp_    baja los reportes del FTP y extrae
-     ├─ calculo_indicador_Services       aplica las formulas del mapeo
-     ├─ shared/semaforo_service          pone el color
-     └─ bd_Ciae_Guardado_Services        guarda en BD_CIAE
+   services/ftp/generar_indicador_ftp_Services.py   orquesta los pasos
+     ├─ datos/lectura_mapeo/mapeo_por_modulo_Datos       lee el mapeo del indicador
+     ├─ services/ftp/extraer_indicador_ftp_Services      baja los reportes del FTP y extrae
+     ├─ services/ftp/calcular_indicador_ftp_Services     aplica las formulas del mapeo
+     ├─ services/compartido/semaforo/color_semaforo_     pone el color
+     └─ datos/bd_ciae/guardar_mes_Datos                  guarda en BD_CIAE
                       │
                       ▼
    ApiResponse(success, message, data)   (el Excel se pide aparte a /Indicadores/excel)
@@ -769,7 +769,8 @@ Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
 | Capa | Regla |
 |---|---|
 | `Controller` | Solo HTTP: recibir parametros, validar rol con `solo_roles`, llamar al servicio y responder `ApiResponse`. Sin logica de negocio. |
-| `services` | Solo logica: extraer, calcular, leer/escribir archivos, FTP. Lo de un solo modulo va en `services/<modulo>/`; lo compartido en la raiz de `services/`. |
+| `services` | Solo logica (un archivo por responsabilidad). Lo de un solo modulo va en `services/<modulo>/`; lo compartido en `services/compartido/`, `informacion/`, `poblacion/`, `grafica/` y `excel/`. |
+| `datos` | Lo unico que lee y escribe: BD_CIAE, el mapeo JSON, el FTP y los Excel subidos. Sin reglas de negocio. |
 | `mapeo` | Las reglas de cada indicador (archivos, columnas, filtros, formulas, semaforo). No se escriben en el codigo. |
 
 Pasos para crear un endpoint nuevo: ver [BackEnd/indicadores/README.md, seccion 12](BackEnd/indicadores/README.md#12-cómo-escribir-un-endpoint-nuevo).
@@ -795,8 +796,8 @@ Cada indicador se guarda en `BD_CIAE/INDICADORES/{año}/{FAMILIA}/{FAMILIA}_{NN}
 }
 ```
 
-Para leer o escribir estos archivos usar siempre `services/bd_Ciae_Guardado_Services.py` (y
-`bd_Ciae_Indicadores_Services.py` para las consultas). El semanal de FTP, los cortes del
+Para leer o escribir estos archivos usar siempre `datos/bd_ciae/` (y
+`services/compartido/reporte_guardado_Services.py` para las consultas tipadas). El semanal de FTP, los cortes del
 Extractor (`CORTES`) y las carpetas `EXTRACTOR_CRUCE` / `EXTRACTOR_PARTES` estan explicados en
 [BackEnd/indicadores/README.md, seccion 5](BackEnd/indicadores/README.md#5-cómo-se-guarda-en-bd_ciae).
 

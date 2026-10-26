@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from ..Controller import ftp_Controller
+from ..Controller import poblacion_Controller
 from ..Controller import iaas_Controller
 from ..Controller import extractor_Controller
 from ..Controller import excel_Controller
@@ -12,6 +13,9 @@ routesIndicadores = APIRouter()
 
 #EndPoints FTP (GENERACION MEDIANTE EXTRACCION DE FTP)
 routesIndicadores.include_router(ftp_Controller.ftpApi, prefix="/ftp")
+
+#EndPoints POBLACION (INFOSALUD: DENOMINADOR DE FTP Y DE LOS CORTES DEL EXTRACTOR; SIGUE BAJO /ftp PARA EL FRONT)
+routesIndicadores.include_router(poblacion_Controller.poblacionApi, prefix="/ftp/poblacion")
 
 #EndPoints IASS (GENERACION DE IAAS)
 routesIndicadores.include_router(iaas_Controller.iaasApi, prefix="/iaas")

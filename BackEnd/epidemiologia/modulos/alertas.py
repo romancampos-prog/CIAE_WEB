@@ -1,3 +1,8 @@
+"""
+Alertas de SisCep: muestras rechazadas, pendientes de clasificar, recibidas adecuadas, sin
+muestra, graves sin muestra y la tabla de negativos por unidad.
+Sin lectura ni escritura de archivos: recibe y regresa DataFrames.
+"""
 import pandas as pd
 
 # Diagnósticos considerados graves (muestra obligatoria)
@@ -9,9 +14,7 @@ def _norm(serie):
     return serie.astype(str).str.upper().str.strip()
 
 
-# ════════════════════════════════════════════════════════════════════════
-# FUNCIONES DE CÁLCULO — cada una devuelve un DataFrame filtrado
-# ════════════════════════════════════════════════════════════════════════
+##--------------------------------------
 
 def alerta_muestras_rechazadas(df):
     """
@@ -22,7 +25,7 @@ def alerta_muestras_rechazadas(df):
     return df[_norm(df['ESTATUS_SISCEP']) == 'MUESTRA RECHAZADA'].copy()
 
 
-
+##--------------------------------------
 
 def alerta_pendientes_clasificacion(df):
     """
@@ -38,7 +41,7 @@ def alerta_pendientes_clasificacion(df):
     return df[tiene_result & sin_diag_fin].copy()
 
 
-
+##--------------------------------------
 
 def alerta_recibidas_adecuadas(df):
     """
@@ -49,7 +52,7 @@ def alerta_recibidas_adecuadas(df):
     return df[_norm(df['ESTATUS_SISCEP']) == 'RECIBIDA ADECUADA'].copy()
 
 
-
+##--------------------------------------
 
 def alerta_sin_muestra(df):
     """
@@ -62,7 +65,7 @@ def alerta_sin_muestra(df):
     return df[muestra.isna() | (muestra == 0)].copy()
 
 
-
+##--------------------------------------
 
 def alerta_graves_sin_muestra(df):
     """
@@ -77,7 +80,7 @@ def alerta_graves_sin_muestra(df):
     return df[es_grave & (muestra == 2)].copy()
 
 
-
+##--------------------------------------
 
 def tabla_negativos_por_unidad(df):
     """
@@ -102,13 +105,14 @@ def tabla_negativos_por_unidad(df):
     )
 
 
-
+##--------------------------------------
 
 def ejecutar_alertas_siscep(df):
     """
     Ejecuta todas las alertas SisCep y devuelve un diccionario con
     los DataFrames de cada una más la tabla de negativos.
     """
+
     print("=" * 50)
     print("ALERTAS SISCEP")
     print("=" * 50)

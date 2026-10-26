@@ -1,0 +1,263 @@
+// react
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+// propios
+import { BrotesPanel, MapaLeaflet, SEMAFORO_MAPA, Spinner as DengueSpinner, TablaUnidades, getTemaMapa, useMapaDengue, type TipoMapa } from '@/features/dengue';
+import { textoAcento } from '@/utils/colorAcento';
+
+
+/**
+ * Página del mapa de dengue por municipio.
+ * Muestra la distribución geoespacial (mapa Leaflet) o la tabla de unidades médicas
+ * según la pestaña activa, más el panel de brotes si existen.
+ * El parámetro `tipo` puede ser 'situacion' (notificados) o 'confirmados'.
+ */
+export default function MapaPagina() {
+  const { tipo = 'situacion' } = useParams<{ tipo: TipoMapa }>()
+  const { datos, cargando, error } = useMapaDengue(tipo)
+  const [tabActiva, setTabActiva]       = useState<'mapa' | 'tabla'>('mapa')
+  const [panelBrotes, setPanelBrotes]   = useState(false)
+
+  const { etiqueta, colorTema, bgTema, bordeTema } = getTemaMapa(tipo)
+
+  if (cargando) return <DengueSpinner texto={`Cargando mapa de ${etiqueta.toLowerCase()}…`} />
+
+  if (error || !datos) return (
+    <div className="dengue-estado-vacio">
+      <div className="dengue-icono">🗺️</div>
+      <p>{error}</p>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+      {/* ── Hero ── */}
+      <div className="epi-canal-hero" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div className="epi-canal-titleblock">
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: bgTema, border: `1px solid ${bordeTema}`,
+            borderRadius: 100, padding: '3px 12px',
+            fontSize: '0.6rem', fontWeight: 700, color: textoAcento(colorTema),
+            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8,
+          }}>
+            🗺️ {tipo === 'situacion' ? 'Mapa de situación' : 'Mapa de confirmados'}
+          </div>
+          <h1 className="epi-canal-titulo" style={{
+            fontSize: 'clamp(1.4rem,3vw,1.9rem)', fontWeight: 800,
+            color: 'var(--texto)', letterSpacing: '-0.8px', margin: '0 0 2px',
+          }}>
+            {etiqueta}{' '}
+            <span style={{
+              backgroundImage: `linear-gradient(90deg, ${colorTema}, #a7802d)`,
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>{datos.año}</span>
+          </h1>
+          <p className="epi-canal-sub" style={{ fontSize: 12, color: 'var(--texto-tenue)', margin: 0 }}>
+            IMSS OOAD Guanajuato · distribución por municipio
+          </p>
+        </div>
+
+        {/* Badge de brotes — en mobile se muestra debajo del mapa (ver más abajo) */}
+        {(datos.brotes_espacial?.length > 0 || datos.brotes_temporal?.length > 0) && (
+          <button className="epi-canal-alerta epi-canal-alerta--desktop" onClick={() => setPanelBrotes(true)} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 18px', borderRadius: 10, flexShrink: 0,
+            background: 'rgba(105,28,50,0.07)',
+            border: '1px solid rgba(105,28,50,0.18)',
+            cursor: 'pointer', fontFamily: 'inherit',
+            transition: 'background 0.18s',
+          }}
+            onMouseOver={e => e.currentTarget.style.background = 'rgba(105,28,50,0.13)'}
+            onMouseOut={e  => e.currentTarget.style.background = 'rgba(105,28,50,0.07)'}
+          >
+            <span style={{ fontSize: 22 }}>⚠️</span>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--tinto-texto)', lineHeight: 1 }}>
+                {(datos.brotes_espacial?.length || 0) + (datos.brotes_temporal?.length || 0)}
+              </div>
+              <div style={{ fontSize: 10, color: '#a4a4a4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                posibles brotes
+              </div>
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* ── Tabs + KPIs en la misma fila ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+
+        {/* Tabs */}
+        <div style={{
+          display: 'flex', gap: 4,
+          background: 'var(--superficie)', borderRadius: 14, padding: 4,
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+          flexShrink: 0,
+        }}>
+          {([
+            { id: 'mapa',  label: '🗺️  Mapa'  },
+            { id: 'tabla', label: '📋  Tabla' },
+          ] as const).map(({ id, label }) => (
+            <button key={id} onClick={() => setTabActiva(id)} style={{
+              padding: '7px 20px', borderRadius: 10, border: 'none',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              fontFamily: 'inherit', transition: 'all 0.18s',
+              background: tabActiva === id ? colorTema : 'transparent',
+              color: tabActiva === id ? 'white' : 'var(--texto-suave)',
+              boxShadow: tabActiva === id ? `0 3px 10px ${colorTema}44` : 'none',
+            }}>{label}</button>
+          ))}
+        </div>
+
+        {/* KPIs — misma altura que los tabs */}
+        <div className="epi-canal-kpis" style={{ display: 'flex', gap: 8, flex: 1, flexWrap: 'wrap' }}>
+          {[
+            { valor: datos.total,         label: 'Total casos',          color: colorTema, borde: bordeTema                },
+            { valor: datos.mun_con_casos, label: 'Municipios con casos', color: 'var(--oro-texto)', borde: 'rgba(167,128,45,0.18)' },
+            { valor: datos.max_casos,     label: 'Máx. por municipio',  color: '#c0392b', borde: 'rgba(192,57,43,0.18)'  },
+          ].map(({ valor, label, color, borde }) => (
+            <div key={label} style={{
+              flex: '1 1 8rem', background: 'var(--superficie)', borderRadius: 12,
+              padding: '12px 16px',
+              border: `1px solid ${borde}`, borderLeft: `3px solid ${color}`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', gap: 3,
+            }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: textoAcento(color), lineHeight: 1 }}>{valor}</div>
+              <div style={{ fontSize: 10, color: 'var(--texto-tenue)', fontWeight: 500 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+
+      {/* ── Mapa ── */}
+      {tabActiva === 'mapa' && (
+        <div style={{
+          background: 'var(--superficie)', borderRadius: 20,
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          overflow: 'visible',
+        }}>
+          {/* Header del mapa */}
+          <div style={{
+            padding: '14px 20px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(0,0,0,0.05)',
+            flexWrap: 'wrap', gap: 10,
+          }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--texto)' }}>
+                {etiqueta} por Municipio
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 1 }}>
+                Hover sobre un municipio para ver su detalle
+              </div>
+            </div>
+            {/* Semáforo compacto */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 10, color: 'var(--texto-tenue)', fontWeight: 600 }}>SEMÁFORO</span>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 1,
+                background: 'var(--superficie-suave)', borderRadius: 8, padding: '4px 8px',
+                border: '1px solid rgba(0,0,0,0.06)',
+              }}>
+                <div style={{
+                  width: 80, height: 8, borderRadius: 4,
+                  background: 'linear-gradient(to right, #2d8a57, #f4d03f, #e67e22, #c0392b)',
+                }} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {SEMAFORO_MAPA.map(({ color, label }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: color }} />
+                    <span style={{ fontSize: 10, color: 'var(--texto-suave)', fontWeight: 500 }}>{label}</span>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4d4d4' }} />
+                  <span style={{ fontSize: 10, color: 'var(--texto-suave)', fontWeight: 500 }}>Sin casos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <MapaLeaflet geojson={datos.geojson} etiqueta={etiqueta} />
+        </div>
+      )}
+
+      {/* ── Tabla ── */}
+      {tabActiva === 'tabla' && (
+        <div style={{
+          background: 'var(--superficie)', borderRadius: 20,
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '14px 20px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(0,0,0,0.05)',
+            flexWrap: 'wrap', gap: 10,
+          }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--texto)' }}>
+                {etiqueta} por Unidad Médica
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 1 }}>
+                Ordenadas por número de casos descendente
+              </div>
+            </div>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              background: bgTema, border: `1px solid ${bordeTema}`,
+              borderRadius: 100, padding: '4px 12px',
+              fontSize: 11, fontWeight: 700, color: textoAcento(colorTema),
+            }}>
+              {datos.unidades.length} unidades
+            </div>
+          </div>
+          <div style={{ padding: '8px 0' }}>
+            <TablaUnidades unidades={datos.unidades} />
+          </div>
+        </div>
+      )}
+
+      {/* Badge de brotes — versión mobile, debajo del mapa/tabla (ver epi.css) */}
+      {(datos.brotes_espacial?.length > 0 || datos.brotes_temporal?.length > 0) && (
+        <button className="epi-canal-alerta epi-canal-alerta--mobile" onClick={() => setPanelBrotes(true)} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.625rem',
+          padding: '0.625rem 1.125rem', borderRadius: '0.875rem',
+          background: 'rgba(105,28,50,0.07)',
+          border: '1px solid rgba(105,28,50,0.18)',
+          cursor: 'pointer', fontFamily: 'inherit',
+          transition: 'all 0.18s',
+        }}
+          onMouseOver={e => e.currentTarget.style.background = 'rgba(105,28,50,0.13)'}
+          onMouseOut={e  => e.currentTarget.style.background = 'rgba(105,28,50,0.07)'}
+        >
+          <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+          <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--tinto-texto)', lineHeight: 1 }}>
+            {(datos.brotes_espacial?.length || 0) + (datos.brotes_temporal?.length || 0)}
+          </span>
+          <span style={{ fontSize: '0.72rem', color: '#a4a4a4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            posibles brotes
+          </span>
+        </button>
+      )}
+
+      {/* BrotesPanel sin cambios funcionales */}
+      <BrotesPanel
+        brotes_espacial={datos.brotes_espacial}
+        brotes_temporal={datos.brotes_temporal}
+        ocultarBoton
+        open={panelBrotes}
+        onToggle={() => setPanelBrotes(v => !v)}
+      />
+
+    </div>
+  )
+}

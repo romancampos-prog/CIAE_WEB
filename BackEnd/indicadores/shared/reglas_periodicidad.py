@@ -3,8 +3,7 @@ Reglas por periodicidad del mapeo (campo "periodicidad" de cada indicador):
 que meses muestran el Excel y la grafica, y el texto que explica el periodo.
 Solo hay dos formas: "mensual" (los 12 meses) y "de corte" (solo los meses de
 corte); lo que cambia entre periodicidades mensuales es el dato, no las columnas.
-Usado en: services/excel_dibujante_Services.py, schemas/model/indicador_Model.py,
-          iaas/services/info_service.py
+Usado en: services/excel/*, services/grafica/*, services/extractor/*, schemas/model/ficha_indicador_Model.py
 """
 
 # Indice 0-based de los meses de corte de cada periodicidad "de corte".
@@ -46,7 +45,9 @@ def clave_periodicidad(periodicidad: str | None) -> str:
 
 def descripcion_periodicidad(periodicidad: str | None) -> str | None:
     """Ej. "Mensual Trimestralizado: cada mes acumula los últimos 3 meses"; None si el indicador no tiene periodicidad."""
+
     if not periodicidad:
         return None
+
     explicacion = _EXPLICACION.get(_clave(periodicidad))
     return f"{periodicidad}: {explicacion}" if explicacion else periodicidad

@@ -1,3 +1,8 @@
+"""
+Calendario de semana epidemiologica SUIVE: inicio de la semana 1 de un año, numero de semana
+y la semana de una fecha (la usan la depuracion de la base y el historico del canal endemico).
+Usado en: modulos/depuracion/asignar_semana.py, datos/historico_datos.py
+"""
 import pandas as pd
 
 
@@ -27,6 +32,8 @@ def _inicio_sem1(año):
         return ene1 + pd.Timedelta(days=6 - dow)         # siguiente domingo
 
 
+##--------------------------------------
+
 def _numero_semana(fecha, inicio_sem1):
     """
     Devuelve el número de semana dado el inicio de la semana 1.
@@ -43,3 +50,22 @@ def _numero_semana(fecha, inicio_sem1):
         if fecha < primer_domingo:
             return 1                                      # aún dentro de la semana parcial
         return int((fecha - primer_domingo).days // 7) + 2
+
+
+##--------------------------------------
+
+def semana_epidemiologica(fecha):
+    """
+    Semana SUIVE de una fecha; None si no hay fecha. Las fechas anteriores al inicio de la
+    semana 1 de su año son de la ultima semana del año anterior (ej. 1-3 ene 2026 -> 2025).
+    """
+
+    if pd.isna(fecha):
+        return None
+
+    inicio = _inicio_sem1(fecha.year)
+
+    if fecha < inicio:
+        inicio = _inicio_sem1(fecha.year - 1)
+
+    return _numero_semana(fecha, inicio)

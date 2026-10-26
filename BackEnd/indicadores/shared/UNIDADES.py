@@ -4,7 +4,7 @@ Catalogos de unidades medicas, leidos de mapeo/unidades/:
   - hospitales.json: hospitales de 2o nivel por clave, para indicadores que se agrupan por el
                      hospital que atiende (MT, Neonatal) y no por la UMF de adscripcion
   - iaas.json:       hospitales de IAAS y su tipo (para el semaforo agrupado de IAAS 01)
-Usado en: services/*, shared/semaforo_service.py
+Usado en: services/*, datos/*, services/compartido/semaforo/color_semaforo_Services.py
 """
 import json
 from pathlib import Path
@@ -22,12 +22,12 @@ CLAVE_UNIDADES_F      = _ftp["CLAVE_UNIDADES_F"]
 
 CLAVE_HOSPITALES = _hospitales["CLAVE_HOSPITALES"]
 
-# Neonatal 06 y 04 llevan las unidades de Guanajuato de su reporte oficial (con UMAE).
+# Neonatal 06 y 04 llevan las unidades de Guanajuato de su reporte oficial. Sin el HGP 48 (UMAE):
+# sus archivos no vienen en las descargas de la delegacion, asi que no se toma en cuenta.
 CLAVE_HOSPITALES_NEONATAL_06 = _hospitales["CLAVE_HOSPITALES_NEONATAL_06"]
 CLAVE_HOSPITALES_NEONATAL_04 = _hospitales["CLAVE_HOSPITALES_NEONATAL_04"]
 
-# {catalogo: unidades que se calculan y se muestran pero no suman al TOTAL_OOAD}: el oficial
-# de Neonatal 06 evalua al HGP 48 aparte, el de Neonatal 04 si lo suma a Guanajuato.
+# {catalogo: unidades que se calculan y se muestran pero no suman al TOTAL_OOAD}; hoy ninguna.
 FUERA_DEL_TOTAL_OOAD = _hospitales.get("FUERA_DEL_TOTAL_OOAD", {})
 
 # Catalogos que un indicador del Extractor puede pedir en 'catalogoUnidades' del mapeo.
@@ -74,10 +74,12 @@ def alias_hgsz(nombre: str) -> str | None:
     En el dato crudo, algunas unidades HGS/HGSMF vienen guardadas como HGSZ/HGSZMF -- es la
     misma unidad, solo cambia el prefijo. Devuelve el nombre alterno a probar, o None.
     """
+
     if nombre.startswith("HGSMF "):
         return "HGSZMF " + nombre[len("HGSMF "):]
     if nombre.startswith("HGS "):
         return "HGSZ " + nombre[len("HGS "):]
+
     return None
 
 

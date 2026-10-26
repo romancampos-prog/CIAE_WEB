@@ -1,37 +1,29 @@
 ﻿"""
 Módulo  : pipeline_controller.py
 Carpeta : epidemiologia/controllers/
-Qué hace: Endpoints para consultar el estado del pipeline y ejecutarlo.
+Qué hace: Endpoints para consultar el estado del pipeline y ejecutarlo (responden ApiResponse).
 Usado en: main.py (prefix /epidemiologia)
 """
-from fastapi import APIRouter, HTTPException, Depends
-from epidemiologia.config import RUTA_OPERATIVA, RUTA_SISCEP
-from epidemiologia.services import pipeline_service
-from configs.response import ApiResponse
+from fastapi import APIRouter, Depends
+
 from auth.services.jwt_utils import solo_roles
+from configs.response import ApiResponse
+from epidemiologia.services.pipeline.estado_pipeline_service import get_estado
+from epidemiologia.services.pipeline.iniciar_pipeline_service import iniciar_pipeline
 
 router = APIRouter()
 
 
+#Get epidemiologia/pipeline/estado
 @router.get("/pipeline/estado")
-def estado(
-    payload:   dict = Depends(solo_roles("admin"))
-):
-    return ApiResponse(success=True, message="Estado del pipeline", data=pipeline_service.get_estado())
+def estado(payload: dict = Depends(solo_roles("admin"))):
+    return ApiResponse(success=True, message="Estado del pipeline", data=get_estado())
 
 
+##--------------------------------------
+
+#Post epidemiologia/pipeline/ejecutar  (409 si ya corre, 400 si falta una base)
 @router.post("/pipeline/ejecutar")
-def ejecutar(
-    payload:   dict = Depends(solo_roles("admin"))
-):
-    estado = pipeline_service.get_estado()
-
-    if estado["corriendo"]:
-        raise HTTPException(status_code=409, detail="El pipeline ya está en ejecución")
-    if not RUTA_OPERATIVA.exists():
-        raise HTTPException(status_code=400, detail="Falta la base operativa")
-    if not RUTA_SISCEP.exists():
-        raise HTTPException(status_code=400, detail="Falta la base SisCep")
-
-    pipeline_service.iniciar_pipeline()
-    return ApiResponse(success=True, message="Pipeline iniciado", data=None)
+def ejecutar(payload: dict = Depends(solo_roles("admin"))):
+    mensaje, datos = iniciar_pipeline()
+    return ApiResponse(success=True, message=mensaje, data=datos)
