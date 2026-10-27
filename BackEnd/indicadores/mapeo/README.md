@@ -42,6 +42,7 @@ mapeo/
 ├── catalogos/
 │   ├── familias.json              nombre, ícono y color de cada familia
 │   └── archivos_extractor.json    nombre legible de cada archivo del Extractor
+│   (el mapa del FTP ya no está aquí: BackEnd/ftp_imss/catalogo_ftp.json)
 ├── unidades/
 │   ├── ftp.json                   las 46 UMF: carpeta en el FTP, nombre y clave
 │   ├── hospitales.json            hospitales de 2º nivel (MT y Neonatal del Extractor)
@@ -66,9 +67,10 @@ mapeo/
 `nombre` se muestra en las páginas de Generar (`nombreCategoria`); `imagen` y `color` los
 pinta el front (ícono con `urlIcono`, color con la variable CSS `--ic`).
 
-### `catalogos/ftp.json`
+### `ftp_imss/catalogo_ftp.json` (fuera del mapeo)
 
-El mapa del FTP: dónde vive cada reporte SIAIS. Lo lee `datos/ftp/catalogo_reportes_ftp_Datos.py`
+El mapa del FTP: dónde vive cada reporte SIAIS. Vive en `BackEnd/ftp_imss/` porque lo comparten
+indicadores y epidemiología. Lo lee `ftp_imss/catalogo_reportes_ftp_Datos.py`
 **al arrancar** (si lo cambias, reinicia el backend).
 
 ```json
@@ -254,7 +256,7 @@ es el nombre que se usa en la fórmula.
 *(DM 01)*
 
 - La **carpeta** del FTP donde vive cada código (`Salud Pública`, `Indicadores`...) está en
-  `catalogos/ftp.json`. Si usas un reporte nuevo que no está ahí, agrégalo en su carpeta.
+  `ftp_imss/catalogo_ftp.json`. Si usas un reporte nuevo que no está ahí, agrégalo en su carpeta.
 - `PB02` es especial: no está en la carpeta de cada unidad sino en
   `ArchsDataMart_{año}/Piramides para {año} por unidades`, un archivo por unidad que se
   encuentra por su clave (`PB02U{clave}...`).
@@ -712,7 +714,7 @@ Sin ningún encabezado esperado, el sistema no sabe qué hoja leer y rechaza el 
 ### FTP
 
 1. Busca el reporte en el FTP y en `WEB_CIAE/encabezados_reportes/` para ver hojas y letras.
-2. Si el código del reporte no está en `catalogos/ftp.json`, agrégalo en su carpeta (y reinicia el backend).
+2. Si el código del reporte no está en `ftp_imss/catalogo_ftp.json`, agrégalo en su carpeta (y reinicia el backend).
 3. Escribe `reporte.numerador`/`denominador` con `fuente: "ftp"`, `hoja` y el modo que
    corresponda (casi siempre `INTERSECCION_COLUMNA` con `buscar: "TOTAL DE LA UNIDAD"`).
 4. Escribe `operacion` usando los códigos como nombres.

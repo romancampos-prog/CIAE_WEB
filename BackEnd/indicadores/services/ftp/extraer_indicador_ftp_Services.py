@@ -7,8 +7,8 @@ Usado en: services/ftp/generar_indicador_ftp_Services.py
 """
 from typing import Any
 
-from datos.ftp.catalogo_reportes_ftp_Datos import codigo_base
-from datos.ftp.conexion_ftp_Datos import conectar_ftp, desconectar_ftp
+from ftp_imss.catalogo_reportes_ftp_Datos import codigo_base
+from ftp_imss.conexion_ftp_Datos import conectar_ftp, desconectar_ftp
 from schemas.model.generacion_ftp_Model import ErrorExtraccion, LogErrores
 from schemas.model.mapeo_comun_Model import FuentePoblacionInfoSalud
 from schemas.model.mapeo_ftp_Model import FuenteArchivosFTP, IndicadorFTPMapeo

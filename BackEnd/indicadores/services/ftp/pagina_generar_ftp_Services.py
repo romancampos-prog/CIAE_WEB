@@ -4,8 +4,8 @@ uno) y los meses que ya estan generados.
 Usado en: Controller/ftp_Controller.py
 """
 from datos.bd_ciae.historico_indicador_Datos import meses_con_datos
-from datos.ftp.catalogo_reportes_ftp_Datos import codigo_base
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_ftp
+from ftp_imss.catalogo_reportes_ftp_Datos import codigo_base
 from schemas.model.mapeo_ftp_Model import FuenteArchivosFTP
 from schemas.model.pagina_generar_Model import IndicadorGenerarFTP
 from services.informacion.lista_indicadores_Services import indicadores_del_modulo

@@ -1,6 +1,6 @@
 """
 Conexion al servidor FTP del IMSS (usuario y contraseña del .env).
-Usado en: services/ftp/extraer_indicador_ftp_Services.py
+Usado en: indicadores/services/ftp/extraer_indicador_ftp_Services.py (y epidemiologia)
 """
 from ftplib import FTP
 
