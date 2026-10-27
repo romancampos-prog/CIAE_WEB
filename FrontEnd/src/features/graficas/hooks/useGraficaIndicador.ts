@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 // propios
-import { descargarB64, indicadoresService } from '@/features/indicadores';
-import { graficasService } from '@/features/graficas/services/graficasService';
+import type { VistaGrafica } from '@/types/pantallas/graficas';
+import { excelApi } from '@/api/indicadores/excelApi';
+import { reportesApi } from '@/api/indicadores/reportesApi';
+import { descargarB64 } from '@/features/indicadores';
 import { CLAVE_ESTATAL, ordenarMeses } from '@/features/graficas/utils/datosGrafica';
-import type { VistaGrafica } from '@/features/graficas/tipos';
 
 const ANIO = '2026';
 
@@ -30,7 +31,7 @@ export function useGraficaIndicador(indicador: string, indsHermanos: string[]) {
 
   const consulta = useQuery({
     queryKey: ['graficas', 'detalle', indicador, ANIO],
-    queryFn: () => graficasService.obtenerGrafica(indicador, ANIO),
+    queryFn: () => reportesApi.obtenerGrafica(indicador, ANIO),
     enabled: !!indicador,
     // Regresar a un indicador ya visto no lo vuelve a pedir (la página borra todo al salir).
     staleTime: Infinity,
@@ -39,7 +40,7 @@ export function useGraficaIndicador(indicador: string, indsHermanos: string[]) {
   });
 
   const descarga = useMutation({
-    mutationFn: (indicadores: string[]) => indicadoresService.descargarExcel(indicadores, ANIO),
+    mutationFn: (indicadores: string[]) => excelApi.descargar(indicadores, ANIO),
     onSuccess: (excel) => descargarB64(excel.archivo_b64, excel.nombre_archivo),
   });
 

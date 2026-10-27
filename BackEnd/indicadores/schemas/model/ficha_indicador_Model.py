@@ -42,10 +42,6 @@ class InfoIndicador(BaseModel):
     modulo: str
     mostrarGenerar: bool
     mostrarGrafica: bool
-    previos: bool
-    mensual: bool = False
-    mensualAcumulado: bool = False
-    peridocidadGenerada: Dict[str, bool] | None = None
     periodicidad: str
     descripcionPeriodicidad: str | None = None
     informacion: InformacionFicha
@@ -59,19 +55,10 @@ class InfoIndicador(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _desde_peridocidadGenerada(cls, datos: Any) -> Any:
-        """
-        mensual/mensualAcumulado viven dentro de peridocidadGenerada en el mapeo; se
-        replican sueltos para quien lee ficha.mensual / ficha.mensualAcumulado directo.
-        """
+    def _con_descripcion_periodicidad(cls, datos: Any) -> Any:
+        """La descripción legible de la periodicidad sale del texto del mapeo (ej. "Semestral Anualizado")."""
 
         if isinstance(datos, dict):
-            anidado = datos.get("peridocidadGenerada")
-
-            if isinstance(anidado, dict):
-                datos.setdefault("mensual", anidado.get("mensual", False))
-                datos.setdefault("mensualAcumulado", anidado.get("mensualAcumulado", False))
-
             datos.setdefault("descripcionPeriodicidad", descripcion_periodicidad(datos.get("periodicidad")))
 
         return datos

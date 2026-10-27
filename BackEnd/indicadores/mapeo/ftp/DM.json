@@ -4,7 +4,6 @@
         "fechaModificacion": "07/10/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": true,
         "periodicidad": "Mensual Acumulado",
         "peridocidadGenerada": {
             "mensual": false,
@@ -139,7 +138,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": true,
         "periodicidad": "Mensual Anualizado",
         "peridocidadGenerada": {
             "mensual": true,
@@ -195,7 +193,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": true,
         "periodicidad": "Mensual Trimestralizado",
         "peridocidadGenerada": {
             "mensual": true,

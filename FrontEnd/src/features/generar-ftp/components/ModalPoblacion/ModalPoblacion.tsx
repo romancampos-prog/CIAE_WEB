@@ -1,4 +1,5 @@
 // propios
+import { IconoExito, IconoInfo, IconoRecargar } from '@/components/icons';
 import { ANO_ACTIVO, useActualizarPoblacion } from '@/features/generar-ftp/hooks/useActualizarPoblacion';
 import './modalPoblacion.css';
 
@@ -29,9 +30,7 @@ const ModalPoblacion = ({ onClose, archivoActual }: Props) => {
                 {fase === 'upload' && (
                     <>
                         <div className="mpob-source-notice">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
+                            <IconoInfo strokeWidth="2.2" style={{ flexShrink: 0 }} />
                             <span>
                                 El archivo debe descargarse de:{' '}
                                 <a
@@ -172,10 +171,7 @@ const ModalPoblacion = ({ onClose, archivoActual }: Props) => {
                         {!resultado ? (
                             <>
                                 <div className="mpob-recalc-info">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--marca-texto)' }}>
-                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                        <path d="M3 3v5h5"/>
-                                    </svg>
+                                    <IconoRecargar style={{ color: 'var(--marca-texto)' }} />
                                     <div>
                                         <p className="mpob-recalc-title">¿Actualizar todos los reportes?</p>
                                         <p className="mpob-recalc-desc">
@@ -204,10 +200,7 @@ const ModalPoblacion = ({ onClose, archivoActual }: Props) => {
                                         {cargando
                                             ? <><div className="mpob-spinner" /> Actualizando…</>
                                             : <>
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                                    <path d="M3 3v5h5"/>
-                                                </svg>
+                                                <IconoRecargar tamano={14} strokeWidth="2.5" />
                                                 Actualizar todo
                                               </>
                                         }
@@ -217,10 +210,7 @@ const ModalPoblacion = ({ onClose, archivoActual }: Props) => {
                         ) : (
                             <>
                                 <div className="mpob-recalc-result">
-                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: 'var(--marca-texto)' }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="9 12 11 14 15 10"/>
-                                    </svg>
+                                    <IconoExito style={{ color: 'var(--marca-texto)' }} />
                                     <p className="mpob-recalc-title">{resultado.total} reportes actualizados</p>
                                     {resultado.cortesExtractor.length > 0 && (
                                         <p className="mpob-recalc-title" style={{ fontSize: '0.85em', marginTop: 4 }}>

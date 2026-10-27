@@ -1,9 +1,10 @@
 // propios
+import type { IndicadorExtractor } from '@/types/pantallas/generarExtractor';
+import { IconoDescargar } from '@/components/icons';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
 import { explicacionPeriodo, numeroMes, tituloSinClave } from '@/features/generar-extractor/utils/textosExtractor';
-import { AnilloProgreso, IconoDescarga } from './IconosExtractor';
+import AnilloProgreso from './AnilloProgreso';
 import type { EstadoGenerarExtractor } from '@/features/generar-extractor/hooks/useGenerarExtractor';
-import type { IndicadorExtractor } from '@/features/generar-extractor/tipos';
 
 interface Props {
   ind: IndicadorExtractor;
@@ -65,7 +66,7 @@ const TarjetaIndicadorExtractor = ({ ind, ex }: Props) => {
                 {info.corteYaGenerado && (
                   <button className="exv-boton-excel" onClick={() => descargar(claveBoton, [ind.indicador], info.anioCorte, info.mesCorte)}
                     disabled={descargando === claveBoton}>
-                    <IconoDescarga /> {descargando === claveBoton ? 'Descargando…' : 'Excel'}
+                    <IconoDescargar strokeWidth="2" /> {descargando === claveBoton ? 'Descargando…' : 'Excel'}
                   </button>
                 )}
               </div>
@@ -85,7 +86,7 @@ const TarjetaIndicadorExtractor = ({ ind, ex }: Props) => {
             {ultimo && (
               <button className="exv-boton-excel" onClick={() => descargar(`${ind.indicador}-${ultimo}`, [ind.indicador], anio, ultimo)}
                 disabled={descargando === `${ind.indicador}-${ultimo}`}>
-                <IconoDescarga /> {descargando === `${ind.indicador}-${ultimo}` ? 'Descargando…' : `Excel ${ultimo}`}
+                <IconoDescargar strokeWidth="2" /> {descargando === `${ind.indicador}-${ultimo}` ? 'Descargando…' : `Excel ${ultimo}`}
               </button>
             )}
           </div>

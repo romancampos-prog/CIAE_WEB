@@ -16,8 +16,6 @@ class IndicadorGenerar(BaseModel):
     titulo:                  str
     periodicidad:            str
     descripcionPeriodicidad: str | None = None
-    peridocidadGenerada:     dict[str, bool] = {}
-    previos:                 bool = False      # FTP: tiene reportes semanales
     imagen:                  str               # icono de la familia, ej. "icono_mt.png"
     color:                   str               # color de la familia
 

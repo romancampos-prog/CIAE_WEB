@@ -1,14 +1,13 @@
 // propios
+import type { Desempeno, PerfilIndicador, ResumenMes } from '@/types/api/indicadores/reportes';
+import { IconoChevronAbajo, IconoChevronArriba } from '@/components/icons';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { formatoNumero as formato } from '@/features/graficas/utils/datosGrafica';
-import type { Desempeno, PerfilIndicador, ResumenMes } from '@/features/graficas/tipos';
 import './estadisticas.css';
 
-const IconoFlecha = ({ sube }: { sube: boolean }) => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    {sube ? <polyline points="6 15 12 9 18 15" /> : <polyline points="6 9 12 15 18 9" />}
-  </svg>
-);
+const IconoFlecha = ({ sube }: { sube: boolean }) => (sube
+  ? <IconoChevronArriba tamano={12} strokeWidth="2.6" aria-hidden />
+  : <IconoChevronAbajo tamano={12} strokeWidth="2.6" aria-hidden />);
 
 const Estado = ({ desempeno }: { desempeno: Desempeno }) => (
   <span className="ige-estado">

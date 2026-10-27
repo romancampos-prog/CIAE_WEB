@@ -1,11 +1,10 @@
 // react
 import { useState } from 'react';
 // propios
-import type { FichaTecnicaCompleta, FuenteCalculo, MetasSemaforo, Umbral } from '@/features/indicadores/tipos';
-import {
-  parsearNumerador, parsearDenominador, parsearResultado, descripcionExtraccion, describirFuenteCalculo, pct,
-  type CalculoParseado, type DescripcionFiltro, type FuenteAgrupada, type Segmento,
-} from './operacionParser';
+import type { FichaTecnicaCompleta, FuenteCalculo, MetasSemaforo, Umbral } from '@/types/api/indicadores/informacion';
+import type { CalculoParseado, DescripcionFiltro, FuenteAgrupada, Segmento } from '@/types/pantallas/fichaTecnica';
+import { IconoBarras, IconoCalculo, IconoChevronAbajo } from '@/components/icons';
+import { parsearNumerador, parsearDenominador, parsearResultado, descripcionExtraccion, describirFuenteCalculo, pct } from './operacionParser';
 import './informacionIndicador.css';
 
 type LadoResuelto =
@@ -34,13 +33,7 @@ const TarjetaFuente = ({ fuente }: { fuente: FuenteAgrupada }) => {
           {!abierta && numCols > 0 && (
             <span className="fc-col-count">{numCols} col{numCols !== 1 ? 's' : ''}</span>
           )}
-          <svg
-            className={`fc-chevron ${abierta ? 'fc-chevron--open' : ''}`}
-            width="12" height="12" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          <IconoChevronAbajo tamano={12} className={`fc-chevron ${abierta ? 'fc-chevron--open' : ''}`} />
         </div>
       </button>
 
@@ -330,19 +323,14 @@ const InformacionIndicador = ({ data }: { data: FichaTecnicaCompleta | null }) =
           className={`det-tab ${tab === 'calculo' ? 'det-tab--active' : ''}`}
           onClick={() => setTab('calculo')}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-          </svg>
+          <IconoCalculo />
           Cálculo
         </button>
         <button
           className={`det-tab ${tab === 'semaforo' ? 'det-tab--active' : ''}`}
           onClick={() => setTab('semaforo')}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
+          <IconoBarras />
           Rangos de desempeño
         </button>
       </div>

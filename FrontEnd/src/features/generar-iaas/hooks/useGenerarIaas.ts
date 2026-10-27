@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 // propios
+import type { DenominadoresCapturados } from '@/types/api/indicadores/iaas';
+import { excelApi } from '@/api/indicadores/excelApi';
+import { iaasApi } from '@/api/indicadores/iaasApi';
 import { useRol } from '@/features/auth';
-import { descargarB64, indicadoresService } from '@/features/indicadores';
-import { iaasService } from '@/features/generar-iaas/services/iaasService';
+import { descargarB64 } from '@/features/indicadores';
 import { calcularFaltantes } from '@/features/generar-iaas/utils/calculos';
 import { usePeriodoIaas } from './usePeriodoIaas';
-import type { DenominadoresCapturados } from '@/features/generar-iaas/tipos';
 
 const INDICADOR_CON_EXCEL_GLOBAL = 'IAAS 01';
 
@@ -40,11 +41,11 @@ export function useGenerarIaas() {
 
   // ── Lo que se lee del backend ──────────────────────────────────────────────
 
-  const unidadesQ    = useQuery({ queryKey: ['iaas', 'unidades'], queryFn: iaasService.listarUnidades });
-  const indicadoresQ = useQuery({ queryKey: ['iaas', 'indicadores'], queryFn: iaasService.listarIndicadores });
+  const unidadesQ    = useQuery({ queryKey: ['iaas', 'unidades'], queryFn: iaasApi.listarUnidades });
+  const indicadoresQ = useQuery({ queryKey: ['iaas', 'indicadores'], queryFn: iaasApi.listarIndicadores });
   const sesionQ      = useQuery({
     queryKey: ['iaas', 'estadoMes', anio, mes],
-    queryFn: () => iaasService.estadoDelMes(anio, mes),
+    queryFn: () => iaasApi.estadoDelMes(anio, mes),
   });
 
   const unidades          = unidadesQ.data ?? [];
@@ -97,7 +98,7 @@ export function useGenerarIaas() {
   /** Excel del año con lo que ya quedó guardado (sale de la BD, no de la respuesta de generar). */
   const descargarExcelGuardado = async () => {
     try {
-      const excel = await indicadoresService.descargarExcel(indicadores.map(d => d.indicador), anio);
+      const excel = await excelApi.descargar(indicadores.map(d => d.indicador), anio);
       descargarB64(excel.archivo_b64, excel.nombre_archivo);
     } catch { /* la generación ya quedó guardada; solo falló la descarga */ }
   };
@@ -110,7 +111,7 @@ export function useGenerarIaas() {
   );
 
   const generacion = useMutation({
-    mutationFn: () => iaasService.generar(anio, mes, archivosUnidad, denominadoresCompletosParaEnviar(), excelGlobal),
+    mutationFn: () => iaasApi.generar(anio, mes, archivosUnidad, denominadoresCompletosParaEnviar(), excelGlobal),
     onSuccess: async (respuesta) => {
       if (respuesta.success) await descargarExcelGuardado();
       limpiarCampos();

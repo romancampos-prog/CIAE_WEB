@@ -2,12 +2,15 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
+import type { IndicadorGenerarFtp, PeriodoFtp, Restricciones, ResultadoCategoriaFtp } from '@/types/api/indicadores/ftp';
+import type { FamiliaFtp, TipoReporte } from '@/types/pantallas/generarFtp';
+import { excelApi } from '@/api/indicadores/excelApi';
+import { ftpApi } from '@/api/indicadores/ftpApi';
+import { informacionApi } from '@/api/indicadores/informacionApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 import { useRol } from '@/features/auth';
-import { descargarB64, indicadoresService, MESES_LARGOS } from '@/features/indicadores';
-import { generacionFtpService } from '@/features/generar-ftp/services/generacionFtpService';
+import { descargarB64, MESES_LARGOS } from '@/features/indicadores';
 import { calcularMesesDisponibles, calcularSemDataFTP } from '@/features/generar-ftp/utils/calculos';
-import type { FamiliaFtp, IndicadorGenerarFtp, PeriodoFtp, ResultadoCategoriaFtp, Restricciones, TipoReporte } from '@/features/generar-ftp/tipos';
 
 const CLAVE_CATEGORIA_GUARDADA = 'categoria_actual';
 
@@ -65,7 +68,7 @@ export function useGenerarFtp() {
   // Esta es la página de Generar FTP (mostrarGenerar + módulo ftp), no la de gráficas.
   const lista = useQuery({
     queryKey: ['ftp', 'indicadores'],
-    queryFn: generacionFtpService.listarIndicadores,
+    queryFn: ftpApi.listarIndicadores,
     select: agruparPorFamilia,
   });
   const categorias = useMemo(() => lista.data ?? [], [lista.data]);
@@ -79,7 +82,7 @@ export function useGenerarFtp() {
 
   const ficha = useQuery({
     queryKey: ['ftp', 'ficha', indicadorSel, datos.ano],
-    queryFn: () => indicadoresService.obtenerFicha(indicadorSel!, datos.ano),
+    queryFn: () => informacionApi.obtenerFicha(indicadorSel!, datos.ano),
     enabled: !!indicadorSel,
   });
   const infoIndicador = indicadorSel ? ficha.data ?? null : null;
@@ -87,7 +90,7 @@ export function useGenerarFtp() {
   /** Qué meses ya tienen reporte "final" generado para el indicador/año activos. */
   const mesesGenerados = useQuery({
     queryKey: ['ftp', 'mesesGenerados', indicadorSel, datos.ano],
-    queryFn: () => indicadoresService.mesesGenerados(indicadorSel!, datos.ano),
+    queryFn: () => ftpApi.mesesGenerados(indicadorSel!, datos.ano),
     enabled: !!indicadorSel,
   });
   const mesesGeneradosList = useMemo(() => (indicadorSel ? mesesGenerados.data ?? [] : []), [indicadorSel, mesesGenerados.data]);
@@ -100,7 +103,7 @@ export function useGenerarFtp() {
   const cerradosCategoria = useQuery({
     queryKey: ['ftp', 'mesesGenerados', 'categoria', indicadores, datos.ano],
     queryFn: async () => {
-      const listas = await Promise.all(indicadores.map(ind => indicadoresService.mesesGenerados(ind, datos.ano)));
+      const listas = await Promise.all(indicadores.map(ind => ftpApi.mesesGenerados(ind, datos.ano)));
       return listas.reduce((acc, meses) => acc.filter(m => meses.includes(m)));
     },
     enabled: !indicadorSel && indicadores.length > 0,
@@ -178,7 +181,7 @@ export function useGenerarFtp() {
   const refrescarMesesGenerados = () => clienteConsultas.invalidateQueries({ queryKey: ['ftp', 'mesesGenerados'] });
 
   const descargarExcel = async (indicadoresExcel: string[]) => {
-    const excel = await indicadoresService.descargarExcel(indicadoresExcel, datos.ano, datos.mes);
+    const excel = await excelApi.descargar(indicadoresExcel, datos.ano, datos.mes);
     descargarB64(excel.archivo_b64, excel.nombre_archivo);
   };
 
@@ -201,7 +204,7 @@ export function useGenerarFtp() {
     setConfirmadoPara(null);
     setCargando(true);
     try {
-      const res = await generacionFtpService.generarIndicador(indicadorSel, datos);
+      const res = await ftpApi.generarIndicador(indicadorSel, datos);
       if (res.success) {
         await descargarExcel([indicadorSel]);
         mostrarSiHayRestricciones(res.data.restricciones);
@@ -223,8 +226,8 @@ export function useGenerarFtp() {
     try {
       const enBatch = regenerarModo === 'batch';
       const res = enBatch
-        ? await generacionFtpService.regenerarCategoria(categoria, datos, password)
-        : await generacionFtpService.regenerarIndicador(indicadorSel!, datos, password);
+        ? await ftpApi.regenerarCategoria(categoria, datos, password)
+        : await ftpApi.regenerarIndicador(indicadorSel!, datos, password);
       if (res.success) {
         await descargarExcel(enBatch ? indicadores : [indicadorSel!]);
         setMostrarConfirmarRegenerar(false);
@@ -259,7 +262,7 @@ export function useGenerarFtp() {
     setCargandoBatch(true);
     setResultadoBatch(null);
     try {
-      const res = await generacionFtpService.generarCategoria(categoria, datos);
+      const res = await ftpApi.generarCategoria(categoria, datos);
       if (res.success) {
         await descargarExcel(indicadores);
         setResultadoBatch({ completados: res.data.completados, errores: res.data.errores });

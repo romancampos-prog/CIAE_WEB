@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import DengueHeader from './Header';
 import DengueSidebar from './Sidebar';
+// propios
+import { IconoMenu } from '@/components/icons';
 import '@/styles/epidemiologia.css';
 import './dengue.css';
 
@@ -37,9 +39,7 @@ export default function DengueLayout() {
             onClick={() => setCollapsed(false)}
             aria-label="Abrir módulos"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/>
-            </svg>
+            <IconoMenu />
           </button>
         )}
         {!collapsed && (

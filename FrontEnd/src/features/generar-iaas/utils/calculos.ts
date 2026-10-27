@@ -1,5 +1,5 @@
 // propios
-import type { DenominadoresCapturados } from '@/features/generar-iaas/tipos';
+import type { DenominadoresCapturados } from '@/types/api/indicadores/iaas';
 
 /**
  * Verifica si un mes está disponible para selección según el año y la fecha actual.

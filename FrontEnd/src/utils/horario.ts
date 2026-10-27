@@ -1,4 +1,5 @@
-export type PeriodoDelDia = 'day' | 'afternoon' | 'night';
+// propios
+import type { PeriodoDelDia } from '@/types/pantallas/tema';
 
 const SALUDOS: Record<PeriodoDelDia, string> = {
   day:       'Buenos días',
@@ -9,7 +10,7 @@ const SALUDOS: Record<PeriodoDelDia, string> = {
 /**
  * Devuelve el período del día según la hora local del navegador.
  */
-export function periodoDelDia(): PeriodoDelDia {
+function periodoDelDia(): PeriodoDelDia {
   const h = new Date().getHours();
   if (h >= 6  && h < 12) return 'day';
   if (h >= 12 && h < 19) return 'afternoon';

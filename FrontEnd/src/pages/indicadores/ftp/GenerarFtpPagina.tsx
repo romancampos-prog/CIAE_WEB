@@ -1,13 +1,10 @@
 // react
 import { useEffect } from 'react';
 // propios
+import { IconoDescargar, IconoGenerarTodos } from '@/components/icons';
 import TopBar from '@/components/TopBar';
 import ModalLoading from '@/components/ui/modal/ModalCargando';
-import {
-  AccionesPoblacion, AvisoMesesFaltantes, BotonGenerar, IcoAll, IcoDownload, ModalPoblacion, ModalRegenerarFtp,
-  ModalRestricciones, PeriodoReporte, RangosDesempeno, ResultadoCategoria, SidebarCategorias, TarjetaSeleccion,
-  useGenerarFtp, usePanelCategorias, usePoblacionActual,
-} from '@/features/generar-ftp';
+import { AccionesPoblacion, AvisoMesesFaltantes, BotonGenerar, ModalPoblacion, ModalRegenerarFtp, ModalRestricciones, PeriodoReporte, RangosDesempeno, ResultadoCategoria, SidebarCategorias, TarjetaSeleccion, useGenerarFtp, usePanelCategorias, usePoblacionActual } from '@/features/generar-ftp';
 import { FichaTecnicaBoton, MESES_LARGOS, urlIcono } from '@/features/indicadores';
 import '@/pages/indicadores/indicadores.css';
 import './generarFtp.css';
@@ -106,8 +103,8 @@ const GenerarFtpPagina = () => {
                     onClick={ftp.generarReporte}
                   >
                     {ftp.confirmandoFaltantes
-                      ? <><IcoDownload /> Generar de todas formas</>
-                      : <><IcoDownload /> Generar – {ftp.indicadorSel}</>}
+                      ? <><IconoDescargar /> Generar de todas formas</>
+                      : <><IconoDescargar /> Generar – {ftp.indicadorSel}</>}
                   </BotonGenerar>
                 )}
               </>
@@ -140,7 +137,7 @@ const GenerarFtpPagina = () => {
                       textoGenerando={`Generando ${ftp.indicadores.length} indicadores…`}
                       onClick={ftp.generarTodos}
                     >
-                      <IcoAll /> Generar todos · {ftp.categoria} ({ftp.indicadores.length})
+                      <IconoGenerarTodos /> Generar todos · {ftp.categoria} ({ftp.indicadores.length})
                     </BotonGenerar>
                   )}
 

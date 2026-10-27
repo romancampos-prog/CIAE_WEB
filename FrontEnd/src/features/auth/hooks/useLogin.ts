@@ -3,10 +3,10 @@ import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
+import type { CredencialesLogin, Rol } from '@/types/api/auth';
+import { authApi } from '@/api/auth/authApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { authService } from '@/features/auth/services/authService';
-import type { CredencialesLogin, Rol } from '@/features/auth/tipos';
 
 // A dónde entra cada rol; el que no está aquí (admin) entra a Inicio.
 const DESTINO_POR_ROL: Partial<Record<Rol, string>> = {
@@ -23,7 +23,7 @@ export function useLogin() {
   const [verContrasena, setVerContrasena] = useState(false);
 
   const envio = useMutation({
-    mutationFn: authService.iniciarSesion,
+    mutationFn: authApi.iniciarSesion,
     onSuccess: ({ usuario, rol }) => {
       login({ user: usuario, rol });
       // La pausa deja ver el botón terminar antes de cambiar de pantalla.

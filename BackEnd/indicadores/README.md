@@ -610,7 +610,6 @@ está claro en el código y conviene revisarlo.
 | Anualizado que ya viene del FTP | DM 02, S_Ob 04 | Se lee tal cual (el reporte ya trae los 12 meses) |
 | Anualizado que suma el Extractor | Neonatal 06 | Ver [8](#dos-archivos-y-anualizado-neonatal-06). Los primeros meses del año necesitan el año anterior subido |
 | Por corte | EH 03, DM 04 | Ventanas Junio/Diciembre; Junio usa la población del año anterior; corregir un mes recalcula el corte cerrado |
-| `peridocidadGenerada` con otro nombre | EH 03, DM 04 (`{"semstralAnualizado": true}`) | El código no lee esa llave; no afecta. Se podría quitar (por confirmar) |
 
 ### Extracción
 

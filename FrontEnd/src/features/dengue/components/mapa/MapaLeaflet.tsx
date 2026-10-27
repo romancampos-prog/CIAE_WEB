@@ -5,8 +5,8 @@ import L, { type LeafletMouseEvent, type Layer, type Path } from 'leaflet'
 import type { Feature, Geometry } from 'geojson'
 import 'leaflet/dist/leaflet.css'
 // propios
+import type { DatosMapa, PropiedadesMunicipio } from '@/types/api/dengue/reportes';
 import useTema from '@/hooks/useTema';
-import type { DatosMapa, PropiedadesMunicipio } from '@/features/dengue/tipos';
 
 type Municipio = Feature<Geometry, PropiedadesMunicipio>;
 
@@ -50,7 +50,9 @@ function FitBounds({ geojsonData }: { geojsonData: DatosMapa['geojson'] }) {
         if (bounds.isValid()) {
           map.fitBounds(bounds, { padding: [20, 20] })
         }
-      } catch {}
+      } catch {
+        // GeoJSON sin geometría válida: se queda la vista inicial del estado.
+      }
     }
   }, [geojsonData, map])
   return null

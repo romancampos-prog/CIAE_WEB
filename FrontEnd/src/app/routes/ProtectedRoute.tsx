@@ -1,7 +1,8 @@
 // react
 import { Navigate, Outlet } from 'react-router-dom';
 // propios
-import { useAuth, type Rol } from '@/features/auth';
+import type { Rol } from '@/types/api/auth';
+import { useAuth } from '@/features/auth';
 
 interface Props {
   /** Si se pasa, además de tener sesión hay que tener uno de estos roles. */

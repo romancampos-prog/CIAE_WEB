@@ -1,7 +1,6 @@
 // propios
-import type { EstadoMesArchivo } from '@/features/generar-extractor/tipos';
-
-export type ClaseEstado = 'ok' | 'parcial' | 'pendiente' | 'bloqueado' | 'previo' | 'futuro';
+import type { EstadoMesArchivo } from '@/types/api/indicadores/extractor';
+import type { ClaseEstado } from '@/types/pantallas/generarExtractor';
 
 // Cómo se ve cada estado de mes que manda /estado-archivos.
 export const ESTADO_MES: Record<EstadoMesArchivo, { clase: ClaseEstado; texto: string }> = {

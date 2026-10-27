@@ -20,20 +20,6 @@
 /* ── Nav: el header ahora es el componente compartido TopBar
    (src/shared/componentes/TopBar.jsx + topbar.css) ── */
 
-.ftp-btn-poblacion {
-  display: flex; align-items: center; gap: 7px;
-  background: var(--marca); color: white; border: none;
-  border-radius: 100px; padding: 8px 18px;
-  font-weight: 700; font-size: 0.8rem;
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-  box-shadow: 0 4px 14px rgba(11,84,69,0.25);
-}
-.ftp-btn-poblacion:hover {
-  background: #0e6655;
-  box-shadow: 0 6px 20px rgba(11,84,69,0.35);
-  transform: translateY(-1px);
-}
-
 /* ── Main ── */
 .ftp-main-content {
   flex: 1; max-width: 1100px; width: 100%;
@@ -53,39 +39,11 @@
 }
 
 /* ── Hero ── */
-.ftp-hero { text-align: center; margin-bottom: 28px; }
 
-.ftp-hero-badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: var(--superficie);
-  border: 1px solid rgba(var(--marca-rgb), 0.15);
-  border-radius: 100px; padding: 5px 16px;
-  font-size: 0.65rem; font-weight: 700;
-  color: var(--marca-texto); text-transform: uppercase; letter-spacing: 1px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(11,84,69,0.07);
-}
-.ftp-hero-badge-dot {
-  width: 6px; height: 6px; background: #4ade80;
-  border-radius: 50%;
-  animation: ftp-pulse 2.2s ease infinite;
-  box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
-}
 @keyframes ftp-pulse {
   0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.65); }
   70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
   100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
-}
-
-.ftp-main-title {
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
-  font-weight: 800; margin: 0 0 8px;
-  letter-spacing: -2px; line-height: 1;
-}
-.ftp-text-gold { color: var(--marca-texto); }
-
-.ftp-subtitle {
-  font-size: 0.92rem; color: var(--texto-suave); margin: 0;
 }
 
 /* ── Hub (HubIndicadoresPagina selección) ── */
@@ -99,7 +57,6 @@
 }
 .ftp-greeting { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .ftp-greeting-icon { display: flex; align-items: center; color: var(--dorado-texto); opacity: 0.85; }
-.ftp-greeting-text { font-size: clamp(1rem, 2.2vw, 1.3rem); font-weight: 300; color: var(--texto-suave); letter-spacing: -0.2px; }
 
 .ftp-hub-title-main {
   font-size: clamp(1.9rem, 4vw, 3rem);
@@ -234,144 +191,14 @@
 .ftp-screen-container .hc-chip--gold { color: var(--dorado-texto); background: rgba(var(--dorado-rgb), 0.08); border: 1px solid rgba(var(--dorado-rgb), 0.2); }
 
 /* ── Módulos ── */
-.ftp-modules {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 28px;
-}
-
-.ftp-module-card {
-  background: var(--superficie);
-  border-radius: 16px;
-  padding: 22px 24px;
-  border: 1.5px solid var(--borde);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-  transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
-  display: flex; flex-direction: column; gap: 10px;
-}
-.ftp-module-card--indicators {
-  border-left: 4px solid var(--marca-texto);
-  cursor: default;
-}
-.ftp-module-card--IAAS {
-  border-left: 4px solid var(--dorado-texto);
-  cursor: pointer;
-}
-.ftp-module-card--IAAS:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(154,112,38,0.15);
-  border-color: var(--dorado-texto);
-}
-
-.ftp-module-header {
-  display: flex; align-items: center; gap: 14px;
-}
-.ftp-module-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: rgba(var(--marca-rgb), 0.08);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--marca-texto); flex-shrink: 0;
-}
-.ftp-module-icon--gold {
-  background: rgba(var(--dorado-rgb), 0.1);
-  color: var(--dorado-texto);
-}
-.ftp-module-eyebrow {
-  font-size: 0.6rem; font-weight: 700; color: var(--texto-tenue);
-  text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 2px;
-}
-.ftp-module-title {
-  font-size: 1rem; font-weight: 800; color: var(--texto); margin: 0;
-}
-.ftp-module-desc {
-  font-size: 0.8rem; color: var(--texto-suave); line-height: 1.55; margin: 0;
-}
 
 /* Label sección */
-.ftp-panel-label {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; font-weight: 700;
-  color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.8px;
-  margin-bottom: 12px;
-}
 
 /* ── Panel glass ── */
-.ftp-glass-panel {
-  background: rgba(var(--superficie-rgb), 0.85);
-  backdrop-filter: blur(14px);
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.5);
-  padding: 24px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.03);
-}
 
 /* ── Disclaimer ── */
-.ftp-info-disclaimer {
-  max-width: 860px; margin: 24px auto 0;
-  padding: 11px 20px;
-  background: rgba(var(--superficie-rgb), 0.6);
-  border-radius: 12px;
-  display: flex; align-items: center; gap: 12px;
-  border: 1px solid rgba(var(--marca-rgb), 0.1);
-}
-.ftp-info-icon {
-  width: 22px; height: 22px;
-  background: var(--marca); color: white;
-  border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; flex-shrink: 0;
-}
-.ftp-info-disclaimer p {
-  margin: 0; font-size: 0.72rem; color: var(--texto-suave); line-height: 1.55;
-}
-.ftp-info-disclaimer strong { color: var(--marca-texto); font-weight: 700; }
 
 /* ── Action footer flotante ── */
-.ftp-action-footer {
-  position: fixed; bottom: 56px; left: 0; right: 0;
-  display: flex; justify-content: center; z-index: 1000;
-  transform: translateY(130px); opacity: 0;
-  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
-  pointer-events: none;
-}
-.ftp-action-footer.show {
-  transform: translateY(0); opacity: 1;
-  pointer-events: all;
-}
-
-.ftp-action-pill {
-  background: var(--superficie);
-  padding: 10px 12px 10px 22px;
-  border-radius: 100px;
-  display: flex; align-items: center; gap: 20px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.06);
-  border: 1px solid rgba(var(--marca-rgb), 0.1);
-}
-
-.ftp-sel-info {
-  display: flex; flex-direction: column; gap: 1px;
-}
-.ftp-sel-label {
-  font-size: 0.62rem; color: var(--texto-tenue);
-  text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
-}
-.ftp-sel-name {
-  font-size: 0.88rem; font-weight: 800; color: var(--marca-texto);
-}
-
-.ftp-btn-submit {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--marca); color: white; border: none;
-  padding: 11px 24px; border-radius: 100px;
-  font-weight: 700; font-size: 0.88rem;
-  cursor: pointer; font-family: inherit;
-  transition: all 0.2s;
-}
-.ftp-btn-submit:hover {
-  background: #0e6655;
-  box-shadow: 0 6px 18px rgba(11,84,69,0.35);
-  transform: translateY(-1px);
-}
 
 /* Responsive — mismos cortes que auth.css / inicio.css (48rem / 30rem) */
 

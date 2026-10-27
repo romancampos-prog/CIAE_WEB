@@ -1,7 +1,8 @@
 // react
 import { useState } from 'react';
 // propios
-import type { Restricciones } from '@/features/generar-ftp/tipos';
+import type { Restricciones } from '@/types/api/indicadores/ftp';
+import { IconoAlerta, IconoCerrar, IconoChevronAbajo, IconoError } from '@/components/icons';
 import './restricciones.css';
 import './modalRestricciones.css';
 
@@ -30,20 +31,6 @@ const LABEL_RUTA: Record<string, string> = {
   DESCARGA_FALLIDA:       'Detalle',
   SERVICIO_NO_APLICA:     'Detalle',
 };
-
-const IcoCritico = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-  </svg>
-);
-
-const IcoAdvertencia = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
-);
 
 // Separa "{ruta}  ✗ fallo en: '{segmento}' — {diagnostico}" en sus 3 partes
 // para poder darles su propia línea/estilo en vez de un solo párrafo pegado.
@@ -90,7 +77,7 @@ const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }: Props
             {/* Icono + título */}
             <div className="mrest-header-icon-wrap">
               <span className={`mrest-header-icon mrest-header-icon--${sev}`}>
-                {hayCriticos ? <IcoCritico /> : <IcoAdvertencia />}
+                {hayCriticos ? <IconoError /> : <IconoAlerta tamano={18} />}
               </span>
             </div>
             <div className="mrest-header-text">
@@ -122,9 +109,7 @@ const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }: Props
               </div>
             </div>
             <button className="mrest-modal-close" onClick={onClose} title="Cerrar">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
+              <IconoCerrar tamano={14} strokeLinejoin="round" />
             </button>
           </div>
         </div>
@@ -146,7 +131,7 @@ const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }: Props
                   >
                     <div className="res-card-left">
                       <span className={`res-ico res-ico--${cardSev}`}>
-                        {cardSev === 'critico' ? <IcoCritico /> : <IcoAdvertencia />}
+                        {cardSev === 'critico' ? <IconoError /> : <IconoAlerta tamano={18} />}
                       </span>
                       <div className="res-card-texto">
                         <p className="res-nombre">{error.nombreError}</p>
@@ -157,13 +142,7 @@ const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }: Props
                       <span className={`res-badge res-badge--${cardSev}`}>
                         {total} unidad{total !== 1 ? 'es' : ''}
                       </span>
-                      <svg
-                        className={`res-chevron ${open ? 'res-chevron--open' : ''}`}
-                        width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                      >
-                        <polyline points="6 9 12 15 18 9"/>
-                      </svg>
+                      <IconoChevronAbajo className={`res-chevron ${open ? 'res-chevron--open' : ''}`} />
                     </div>
                   </button>
 

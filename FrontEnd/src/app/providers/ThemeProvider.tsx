@@ -1,13 +1,8 @@
 // react
 import { createContext, useSyncExternalStore, type ReactNode } from 'react';
 // propios
-import { alternarTema, suscribirTema, temaActual, type Tema } from '@/utils/tema';
-
-export interface ValorTema {
-  tema: Tema;
-  esOscuro: boolean;
-  alternarTema: () => void;
-}
+import type { Tema, ValorTema } from '@/types/pantallas/tema';
+import { alternarTema, suscribirTema, temaActual } from '@/utils/tema';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const TemaContext = createContext<ValorTema | null>(null);

@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // propios
+import { IconoActividad, IconoFlechaDerecha, IconoSubir } from '@/components/icons';
 import { useRol } from '@/features/auth';
 import TopBar from '@/components/TopBar';
 import { useMesesGuardadosIaas } from '@/features/generar-iaas';
@@ -40,9 +41,7 @@ const MenuIaasPagina = () => {
           >
             <div className="hc-header hc-header--green">
               <div className="hc-icon-box hc-icon-box--green">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                </svg>
+                <IconoActividad />
               </div>
               <div className="hc-header-text">
                 <p className="hc-eyebrow">Consulta</p>
@@ -68,9 +67,7 @@ const MenuIaasPagina = () => {
                 )}
               </div>
               <div className="hc-arrow hc-arrow--green">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
+                <IconoFlechaDerecha />
               </div>
             </div>
           </div>
@@ -80,11 +77,7 @@ const MenuIaasPagina = () => {
           <div className="home-card" onClick={() => navigate('/CIAE/IndicadoresMedicos/IAAS/Reporte')}>
             <div className="hc-header hc-header--gold">
               <div className="hc-icon-box hc-icon-box--gold">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
+                <IconoSubir />
               </div>
               <div className="hc-header-text">
                 <p className="hc-eyebrow">Captura</p>
@@ -99,9 +92,7 @@ const MenuIaasPagina = () => {
                 <span className="hc-chip hc-chip--gold">IAAS 01–06</span>
               </div>
               <div className="hc-arrow hc-arrow--green">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
+                <IconoFlechaDerecha />
               </div>
             </div>
           </div>

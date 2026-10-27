@@ -4,11 +4,7 @@
         "fechaModificacion": "10/09/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": false,
         "periodicidad": "Semestral Anualizado",
-        "peridocidadGenerada": {
-            "semstralAnualizado": true
-        },
         "informacion": {
             "titulo": "DM 04 - Tasa de hospitalizaciones evitables por diabetes en población derechohabiente de 20 a 74 años",
             "objetivo": "Medir el comportamiento de las hospitalizaciones potencialmente evitables por diabetes en derechohabientes de 20 a 74 años, con el propósito de conocer la magnitud de este problema de salud pública.",

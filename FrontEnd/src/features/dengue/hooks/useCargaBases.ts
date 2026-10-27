@@ -1,8 +1,8 @@
 // react
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 // propios
+import { archivosDengueApi } from '@/api/dengue/archivosApi';
 import { usePipeline } from '@/features/dengue/context/PipelineContext';
-import { dengueService } from '@/features/dengue/services/dengueService';
 
 type Base = 'operativa' | 'siscep';
 
@@ -10,25 +10,19 @@ type Base = 'operativa' | 'siscep';
 export function useCargaBases() {
   const { estado, ejecutar } = usePipeline();
   const [listos, setListos] = useState<Record<Base, boolean>>({ operativa: false, siscep: false });
-  const [toastTick, setToastTick] = useState(0);
-
-  // Dispara el toast en cada visita a esta página y cuando termina un pipeline nuevo.
-  useEffect(() => {
-    if (estado?.ultimo_reporte) setToastTick(t => t + 1);
-  }, [estado?.ultimo_reporte]);
 
   /** Handler de UploadCard para una base: la sube y marca ese paso como listo. */
   const subir = (base: Base) => async (archivo: File) => {
     const respuesta = base === 'operativa'
-      ? await dengueService.subirOperativa(archivo)
-      : await dengueService.subirSiscep(archivo);
+      ? await archivosDengueApi.subirOperativa(archivo)
+      : await archivosDengueApi.subirSiscep(archivo);
     setListos(previos => ({ ...previos, [base]: true }));
     return respuesta.data as { nombre: string; bytes: number };
   };
 
   return {
     estado, ejecutar,
-    listos, toastTick, subir,
+    listos, subir,
     ambosListos: listos.operativa && listos.siscep,
     corriendo:   !!estado?.corriendo,
     completado:  !!estado?.completado,

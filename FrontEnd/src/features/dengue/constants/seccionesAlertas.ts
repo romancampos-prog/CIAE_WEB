@@ -1,15 +1,5 @@
 // propios
-import type { TipoColumnasAlerta } from '@/features/dengue/components/alertas/SeccionAlerta';
-import type { DatosAlertasSiscep } from '@/features/dengue/tipos';
-
-export interface SeccionAlertaSiscep {
-  clave: Exclude<keyof DatosAlertasSiscep, 'año' | 'tabla_negativos'>;
-  titulo: string;
-  descripcion: string;
-  tipo: TipoColumnasAlerta;
-  color: string;
-  prioritaria?: boolean;
-}
+import type { SeccionAlertaSiscep } from '@/types/pantallas/dengue';
 
 // Las cinco alertas de SisCep, en el orden en que se muestran.
 export const SECCIONES_ALERTAS: SeccionAlertaSiscep[] = [

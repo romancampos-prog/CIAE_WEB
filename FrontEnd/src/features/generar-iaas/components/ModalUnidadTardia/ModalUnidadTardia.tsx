@@ -1,11 +1,11 @@
 // react
 import { useRef, useState, type KeyboardEvent } from 'react';
 // propios
-import { UploadIcon, XIcon, FileIcon } from '@/components/ui/Iconos';
+import type { IndicadorGenerarIaas, SesionIaas } from '@/types/api/indicadores/iaas';
+import { IconoAlerta, IconoArchivo, IconoCandado, IconoCerrar, IconoFlechaDerecha, IconoReloj, IconoSubirNube } from '@/components/icons';
 import ModalConfirmarPassword from '@/components/ui/modal/ModalConfirmarPassword';
 import { MESES_LARGOS } from '@/features/indicadores';
 import { useUnidadTardia } from '@/features/generar-iaas/hooks/useUnidadTardia';
-import type { IndicadorGenerarIaas, SesionIaas } from '@/features/generar-iaas/tipos';
 import './modalUnidadTardia.css';
 
 interface Props {
@@ -49,12 +49,12 @@ const ZonaExcel = ({ etiqueta, opcional, archivo, onElegir, onQuitar }: PropsZon
         <input ref={entrada} type="file" accept=".xlsx" hidden onChange={e => onElegir(e.target.files?.[0])} />
         {archivo ? (
           <div className="mut-file-chip">
-            <FileIcon />
+            <IconoArchivo />
             <span>{archivo.name.replace('.xlsx', '')}</span>
-            <button className="mut-chip-x" onClick={e => { e.stopPropagation(); onQuitar(); }}><XIcon /></button>
+            <button className="mut-chip-x" onClick={e => { e.stopPropagation(); onQuitar(); }}><IconoCerrar strokeLinejoin="round" /></button>
           </div>
         ) : (
-          <span className="mut-drop-label"><UploadIcon /> Subir o arrastrar .xlsx</span>
+          <span className="mut-drop-label"><IconoSubirNube /> Subir o arrastrar .xlsx</span>
         )}
       </div>
     </div>
@@ -103,16 +103,14 @@ export default function ModalUnidadTardia({ onClose, anio, mes, unidades, todosI
         <div className="mut-header">
           <div className="mut-header-left">
             <div className="mut-icon-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </svg>
+              <IconoReloj tamano={16} />
             </div>
             <div>
               <p className="mut-title">Completar unidad tardía</p>
               <p className="mut-sub">IAAS — {mesLabel} {anio}</p>
             </div>
           </div>
-          <button className="mut-close" onClick={onClose}><XIcon /></button>
+          <button className="mut-close" onClick={onClose}><IconoCerrar strokeLinejoin="round" /></button>
         </div>
 
         <div className="mut-body">
@@ -194,9 +192,7 @@ export default function ModalUnidadTardia({ onClose, anio, mes, unidades, todosI
                           <span className="mut-ind-den-box">
                             {tieneDen ? denGuardado : '—'}
                           </span>
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                          </svg>
+                          <IconoCandado tamano={11} strokeWidth="2.2" />
                         </span>
                       )}
                     </div>
@@ -231,10 +227,7 @@ export default function ModalUnidadTardia({ onClose, anio, mes, unidades, todosI
           {/* Warning */}
           {unidad && (
             <div className="mut-warning">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
+              <IconoAlerta tamano={13} />
               Sobreescribirá los datos de <strong>&nbsp;{unidad}&nbsp;</strong> para {mesLabel} {anio}
             </div>
           )}
@@ -247,9 +240,7 @@ export default function ModalUnidadTardia({ onClose, anio, mes, unidades, todosI
           <button className="mut-btn-cancel" onClick={onClose}>Cancelar</button>
           <button className="mut-btn-confirm" onClick={tardia.confirmar}>
             Confirmar
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-            </svg>
+            <IconoFlechaDerecha tamano={13} />
           </button>
         </div>
       </div>

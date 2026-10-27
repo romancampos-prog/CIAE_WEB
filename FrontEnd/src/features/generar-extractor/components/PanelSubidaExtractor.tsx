@@ -1,7 +1,9 @@
 // propios
+import { IconoCerrar, IconoDocumento, IconoPalomitaAncha } from '@/components/icons';
 import { DESCRIPCION_ESTADO, ESTADO_MES } from '@/features/generar-extractor/constants/estadosMes';
 import { numeroMes, resumenIndicador } from '@/features/generar-extractor/utils/textosExtractor';
-import { ChipIndicador, IconoArchivo, IconoCheck, IconoEstadoMes } from './IconosExtractor';
+import ChipIndicador from './ChipIndicador';
+import IconoEstadoMes from './IconoEstadoMes';
 import ZonaArchivo from './ZonaArchivo';
 import type { EstadoGenerarExtractor } from '@/features/generar-extractor/hooks/useGenerarExtractor';
 
@@ -25,13 +27,13 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
         onClick={e => e.stopPropagation()}
       >
         <header className="exa-panel-header">
-          <span className={`exv-archivo-icono${panel.tipo === 'cruce' ? ' exa-icono--cruce' : ''}`}><IconoArchivo /></span>
+          <span className={`exv-archivo-icono${panel.tipo === 'cruce' ? ' exa-icono--cruce' : ''}`}><IconoDocumento /></span>
           <div className="exa-panel-titulos">
             <h2 id="exa-panel-titulo">{panel.archivo}</h2>
             <p>{panel.mes} {anio}</p>
           </div>
           <button type="button" className="exa-panel-cerrar" onClick={ex.cerrarPanel} aria-label="Cerrar panel" autoFocus>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+            <IconoCerrar tamano={18} strokeWidth="2.4" />
           </button>
         </header>
 
@@ -39,7 +41,7 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
           {resultado ? (
             <>
               <div className="exa-resultado-encabezado">
-                <span className="exa-resultado-ok"><IconoCheck /></span>
+                <span className="exa-resultado-ok"><IconoPalomitaAncha /></span>
                 <div>
                   <p className="exa-resultado-titulo">{resultado.archivo} de {resultado.mes} procesado</p>
                   {resultado.mensaje && <p className="exa-resultado-sub">{resultado.mensaje}</p>}
@@ -82,7 +84,7 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
               )}
 
               <ZonaArchivo
-                sugerido={`${panel.prefijo}_${numeroMes(panel.mes)}_${anio}`}
+                sugerido={archivoDelPanel.nombreSugerido.replace('{MM}', numeroMes(panel.mes)).replace('{AAAA}', String(anio))}
                 archivo={ex.archivoSeleccionado}
                 onSeleccionar={ex.setArchivoSeleccionado}
               />

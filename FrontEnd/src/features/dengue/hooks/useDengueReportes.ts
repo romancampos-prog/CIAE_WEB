@@ -2,10 +2,10 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
-import { CLAVE_REPORTES_DENGUE } from '@/features/dengue/context/PipelineContext';
-import { dengueService } from '@/features/dengue/services/dengueService';
-import type { TipoMapa } from '@/features/dengue/tipos';
+import type { TipoMapa } from '@/types/api/dengue/reportes';
+import { reportesDengueApi } from '@/api/dengue/reportesApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
+import { CLAVE_REPORTES_DENGUE } from '@/features/dengue/constants/clavesConsulta';
 
 /**
  * Un reporte de dengue: se vuelve a pedir solo cuando el pipeline termina un análisis nuevo
@@ -28,8 +28,8 @@ function useDengueReporte<T>(nombre: unknown[], pedir: () => Promise<T>) {
   return { datos: consulta.data ?? null, cargando: consulta.isLoading, error };
 }
 
-export const useCanal              = () => useDengueReporte(['canal'], dengueService.canal);
-export const useMapaDengue         = (tipo: TipoMapa) => useDengueReporte(['mapa', tipo], () => dengueService.mapa(tipo));
-export const useAlertasSiscep      = () => useDengueReporte(['alertasSiscep'], dengueService.alertasSiscep);
-export const useDuplicados         = () => useDengueReporte(['duplicados'], dengueService.duplicados);
-export const usePosiblesDuplicados = () => useDengueReporte(['posiblesDuplicados'], dengueService.posiblesDuplicados);
+export const useCanal              = () => useDengueReporte(['canal'], reportesDengueApi.canal);
+export const useMapaDengue         = (tipo: TipoMapa) => useDengueReporte(['mapa', tipo], () => reportesDengueApi.mapa(tipo));
+export const useAlertasSiscep      = () => useDengueReporte(['alertasSiscep'], reportesDengueApi.alertasSiscep);
+export const useDuplicados         = () => useDengueReporte(['duplicados'], reportesDengueApi.duplicados);
+export const usePosiblesDuplicados = () => useDengueReporte(['posiblesDuplicados'], reportesDengueApi.posiblesDuplicados);

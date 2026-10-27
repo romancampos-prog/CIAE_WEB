@@ -1,7 +1,7 @@
 // react
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 // propios
-import type { Rol } from '@/features/auth';
+import type { Rol } from '@/types/api/auth';
 import { DengueLayout, PipelineProvider } from '@/features/dengue';
 import AuthLayout                   from '@/app/layouts/AuthLayout';
 import MainLayout                   from '@/app/layouts/MainLayout';

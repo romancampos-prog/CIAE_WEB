@@ -1,7 +1,7 @@
 // react
 import { useState, type KeyboardEvent } from 'react';
 // propios
-import { CheckIcon } from '@/components/ui/Iconos';
+import { IconoPalomita } from '@/components/icons';
 import ArchivoUnidadIaas from './ArchivoUnidadIaas';
 import ExcelGlobalIaas from './ExcelGlobalIaas';
 import type { EstadoGenerarIaas } from '@/features/generar-iaas/hooks/useGenerarIaas';
@@ -65,7 +65,7 @@ const TablaCapturaIaas = ({ iaas }: { iaas: EstadoGenerarIaas }) => {
               <td className="ia-td-unidad">
                 <div className="ia-td-unidad-inner">
                   <span className={`ia-row-status ${okNum ? 'ia-row-status--ok' : ''}`}>
-                    {okNum ? <CheckIcon size={10} /> : <span className="ia-row-dot" />}
+                    {okNum ? <IconoPalomita tamano={10} /> : <span className="ia-row-dot" />}
                   </span>
                   <span className="ia-unit-name">{u}</span>
                 </div>

@@ -1,8 +1,8 @@
 // react
 import type { ReactNode } from 'react';
 // propios
+import type { Desempeno } from '@/types/api/indicadores/reportes';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import type { Desempeno } from '@/features/graficas/tipos';
 
 interface Props {
   niveles?: Desempeno[];

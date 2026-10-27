@@ -4,7 +4,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": true,
         "periodicidad": "Mensual",
         "peridocidadGenerada": {
             "mensual": true,
@@ -67,7 +66,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": true,
         "periodicidad": "Mensual",
         "peridocidadGenerada": {
             "mensual": true,

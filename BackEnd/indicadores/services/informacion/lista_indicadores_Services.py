@@ -57,8 +57,6 @@ def indicadores_del_modulo(modulo: str) -> list[IndicadorGenerar]:
             titulo=bloque["informacion"]["titulo"],
             periodicidad=bloque["periodicidad"],
             descripcionPeriodicidad=descripcion_periodicidad(bloque["periodicidad"]),
-            peridocidadGenerada=bloque.get("peridocidadGenerada") or {},
-            previos=bloque.get("previos", False),
             imagen=bloque["imagen"],
             color=bloque["color"],
         ))

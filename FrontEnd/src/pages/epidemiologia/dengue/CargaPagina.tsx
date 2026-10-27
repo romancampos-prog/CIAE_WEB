@@ -8,7 +8,7 @@ import { textoAcento } from '@/utils/colorAcento';
  * bloquea la UI con el overlay corgi mientras el análisis está en curso.
  */
 export default function CargaPagina() {
-  const { estado, ejecutar, listos, toastTick, subir, ambosListos, corriendo, completado, hayError, cuenta } = useCargaBases()
+  const { estado, ejecutar, listos, subir, ambosListos, corriendo, completado, hayError, cuenta } = useCargaBases()
 
   return (
     <div style={{
@@ -218,7 +218,7 @@ export default function CargaPagina() {
         </div>
       )}
 
-      <ReporteToast ultimoReporte={estado?.ultimo_reporte ?? null} trigger={toastTick} />
+      <ReporteToast ultimoReporte={estado?.ultimo_reporte ?? null} />
     </div>
   )
 }

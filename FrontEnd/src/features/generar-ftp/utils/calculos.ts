@@ -1,6 +1,6 @@
 // propios
-import type { FichaIndicador, MetasSemaforo, Umbral } from '@/features/indicadores';
-import type { TextosSemaforo, TipoReporte } from '@/features/generar-ftp/tipos';
+import type { FichaIndicador, MetasSemaforo, Umbral } from '@/types/api/indicadores/informacion';
+import type { TextosSemaforo, TipoReporte } from '@/types/pantallas/generarFtp';
 
 // Umbrales de semáforo pueden venir en formato legado (número puro, ej. 1.7)
 // o explícito (texto con operador, ej. "<= 1.7") -- ver services/compartido/semaforo/ del backend.

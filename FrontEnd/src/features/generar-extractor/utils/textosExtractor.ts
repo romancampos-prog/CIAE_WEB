@@ -1,6 +1,6 @@
 // propios
+import type { ResultadoIndicadorExtractor } from '@/types/api/indicadores/extractor';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
-import type { ResultadoIndicadorExtractor } from '@/features/generar-extractor/tipos';
 
 /** "Junio" -> "06". */
 export const numeroMes = (mes: string): string => String(MESES_LARGOS_ARR.indexOf(mes) + 1).padStart(2, '0');

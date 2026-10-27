@@ -2,8 +2,8 @@
 import { useState } from 'react'
 import Plot from 'react-plotly.js'
 // propios
+import type { DatosCanal } from '@/types/api/dengue/reportes';
 import useTema from '@/hooks/useTema';
-import type { DatosCanal } from '@/features/dengue/tipos';
 
 const ZONA_COLORES: Record<string, string> = {
   exito    : '#2e8b57',

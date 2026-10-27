@@ -1,5 +1,5 @@
 // propios
-import type { Desempeno } from '@/features/graficas/tipos';
+import type { Desempeno } from '@/types/api/indicadores/reportes';
 
 // Variables CSS del tema (src/styles/tema.css): siguen solas al modo
 // claro/oscuro en style={{}}, variables --status y clases.

@@ -1,6 +1,7 @@
 // propios
+import type { PerfilIndicador, ReporteIndicador, TipoMeta, UnidadDatos } from '@/types/api/indicadores/reportes';
+import type { FilaUnidad, PuntoSerie } from '@/types/pantallas/graficas';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
-import type { FilaUnidad, PerfilIndicador, PuntoSerie, ReporteIndicador, TipoMeta, UnidadDatos } from '@/features/graficas/tipos';
 
 // Clave con la que el backend manda el estatal (total OOAD) dentro de cada mes.
 export const CLAVE_ESTATAL = 'TOTAL_OOAD';

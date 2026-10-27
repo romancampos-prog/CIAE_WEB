@@ -1,9 +1,11 @@
 // react
 import { useState } from 'react';
 // propios
+import type { Desempeno } from '@/types/api/indicadores/reportes';
+import type { FilaUnidad } from '@/types/pantallas/graficas';
+import { IconoBuscar } from '@/components/icons';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { CLAVE_ESTATAL, formatoNumero, nombreUnidad } from '@/features/graficas/utils/datosGrafica';
-import type { Desempeno, FilaUnidad } from '@/features/graficas/tipos';
 
 // Mismo distintivo que tenía el panel de unidades anterior: el color dice el nivel y el signo lo repite.
 const SIGNO: Record<Desempeno, string> = { Esperado: '✓', Medio: '!', Bajo: '!', Gris: '?' };
@@ -60,9 +62,7 @@ const ListaUnidades = ({ filas, estatal, unidadSel, grupoDeUnidad, onElegir }: P
     <aside className="gi-lista-unidades">
       <p className="gi-lista-titulo">Unidades</p>
       <label className="gi-buscar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
+        <IconoBuscar aria-hidden />
         <input type="search" value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="Buscar unidad…" aria-label="Buscar unidad" />
       </label>
       <div className="gi-lista-scroll">

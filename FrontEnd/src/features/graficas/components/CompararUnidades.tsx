@@ -1,11 +1,12 @@
 // react
 import { useState } from 'react';
 // propios
+import type { Desempeno, PerfilIndicador } from '@/types/api/indicadores/reportes';
+import type { FilaUnidad } from '@/types/pantallas/graficas';
 import LeyendaSemaforo from './LeyendaSemaforo';
 import TooltipDato from './TooltipDato';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { formatoValor, metaDe, ordenarPorResultado, techoDe } from '@/features/graficas/utils/datosGrafica';
-import type { Desempeno, FilaUnidad, PerfilIndicador } from '@/features/graficas/tipos';
 
 interface Props {
   filas: FilaUnidad[];

@@ -2,19 +2,12 @@
 import { useState, type DragEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
-import { poblacionService } from '@/features/generar-ftp/services/poblacionService';
+import type { AdvertenciasCarga } from '@/types/pantallas/generarFtp';
+import { poblacionApi } from '@/api/indicadores/poblacionApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 import { CLAVE_POBLACION_ACTUAL } from './usePoblacionActual';
 
 export const ANO_ACTIVO = '2026';
-
-export interface AdvertenciasCarga {
-  no_encontradas: string[];
-  extras: string[];
-  celdasVacias: Record<string, string[]>;
-  alias_sugeridos: Record<string, string>;
-  advertenciaTitulo: string | null;
-}
 
 /**
  * Los dos pasos del modal de población: subir el Excel (con sus advertencias) y, después,
@@ -31,7 +24,7 @@ export function useActualizarPoblacion() {
   const [periodo, setPeriodo]           = useState<{ mes: string; anio: number } | null>(null);
 
   const subida = useMutation({
-    mutationFn: poblacionService.subirArchivo,
+    mutationFn: poblacionApi.subirArchivo,
     onMutate: () => setMensaje(null),
     onSuccess: (datos) => {
       clienteConsultas.invalidateQueries({ queryKey: CLAVE_POBLACION_ACTUAL });
@@ -60,7 +53,7 @@ export function useActualizarPoblacion() {
   });
 
   const recalculo = useMutation({
-    mutationFn: () => poblacionService.recalcular(ANO_ACTIVO),
+    mutationFn: () => poblacionApi.recalcular(ANO_ACTIVO),
     onError: () => setMensaje({ tipo: 'error', texto: 'Error al recalcular los reportes.' }),
   });
 

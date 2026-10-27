@@ -1,7 +1,7 @@
 // react
 import { useState } from 'react';
 // propios
-import { CheckIcon } from '@/components/ui/Iconos';
+import { IconoPalomita } from '@/components/icons';
 import ArchivoUnidadIaas from './ArchivoUnidadIaas';
 import ExcelGlobalIaas from './ExcelGlobalIaas';
 import type { EstadoGenerarIaas } from '@/features/generar-iaas/hooks/useGenerarIaas';
@@ -41,7 +41,7 @@ const TarjetasCapturaIaas = ({ iaas }: { iaas: EstadoGenerarIaas }) => {
           <div key={u} className={`ia-mcard ${iaas.denominadoresCompletos(u) && okNum ? 'ia-mcard--ok' : ''}`}>
             <div className="ia-mcard-header">
               <span className={`ia-row-status ${okNum ? 'ia-row-status--ok' : ''}`}>
-                {okNum ? <CheckIcon size={10} /> : <span className="ia-row-dot" />}
+                {okNum ? <IconoPalomita tamano={10} /> : <span className="ia-row-dot" />}
               </span>
               <span className="ia-unit-name">{u}</span>
             </div>

@@ -1,10 +1,10 @@
 // react
 import { useState } from 'react'
 // propios
+import type { RegistroCaso } from '@/types/api/dengue/reportes';
+import type { TipoColumnasAlerta } from '@/types/pantallas/dengue';
+import { IconoChevronAbajo, IconoPalomita } from '@/components/icons';
 import { textoAcento } from '@/utils/colorAcento';
-import type { RegistroCaso } from '@/features/dengue/tipos';
-
-export type TipoColumnasAlerta = 'cols_caso' | 'cols_pend';
 
 const CABECERAS: Record<TipoColumnasAlerta, string[]> = {
   cols_caso: ['Folio', 'Unidad', 'Nombre', 'Ap. Paterno', 'Ap. Materno', 'Dx Probable', 'Sem'],
@@ -104,17 +104,10 @@ export default function SeccionAlerta({ titulo, descripcion, registros, tipo = '
 
           {/* Chevron */}
           {!vacio && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                 style={{ transition: 'transform 0.2s', transform: abierto ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+            <IconoChevronAbajo stroke="#94a3b8" style={{ transition: 'transform 0.2s', transform: abierto ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }} />
           )}
           {vacio && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+            <IconoPalomita stroke="#16a34a" />
           )}
         </div>
       </button>

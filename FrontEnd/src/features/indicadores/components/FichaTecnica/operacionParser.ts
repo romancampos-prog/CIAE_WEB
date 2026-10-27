@@ -11,41 +11,11 @@
  */
 
 // propios
-import type {
-  CondicionColumna, ConfigArchivo, ConfigsFuente, CruceArchivo, DetalleFuente, FuenteCalculo, GrupoColumnas,
-} from '@/features/indicadores/tipos';
+import type { CondicionColumna, ConfigArchivo, ConfigsFuente, CruceArchivo, DetalleFuente, FuenteCalculo, GrupoColumnas } from '@/types/api/indicadores/informacion';
+import type { CalculoParseado, ConfigFuente, DescripcionFiltro, FuenteAgrupada, FuenteDescrita, Segmento } from '@/types/pantallas/fichaTecnica';
 
 /** Mapas de columnas que cambian por mes ({"MESES_CIP01": {"1": "D", ...}}). */
 type ColumnasPorMes = Record<string, Record<string, string>>;
-type ConfigFuente = ConfigArchivo | string[];
-
-export interface GrupoCols {
-  cols: string[];
-  prev: string | null;
-}
-
-export interface FuenteAgrupada {
-  id: string;
-  hoja: string;
-  cfg: ConfigFuente | null;
-  grupos: GrupoCols[];
-}
-
-export interface CalculoParseado {
-  tipo: 'normal' | 'producto';
-  fuentes: FuenteAgrupada[];
-  operacion: string;
-  resumen: string;
-}
-
-/** Texto plano o un grupo de códigos que el front pinta como chips. */
-export type Segmento = string | { codigos: (string | number)[] };
-
-export interface DescripcionFiltro {
-  hoja?: string;
-  condiciones: Segmento[];
-  cruce: Segmento[] | null;
-}
 
 interface FuenteToken {
   id: string;
@@ -417,7 +387,7 @@ const DESCRIPTORES_FILTRO: Record<string, (detalle: DetalleFuente) => Omit<Descr
  * @param {string} modoExtraccion
  * @param {object} detalle - el bloque crudo (reporte.numerador o .denominador)
  */
-export const descripcionFiltro = (modoExtraccion: string, detalle: DetalleFuente): DescripcionFiltro => {
+const descripcionFiltro = (modoExtraccion: string, detalle: DetalleFuente): DescripcionFiltro => {
   const descriptor = DESCRIPTORES_FILTRO[modoExtraccion];
   const partes = descriptor
     ? descriptor(detalle)
@@ -426,11 +396,6 @@ export const descripcionFiltro = (modoExtraccion: string, detalle: DetalleFuente
 };
 
 const MODOS_FILTRO: string[] = ['FILTRO_CONTEO', 'FILTRO_CONTEO_ACUMULADO', 'FILTRO_UNIDAD_VALOR'];
-
-export type FuenteDescrita =
-  | ({ tipo: 'filtro' } & DescripcionFiltro)
-  | { tipo: 'formula' }
-  | { tipo: 'sin_desglose'; fuente: string };
 
 /**
  * Decide cómo describir un lado (numerador/denominador) de reporte.ficha,

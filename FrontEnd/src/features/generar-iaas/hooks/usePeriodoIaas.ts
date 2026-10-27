@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 // propios
+import { iaasApi } from '@/api/indicadores/iaasApi';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
-import { iaasService } from '@/features/generar-iaas/services/iaasService';
 import { mesDisponible } from '@/features/generar-iaas/utils/calculos';
 
 /**
@@ -25,7 +25,7 @@ export function usePeriodoIaas() {
 
   const mesesDelAnioActual = useQuery({
     queryKey: ['iaas', 'mesesGuardados', String(anioActual)],
-    queryFn: () => iaasService.mesesGuardados(String(anioActual)),
+    queryFn: () => iaasApi.mesesGuardados(String(anioActual)),
   });
   // Mientras no se sepa, se asume generado (no se ofrece el año anterior de más).
   const eneroActualGenerado = mesesDelAnioActual.data?.includes('01') ?? true;

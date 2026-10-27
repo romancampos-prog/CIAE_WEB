@@ -2,16 +2,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 // propios
-import { indicadoresService, urlIcono } from '@/features/indicadores';
+import type { GrupoIndicadores } from '@/types/pantallas/graficas';
+import { informacionApi } from '@/api/indicadores/informacionApi';
+import { urlIcono } from '@/features/indicadores';
 
 const COLOR_POR_DEFECTO = '#0b5445';
-
-export interface GrupoIndicadores {
-  cat: string;
-  color: string;
-  icono: string | null;
-  inds: string[];
-}
 
 /**
  * Maestro de la página de gráficas: la lista de familias (una sola vez), el indicador elegido
@@ -24,7 +19,7 @@ export function useSeleccionIndicador() {
 
   const lista = useQuery({
     queryKey: ['graficas', 'indicadores'],
-    queryFn: () => indicadoresService.listarFamilias(),
+    queryFn: () => informacionApi.listarFamilias(),
   });
 
   // Lo consultado solo vale mientras se está en gráficas: al salir se olvida, para no

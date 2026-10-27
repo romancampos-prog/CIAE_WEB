@@ -1,7 +1,7 @@
 // API publica de la feature generar-ftp: lo unico que se puede usar fuera de features/generar-ftp/.
 export { default as AccionesPoblacion } from './components/AccionesPoblacion';
 export { default as AvisoMesesFaltantes } from './components/AvisoMesesFaltantes';
-export { default as BotonGenerar, IcoAll, IcoDownload } from './components/BotonGenerar';
+export { default as BotonGenerar } from './components/BotonGenerar';
 export { default as ModalPoblacion } from './components/ModalPoblacion/ModalPoblacion';
 export { default as ModalRegenerarFtp } from './components/ModalRegenerarFtp';
 export { default as ModalRestricciones } from './components/ModalRestricciones/ModalRestricciones';

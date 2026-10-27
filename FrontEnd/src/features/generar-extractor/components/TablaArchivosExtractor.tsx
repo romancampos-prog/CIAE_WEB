@@ -1,7 +1,7 @@
 // propios
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
 import { ESTADO_FUTURO, ESTADO_MES } from '@/features/generar-extractor/constants/estadosMes';
-import { IconoEstadoMes } from './IconosExtractor';
+import IconoEstadoMes from './IconoEstadoMes';
 import type { EstadoGenerarExtractor } from '@/features/generar-extractor/hooks/useGenerarExtractor';
 
 /** Todo el año en una tabla: filas = archivos, columnas = meses. Clic en un mes abre el panel de subida. */

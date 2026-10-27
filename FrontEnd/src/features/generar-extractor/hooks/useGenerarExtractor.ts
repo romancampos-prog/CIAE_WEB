@@ -2,10 +2,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
-import { descargarB64, indicadoresService, MESES_LARGOS_ARR, urlIcono } from '@/features/indicadores';
-import { extractorService } from '@/features/generar-extractor/services/extractorService';
-import type { ArchivoExtractor, IndicadorExtractor, PanelSubida, ResultadoSubida } from '@/features/generar-extractor/tipos';
+import type { ArchivoExtractor } from '@/types/api/indicadores/extractor';
+import type { IndicadorExtractor, PanelSubida, ResultadoSubida } from '@/types/pantallas/generarExtractor';
+import { excelApi } from '@/api/indicadores/excelApi';
+import { extractorApi } from '@/api/indicadores/extractorApi';
+import { ftpApi } from '@/api/indicadores/ftpApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
+import { descargarB64, MESES_LARGOS_ARR, urlIcono } from '@/features/indicadores';
 
 // Años del selector: el actual y los anteriores, calculados con la fecha (en 2027 aparece solo).
 const ANIOS_HACIA_ATRAS = 1;
@@ -35,7 +38,7 @@ export function useGenerarExtractor() {
   // Qué indicadores maneja el Extractor y qué usa cada uno: todo del mapeo, vía backend.
   const indicadoresQ = useQuery({
     queryKey: ['extractor', 'indicadores'],
-    queryFn: extractorService.listarIndicadores,
+    queryFn: extractorApi.listarIndicadores,
     select: (lista): IndicadorExtractor[] => lista.map(i => ({ ...i, icono: urlIcono(i.imagen) })),
   });
   const indicadores = useMemo(() => indicadoresQ.data ?? [], [indicadoresQ.data]);
@@ -49,10 +52,10 @@ export function useGenerarExtractor() {
       // /estado-cortes responde por ventana de corte: Jul-Dic del año elegido viven en la
       // ventana "Junio del año siguiente", así que se piden los dos años.
       const [estadoArchivos, cortesAnio, cortesSiguiente, generados] = await Promise.all([
-        extractorService.estadoArchivos(anio),
-        extractorService.estadoCortes(anio),
-        extractorService.estadoCortes(anio + 1),
-        Promise.all(mensuales.map(i => indicadoresService.mesesGenerados(i.indicador, String(anio)))),
+        extractorApi.estadoArchivos(anio),
+        extractorApi.estadoCortes(anio),
+        extractorApi.estadoCortes(anio + 1),
+        Promise.all(mensuales.map(i => ftpApi.mesesGenerados(i.indicador, String(anio)))),
       ]);
       return {
         archivos: estadoArchivos?.archivos ?? [],
@@ -75,8 +78,8 @@ export function useGenerarExtractor() {
 
   const subida = useMutation({
     mutationFn: ({ panel: p, archivo }: { panel: PanelSubida; archivo: File }) => (p.tipo === 'principal'
-      ? extractorService.subirArchivoMensual(anio, p.mes, archivo, p.prefijo)
-      : extractorService.subirCruce(anio, p.mes, archivo)),
+      ? extractorApi.subirArchivoMensual(anio, p.mes, archivo, p.prefijo)
+      : extractorApi.subirCruce(anio, p.mes, archivo)),
     onMutate: () => setError(''),
     onSuccess: (res, { panel: p }) => {
       // El resultado se queda en el mismo panel donde se subió, para que no se pierda.
@@ -125,7 +128,7 @@ export function useGenerarExtractor() {
     setDescargando(clave);
     setError('');
     try {
-      const res = await indicadoresService.descargarExcel(indicadoresExcel, anioExcel, mes);
+      const res = await excelApi.descargar(indicadoresExcel, anioExcel, mes);
       descargarB64(res.archivo_b64, res.nombre_archivo);
     } catch (e) {
       setError(mensajeDeError(e, 'Error al descargar el reporte.'));

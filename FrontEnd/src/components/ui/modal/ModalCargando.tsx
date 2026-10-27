@@ -1,13 +1,15 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import './modalCargando.css';
 import dogGif from "@/assets/corgi.gif";
+// propios
+import { IconoCandado } from '@/components/icons';
 
 interface Props {
   isOpen: boolean;
   nota?: ReactNode;
 }
 
-const ModalLoading = ({ isOpen, nota }: Props) => {
+const ContenidoCargando = ({ nota }: { nota?: ReactNode }) => {
   const [mensajeIdx, setMensajeIdx] = useState(0);
   const mensajes = [
     "Generando su reporte...",
@@ -18,19 +20,12 @@ const ModalLoading = ({ isOpen, nota }: Props) => {
 
   // Cambia el mensaje cada 2.5 segundos
   useEffect(() => {
-    if (!isOpen) {
-        setMensajeIdx(0); // Reinicia el índice al cerrar
-        return;
-    }
-    
     const interval = setInterval(() => {
       setMensajeIdx((prev) => (prev + 1) % mensajes.length);
     }, 2500);
 
     return () => clearInterval(interval);
-  }, [isOpen, mensajes.length]);
-
-  if (!isOpen) return null;
+  }, [mensajes.length]);
 
   return (
     <div className="modal-overlay-loading">
@@ -54,9 +49,7 @@ const ModalLoading = ({ isOpen, nota }: Props) => {
 
         {nota && (
           <p className="mcl-nota">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
+            <IconoCandado />
             {nota}
           </p>
         )}
@@ -64,5 +57,8 @@ const ModalLoading = ({ isOpen, nota }: Props) => {
     </div>
   );
 };
+
+/** Modal de "generando": se monta solo mientras está abierto, así cada vez empieza en el primer mensaje. */
+const ModalLoading = ({ isOpen, nota }: Props) => (isOpen ? <ContenidoCargando nota={nota} /> : null);
 
 export default ModalLoading;

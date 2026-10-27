@@ -1,6 +1,7 @@
 // react
 import { useState } from 'react';
 // propios
+import { IconoInfo, IconoTendencia } from '@/components/icons';
 import { useGraficaIndicador } from '@/features/graficas/hooks/useGraficaIndicador';
 import SelectorMes from './SelectorMes';
 import PestanasGrafica from './PestanasGrafica';
@@ -61,9 +62,7 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
           {ficha?.informacion?.titulo && <p className="gi-titulo-largo">{ficha.informacion.titulo}</p>}
           {ficha && (
             <button className="ig-info-toggle" onClick={() => setInfoAbierta(v => !v)} aria-expanded={infoAbierta}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
+              <IconoInfo tamano={13} aria-hidden />
               {infoAbierta ? 'Ocultar detalle' : 'Ver detalle'}
             </button>
           )}
@@ -139,9 +138,7 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
 
       {!cargando && !hayDatos && (
         <div className="ig-empty">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/>
-          </svg>
+          <IconoTendencia aria-hidden />
           Sin datos guardados para {indSel} – {anio}
         </div>
       )}

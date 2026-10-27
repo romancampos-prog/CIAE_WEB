@@ -1,4 +1,5 @@
 // propios
+import { IconoLuna, IconoSol } from '@/components/icons';
 import useTema from '@/hooks/useTema';
 import './botonTema.css';
 
@@ -21,14 +22,9 @@ const BotonTema = ({ className = '' }) => {
       title={etiqueta}
     >
       {esOscuro ? (
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.2" />
-          <path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56" />
-        </svg>
+        <IconoSol />
       ) : (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
+        <IconoLuna />
       )}
     </button>
   );

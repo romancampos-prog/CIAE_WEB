@@ -4,7 +4,6 @@
         "fechaModificacion": "08/10/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
-        "previos": true,
         "periodicidad": "Mensual Acumulado",
         "peridocidadGenerada": {
             "mensual": false,

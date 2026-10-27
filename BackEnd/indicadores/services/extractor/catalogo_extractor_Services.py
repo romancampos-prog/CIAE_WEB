@@ -59,6 +59,13 @@ def nombre_archivo(clave: str | None) -> str | None:
 
 ##--------------------------------------
 
+def nombre_sugerido_archivo(clave: str) -> str:
+    """Nombre sugerido para guardar el archivo (catalogos/archivos_extractor.json), con {MM} y {AAAA} por llenar."""
+    return catalogo_archivos_extractor().get(clave, {}).get("nombreSugerido", f"{clave}_{{MM}}_{{AAAA}}.xlsx")
+
+
+##--------------------------------------
+
 def archivo_denominador_aparte(indicador: str) -> str | None:
     """Clave del archivo del denominador si es OTRO archivo del Extractor (Neonatal 06: Nacimientos); None si sale del mismo o de poblacion."""
     reporte = cargar_indicador_extractor(indicador).reporte

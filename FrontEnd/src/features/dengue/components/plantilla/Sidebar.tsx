@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { usePipeline } from '@/features/dengue/context/PipelineContext';
+// propios
+import { IconoChevronIzquierda } from '@/components/icons';
 
 const NAV = [
   { to: '/CIAE/Epidemiologia/dengue',                  icono: '📂', label: 'Carga de datos',   bloqueable: false },
@@ -28,14 +30,7 @@ export default function DengueSidebar({ collapsed, onToggle }: { collapsed: bool
     <nav className={`epi-sidebar${collapsed ? ' epi-sidebar--collapsed' : ''}`}>
 
       <button className="epi-sidebar-toggle" onClick={onToggle} title={collapsed ? 'Expandir' : 'Colapsar'}>
-        <svg
-          width="14" height="14" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" strokeWidth="2.5"
-          strokeLinecap="round" strokeLinejoin="round"
-          style={{ transition: 'transform 0.3s', transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
+        <IconoChevronIzquierda style={{ transition: 'transform 0.3s', transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)' }} />
       </button>
 
       {!collapsed && (

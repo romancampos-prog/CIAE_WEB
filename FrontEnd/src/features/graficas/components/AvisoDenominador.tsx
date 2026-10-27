@@ -8,7 +8,7 @@
  *   mes     — "Agosto"
  */
 // propios
-import type { FilaUnidad } from '@/features/graficas/tipos';
+import type { FilaUnidad } from '@/types/pantallas/graficas';
 
 interface Props {
   filas: FilaUnidad[];

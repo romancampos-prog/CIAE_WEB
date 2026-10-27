@@ -1,5 +1,5 @@
 // propios
-import type { DatosCanal } from '@/features/dengue/tipos';
+import type { DatosCanal } from '@/types/api/dengue/reportes';
 
 /**
  * Panel lateral de semanas que superaron el umbral histórico del canal endémico.

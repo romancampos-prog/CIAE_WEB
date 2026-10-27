@@ -1,7 +1,8 @@
 // propios
+import type { BrechaUnidad, Desempeno, PerfilIndicador } from '@/types/api/indicadores/reportes';
+import type { FilaUnidad } from '@/types/pantallas/graficas';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { CLAVE_ESTATAL, formatoNumero, formatoValor, nombreUnidad, ordenarPorResultado } from '@/features/graficas/utils/datosGrafica';
-import type { BrechaUnidad, Desempeno, FilaUnidad, PerfilIndicador } from '@/features/graficas/tipos';
 
 interface Props {
   unidad: string;

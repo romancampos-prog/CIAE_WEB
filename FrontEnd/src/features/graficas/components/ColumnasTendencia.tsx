@@ -1,8 +1,8 @@
 // propios
+import type { PuntoColumna } from '@/types/pantallas/graficas';
 import TooltipDato from './TooltipDato';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { formatoNumero, techoDe } from '@/features/graficas/utils/datosGrafica';
-import type { PuntoColumna } from '@/features/graficas/tipos';
 
 interface Props {
   puntos: PuntoColumna[];

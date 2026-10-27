@@ -1,10 +1,11 @@
 // react
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
-import { dengueService } from '@/features/dengue/services/dengueService';
-import type { EstadoPipeline } from '@/features/dengue/tipos';
+import type { EstadoPipeline } from '@/types/api/dengue/pipeline';
+import { pipelineDengueApi } from '@/api/dengue/pipelineApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
+import { CLAVE_REPORTES_DENGUE } from '@/features/dengue/constants/clavesConsulta';
 
 interface ValorPipeline {
   estado: EstadoPipeline | null;
@@ -13,21 +14,17 @@ interface ValorPipeline {
 
 const PipelineContext = createContext<ValorPipeline | null>(null);
 
-export const CLAVE_REPORTES_DENGUE = ['dengue', 'reporte'];
-
 /**
  * Estado del pipeline de dengue para toda la sección (un solo polling): mientras corre se
  * pregunta cada 2 s, y al terminar se vuelven a pedir los reportes.
  */
 export function PipelineProvider({ children }: { children: ReactNode }) {
   const clienteConsultas = useQueryClient();
-  // Mientras llega la primera respuesta del backend tras "ejecutar", se sigue preguntando.
-  const [recienIniciado, setRecienIniciado] = useState(false);
 
   const consulta = useQuery({
     queryKey: ['dengue', 'pipeline'],
-    queryFn: dengueService.estadoPipeline,
-    refetchInterval: (q) => (recienIniciado || q.state.data?.corriendo ? 2000 : false),
+    queryFn: pipelineDengueApi.estadoPipeline,
+    refetchInterval: (q) => (q.state.data?.corriendo ? 2000 : false),
   });
   const estado = consulta.data ?? null;
 
@@ -39,18 +36,16 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       clienteConsultas.invalidateQueries({ queryKey: CLAVE_REPORTES_DENGUE });
     }
     corriaAntes.current = estado.corriendo;
-    if (estado.corriendo) setRecienIniciado(false);
   }, [estado, clienteConsultas]);
 
   const ejecucion = useMutation({
-    mutationFn: dengueService.ejecutarPipeline,
+    mutationFn: pipelineDengueApi.ejecutarPipeline,
     onSuccess: () => {
-      // Se muestra "Iniciando..." de inmediato, sin esperar al siguiente polling.
+      // Se muestra "Iniciando..." de inmediato; con corriendo = true el polling arranca solo.
       clienteConsultas.setQueryData<EstadoPipeline>(['dengue', 'pipeline'], previo => previo && ({
         ...previo, corriendo: true, completado: false, error: null, paso: 'Iniciando...',
       }));
       corriaAntes.current = true;
-      setRecienIniciado(true);
     },
     onError: (error) => alert(mensajeDeError(error, 'Error al iniciar el pipeline')),
   });

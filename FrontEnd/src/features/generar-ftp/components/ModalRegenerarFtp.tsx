@@ -1,7 +1,7 @@
 // propios
+import type { PeriodoFtp } from '@/types/api/indicadores/ftp';
 import ModalConfirmarPassword from '@/components/ui/modal/ModalConfirmarPassword';
 import { MESES_LARGOS } from '@/features/indicadores';
-import type { PeriodoFtp } from '@/features/generar-ftp/tipos';
 
 interface Props {
   abierto: boolean;

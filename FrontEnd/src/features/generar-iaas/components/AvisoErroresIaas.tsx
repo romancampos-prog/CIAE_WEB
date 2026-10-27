@@ -1,22 +1,24 @@
 // react
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+// propios
+import { IconoAlerta } from '@/components/icons';
 
 const DURACION = 8000
 
 /** Toast de error de Excel (mensaje único). Cada vez que sube `trigger` se vuelve a mostrar. */
 export default function AvisoErroresIaas({ mensaje, trigger = 0 }: { mensaje: string; trigger?: number }) {
+  if (!mensaje || !trigger) return null
+  // Un key nuevo en cada disparo vuelve a montar el toast: su animación arranca desde cero.
+  return <ToastErrorExcel key={trigger} mensaje={mensaje} />
+}
+
+function ToastErrorExcel({ mensaje }: { mensaje: string }) {
   const [visible,  setVisible]  = useState(false)
   const [saliendo, setSaliendo] = useState(false)
   const [progreso, setProgreso] = useState(100)
 
   useEffect(() => {
-    if (!mensaje || !trigger) return
-
-    setVisible(false)
-    setSaliendo(false)
-    setProgreso(100)
-
     const t1 = setTimeout(() => setVisible(true), 100)
 
     const inicio    = Date.now()
@@ -33,9 +35,9 @@ export default function AvisoErroresIaas({ mensaje, trigger = 0 }: { mensaje: st
     }, DURACION)
 
     return () => { clearTimeout(t1); clearTimeout(t2); clearInterval(intervalo) }
-  }, [trigger])
+  }, [])
 
-  if (!visible || !mensaje) return null
+  if (!visible) return null
 
   return createPortal(
     <div style={{
@@ -69,11 +71,7 @@ export default function AvisoErroresIaas({ mensaje, trigger = 0 }: { mensaje: st
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 3px 10px rgba(185,28,28,0.3)',
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
+            <IconoAlerta tamano={18} stroke="white" />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>

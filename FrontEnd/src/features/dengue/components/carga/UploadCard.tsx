@@ -1,31 +1,8 @@
 // react
 import { useRef, useState, type DragEvent } from 'react'
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
-
-/**
- * Icono SVG estilizado de archivo Excel.
- * @param {{ size?: number, light?: boolean }} props
- */
-const IconExcel = ({ size = 52, light = false }) => (
-  <svg width={size} height={size} viewBox="0 0 52 52" fill="none">
-    <rect x="4" y="2" width="32" height="42" rx="4"
-          fill={light ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}
-          stroke={light ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)'} strokeWidth="1.5"/>
-    <path d="M36 2v12h12" stroke={light ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)'}
-          strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
-    <rect x="4" y="2" width="22" height="42" rx="4"
-          fill={light ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'}/>
-    <path d="M36 2v12h12L36 2z"
-          fill={light ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'} />
-    <path d="M14 20l8 12m0-12l-8 12"
-          stroke={light ? 'rgba(212,188,148,0.9)' : '#a7802d'}
-          strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M26 20h10M26 26h8M26 32h10"
-          stroke={light ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}
-          strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-)
+import { IconoExcel } from '@/components/icons';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 
 type TemaTarjeta = 'tinto' | 'verde';
 
@@ -173,7 +150,7 @@ export default function UploadCard({ titulo, hint, onUpload, nombreActual, paso,
         {!ok ? (
           <>
             <div style={{ opacity: sub ? 0.5 : 1, transition: 'opacity 0.2s' }}>
-              <IconExcel light />
+              <IconoExcel claro />
             </div>
 
             {sub ? (

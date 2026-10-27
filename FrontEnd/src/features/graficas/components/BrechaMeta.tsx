@@ -1,9 +1,9 @@
 // react
 import { useState } from 'react';
 // propios
+import type { BrechaUnidad, TipoMeta } from '@/types/api/indicadores/reportes';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { formatoNumero as formato } from '@/features/graficas/utils/datosGrafica';
-import type { BrechaUnidad, TipoMeta } from '@/features/graficas/tipos';
 import './estadisticas.css';
 
 const VISIBLES = 8;

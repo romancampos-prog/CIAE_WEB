@@ -1,5 +1,5 @@
 // propios
-import { UploadIcon, CheckIcon, XIcon } from '@/components/ui/Iconos';
+import { IconoCerrar, IconoPalomita, IconoSubirNube } from '@/components/icons';
 
 interface Props {
   archivo: File | null;
@@ -11,7 +11,7 @@ interface Props {
 const ExcelGlobalIaas = ({ archivo, nota, onElegir }: Props) => (archivo ? (
   <div className="ia-td-global-listo">
     <span className="ia-td-global-nota">{nota}</span>
-    <span className="ia-td-global-check"><CheckIcon size={16} /></span>
+    <span className="ia-td-global-check"><IconoPalomita tamano={16} /></span>
     <span className="ia-td-global-archivo" title={archivo.name}>
       {archivo.name.replace('.xlsx', '')}
     </span>
@@ -21,7 +21,7 @@ const ExcelGlobalIaas = ({ archivo, nota, onElegir }: Props) => (archivo ? (
         Cambiar archivo
       </label>
       <button className="ia-td-global-quitar" title="Quitar archivo" onClick={() => onElegir(null)}>
-        <XIcon />
+        <IconoCerrar strokeLinejoin="round" />
       </button>
     </div>
   </div>
@@ -29,7 +29,7 @@ const ExcelGlobalIaas = ({ archivo, nota, onElegir }: Props) => (archivo ? (
   <label className="ia-td-global-dropzone">
     <input type="file" accept=".xlsx" hidden onChange={e => onElegir(e.target.files?.[0])} />
     <span className="ia-td-global-nota">{nota}</span>
-    <UploadIcon />
+    <IconoSubirNube />
     <strong>Arrastra tu Excel aquí</strong>
     <span>o haz clic para buscar</span>
   </label>

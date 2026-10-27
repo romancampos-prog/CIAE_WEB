@@ -113,8 +113,9 @@ que se escribe en el campo `archivo` del mapeo.
 "DEFUNCIONES": { "nombre": "Defunciones (unidad de atención)", "nombreSugerido": "DEFUNCIONES_{MM}_{AAAA}.xlsx" }
 ```
 
-`nombre` es lo que ve el usuario; `nombreSugerido` es solo una sugerencia (el archivo se
-valida por su **contenido**, no por su nombre).
+`nombre` es lo que ve el usuario; `nombreSugerido` es solo una sugerencia que el backend manda en
+`/extractor/estado-archivos` y el front muestra como ejemplo, con `{MM}` y `{AAAA}` ya llenos (el
+archivo se valida por su **contenido**, no por su nombre).
 
 ### `unidades/`
 
@@ -135,8 +136,9 @@ Las tres listas de `ftp.json` van **en el mismo orden**: la posición 5 de
 Dice cómo leer el Excel nacional de población InfoSalud: `hoja`, `fila_titulo` (de ahí sale
 el mes/año del reporte), `fila_grupos`, `fila_encabezados`, `encabezados_edad` (los nombres
 exactos de las columnas de edad, ej. `"20 a 24"`, `"25  a 29"` con doble espacio),
-`bloques_edad` (`Todos`, `Hombres`, `Mujeres`) y `alias` (nombre en el Excel → nombre en el
-sistema; `null` = ignorar esa fila). Lo usa `datos/excel_subido/excel_poblacion_Datos.py`.
+`bloques_edad` (`Todos`, `Hombres`, `Mujeres`), `columnas_unicas` (dónde viene la delegación y la unidad),
+`delegacion_filtro` (qué delegación se toma del Excel nacional, `"Guanajuato"`) y `alias` (nombre en el
+Excel → nombre en el sistema; `null` = ignorar esa fila). Lo usa `datos/excel_subido/excel_poblacion_Datos.py`.
 
 ---
 
@@ -151,9 +153,7 @@ Todos los indicadores, de cualquier carpeta, tienen la misma forma por fuera. Ej
     "fechaModificacion": "10/09/2026",
     "mostrarGenerar": true,
     "mostrarGrafica": true,
-    "previos": false,
     "periodicidad": "Semestral Anualizado",
-    "peridocidadGenerada": { "semstralAnualizado": true },
     "informacion": { "titulo": "...", "objetivo": "...", "descNum": "...", "descDen": "..." },
     "reporte":  { ... ver sección 3 ... },
     "semaforo": { "Esperado": "<= 17.38", "Medio": null, "Bajo": "> 17.38" }
@@ -166,9 +166,8 @@ Todos los indicadores, de cualquier carpeta, tienen la misma forma por fuera. Ej
 | `fechaModificacion` | Fecha en que se cambió la ficha | `"dd/mm/aaaa"` | ficha técnica (`/informacion/ficha-tecnica`) |
 | `mostrarGenerar` | Si aparece en la página de Generar de su módulo | `true` / `false` | `indicadores_del_modulo`, `todos_los_indicadores("mostrarGenerar")`. Si falta, `todos_los_indicadores` lo toma como `true` |
 | `mostrarGrafica` | Si aparece en Gráficas / descargas | `true` / `false` | `todos_los_indicadores("mostrarGrafica")` (default de `/informacion/indicadores`) |
-| `previos` | Si el indicador tiene reporte **semanal** en el FTP | `true` / `false` | Se manda al front en Generar (`IndicadorGenerar.previos`). El backend no lo valida: si llega `semana`, genera semanal |
 | `periodicidad` | Cómo se publica el indicador (texto de la ficha) | ver tabla abajo | Excel (qué columnas de mes), Extractor (qué proceso sigue), texto de ayuda |
-| `peridocidadGenerada` | Qué datos guarda/arma el sistema | `{"mensual": bool, "mensualAcumulado": bool}` | `acumula_sumando_meses` (gráfica y Excel) |
+| `peridocidadGenerada` | Qué datos guarda/arma el sistema (opcional; sin él, nada se suma) | `{"mensual": bool, "mensualAcumulado": bool}` | `acumula_sumando_meses` (gráfica y Excel); no se manda al front |
 | `informacion` | Textos de la ficha | `titulo`, `objetivo`, `descNum`, `descDen` (los 4 obligatorios) | ficha, gráficas, Excel |
 | `reporte` | Reglas de extracción y cálculo. `{}` en `sin_generar/` | ver sección 3 | generación |
 | `semaforo` | Umbrales de color | ver sección 8 | generación, gráficas, Excel |
@@ -717,8 +716,7 @@ Sin ningún encabezado esperado, el sistema no sabe qué hoja leer y rechaza el 
 3. Escribe `reporte.numerador`/`denominador` con `fuente: "ftp"`, `hoja` y el modo que
    corresponda (casi siempre `INTERSECCION_COLUMNA` con `buscar: "TOTAL DE LA UNIDAD"`).
 4. Escribe `operacion` usando los códigos como nombres.
-5. `previos: true` si el reporte también existe en la carpeta semanal.
-6. Si alguna unidad no tiene el servicio, agrégala en `unidadesSinServicio`.
+5. Si alguna unidad no tiene el servicio, agrégala en `unidadesSinServicio`.
 
 ### IAAS
 

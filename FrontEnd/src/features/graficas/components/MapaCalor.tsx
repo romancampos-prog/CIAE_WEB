@@ -1,7 +1,7 @@
 // propios
+import type { Desempeno, EstadisticasGrafica } from '@/types/api/indicadores/reportes';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import { formatoNumero, mesCorto as corto } from '@/features/graficas/utils/datosGrafica';
-import type { Desempeno, EstadisticasGrafica } from '@/features/graficas/tipos';
 import './estadisticas.css';
 
 // En las celdas cabe poco: un decimal.

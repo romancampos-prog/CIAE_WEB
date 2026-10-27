@@ -2,8 +2,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // propios
+import { IconoActividad, IconoPeriodoDelDia, IconoSubir } from '@/components/icons';
 import { useAuth, useRol } from '@/features/auth';
-import IconoPeriodoDelDia from '@/components/ui/IconoPeriodoDelDia';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
 import { getGreeting } from '@/utils/horario';
@@ -69,9 +69,7 @@ const HubIndicadoresPagina = () => {
             color="green"
             onClick={() => navigate('/CIAE/IndicadoresMedicos/Graficas')}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
+            <IconoActividad />
           </NavCard>
 
           {puedeGenerar && (
@@ -83,11 +81,7 @@ const HubIndicadoresPagina = () => {
               color="gold"
               onClick={() => navigate(navDestGenerar)}
             >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
+              <IconoSubir />
             </NavCard>
           )}
 

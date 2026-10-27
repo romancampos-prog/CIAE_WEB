@@ -1,10 +1,11 @@
 // propios
+import type { BrechaUnidad, PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
+import type { PuntoColumna } from '@/types/pantallas/graficas';
 import ListaUnidades from './ListaUnidades';
 import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
 import LeyendaSemaforo from './LeyendaSemaforo';
 import { datosDelMes, formatoValor, mesCorto, nombreUnidad, serieDeUnidad } from '@/features/graficas/utils/datosGrafica';
-import type { BrechaUnidad, PerfilIndicador, PuntoColumna, ReporteIndicador } from '@/features/graficas/tipos';
 
 interface Props {
   reporte: ReporteIndicador | null;

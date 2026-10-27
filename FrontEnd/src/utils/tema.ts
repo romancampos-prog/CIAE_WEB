@@ -1,9 +1,10 @@
-export type Tema = 'light' | 'dark';
+// propios
+import type { Tema } from '@/types/pantallas/tema';
 
 // La misma clave la lee el script inline de index.html: si se cambia aquí, cambiarla allá.
 const CLAVE_TEMA_GUARDADO = 'ciae-tema';
 
-export const leerTemaGuardado = (): Tema | null => {
+const leerTemaGuardado = (): Tema | null => {
   try {
     const valor = localStorage.getItem(CLAVE_TEMA_GUARDADO);
     return valor === 'dark' || valor === 'light' ? valor : null;
@@ -25,7 +26,7 @@ const consultaTemaSistema = () =>
     ? window.matchMedia('(prefers-color-scheme: dark)')
     : null;
 
-export const temaDelSistema = (): Tema => (consultaTemaSistema()?.matches ? 'dark' : 'light');
+const temaDelSistema = (): Tema => (consultaTemaSistema()?.matches ? 'dark' : 'light');
 
 export const temaActual = (): Tema =>
   document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';

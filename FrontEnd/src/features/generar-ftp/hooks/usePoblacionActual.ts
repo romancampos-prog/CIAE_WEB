@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 // propios
-import { poblacionService } from '@/features/generar-ftp/services/poblacionService';
+import { poblacionApi } from '@/api/indicadores/poblacionApi';
 
 export const CLAVE_POBLACION_ACTUAL = ['ftp', 'poblacionActual'];
 
@@ -11,7 +11,7 @@ export function usePoblacionActual() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const consulta = useQuery({
     queryKey: CLAVE_POBLACION_ACTUAL,
-    queryFn: poblacionService.archivoActual,
+    queryFn: poblacionApi.archivoActual,
   });
 
   const { nombre_sin_ext, mes_detectado, anio_detectado } = consulta.data ?? {};

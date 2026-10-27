@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 // propios
-import { BrotesPanel, MapaLeaflet, SEMAFORO_MAPA, Spinner as DengueSpinner, TablaUnidades, getTemaMapa, useMapaDengue, type TipoMapa } from '@/features/dengue';
+import type { TipoMapa } from '@/types/api/dengue/reportes';
+import { BrotesPanel, MapaLeaflet, SEMAFORO_MAPA, Spinner as DengueSpinner, TablaUnidades, getTemaMapa, useMapaDengue } from '@/features/dengue';
 import { textoAcento } from '@/utils/colorAcento';
 
 

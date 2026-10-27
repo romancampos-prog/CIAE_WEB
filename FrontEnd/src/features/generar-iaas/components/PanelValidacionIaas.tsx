@@ -1,28 +1,31 @@
 // react
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+// propios
+import { IconoAlerta } from '@/components/icons';
 
 /** Panel con la lista de problemas del Excel. Cada vez que sube `trigger` se vuelve a mostrar. */
 export default function PanelValidacionIaas({ errores, trigger = 0 }: { errores: string[]; trigger?: number }) {
+  if (!errores?.length || !trigger) return null
+  // Un key nuevo en cada disparo vuelve a montar el panel: su animación arranca desde cero.
+  return <ListaErroresExcel key={trigger} errores={errores} />
+}
+
+function ListaErroresExcel({ errores }: { errores: string[] }) {
   const [visible,  setVisible]  = useState(false)
   const [saliendo, setSaliendo] = useState(false)
 
   useEffect(() => {
-    if (!errores?.length || !trigger) return
-
-    setVisible(false)
-    setSaliendo(false)
-
     const t1 = setTimeout(() => setVisible(true), 80)
     return () => clearTimeout(t1)
-  }, [trigger])
+  }, [])
 
   const cerrar = () => {
     setSaliendo(true)
     setTimeout(() => { setVisible(false); setSaliendo(false) }, 380)
   }
 
-  if (!visible || !errores?.length) return null
+  if (!visible) return null
 
   return createPortal(
     <div style={{
@@ -63,11 +66,7 @@ export default function PanelValidacionIaas({ errores, trigger = 0 }: { errores:
             display:     'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow:   '0 3px 10px rgba(185,28,28,0.3)',
           }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
+            <IconoAlerta tamano={17} stroke="white" />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>

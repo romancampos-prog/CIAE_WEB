@@ -1,8 +1,8 @@
 // react
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 // propios
-import { authService } from '@/features/auth/services/authService';
-import type { Sesion } from '@/features/auth/tipos';
+import type { Sesion } from '@/types/pantallas/auth';
+import { authApi } from '@/api/auth/authApi';
 
 interface ValorAuth {
   user: Sesion | null;
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authService.quienSoy()
+    authApi.quienSoy()
       .then(({ usuario, rol }) => setUser({ user: usuario, rol }))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await authService.cerrarSesion();
+      await authApi.cerrarSesion();
     } catch {
       // aunque falle la llamada al backend, igual se limpia la sesión local
     }

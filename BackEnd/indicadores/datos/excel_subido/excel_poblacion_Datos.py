@@ -13,8 +13,6 @@ from datos.lectura_mapeo.mapeo_poblacion_Datos import cargar_mapeo_poblacion
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import NOMBREUNIDADESARCHIVO
 
-DELEGACION_FILTRO = "Guanajuato"
-
 _REGEX_MES_ANIO_TITULO = re.compile(r'(' + '|'.join(MESES_ESTANDAR) + r')\s+(\d{4})', re.IGNORECASE)
 
 
@@ -125,6 +123,8 @@ def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio
         fila_encabezados = crudo.iloc[mapeo["fila_encabezados"] - 1]
         datos            = crudo.iloc[mapeo["fila_encabezados"]:]
 
+        # Solo las filas de nuestra delegación (mapeo/POBLACION.json, "delegacion_filtro")
+        delegacion     = mapeo["delegacion_filtro"]
         col_delegacion = _buscar_columna(fila_grupos, mapeo["columnas_unicas"]["delegacion"])
         col_unidad     = _buscar_columna(fila_grupos, mapeo["columnas_unicas"]["unidad"])
 
@@ -153,11 +153,11 @@ def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio
             bloques[grupo] = (inicio, fin)
 
         df_gto = datos[
-            datos[col_delegacion].astype(str).str.strip() == DELEGACION_FILTRO
+            datos[col_delegacion].astype(str).str.strip() == delegacion
         ].copy()
 
         if df_gto.empty:
-            return {"ok": False, "detalle": f"No hay filas con '{DELEGACION_FILTRO}' en el Excel."}
+            return {"ok": False, "detalle": f"No hay filas con '{delegacion}' en el Excel."}
 
         resultado     = {}
         errores_datos = []
@@ -246,7 +246,7 @@ def procesar_archivo_poblacion(contenido_bytes: bytes, nombre_archivo: str, anio
 
         return {
             "ok":                  True,
-            "detalle":             f"Procesadas {len(resultado_ordenado)} unidades de {DELEGACION_FILTRO}.",
+            "detalle":             f"Procesadas {len(resultado_ordenado)} unidades de {delegacion}.",
             "nombre":              nombre_archivo,
             "nombre_sin_ext":      nombre_sin_ext,
             "unidades":            len(resultado_ordenado),

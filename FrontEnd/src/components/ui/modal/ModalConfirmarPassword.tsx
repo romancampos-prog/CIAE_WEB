@@ -1,21 +1,8 @@
 // react
 import { useState, useEffect, useRef, type MouseEvent as EventoMouse } from 'react';
 // propios
+import { IconoCandado, IconoFlechaDerecha, IconoOjo, IconoOjoTachado } from '@/components/icons';
 import './modalConfirmarPassword.css';
-
-const EyeIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
-
-const EyeOffIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-);
 
 /**
  * Mini-modal reutilizable: pide contraseña para confirmar una acción sensible
@@ -41,8 +28,12 @@ interface Props {
   confirmLabel?: string;
 }
 
-export default function ModalConfirmarPassword({
-  isOpen,
+export default function ModalConfirmarPassword(props: Props) {
+  // Se monta solo mientras está abierto: cada apertura empieza sin contraseña y en su lugar.
+  return props.isOpen ? <ContenidoConfirmarPassword {...props} /> : null;
+}
+
+function ContenidoConfirmarPassword({
   onClose,
   onConfirm,
   titulo = 'Confirmar acción',
@@ -60,12 +51,9 @@ export default function ModalConfirmarPassword({
   const dragState = useRef({ arrastrando: false, startX: 0, startY: 0, origX: 0, origY: 0 });
 
   useEffect(() => {
-    if (!isOpen) return;
-    setPassword('');
-    setVerPassword(false);
-    setDragPos({ x: 0, y: 0 });
-    setTimeout(() => passRef.current?.focus(), 50);
-  }, [isOpen]);
+    const t = setTimeout(() => passRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   const iniciarArrastre = (e: EventoMouse<HTMLDivElement>) => {
     e.preventDefault();
@@ -84,7 +72,6 @@ export default function ModalConfirmarPassword({
     window.removeEventListener('mouseup', terminarArrastre);
   };
 
-  if (!isOpen) return null;
 
   const confirmar = () => onConfirm?.(password);
 
@@ -93,9 +80,7 @@ export default function ModalConfirmarPassword({
       <div className="mcp-box" style={{ '--mcp-color': color, transform: `translate(${dragPos.x}px, ${dragPos.y}px)` }}>
         <div className="mcp-hero" onMouseDown={iniciarArrastre}>
           <div className="mcp-icon-wrap">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
+            <IconoCandado tamano={20} />
           </div>
           <p className="mcp-title">{titulo}</p>
         </div>
@@ -122,7 +107,7 @@ export default function ModalConfirmarPassword({
               title={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               tabIndex={-1}
             >
-              {verPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {verPassword ? <IconoOjoTachado /> : <IconoOjo />}
             </button>
           </div>
           {error && <p className="mcp-error">{error}</p>}
@@ -132,9 +117,7 @@ export default function ModalConfirmarPassword({
           <button className="mcp-btn-confirm" onClick={confirmar} disabled={enviando}>
             {enviando ? 'Procesando…' : confirmLabel}
             {!enviando && (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-              </svg>
+              <IconoFlechaDerecha tamano={13} />
             )}
           </button>
         </div>

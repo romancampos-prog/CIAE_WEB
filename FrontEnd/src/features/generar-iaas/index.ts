@@ -9,4 +9,3 @@ export { default as TablaCapturaIaas } from './components/TablaCapturaIaas';
 export { default as TarjetasCapturaIaas } from './components/TarjetasCapturaIaas';
 export { useGenerarIaas } from './hooks/useGenerarIaas';
 export { useMesesGuardadosIaas } from './hooks/useMesesGuardadosIaas';
-export { iaasService } from './services/iaasService';

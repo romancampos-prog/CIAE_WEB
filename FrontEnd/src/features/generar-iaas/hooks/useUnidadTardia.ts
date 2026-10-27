@@ -1,9 +1,9 @@
 // react
 import { useState } from 'react';
 // propios
-import { mensajeDeError } from '@/api/mensajeDeError';
-import { iaasService } from '@/features/generar-iaas/services/iaasService';
-import type { SesionIaas } from '@/features/generar-iaas/tipos';
+import type { SesionIaas } from '@/types/api/indicadores/iaas';
+import { iaasApi } from '@/api/indicadores/iaasApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 
 const INDICADOR_CON_EXCEL_GLOBAL = 'IAAS 01';
 
@@ -121,7 +121,7 @@ export function useUnidadTardia({ anio, mes, todosIndicadores, sesion, alTermina
       const denominadores = Object.fromEntries([...seleccionados]
         .filter(i => i !== INDICADOR_CON_EXCEL_GLOBAL)
         .map(i => [i, sinDato.has(i) ? null : denoms[i]]));
-      const res = await iaasService.completarUnidadTardia({
+      const res = await iaasApi.completarUnidadTardia({
         anio, mes, unidad, indicadores: [...seleccionados], denominadores,
         excelUnidad, excelDenominadorIaas01: excelDenIaas01, password,
       });

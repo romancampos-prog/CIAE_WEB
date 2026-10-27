@@ -1,8 +1,8 @@
 // react
 import type { CSSProperties } from 'react';
 // propios
+import type { BroteEspacial, BroteTemporal } from '@/types/api/dengue/reportes';
 import PanelDeslizante from '@/features/dengue/components/comun/PanelDeslizante';
-import type { BroteEspacial, BroteTemporal } from '@/features/dengue/tipos';
 
 const estiloSeccion: CSSProperties = { borderBottom: '1px solid #f0ece4', padding: '16px 20px' }
 const estiloTitulo: CSSProperties  = {

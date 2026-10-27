@@ -1,6 +1,6 @@
 // propios
-import type { SeccionAlertaSiscep } from '@/features/dengue/constants/seccionesAlertas';
-import type { DatosAlertasSiscep, DatosCanal, RegistroCaso, TipoMapa } from '@/features/dengue/tipos';
+import type { DatosAlertasSiscep, DatosCanal, RegistroCaso, TipoMapa } from '@/types/api/dengue/reportes';
+import type { SeccionAlertaSiscep } from '@/types/pantallas/dengue';
 
 /**
  * Calcula los KPIs del canal endémico a partir de los datos de la API.

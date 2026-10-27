@@ -1,5 +1,5 @@
 // propios
-import type { TextosSemaforo } from '@/features/generar-ftp/tipos';
+import type { TextosSemaforo } from '@/types/pantallas/generarFtp';
 
 /** Rangos del semáforo del indicador en el mes elegido. */
 const RangosDesempeno = ({ mes, textos }: { mes: string; textos: TextosSemaforo }) => (

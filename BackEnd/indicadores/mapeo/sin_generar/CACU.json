@@ -4,7 +4,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
-        "previos": false,
         "periodicidad": "Mensual Semestralizado",
         "informacion": {
             "titulo": "CACU 02 - Tiempo promedio para el diagnóstico de cáncer cérvico uterino a partir de la sospecha por citología cérvico vaginal de tamizaje.",
@@ -24,7 +23,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
-        "previos": false,
         "periodicidad": "Mensual Semestralizado",
         "informacion": {
             "titulo": "CACU 03 - Tiempo promedio para el inicio del tratamiento en cáncer cérvico uterino.",
@@ -44,7 +42,6 @@
         "fechaModificacion": "19/08/2026",
         "mostrarGenerar": false,
         "mostrarGrafica": true,
-        "previos": false,
         "periodicidad": "Trimestral Acumulado",
         "informacion": {
             "titulo": "CACU 04 - Tasa de incidencia de invalidez por cáncer cérvico uterino por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora.",

@@ -1,3 +1,4 @@
+// react
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -5,10 +6,16 @@ const DURACION = 6000
 
 /**
  * Toast de notificación que muestra el nombre del último reporte generado.
- * Se dispara cada vez que `trigger` cambia y se cierra automáticamente a los 6 s.
+ * Aparece al entrar a la página y cada vez que llega un reporte nuevo; se cierra solo a los 6 s.
  * Incluye una barra de progreso animada que indica el tiempo restante.
  */
-export default function ReporteToast({ ultimoReporte, trigger = 0 }: { ultimoReporte: string | null; trigger?: number }) {
+export default function ReporteToast({ ultimoReporte }: { ultimoReporte: string | null }) {
+  if (!ultimoReporte) return null
+  // Con el reporte como key, uno nuevo vuelve a montar el toast y arranca su animación desde cero.
+  return <ToastReporte key={ultimoReporte} ultimoReporte={ultimoReporte} />
+}
+
+function ToastReporte({ ultimoReporte }: { ultimoReporte: string }) {
   const [visible,  setVisible]  = useState(false)
   const [saliendo, setSaliendo] = useState(false)
   const [progreso, setProgreso] = useState(100)
@@ -19,12 +26,6 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }: { ultimoRep
   }
 
   useEffect(() => {
-    if (!ultimoReporte || !trigger) return
-
-    setVisible(false)
-    setSaliendo(false)
-    setProgreso(100)
-
     const t1 = setTimeout(() => setVisible(true), 200)
 
     const inicio    = Date.now()
@@ -35,12 +36,15 @@ export default function ReporteToast({ ultimoReporte, trigger = 0 }: { ultimoRep
       if (pct <= 0) clearInterval(intervalo)
     }, 30)
 
-    const t2 = setTimeout(() => cerrar(), DURACION)
+    const t2 = setTimeout(() => {
+      setSaliendo(true)
+      setTimeout(() => { setVisible(false); setSaliendo(false) }, 350)
+    }, DURACION)
 
     return () => { clearTimeout(t1); clearTimeout(t2); clearInterval(intervalo) }
-  }, [trigger])
+  }, [])
 
-  if (!visible || !ultimoReporte) return null
+  if (!visible) return null
 
   return createPortal(
     <div className="epi-toast" style={{

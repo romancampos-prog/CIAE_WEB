@@ -8,7 +8,7 @@ from datos.bd_ciae.extractor_reporte_Datos import leer_reporte_extractor
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from services.extractor.catalogo_extractor_Services import (
     ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, configuracion_cruce, indicadores_extractor,
-    nombre_archivo, tiene_desfase,
+    nombre_archivo, nombre_sugerido_archivo, tiene_desfase,
 )
 from services.extractor.generar_con_desfase_Services import clave_defunciones
 from shared.MESES import MESES_ESTANDAR, mes_desplazado
@@ -75,7 +75,8 @@ def estado_archivos(anio: int) -> dict:
             meses.append({"mes": mes, "estado": estado, "faltan": faltan})
 
         archivos.append({
-            "archivo": nombre_archivo(clave), "prefijoArchivo": clave, "tipo": "principal", "requerido": True,
+            "archivo": nombre_archivo(clave), "prefijoArchivo": clave, "nombreSugerido": nombre_sugerido_archivo(clave),
+            "tipo": "principal", "requerido": True,
             "uso": f"Base de {', '.join(inds)}", "indicadores": inds, "meses": meses,
         })
 
@@ -106,7 +107,8 @@ def estado_archivos(anio: int) -> dict:
             meses.append({"mes": mes, "estado": estado})
 
         archivos.append({
-            "archivo": nombre_archivo(archivo_cruce), "prefijoArchivo": archivo_cruce, "tipo": "cruce", "requerido": False,
+            "archivo": nombre_archivo(archivo_cruce), "prefijoArchivo": archivo_cruce, "nombreSugerido": nombre_sugerido_archivo(archivo_cruce),
+            "tipo": "cruce", "requerido": False,
             "uso": "Cruce para validar la vía 2", "indicadores": inds, "meses": meses,
         })
 

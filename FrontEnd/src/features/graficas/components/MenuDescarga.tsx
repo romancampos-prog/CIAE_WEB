@@ -1,5 +1,7 @@
 // react
 import { useState, useRef, useEffect } from 'react';
+// propios
+import { IconoCapas, IconoDescargar } from '@/components/icons';
 
 interface OpcionDescarga {
   label: string;
@@ -13,22 +15,6 @@ interface Props {
   cargando?: boolean;
   opciones: OpcionDescarga[];
 }
-
-const IconoUno = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-    <polyline points="7 10 12 15 17 10"/>
-    <line x1="12" y1="15" x2="12" y2="3"/>
-  </svg>
-);
-
-const IconoTodos = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-    <polyline points="2 12 12 17 22 12"/>
-    <polyline points="2 17 12 22 22 17"/>
-  </svg>
-);
 
 /**
  * Botón único de descarga — al hacer click despliega una tarjetita con las opciones
@@ -66,7 +52,7 @@ const MenuDescarga = ({ disabled, cargando, opciones }: Props) => {
         disabled={disabled}
         title={mostrandoSpinner ? 'Generando archivo…' : 'Descargar'}
       >
-        {mostrandoSpinner ? <span className="ig-btn-dl-spinner" /> : <IconoUno />}
+        {mostrandoSpinner ? <span className="ig-btn-dl-spinner" /> : <IconoDescargar tamano={13} />}
       </button>
       {abierto && (
         <div className="ig-dl-menu">
@@ -78,7 +64,7 @@ const MenuDescarga = ({ disabled, cargando, opciones }: Props) => {
               onClick={() => { op.onClick(); setAbierto(false); }}
             >
               <span className="ig-dl-menu-icon">
-                {op.multiple ? <IconoTodos /> : <IconoUno />}
+                {op.multiple ? <IconoCapas /> : <IconoDescargar tamano={13} />}
               </span>
               {op.label}
             </button>

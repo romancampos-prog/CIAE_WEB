@@ -1,5 +1,6 @@
 // propios
-import type { GrupoIndicadores } from '@/features/graficas/hooks/useSeleccionIndicador';
+import type { GrupoIndicadores } from '@/types/pantallas/graficas';
+import { IconoCerrar } from '@/components/icons';
 
 interface Props {
   grupos: GrupoIndicadores[];
@@ -42,9 +43,7 @@ const SelectorIndicadores = ({ grupos, indicador, categoria, color, icono, drawe
       <div className="ig-drawer-header">
         <span className="ig-drawer-title">Indicadores</span>
         <button className="ig-drawer-close" onClick={cerrarDrawer}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          <IconoCerrar tamano={13} strokeLinejoin="round" />
         </button>
       </div>
 

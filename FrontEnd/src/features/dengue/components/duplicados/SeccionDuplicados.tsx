@@ -1,9 +1,10 @@
 // react
 import { Fragment, useState } from 'react'
 // propios
+import type { RegistroCaso } from '@/types/api/dengue/reportes';
+import { IconoChevronAbajo, IconoChevronDerecha, IconoPalomita } from '@/components/icons';
 import { textoAcento } from '@/utils/colorAcento';
 import { COLOR_DUPLICADOS, estiloClasificacion } from '@/features/dengue/constants/clasificacion';
-import type { RegistroCaso } from '@/features/dengue/tipos';
 
 const COLOR = COLOR_DUPLICADOS
 
@@ -87,17 +88,10 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
           }}>{registros.length}</div>
 
           {!vacio && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                 style={{ transition: 'transform 0.2s', transform: abierto ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+            <IconoChevronAbajo stroke="#94a3b8" style={{ transition: 'transform 0.2s', transform: abierto ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }} />
           )}
           {vacio && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+            <IconoPalomita stroke="#16a34a" />
           )}
         </div>
       </button>
@@ -146,11 +140,7 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
                     >
                       {/* Toggle sub-fila */}
                       <td style={{ padding: '9px 6px', borderBottom: `1px solid ${COLOR}10`, textAlign: 'center' }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                             stroke={COLOR} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                             style={{ transition: 'transform 0.15s', transform: estaExpandido ? 'rotate(90deg)' : 'rotate(0deg)' }}>
-                          <polyline points="9 18 15 12 9 6"/>
-                        </svg>
+                        <IconoChevronDerecha stroke={COLOR} style={{ transition: 'transform 0.15s', transform: estaExpandido ? 'rotate(90deg)' : 'rotate(0deg)' }} />
                       </td>
 
                       {CAMPOS_RECHAZADO.map((campo, j) => {
@@ -187,10 +177,7 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
                           background: 'rgba(79,70,229,0.03)',
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                 stroke={COLOR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
+                            <IconoPalomita stroke={COLOR} strokeWidth="2" />
                             <span style={{ fontSize: 11, color: 'var(--texto-suave)' }}>Folio conservado:</span>
                             <span style={{
                               fontSize: 12, fontWeight: 800, color: textoAcento(COLOR),
