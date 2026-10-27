@@ -20,9 +20,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import resample
 
-from epidemiologia.datos.modelo_duplicados_datos import RUTA_MODELO
-from epidemiologia.modulos.duplicados.campos_registro import texto_limpio
-from epidemiologia.modulos.duplicados.similitud import NOMBRES_FEATURES, calcular_vector
+from epidemiologia.datos.dengue.modelo_duplicados_datos import RUTA_MODELO
+from epidemiologia.modulos.dengue.duplicados.campos_registro import texto_limpio
+from epidemiologia.modulos.dengue.duplicados.similitud import NOMBRES_FEATURES, calcular_vector
 
 
 def _generar_pares_sinteticos(df, max_pares=80):

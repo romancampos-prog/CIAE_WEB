@@ -12,45 +12,54 @@ servicio y los servicios orquestan con pasos numerados.
 
 ```
 epidemiologia/
-├── __init__.py                     — ROUTERS (los 3 controllers bajo /epidemiologia)
-├── config.py                       — AÑO_ACTUAL y rutas (BD_CIAE/EPIDEMIOLOGIA/Dengue y mapeo/)
+├── Routes/
+│   └── epidemiologia_Route.py      — junta los controllers (/archivos, /pipeline, /reportes); main.py lo monta bajo /epidemiologia
+├── config.py                       — AÑO_ACTUAL y rutas (BD_CIAE/EPIDEMIOLOGIA/Dengue y mapeo/dengue/)
 ├── controllers/
 │   ├── archivos_controller.py      — subir base operativa / SisCep            (ApiResponse)
 │   ├── pipeline_controller.py      — estado y ejecutar el pipeline            (ApiResponse)
 │   └── reportes_controller.py      — resultados por sección                   (dato DIRECTO)
 ├── services/                       — orquestan: leen con datos/, calculan con modulos/
-│   ├── subir_bases_service.py      — validar .xlsx y peso, guardar, auditar
-│   ├── pipeline/
-│   │   ├── estado_pipeline_service.py   — ESTADO y RESULTADOS en memoria (se cargan de disco al arrancar)
-│   │   ├── iniciar_pipeline_service.py  — 409 si ya corre, 400 si falta una base; arranca el hilo
-│   │   └── pasos_pipeline_service.py    — los pasos en orden (ver abajo)
-│   ├── depuracion_service.py       — los 7 pasos de la depuración
-│   ├── duplicados_service.py       — detectar + tabla de eliminados con datos del paciente
-│   ├── canal_service.py            — canal endémico (histórico vs año actual)
-│   ├── alertas_service.py          — alertas SisCep para el front
-│   ├── clustering_service.py       — conteos, coordenadas, brotes y GeoJSON
-│   └── mapa_service.py             — GeoJSON con casos por municipio para Leaflet
+│   └── dengue/
+│       ├── subir_bases_service.py  — validar .xlsx y peso, guardar, auditar
+│       ├── pipeline/
+│       │   ├── estado_pipeline_service.py   — ESTADO y RESULTADOS en memoria (estado_del_pipeline, resultado_guardado)
+│       │   ├── iniciar_pipeline_service.py  — 409 si ya corre, 400 si falta una base; arranca el hilo
+│       │   └── pasos_pipeline_service.py    — los pasos en orden (ver abajo)
+│       ├── depuracion_service.py   — los 7 pasos de la depuración
+│       ├── duplicados_service.py   — detectar + tabla de eliminados con datos del paciente
+│       ├── canal_service.py        — canal endémico (histórico vs año actual)
+│       ├── alertas_service.py      — alertas SisCep para el front
+│       ├── clustering_service.py   — conteos, coordenadas, brotes y GeoJSON
+│       └── mapa_service.py         — GeoJSON con casos por municipio para Leaflet
 ├── datos/                          — lo ÚNICO que lee y escribe archivos
-│   ├── bases_dengue_datos.py       — leer/guardar base operativa y SisCep
-│   ├── historico_datos.py          — histórico {año}.xlsx con su semana epidemiológica
-│   ├── catalogos_geo_datos.py      — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/)
-│   ├── resultados_pipeline_datos.py — resultados/{clave}.json y fecha del último reporte
-│   └── modelo_duplicados_datos.py  — el modelo entrenado de duplicados (hoy no existe)
+│   └── dengue/
+│       ├── bases_dengue_datos.py   — leer/guardar base operativa y SisCep
+│       ├── historico_datos.py      — histórico {año}.xlsx con su semana epidemiológica
+│       ├── catalogos_geo_datos.py  — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/dengue/)
+│       ├── resultados_pipeline_datos.py — resultados/{clave}.json y fecha del último reporte
+│       └── modelo_duplicados_datos.py   — el modelo entrenado de duplicados (hoy no existe)
 ├── modulos/                        — algoritmos puros: reciben y regresan DataFrames, sin archivos
-│   ├── fechas.py                   — semana epidemiológica SUIVE (semana_epidemiologica)
-│   ├── depuracion/                 — filtrar_imss, limpiar_texto, ubicacion_geografica,
-│   │                                 cruce_siscep, asignar_semana, clasificacion_caso
-│   ├── duplicados/                 — campos_registro, excepciones, reglas_resolucion, similitud,
-│   │                                 candidatos, formato_posibles, deteccion
-│   ├── clustering/                 — municipios_y_ventanas, conteo_casos, coordenadas_cp,
-│   │                                 brotes_espaciales, brotes_temporales
-│   ├── canal_endemico.py           — canal por cuartiles, zonas y semanas anómalas
-│   └── alertas.py                  — las 5 alertas SisCep y negativos por unidad
+│   └── dengue/
+│       ├── fechas.py               — semana epidemiológica SUIVE (semana_epidemiologica)
+│       ├── depuracion/             — filtrar_imss, limpiar_texto, ubicacion_geografica,
+│       │                             cruce_siscep, asignar_semana, clasificacion_caso
+│       ├── duplicados/             — campos_registro, excepciones, reglas_resolucion, similitud,
+│       │                             candidatos, formato_posibles, deteccion
+│       ├── clustering/             — municipios_y_ventanas, conteo_casos, coordenadas_cp,
+│       │                             brotes_espaciales, brotes_temporales
+│       ├── canal_endemico.py       — canal por cuartiles, zonas y semanas anómalas
+│       └── alertas.py              — las 5 alertas SisCep y negativos por unidad
 ├── entrenamiento/
 │   └── entrenar_duplicados.py      — se corre a mano: MLP vs Random Forest -> modelos/mlp_duplicados.pkl
 └── mapeo/
-    ├── gto_normalizado.json        — GeoJSON de los municipios de Guanajuato
-    └── cp_coordenadas.csv          — código postal -> LAT, LON
+    └── dengue/
+        ├── gto_normalizado.json    — GeoJSON de los municipios de Guanajuato
+        └── cp_coordenadas.csv      — código postal -> LAT, LON (fuera de git: *.csv en .gitignore)
+
+Cada tema tiene su carpeta en services/, modulos/, datos/ y mapeo/ (hoy dengue/; lo nuevo, ej.
+ftp/, va en su propia carpeta). El FTP en sí (conectar, navegar, catálogo SIAIS) es compartido
+con indicadores y vive en BackEnd/ftp_imss/.
 ```
 
 ## Respuestas: dos formatos
@@ -63,15 +72,15 @@ epidemiologia/
 
 | Método y ruta | Para qué | Servicio |
 |---|---|---|
-| `POST /epidemiologia/archivos/operativa` | Subir la base operativa (`.xlsx`) | `subir_bases_service.subir_base_operativa` |
-| `POST /epidemiologia/archivos/siscep` | Subir la base SisCep (`.xlsx`) | `subir_bases_service.subir_base_siscep` |
-| `GET /epidemiologia/pipeline/estado` | `{corriendo, paso, completado, error, ultimo_reporte, archivos: {operativa, siscep}}` (polling) | `estado_pipeline_service.get_estado` |
-| `POST /epidemiologia/pipeline/ejecutar` | Arrancar el pipeline | `iniciar_pipeline_service.iniciar_pipeline` |
-| `GET /epidemiologia/reportes/canal` | Canal endémico | `get_resultado("canal")` |
-| `GET /epidemiologia/reportes/mapa/{situacion\|confirmados}` | Mapa de casos y brotes | `get_resultado("mapa")[tipo]` |
-| `GET /epidemiologia/reportes/alertas-siscep` | Alertas SisCep | `get_resultado("alertas")` |
-| `GET /epidemiologia/reportes/duplicados` | Registros eliminados por duplicado | `get_resultado("duplicados")` |
-| `GET /epidemiologia/reportes/posibles-duplicados` | Pares parecidos no confirmados (revisión a mano) | `get_resultado("posibles_duplicados")` |
+| `POST /epidemiologia/archivos/operativa` | Subir la base operativa (`.xlsx`) | `dengue/subir_bases_service.subir_base_operativa` |
+| `POST /epidemiologia/archivos/siscep` | Subir la base SisCep (`.xlsx`) | `dengue/subir_bases_service.subir_base_siscep` |
+| `GET /epidemiologia/pipeline/estado` | `{corriendo, paso, completado, error, ultimo_reporte, archivos: {operativa, siscep}}` (polling) | `dengue/pipeline/estado_pipeline_service.estado_del_pipeline` |
+| `POST /epidemiologia/pipeline/ejecutar` | Arrancar el pipeline | `dengue/pipeline/iniciar_pipeline_service.iniciar_pipeline` |
+| `GET /epidemiologia/reportes/canal` | Canal endémico | `resultado_guardado("canal")` |
+| `GET /epidemiologia/reportes/mapa/{situacion\|confirmados}` | Mapa de casos y brotes | `resultado_guardado("mapa")[tipo]` |
+| `GET /epidemiologia/reportes/alertas-siscep` | Alertas SisCep | `resultado_guardado("alertas")` |
+| `GET /epidemiologia/reportes/duplicados` | Registros eliminados por duplicado | `resultado_guardado("duplicados")` |
+| `GET /epidemiologia/reportes/posibles-duplicados` | Pares parecidos no confirmados (revisión a mano) | `resultado_guardado("posibles_duplicados")` |
 
 Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corrido.
 
@@ -102,12 +111,12 @@ nombre ≥ 0.88). El entrenamiento quedó aparte en `entrenamiento/entrenar_dupl
 corre a mano con un Excel etiquetado). **Por confirmar** si se va a entrenar el modelo o si se
 quita el entrenamiento.
 
-## Agregar una sección de análisis
+## Agregar una sección de análisis de dengue
 
-1. El algoritmo en `modulos/` (recibe y regresa DataFrames, sin leer archivos).
-2. Si necesita leer algo, su lectura en `datos/`.
-3. Un servicio en `services/` que lo orqueste y arme la respuesta para el front.
-4. Agregar el paso en `services/pipeline/pasos_pipeline_service.py`, su clave en
-   `CLAVES_RESULTADOS` (`datos/resultados_pipeline_datos.py`) y el endpoint en
+1. El algoritmo en `modulos/dengue/` (recibe y regresa DataFrames, sin leer archivos).
+2. Si necesita leer algo, su lectura en `datos/dengue/`.
+3. Un servicio en `services/dengue/` que lo orqueste y arme la respuesta para el front.
+4. Agregar el paso en `services/dengue/pipeline/pasos_pipeline_service.py`, su clave en
+   `CLAVES_RESULTADOS` (`datos/dengue/resultados_pipeline_datos.py`) y el endpoint en
    `controllers/reportes_controller.py` (dato directo).
 5. En el front: la función en la API de dengue y su página.

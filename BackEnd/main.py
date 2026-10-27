@@ -1,4 +1,4 @@
-﻿import mimetypes
+import mimetypes
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
@@ -20,7 +20,7 @@ from configs.cors import AMBIENTE, ORIGINS
 
 from auth.controllers.auth_controller import router as auth_router
 
-import epidemiologia as epi_module
+from epidemiologia.Routes import epidemiologia_Route
 from indicadores.Routes import indicadores_Route
 from middleware.endPoints_Middleware import ErroresEndpointsMiddleware
 
@@ -55,8 +55,7 @@ app.include_router(indicadores_Route.routesIndicadores , prefix="/Indicadores")
 
 app.include_router(auth_router, prefix="/auth")
 
-for _router, _prefix in epi_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
+app.include_router(epidemiologia_Route.routesEpidemiologia, prefix="/epidemiologia")
 
 app.mount("/assets", StaticFiles(directory=os.path.join(DIST, "assets")), name="assets")
 

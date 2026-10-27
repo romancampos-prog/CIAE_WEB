@@ -642,6 +642,7 @@ BackEnd/
 ├── configs/              configuracion global (cors.py, settings.py, response.py = ApiResponse)
 ├── auth/                 autenticacion JWT (controllers/, services/ con solo_roles)
 ├── middleware/           captura de errores de los endpoints
+├── ftp_imss/             FTP del IMSS compartido (conectar, navegar con diagnostico, descargar, catalogo_ftp.json)
 ├── indicadores/          MODULO: Indicadores Medicos
 │   ├── Routes/           indicadores_Route.py: junta los controllers bajo /Indicadores
 │   ├── Controller/       ftp, iaas, extractor, reportes, informacion, excel (*_Controller.py)
@@ -652,7 +653,7 @@ BackEnd/
 │   ├── shared/           meses, unidades, semaforo, periodicidad, validar archivos, auditoria
 │   ├── schemas/          DTO/ (peticiones) y model/ (modelos internos)
 │   └── mapeo/            JSON de configuracion de cada indicador
-├── epidemiologia/        MODULO: Epidemiologia (expone ROUTERS)
+├── epidemiologia/        MODULO: Epidemiologia (Routes/epidemiologia_Route.py, igual que indicadores)
 ├── main.py               punto de entrada: registra los routers y sirve el frontend
 └── requirements.txt
 ```

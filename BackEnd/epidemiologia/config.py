@@ -3,7 +3,7 @@ from configs.settings import DATA_DIR
 
 AÑO_ACTUAL = 2026
 
-_MAPEO = Path(__file__).parent / "mapeo"
+_MAPEO = Path(__file__).parent / "mapeo" / "dengue"
 
 RUTA_OPERATIVA       = DATA_DIR / "EPIDEMIOLOGIA" / "Dengue" / "bases"             / "base_operativa.xlsx"
 RUTA_SISCEP          = DATA_DIR / "EPIDEMIOLOGIA" / "Dengue" / "bases"             / "base_siscep.xlsx"
