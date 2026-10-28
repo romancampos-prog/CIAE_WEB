@@ -639,24 +639,30 @@ Los indicadores llegan del backend (mapeo). Agregar un indicador **no requiere t
 
 ```
 BackEnd/
+├── main.py               punto de entrada: registra los routers y sirve el frontend
 ├── configs/              configuracion global (cors.py, settings.py, response.py = ApiResponse)
-├── auth/                 autenticacion JWT (controllers/, services/ con solo_roles)
-├── middleware/           captura de errores de los endpoints
-├── service/             lo que comparten indicadores y epidemiologia
+├── middleware/           errores_endpoints_Middleware.py: captura los errores de los endpoints
+├── compartido/           lo que usan 2 o mas modulos
 │   ├── ftp_imss/         FTP del IMSS (conectar, navegar con diagnostico, descargar, catalogo_ftp.json)
-│   └── extraccion_excel/ motor + un archivo por modo (modos_por_posicion/, modos_por_filtro/)
+│   ├── extraccion_excel/ motor + un archivo por modo (modos_por_posicion/, modos_por_filtro/)
+│   ├── auditoria_Services.py        eventos en BD_CIAE/auditoria.log
+│   └── validar_archivo_Services.py  peso/tipo del archivo subido y contrasena
+├── auth/                 MODULO: sesion (Controller/, services/ con solo_roles, schemas/)
 ├── indicadores/          MODULO: Indicadores Medicos
 │   ├── Routes/           indicadores_Route.py: junta los controllers bajo /Indicadores
-│   ├── Controller/       ftp, iaas, extractor, reportes, informacion, excel (*_Controller.py)
-│   ├── services/         logica compartida (calculo, guardado en BD_CIAE, Excel, mapeo, poblacion)
-│   │   ├── ftp/          logica exclusiva de FTP
-│   │   ├── iaas/         logica exclusiva de IAAS
-│   │   └── extractor/    logica exclusiva del Extractor
-│   ├── shared/           meses, unidades, semaforo, periodicidad, validar archivos, auditoria
+│   ├── Controller/       ftp, poblacion, iaas, extractor, reportes, informacion, excel (*_Controller.py)
+│   ├── services/         un tema por carpeta (*_Services.py)
+│   │   ├── ftp/, iaas/, extractor/          logica exclusiva de cada modulo de generacion
+│   │   ├── calculo/, semaforo/              formulas, resultado por unidad y color
+│   │   ├── reporte_guardado/                lectura tipada de lo guardado (graficas y Excel)
+│   │   └── informacion/, poblacion/, grafica/, excel/
+│   ├── datos/            lo unico que lee/escribe: bd_ciae/, lectura_mapeo/, excel_subido/ (*_Datos.py)
+│   ├── shared/           meses, unidades, periodicidad (internos de indicadores)
 │   ├── schemas/          DTO/ (peticiones) y model/ (modelos internos)
 │   └── mapeo/            JSON de configuracion de cada indicador
-├── epidemiologia/        MODULO: Epidemiologia (Routes/epidemiologia_Route.py, igual que indicadores)
-├── main.py               punto de entrada: registra los routers y sirve el frontend
+├── epidemiologia/        MODULO: Epidemiologia (mismo esqueleto, una carpeta por tema: dengue/, ftp/)
+│   ├── Routes/, Controller/, services/, datos/, schemas/, mapeo/
+│   └── modulos/          algoritmos puros (depuracion, duplicados, clustering, canal endemico)
 └── requirements.txt
 ```
 
@@ -676,7 +682,7 @@ Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
      ├─ datos/lectura_mapeo/mapeo_por_modulo_Datos       lee el mapeo del indicador
      ├─ services/ftp/extraer_indicador_ftp_Services      baja los reportes del FTP y extrae
      ├─ services/ftp/calcular_indicador_ftp_Services     aplica las formulas del mapeo
-     ├─ services/semaforo/color_semaforo_     pone el color
+     ├─ services/semaforo/color_semaforo_Services        pone el color
      └─ datos/bd_ciae/guardar_mes_Datos                  guarda en BD_CIAE
                       │
                       ▼
