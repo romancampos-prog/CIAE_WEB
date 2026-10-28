@@ -15,7 +15,7 @@ class FuenteExcelWeb(BaseModel):
     Excel subido por el usuario (IAAS). Solo se tipa lo que necesita quien
     carga el archivo (encabezado, modo); el resto del detalle
     (filtroColumna, columnaUnidad, ...) se conserva tal cual (extra="allow") y
-    lo valida el motor de extraccion (services/compartido/extraccion/) segun modoExtraccion.
+    lo valida el motor de extraccion (service/extraccion_excel/) segun modoExtraccion.
     Sin "hoja": se lee la primera hoja que trae los encabezados del mapeo en sus
     letras (datos/excel_subido/lector_excel_Datos.LectorExcel). nombreArchivo (extra) = etiqueta para la ficha.
     """

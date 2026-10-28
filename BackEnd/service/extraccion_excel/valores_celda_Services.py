@@ -1,6 +1,6 @@
 """
 Leer el valor de una celda de Excel: a numero (aceptando comas de miles) y si esta vacia.
-Usado en: services/compartido/extraccion/modos_por_*_Services.py
+Usado en: modos_por_filtro/cumple_condicion_Services.py, modos_por_filtro/filtro_unidad_valor_Services.py, modos_por_posicion/interseccion_columna_Services.py, modos_por_posicion/interseccion_fila_Services.py
 """
 import pandas as pd
 

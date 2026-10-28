@@ -10,7 +10,8 @@ import io
 import pandas as pd
 from openpyxl.utils import get_column_letter
 
-from shared.columnas_excel import letra_a_numero
+from service.extraccion_excel.columnas_excel import letra_a_numero
+
 
 
 class HojaNoEncontrada(ValueError):

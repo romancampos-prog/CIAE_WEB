@@ -10,8 +10,8 @@ from fastapi import HTTPException
 from datos.excel_subido.lector_excel_Datos import HojaNoEncontrada, LectorExcel, numeros_escritos_como_texto
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_iaas
 from schemas.model.mapeo_iaas_Model import FuenteExcelWeb
-from services.compartido.extraccion.motor_extraccion_Services import columnas_esperadas
-from shared.columnas_excel import letra_a_numero
+from service.extraccion_excel.columnas_excel import letra_a_numero
+from service.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 
 
 class ErroresValidacionExcel(HTTPException):

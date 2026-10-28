@@ -15,7 +15,7 @@ class FuenteExtractor(BaseModel):
     """
     Excel crudo mensual (SUI-13) del motor Extractor (EH 03, DM 04, MT 03).
     filtroColumna, filtroGrupoColumnas y cruce se conservan tal cual (extra="allow")
-    -- los valida el motor de extraccion (services/compartido/extraccion/), no un modelo aqui.
+    -- los valida el motor de extraccion (service/extraccion_excel/), no un modelo aqui.
     catalogoUnidades: con que catalogo se agrupa (ver shared/UNIDADES.CATALOGOS_UNIDADES);
     sin el, se agrupa por las UMF de FTP (lo de EH 03/DM 04).
     archivo: que archivo base alimenta al indicador (SUI_13, EGRESOS_TOCO...) -- la vista

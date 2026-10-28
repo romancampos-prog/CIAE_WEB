@@ -1,9 +1,9 @@
 """
-Catalogo del FTP (ftp_imss/catalogo_ftp.json): las plantillas de ruta de cada tipo de carpeta, en
+Catalogo del FTP (service/ftp_imss/catalogo_ftp.json): las plantillas de ruta de cada tipo de carpeta, en
 que carpeta de 1.SIAIS_Reportes vive cada reporte (con los nombres que esa carpeta tiene de
 verdad en el FTP) y como viene el periodo del mes en el nombre del archivo. Se lee al arrancar:
 tras editar el JSON hay que reiniciar el backend.
-Usado en: ftp_imss/reportes_siais_ftp_Datos.py, indicadores/services/ftp/* (y epidemiologia)
+Usado en: service/ftp_imss/reportes_siais_ftp_Datos.py, indicadores/services/ftp/* (y epidemiologia)
 """
 import json
 from pathlib import Path
@@ -31,11 +31,11 @@ def codigo_base(codigo_reporte: str) -> str:
 ##--------------------------------------
 
 def subcarpeta_de_reporte(codigo_reporte: str) -> str:
-    """Carpeta del catalogo donde vive el reporte; ValueError si no esta en ftp_imss/catalogo_ftp.json."""
+    """Carpeta del catalogo donde vive el reporte; ValueError si no esta en service/ftp_imss/catalogo_ftp.json."""
     carpeta = _CARPETA_POR_REPORTE.get(codigo_base(codigo_reporte))
 
     if carpeta is None:
-        raise ValueError(f"El reporte '{codigo_reporte}' no esta en el catalogo del FTP (ftp_imss/catalogo_ftp.json).")
+        raise ValueError(f"El reporte '{codigo_reporte}' no esta en el catalogo del FTP (service/ftp_imss/catalogo_ftp.json).")
 
     return carpeta
 

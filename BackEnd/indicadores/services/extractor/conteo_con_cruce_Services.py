@@ -4,11 +4,12 @@ candidatos de la via 2, que se confirman contra el archivo de Egresos del mismo 
 Usado en: services/extractor/generar_corte_Services.py
 """
 from datos.excel_subido.lector_excel_Datos import LectorExcel, numeros_escritos_como_texto
-from schemas.model.detalle_extraccion_Model import CondicionFiltro
-from services.compartido.extraccion.modos_por_filtro_Services import cumple_condicion, fila_cumple
-from services.compartido.extraccion.motor_extraccion_Services import columnas_esperadas
+from service.extraccion_excel.columnas_excel import letra_a_numero
+from service.extraccion_excel.detalle_extraccion_Model import CondicionFiltro
+from service.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
+from service.extraccion_excel.modos_por_filtro.fila_cumple_Services import fila_cumple
+from service.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 from services.extractor.leer_archivo_extractor_Services import columnas_por_nombre, validar_mes_anio_archivo
-from shared.columnas_excel import letra_a_numero
 from shared.UNIDADES import CLAVE_UNIDADES_F
 
 

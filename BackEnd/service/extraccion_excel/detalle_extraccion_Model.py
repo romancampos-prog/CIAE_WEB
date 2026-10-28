@@ -3,7 +3,7 @@ El bloque "detalle" de reporte.numerador/denominador del mapeo, un modelo por mo
 (solo con lo que cada modo de verdad usa, ver indicadores/mapeo/README.md). El motor de
 extraccion lo valida antes de extraer: si el mapeo trae un dato mal formado se sabe de
 inmediato en vez de tronar a medio pandas.
-Usado en: services/compartido/extraccion/*, services/extractor/*
+Usado en: el motor y los modos de extraccion; en indicadores, el Extractor
 """
 from typing import Any, Literal
 

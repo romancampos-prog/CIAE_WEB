@@ -13,12 +13,13 @@ servicio y los servicios orquestan con pasos numerados.
 ```
 epidemiologia/
 ├── Routes/
-│   └── epidemiologia_Route.py      — junta los controllers (/archivos, /pipeline, /reportes); main.py lo monta bajo /epidemiologia
+│   └── epidemiologia_Route.py      — junta los controllers (/archivos, /pipeline, /reportes, /ftp); main.py lo monta bajo /epidemiologia
 ├── config.py                       — AÑO_ACTUAL y rutas (BD_CIAE/EPIDEMIOLOGIA/Dengue y mapeo/dengue/)
 ├── controllers/
 │   ├── archivos_controller.py      — subir base operativa / SisCep            (ApiResponse)
 │   ├── pipeline_controller.py      — estado y ejecutar el pipeline            (ApiResponse)
-│   └── reportes_controller.py      — resultados por sección                   (dato DIRECTO)
+│   ├── reportes_controller.py      — resultados por sección                   (dato DIRECTO)
+│   └── ftp.py                      — reportes SIAIS del FTP (en construcción)
 ├── services/                       — orquestan: leen con datos/, calculan con modulos/
 │   └── dengue/
 │       ├── subir_bases_service.py  — validar .xlsx y peso, guardar, auditar
@@ -53,13 +54,15 @@ epidemiologia/
 ├── entrenamiento/
 │   └── entrenar_duplicados.py      — se corre a mano: MLP vs Random Forest -> modelos/mlp_duplicados.pkl
 └── mapeo/
-    └── dengue/
-        ├── gto_normalizado.json    — GeoJSON de los municipios de Guanajuato
-        └── cp_coordenadas.csv      — código postal -> LAT, LON (fuera de git: *.csv en .gitignore)
+    ├── dengue/
+    │   ├── gto_normalizado.json    — GeoJSON de los municipios de Guanajuato
+    │   └── cp_coordenadas.csv      — código postal -> LAT, LON (fuera de git: *.csv en .gitignore)
+    └── ftp/
+        └── AccionesUP86.json       — un archivo por extracción: del OC30, las acciones UP86 (filtro + columnas)
 
 Cada tema tiene su carpeta en services/, modulos/, datos/ y mapeo/ (hoy dengue/; lo nuevo, ej.
 ftp/, va en su propia carpeta). El FTP en sí (conectar, navegar, catálogo SIAIS) es compartido
-con indicadores y vive en BackEnd/ftp_imss/.
+con indicadores y vive en BackEnd/service/ftp_imss/.
 ```
 
 ## Respuestas: dos formatos

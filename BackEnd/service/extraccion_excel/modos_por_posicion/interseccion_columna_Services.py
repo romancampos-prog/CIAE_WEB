@@ -1,13 +1,11 @@
 """
-Modos de extraccion por posicion (los de FTP): INTERSECCION_COLUMNA (fila por etiqueta),
-INTERSECCION_FILA (fila fija) y ULTIMA_FILA (el ultimo valor numerico de la columna).
-Usado en: services/compartido/extraccion/motor_extraccion_Services.py
+INTERSECCION_COLUMNA: busca en una columna la fila con un texto (ej. "TOTAL DE LA UNIDAD") y
+toma de esa fila los valores de columna_dato (las letras pueden depender del mes).
+Usado en: motor_extraccion_Services.py
 """
-import pandas as pd
-
-from schemas.model.detalle_extraccion_Model import DetalleInterseccionColumna, DetalleInterseccionFila, DetalleUltimaFila
-from services.compartido.extraccion.valores_celda_Services import a_numero
-from shared.columnas_excel import letra_a_numero
+from service.extraccion_excel.columnas_excel import letra_a_numero
+from service.extraccion_excel.detalle_extraccion_Model import DetalleInterseccionColumna
+from service.extraccion_excel.valores_celda_Services import a_numero
 
 
 # Modos "formula" -- mismo algoritmo que ya probo la extraccion de FTP, solo se
@@ -57,50 +55,6 @@ def interseccion_columna(
 
     if all(v is None for v in valores):
         return None, "ARCHIVO_VACIO", f"Fila con '{texto_buscar}' encontrada pero celdas vacias en {letras_dato}"
-    if any(v is None for v in valores):
-        return valores, "VALOR_NULO", None
-
-    return valores, None, None
-
-
-##--------------------------------------
-
-def interseccion_fila(df, detalle: DetalleInterseccionFila):
-    valores = []
-
-    for f in detalle.fila:
-        idx_fila = f - 1
-
-        for letra in detalle.columna_dato:
-            idx_col = letra_a_numero(letra)
-
-            try:
-                valores.append(a_numero(df.iloc[idx_fila, idx_col]) or 0.0)
-            except IndexError:
-                valores.append(None)
-
-    if not valores or all(v is None for v in valores):
-        return None, "ARCHIVO_VACIO", f"Filas {detalle.fila} vacias o no encontradas"
-    if any(v is None for v in valores):
-        return valores, "VALOR_NULO", None
-
-    return valores, None, None
-
-
-##--------------------------------------
-
-def ultima_fila(df, detalle: DetalleUltimaFila):
-    indices = [letra_a_numero(l) for l in detalle.columna_dato]
-    bloque  = df.iloc[detalle.encabezado:, indices]
-
-    valores = []
-
-    for i in range(bloque.shape[1]):
-        columna = pd.to_numeric(bloque.iloc[:, i], errors='coerce').dropna()
-        valores.append(float(columna.iloc[-1]) if not columna.empty else None)
-
-    if all(v is None for v in valores):
-        return None, "ARCHIVO_VACIO", f"Sin valores numericos en {detalle.columna_dato} desde fila {detalle.encabezado + 1}"
     if any(v is None for v in valores):
         return valores, "VALOR_NULO", None
 

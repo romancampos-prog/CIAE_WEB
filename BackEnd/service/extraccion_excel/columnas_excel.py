@@ -1,6 +1,7 @@
 """
 Letra de columna de Excel ("A", "AA") a su posicion: la usan el motor de extraccion, el lector
 de los Excel que sube el usuario, IAAS y el Extractor (todas las columnas del mapeo van por letra).
+Usado en: los modos de extraccion y, en indicadores, LectorExcel, IAAS y el Extractor
 """
 
 

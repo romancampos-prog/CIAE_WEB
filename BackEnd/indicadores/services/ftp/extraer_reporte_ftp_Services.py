@@ -9,11 +9,11 @@ from typing import Any
 
 import pandas as pd
 
-from ftp_imss.catalogo_reportes_ftp_Datos import es_de_piramides
-from ftp_imss.navegacion_ftp_Datos import descargar_archivo, navegar_alguna_ruta
-from ftp_imss.reportes_siais_ftp_Datos import elegir_archivo_del_periodo, listar_reportes, rutas_de_la_unidad
 from schemas.model.generacion_ftp_Model import LogErrores
-from services.compartido.extraccion.motor_extraccion_Services import extraer
+from service.extraccion_excel.motor_extraccion_Services import extraer
+from service.ftp_imss.catalogo_reportes_ftp_Datos import es_de_piramides
+from service.ftp_imss.navegacion_ftp_Datos import descargar_archivo, navegar_alguna_ruta
+from service.ftp_imss.reportes_siais_ftp_Datos import elegir_archivo_del_periodo, listar_reportes, rutas_de_la_unidad
 from services.ftp.errores_extraccion_ftp_Services import registrar_error
 from shared.UNIDADES import CLAVE_UNIDADES_F, NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS
 
@@ -81,7 +81,7 @@ def extraer_reporte_de_unidades(
     valores_por_unidad: dict[str, dict[str, list[float] | None] | None] = {}
 
     for unidad_ruta, unidad in zip(unidades_ruta, NOMBREUNIDADESARCHIVO):
-        # Las rutas salen de ftp_imss/catalogo_ftp.json (piramides: una sola carpeta del año, sin mes ni semana).
+        # Las rutas salen de service/ftp_imss/catalogo_ftp.json (piramides: una sola carpeta del año, sin mes ni semana).
         rutas = rutas_de_la_unidad(reporte, ano, mes, unidad_ruta, semana)
         carpeta = rutas[0]
 

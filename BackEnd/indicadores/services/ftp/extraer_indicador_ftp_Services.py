@@ -7,12 +7,12 @@ Usado en: services/ftp/generar_indicador_ftp_Services.py
 """
 from typing import Any
 
-from ftp_imss.catalogo_reportes_ftp_Datos import codigo_base
-from ftp_imss.conexion_ftp_Datos import conectar_ftp, desconectar_ftp
 from schemas.model.generacion_ftp_Model import ErrorExtraccion, LogErrores
 from schemas.model.mapeo_comun_Model import FuentePoblacionInfoSalud
 from schemas.model.mapeo_ftp_Model import FuenteArchivosFTP, IndicadorFTPMapeo
 from schemas.model.unidad_resultado_Model import DatosExtraidosUnidad
+from service.ftp_imss.catalogo_reportes_ftp_Datos import codigo_base
+from service.ftp_imss.conexion_ftp_Datos import conectar_ftp, desconectar_ftp
 from services.ftp.errores_extraccion_ftp_Services import CATALOGO_ERRORES_FTP, registrar_error
 from services.ftp.extraer_reporte_ftp_Services import extraer_reporte_de_unidades
 from services.poblacion.denominador_poblacion_Services import extraer_poblacion
