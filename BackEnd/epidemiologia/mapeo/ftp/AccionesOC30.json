@@ -1,0 +1,24 @@
+{
+    "fuente": "ftp",
+    "archivo": {
+        "OC30": {
+            "hoja": ["*"],
+            "modoExtraccion": "FILTRO_SELECCION",
+            "encabezado": 9,
+            "filtroColumna": {
+                "V": {
+                    "tipo": "LISTA",
+                    "filtro": ["UP87", "UP407", "UP409", "UP411", "UP414", "UP223"],
+                    "nombreColumna": "Clave de la Acción"
+                }
+            },
+            "seleccionar": {
+                "C": "Fecha de Atención",
+                "G": "Número Seguridad Social",
+                "H": "Agregado",
+                "I": "Nombre Completo del Paciente",
+                "V": "Clave de la Acción"
+            }
+        }
+    }
+}

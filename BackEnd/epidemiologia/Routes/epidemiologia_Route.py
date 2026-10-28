@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from ..Controller import archivos_Controller
 from ..Controller import pipeline_Controller
 from ..Controller import reportes_Controller
+from ..Controller import epiFTP
 
 
 routesEpidemiologia = APIRouter()
@@ -15,3 +16,8 @@ routesEpidemiologia.include_router(pipeline_Controller.pipelineApi, prefix="/pip
 
 #EndPoints REPORTES (RESULTADOS POR SECCION: CANAL, MAPAS, ALERTAS, DUPLICADOS)
 routesEpidemiologia.include_router(reportes_Controller.reportesApi, prefix="/reportes")
+
+#EndPoints FTP para uso de epidemeologia
+routesEpidemiologia.include_router(epiFTP.ftpApi, prefix="/ftp")
+
+
