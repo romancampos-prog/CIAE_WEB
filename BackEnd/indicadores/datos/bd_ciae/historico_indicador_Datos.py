@@ -1,7 +1,7 @@
 """
 Lectura del historico definitivo de un indicador en BD_CIAE (crudo, como esta en disco): los
 meses que ya tiene y sus numeradores. La consulta tipada para graficas y Excel esta en
-services/compartido/reporte_guardado_Services.py.
+services/reporte_guardado/reporte_guardado_Services.py.
 Usado en: services/{ftp,iaas,poblacion}/*, services/excel/excel_iaas_calculo_Services.py
 """
 from datos.bd_ciae.archivos_bd_ciae_Datos import leer_json, ruta_definitivo

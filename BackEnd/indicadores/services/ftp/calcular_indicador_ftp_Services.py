@@ -5,8 +5,8 @@ Usado en: services/ftp/generar_indicador_ftp_Services.py
 """
 from schemas.model.ficha_indicador_Model import Operacion
 from schemas.model.unidad_resultado_Model import DatosExtraidosUnidad, ResultadoUnidad
-from services.compartido.calculo.formulas_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL, agregar_total_ooad, calcular_resultado
+from services.calculo.formulas_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL, agregar_total_ooad, calcular_resultado
 
 
 def calcular_indicador(

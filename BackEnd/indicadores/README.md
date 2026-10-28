@@ -42,7 +42,7 @@ main.py
 ```
 
 Como `indicadores/` está en `sys.path`, dentro de este módulo se importa así:
-`from services.compartido.calculo.formulas_Services import ...`, `from datos.bd_ciae.guardar_mes_Datos import ...`,
+`from services.calculo.formulas_Services import ...`, `from datos.bd_ciae.guardar_mes_Datos import ...`,
 `from shared.UNIDADES import ...` (sin `indicadores.` adelante).
 
 **Un archivo por responsabilidad:** cada archivo hace una sola cosa y se llama como lo que hace;
@@ -54,10 +54,10 @@ Las capas:
 |---|---|---|
 | `Controller/` | Endpoints (`nombre_Controller.py`) | Delgados: reciben, llaman a **un** servicio y responden. Sin lógica |
 | `services/ftp/`, `iaas/`, `extractor/` | Lógica exclusiva de ese módulo (`nombre_Services.py`) | El servicio de cada endpoint orquesta con pasos numerados y regresa `(mensaje, datos)` |
-| `services/compartido/` | Lo que usan los tres módulos: cálculo, semáforo, motor de extracción, reporte guardado | No sabe de qué módulo vienen los datos |
+| `services/calculo/`, `semaforo/`, `reporte_guardado/` | Lo que usan los tres módulos: fórmulas, semáforo, lectura tipada de lo guardado | No sabe de qué módulo vienen los datos |
 | `services/informacion/`, `poblacion/`, `grafica/`, `excel/` | Fichas y listas del mapeo, población, gráficas y Excel | Compartidos por todos los módulos |
 | `datos/` | **Lo único** que lee y escribe: BD_CIAE, el mapeo JSON, el FTP y los Excel subidos (`nombre_Datos.py`) | Sin reglas de negocio |
-| `shared/` | Utilidades transversales | Meses, unidades, periodicidad, letras de columna, validar archivos, auditoría |
+| `shared/` | Utilidades internas de indicadores | Meses, unidades, periodicidad (lo que comparte con auth y epidemiología está en `BackEnd/compartido/`) |
 | `schemas/DTO/` | Lo que reciben los endpoints | Pydantic |
 | `schemas/model/` | Modelos internos | Pydantic |
 | `mapeo/` | Configuración (JSON) | Ver [mapeo/README.md](mapeo/README.md) |
@@ -87,9 +87,7 @@ Las capas:
 | `bd_ciae/historico_indicador_Datos.py` | Meses guardados de un indicador, su histórico crudo y sus numeradores |
 | `bd_ciae/guardar_mes_Datos.py` | Guardar el mes definitivo (formato de disco: `%` y `desempeno`) |
 | `bd_ciae/semanal_Datos.py` | Semanal de FTP: guardar, leer y borrar el mes al llegar el definitivo |
-| `bd_ciae/extractor_reporte_Datos.py` | JSON del Extractor de corte: leer, guardar y guardar el numerador crudo del mes |
-| `bd_ciae/extractor_cruce_Datos.py` | `EXTRACTOR_CRUCE`: vía 1 + candidatos que dejó el SUI-13 |
-| `bd_ciae/extractor_partes_Datos.py` | `EXTRACTOR_PARTES`: conteo de cada archivo por mes (Neonatal 04 y 06) |
+| `bd_ciae/extractor_Datos.py` | JSON del Extractor: el reporte (numerador crudo del mes), `EXTRACTOR_PARTES` (conteo de cada archivo, Neonatal 04 y 06) y `EXTRACTOR_CRUCE` (vía 1 + candidatos que dejó el SUI-13) |
 | `bd_ciae/poblacion_Datos.py` | `POBLACION_{año}.json`: leer, su periodo y guardar |
 | `lectura_mapeo/mapeo_indicadores_Datos.py` | **Único** lector del mapeo: `bloque_mapeo`, catálogos de familias y de archivos del Extractor |
 | `lectura_mapeo/mapeo_por_modulo_Datos.py` | El mapeo tipado de cada módulo: `cargar_indicador_ftp`, `cargar_indicador_iaas`, `cargar_indicador_extractor` |
@@ -104,7 +102,7 @@ El FTP ya no está en `datos/`: vive en `BackEnd/compartido/ftp_imss/` porque ta
 (`conexion_ftp_Datos`, `navegacion_ftp_Datos` con el diagnóstico de rutas, `catalogo_reportes_ftp_Datos`
 que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, listar y elegir el del periodo).
 
-### services/compartido/ (lo que usan los tres módulos)
+### services/calculo/, semaforo/, reporte_guardado/ (lo que usan los tres módulos)
 
 | Archivo | Qué hace |
 |---|---|
@@ -113,7 +111,7 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `calculo/mensual_acumulado_Services.py` | Mensual acumulado sumando meses (gráfica y Excel) |
 | `semaforo/umbrales_semaforo_Services.py` | Leer los umbrales del mapeo (legado/explícito, por mes, por grupo, rangos) |
 | `semaforo/color_semaforo_Services.py` | Color de un resultado y semaforizar unidades/reportes |
-| `reporte_guardado_Services.py` | Lectura tipada del reporte y del semanal para gráficas y Excel |
+| `reporte_guardado/reporte_guardado_Services.py` | Lectura tipada del reporte y del semanal para gráficas y Excel |
 
 ### services/informacion/, poblacion/, grafica/, excel/
 
@@ -174,9 +172,7 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 |---|---|
 | `shared/MESES.py` | `MESES_ESTANDAR`, `nombre_del_mes`, `mes_desplazado` |
 | `shared/UNIDADES.py` | Carga `mapeo/unidades/*.json` (listas de unidades, claves, grupos IAAS, alias HGSZ) |
-| `shared/reglas_periodicidad.py` | Qué meses muestra cada periodicidad y su texto de ayuda |
-| `shared/validarArchivo_service.py` | Peso y tipo del archivo subido, contraseña (epidemiología usa `validarPeso_Archivo`) |
-| `shared/auditoria_service.py` | Escribe eventos en `BD_CIAE/auditoria.log` (también lo usan auth y epidemiología) |
+| `shared/reglas_periodicidad.py` | Qué meses muestra cada periodicidad, su clave normalizada y su texto de ayuda |
 | `schemas/DTO/*_ViewModel.py` | Peticiones de FTP, población e IAAS (`comun_ViewModel.TextoObligatorio`) |
 | `schemas/model/mapeo_{comun,ftp,iaas,extractor}_Model.py` | Forma del mapeo que lee cada módulo (`IndicadorFTPMapeo`, `IndicadorIAASMapeo`, `IndicadorExtractorMapeo`) |
 | `schemas/model/reporte_guardado_Model.py` | Lo guardado en BD_CIAE (`UnidadDatos`, `MesReporte`, `ReporteIndicador`) |
@@ -235,13 +231,13 @@ Los servicios de los tres módulos siguen los mismos pasos y los marcan con come
 
 | Paso | Qué pasa | Dónde |
 |---|---|---|
-| 1. Validar | Mes/año, peso y tipo de archivo, contraseña si se sobrescribe | `shared/validarArchivo_service.py` |
+| 1. Validar | Mes/año, peso y tipo de archivo, contraseña si se sobrescribe | `BackEnd/compartido/validar_archivo_Services.py` |
 | 2. Mapeo | Se lee el bloque del indicador | `datos/lectura_mapeo/mapeo_por_modulo_Datos.cargar_indicador_*` |
 | 3. Extracción | Se cargan los Excel y se sacan numerador y denominador por unidad | capa 1 en `services/<modulo>/` (+ `compartido/ftp_imss/`, `datos/excel_subido/`), capa 2 en `compartido/extraccion_excel/` |
-| 4. Cálculo | Fórmulas del mapeo por unidad + `TOTAL_OOAD` | `services/compartido/calculo/` |
-| 5. Semáforo | Color de cada unidad | `services/compartido/semaforo/color_semaforo_Services.py` |
+| 4. Cálculo | Fórmulas del mapeo por unidad + `TOTAL_OOAD` | `services/calculo/` |
+| 5. Semáforo | Color de cada unidad | `services/semaforo/color_semaforo_Services.py` |
 | 6. Guardado | En `BD_CIAE/INDICADORES/...` | `datos/bd_ciae/` |
-| 7. Auditoría y respuesta | `auditoria.log` + mensaje | `shared/auditoria_service.py` |
+| 7. Auditoría y respuesta | `auditoria.log` + mensaje | `BackEnd/compartido/auditoria_Services.py` |
 
 "Capa 1" = cómo llega el archivo (bajarlo del FTP, leer el Excel subido, elegir la hoja,
 validar que sea el correcto). "Capa 2" = qué sacar de una hoja ya cargada (es igual para

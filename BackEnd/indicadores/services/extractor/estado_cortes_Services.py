@@ -3,7 +3,7 @@ Cuantos de los 12 meses de cada corte (Junio, Diciembre y el Junio siguiente) ya
 para que el front muestre "llevas 8 de 12 meses para el corte de Diciembre".
 Usado en: Controller/extractor_Controller.py
 """
-from datos.bd_ciae.extractor_reporte_Datos import leer_reporte_extractor
+from datos.bd_ciae.extractor_Datos import leer_reporte_extractor
 from services.extractor.catalogo_extractor_Services import indicadores_extractor_de_corte
 from services.extractor.corte_semestral_Services import ventana_corte
 

@@ -3,8 +3,7 @@ Procesar un mes de un indicador de corte: numerador crudo del mes (via 1 + via 2
 Egresos), guardarlo y generar o recalcular los cortes que lo incluyen.
 Usado en: services/extractor/subir_archivo_extractor_Services.py, services/extractor/completar_cruce_Services.py
 """
-from datos.bd_ciae.extractor_cruce_Datos import guardar_pendiente_cruce
-from datos.bd_ciae.extractor_reporte_Datos import guardar_numerador_mes
+from datos.bd_ciae.extractor_Datos import guardar_numerador_mes, guardar_pendiente_cruce
 from datos.excel_subido.lector_excel_Datos import LectorExcel
 from schemas.model.mapeo_extractor_Model import IndicadorExtractorMapeo
 from services.extractor.catalogo_extractor_Services import configuracion_cruce

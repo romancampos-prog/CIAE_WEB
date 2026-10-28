@@ -4,7 +4,7 @@ SUI-13 de ese mes, guarda el mes y genera o recalcula el corte.
 Usado en: Controller/extractor_Controller.py
 """
 from compartido.validar_archivo_Services import validar_archivo_subido
-from datos.bd_ciae.extractor_cruce_Datos import leer_pendiente_cruce
+from datos.bd_ciae.extractor_Datos import leer_pendiente_cruce
 from datos.excel_subido.lector_excel_Datos import LectorExcel
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from services.extractor.catalogo_extractor_Services import configuracion_cruce, indicadores_extractor

@@ -676,7 +676,7 @@ Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
      ├─ datos/lectura_mapeo/mapeo_por_modulo_Datos       lee el mapeo del indicador
      ├─ services/ftp/extraer_indicador_ftp_Services      baja los reportes del FTP y extrae
      ├─ services/ftp/calcular_indicador_ftp_Services     aplica las formulas del mapeo
-     ├─ services/compartido/semaforo/color_semaforo_     pone el color
+     ├─ services/semaforo/color_semaforo_     pone el color
      └─ datos/bd_ciae/guardar_mes_Datos                  guarda en BD_CIAE
                       │
                       ▼
@@ -688,7 +688,7 @@ Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
 | Capa | Regla |
 |---|---|
 | `Controller` | Solo HTTP: recibir parametros, validar rol con `solo_roles`, llamar al servicio y responder `ApiResponse`. Sin logica de negocio. |
-| `services` | Solo logica (un archivo por responsabilidad). Lo de un solo modulo va en `services/<modulo>/`; lo compartido en `services/compartido/`, `informacion/`, `poblacion/`, `grafica/` y `excel/`. |
+| `services` | Solo logica (un archivo por responsabilidad). Lo de un solo modulo va en `services/<modulo>/`; lo compartido en `services/calculo/`, `semaforo/`, `reporte_guardado/`, `informacion/`, `poblacion/`, `grafica/` y `excel/`. |
 | `datos` | Lo unico que lee y escribe: BD_CIAE, el mapeo JSON, el FTP y los Excel subidos. Sin reglas de negocio. |
 | `mapeo` | Las reglas de cada indicador (archivos, columnas, filtros, formulas, semaforo). No se escriben en el codigo. |
 
@@ -716,7 +716,7 @@ Cada indicador se guarda en `BD_CIAE/INDICADORES/{año}/{FAMILIA}/{FAMILIA}_{NN}
 ```
 
 Para leer o escribir estos archivos usar siempre `datos/bd_ciae/` (y
-`services/compartido/reporte_guardado_Services.py` para las consultas tipadas). El semanal de FTP, los cortes del
+`services/reporte_guardado/reporte_guardado_Services.py` para las consultas tipadas). El semanal de FTP, los cortes del
 Extractor (`CORTES`) y las carpetas `EXTRACTOR_CRUCE` / `EXTRACTOR_PARTES` estan explicados en
 [BackEnd/indicadores/README.md, seccion 5](BackEnd/indicadores/README.md#5-cómo-se-guarda-en-bd_ciae).
 

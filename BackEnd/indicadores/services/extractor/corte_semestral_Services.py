@@ -5,14 +5,14 @@ que FTP), se semaforiza y se guarda en CORTES. Tambien el recalculo de los corte
 cuando llega una poblacion nueva.
 Usado en: services/extractor/generar_corte_Services.py, services/poblacion/recalcular_poblacion_Services.py
 """
-from datos.bd_ciae.extractor_reporte_Datos import guardar_reporte_extractor, leer_reporte_extractor
+from datos.bd_ciae.extractor_Datos import guardar_reporte_extractor, leer_reporte_extractor
 from datos.bd_ciae.poblacion_Datos import texto_poblacion_vigente
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from schemas.model.reporte_guardado_Model import UnidadDatos
-from services.compartido.calculo.formulas_Services import evaluar_formula
-from services.compartido.semaforo.color_semaforo_Services import semaforizar_reporte
+from services.calculo.formulas_Services import evaluar_formula
 from services.extractor.catalogo_extractor_Services import indicadores_extractor_de_corte
 from services.poblacion.denominador_poblacion_Services import denominador_de_poblacion
+from services.semaforo.color_semaforo_Services import semaforizar_reporte
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import NOMBREUNIDADESARCHIVO
 
@@ -65,7 +65,7 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
         if anio_mes not in reportes_cache:
             reportes_cache[anio_mes] = leer_reporte_extractor(indicador, anio_mes)
 
-        # MESES siempre es el dato crudo (ver datos/bd_ciae/extractor_reporte_Datos.guardar_numerador_mes)
+        # MESES siempre es el dato crudo (ver datos/bd_ciae/extractor_Datos.guardar_numerador_mes)
         # -- nunca lo sobreescribe un cierre de corte, ni siquiera para el propio mes de
         # corte, asi que sirve igual si "mes" es Junio/Diciembre o cualquier otro.
         datos_mes = reportes_cache[anio_mes]["MESES"].get(mes)

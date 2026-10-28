@@ -5,8 +5,8 @@ Usado en: services/excel/generar_excel_Services.py
 """
 from datos.lectura_mapeo.mapeo_indicadores_Datos import bloque_mapeo
 from schemas.model.excel_Model import HojaIndicador, MetadataHoja, SolicitudExcel
-from services.compartido.reporte_guardado_Services import cargar_reporte_indicador, cargar_semanal
 from services.extractor.catalogo_extractor_Services import es_indicador_de_corte
+from services.reporte_guardado.reporte_guardado_Services import cargar_reporte_indicador, cargar_semanal
 from shared.MESES import MESES_ESTANDAR
 
 

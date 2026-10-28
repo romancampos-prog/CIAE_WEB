@@ -5,10 +5,10 @@ datos. Regla comun de dato incompleto:
   - denominador 0 con numerador > 0                 -> Gris (inconsistencia: no se puede dividir,
                                                        no es que el desempeño sea malo)
   - numerador 0 con denominador valido (0 o no)     -> cero real, se evalua normal
-Usado en: services/{ftp,iaas,extractor,poblacion}/*, services/compartido/calculo/mensual_acumulado_Services.py
+Usado en: services/{ftp,iaas,extractor,poblacion}/*, services/calculo/mensual_acumulado_Services.py
 """
 from schemas.model.unidad_resultado_Model import ResultadoUnidad
-from services.compartido.calculo.formulas_Services import evaluar_formula
+from services.calculo.formulas_Services import evaluar_formula
 
 CLAVE_TOTAL = "TOTAL_OOAD"
 

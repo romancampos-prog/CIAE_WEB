@@ -1,7 +1,7 @@
 """
 El reporte semanal (previo) de FTP en BD_CIAE: guardar, leer y borrar el mes cuando ya llego
 el definitivo.
-Usado en: services/ftp/generar_indicador_ftp_Services.py, services/compartido/reporte_guardado_Services.py
+Usado en: services/ftp/generar_indicador_ftp_Services.py, services/reporte_guardado/reporte_guardado_Services.py
 """
 from collections.abc import Mapping
 

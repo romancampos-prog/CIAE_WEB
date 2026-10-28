@@ -3,7 +3,7 @@ Extractor de corte (EH 03, DM 04): los cortes cerrados y los casos crudos de cad
 año y del anterior, para la tendencia por cortes de la grafica.
 Usado en: services/grafica/grafica_indicador_Services.py
 """
-from services.compartido.reporte_guardado_Services import cargar_reporte_indicador
+from services.reporte_guardado.reporte_guardado_Services import cargar_reporte_indicador
 from shared.MESES import MESES_ESTANDAR
 
 

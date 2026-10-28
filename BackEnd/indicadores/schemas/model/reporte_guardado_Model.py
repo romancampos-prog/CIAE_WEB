@@ -1,7 +1,7 @@
 """
 El reporte de un indicador tal como se lee de BD_CIAE (graficas y Excel): unidad, mes,
 semanal (previo) y el año completo.
-Usado en: services/compartido/*, services/grafica/*, services/excel/*, services/extractor/corte_semestral_Services.py
+Usado en: services/reporte_guardado/*, services/grafica/*, services/excel/*, services/extractor/corte_semestral_Services.py
 """
 from typing import Dict, Literal
 

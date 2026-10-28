@@ -7,11 +7,11 @@ reglas del mapeo (semaforo y formula): el front solo las pinta.
 Usado en: services/grafica/grafica_indicador_Services.py
 """
 from schemas.model.reporte_guardado_Model import ReporteIndicador
-from services.compartido.calculo.formulas_Services import evaluar_formula
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL as TOTAL
-from services.compartido.semaforo.color_semaforo_Services import evaluar_color
-from services.compartido.semaforo.umbrales_semaforo_Services import umbrales_para
+from services.calculo.formulas_Services import evaluar_formula
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL as TOTAL
 from services.grafica.metas_semaforo_Services import meta_esperado, texto_meta
+from services.semaforo.color_semaforo_Services import evaluar_color
+from services.semaforo.umbrales_semaforo_Services import umbrales_para
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 

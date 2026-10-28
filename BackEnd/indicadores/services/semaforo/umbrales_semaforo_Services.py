@@ -6,7 +6,7 @@ metas, para poder migrar indicador por indicador sin romper a los que todavia no
   - Explicito (texto con operador): {"Bajo": "<= 1.7", "Esperado": ">= 2.3"}.
 Y tres formas de semaforo: mensual ({"Enero": metas, ...}), agrupado por tipo de hospital
 (IAAS 01: {"HGS": metas, ..., "OOAD": metas}) o fijo (metas directas).
-Usado en: services/compartido/semaforo/color_semaforo_Services.py, services/grafica/*, services/excel/*, services/informacion/*
+Usado en: services/semaforo/color_semaforo_Services.py, services/grafica/*, services/excel/*, services/informacion/*
 """
 import operator
 import re

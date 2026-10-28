@@ -5,7 +5,7 @@ por mes (egresos, infecciones, dias, tasa) y un umbral por tipo de hospital; IAA
 Usado en: services/excel/excel_iaas_Services.py
 """
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_iaas
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL
 from services.excel.excel_iaas_calculo_Services import MESES, UNIDADES
 
 NOTA = "NOTA: SOLO SE HACE SUMATORIA DE LAS UNIDADES COMPLETAS"

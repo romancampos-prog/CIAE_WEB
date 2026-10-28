@@ -4,7 +4,7 @@ cada archivo guarda su lado y el mes se genera cuando ya esta lo que falta; el a
 la ventana de 12 meses y genera o recalcula los 11 meses siguientes.
 Usado en: services/extractor/subir_archivo_extractor_Services.py
 """
-from datos.bd_ciae.extractor_partes_Datos import guardar_parte_mes, leer_partes
+from datos.bd_ciae.extractor_Datos import guardar_parte_mes, leer_partes
 from datos.excel_subido.lector_excel_Datos import LectorExcel
 from schemas.model.mapeo_extractor_Model import IndicadorExtractorMapeo
 from services.extractor.catalogo_extractor_Services import ANUALIZADO, nombre_archivo

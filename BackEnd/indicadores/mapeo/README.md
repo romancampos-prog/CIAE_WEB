@@ -564,7 +564,7 @@ Solo en el numerador de EH 03 y DM 04 (`FILTRO_CONTEO_ACUMULADO`). Es la **vía 
 
 ## 7. `operacion`: las fórmulas
 
-Tres fórmulas en texto que evalúa `services/compartido/calculo/` (`formulas_Services.py`):
+Tres fórmulas en texto que evalúa `services/calculo/` (`formulas_Services.py`):
 
 | Fórmula | Con qué nombres trabaja |
 |---|---|
@@ -607,7 +607,7 @@ Reglas que aplica el código (no se escriben en el mapeo):
 ## 8. `semaforo`
 
 Cuatro colores: **Esperado** (verde), **Medio** (amarillo), **Bajo** (rojo) y **Gris** (sin
-dato). Lo evalúa `services/compartido/semaforo/`.
+dato). Lo evalúa `services/semaforo/`.
 
 ### Cómo se escribe un umbral
 

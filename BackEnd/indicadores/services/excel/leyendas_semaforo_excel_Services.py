@@ -5,8 +5,8 @@ Usado en: services/excel/escribir_hoja_indicador_Services.py
 """
 import re
 
-from services.compartido.semaforo.color_semaforo_Services import evaluar_color
-from services.compartido.semaforo.umbrales_semaforo_Services import numero_de_umbral
+from services.semaforo.color_semaforo_Services import evaluar_color
+from services.semaforo.umbrales_semaforo_Services import numero_de_umbral
 from shared.MESES import MESES_ESTANDAR as MESES_LISTA
 
 

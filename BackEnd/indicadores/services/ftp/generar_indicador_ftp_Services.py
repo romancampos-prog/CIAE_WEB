@@ -10,9 +10,9 @@ from datos.bd_ciae.semanal_Datos import borrar_mes_semanal, guardar_mes_semanal
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_ftp
 from schemas.model.generacion_ftp_Model import ErrorExtraccion, ResultadoGeneracion, RutaAfectada
 from schemas.model.mapeo_comun_Model import FuentePoblacionInfoSalud
-from services.compartido.semaforo.color_semaforo_Services import semaforizar_unidades
 from services.ftp.calcular_indicador_ftp_Services import calcular_indicador
 from services.ftp.extraer_indicador_ftp_Services import extraer_indicador
+from services.semaforo.color_semaforo_Services import semaforizar_unidades
 
 
 def generar_indicador_ftp(indicador: str, ano: str, mes: str, semana: str | int | None = None) -> ResultadoGeneracion:

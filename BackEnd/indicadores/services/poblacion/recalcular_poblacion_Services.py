@@ -9,11 +9,11 @@ from datos.bd_ciae.poblacion_Datos import leer_periodo_poblacion, texto_poblacio
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_ftp
 from schemas.model.mapeo_comun_Model import FuentePoblacionInfoSalud
 from schemas.model.poblacion_Model import CorteExtractorRecalculado, IndicadorRecalculado, ResultadoRecalculoPoblacion
-from services.compartido.calculo.resultado_unidades_Services import calcular_unidades
-from services.compartido.semaforo.color_semaforo_Services import semaforizar_unidades
+from services.calculo.resultado_unidades_Services import calcular_unidades
 from services.extractor.corte_semestral_Services import recalcular_cortes_con_poblacion
 from services.informacion.lista_indicadores_Services import todos_los_indicadores
 from services.poblacion.denominador_poblacion_Services import denominador_de_poblacion
+from services.semaforo.color_semaforo_Services import semaforizar_unidades
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import NOMBREUNIDADESARCHIVO
 

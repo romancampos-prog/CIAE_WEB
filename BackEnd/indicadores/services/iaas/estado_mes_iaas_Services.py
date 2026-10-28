@@ -6,7 +6,7 @@ Usado en: Controller/iaas_Controller.py, services/iaas/generar_mes_iaas_Services
 from datos.bd_ciae.historico_indicador_Datos import leer_historico_indicador, meses_con_datos
 from schemas.model.iaas_Model import SesionIAAS
 from schemas.model.unidad_resultado_Model import UnidadSemaforizada
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL
 from services.iaas.catalogo_iaas_Services import INDICADORES_IAAS
 from shared.MESES import nombre_del_mes
 from shared.UNIDADES import ORDEN_DEMAS_IAAS

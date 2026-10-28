@@ -3,7 +3,7 @@ La meta (Esperado) del semaforo leida para la grafica: su sentido (mas o menos e
 texto y sus numeros (limite o rango).
 Usado en: services/grafica/perfil_indicador_Services.py, services/grafica/estadisticas_grafica_Services.py
 """
-from services.compartido.semaforo.umbrales_semaforo_Services import RE_UMBRAL, RE_UMBRAL_COMPUESTO
+from services.semaforo.umbrales_semaforo_Services import RE_UMBRAL, RE_UMBRAL_COMPUESTO
 
 
 def meta_esperado(umbrales: dict) -> tuple[str, float] | None:

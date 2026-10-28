@@ -4,7 +4,7 @@ menos las defunciones de ESOS bebes, acomodadas por su fecha de nacimiento. Cada
 parte en el mes del reporte que le toca y el mes se genera cuando ya estan sus 4 archivos.
 Usado en: services/extractor/subir_archivo_extractor_Services.py, services/extractor/estado_archivos_Services.py
 """
-from datos.bd_ciae.extractor_partes_Datos import guardar_parte_mes, leer_partes
+from datos.bd_ciae.extractor_Datos import guardar_parte_mes, leer_partes
 from datos.excel_subido.lector_excel_Datos import LectorExcel
 from schemas.model.mapeo_extractor_Model import IndicadorExtractorMapeo
 from services.extractor.catalogo_extractor_Services import nombre_archivo

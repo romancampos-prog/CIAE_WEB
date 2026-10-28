@@ -5,9 +5,9 @@ Usado en: services/grafica/grafica_indicador_Services.py, services/excel/hoja_es
 """
 from datos.lectura_mapeo.mapeo_indicadores_Datos import bloque_mapeo
 from schemas.model.reporte_guardado_Model import MesReporte, UnidadDatos
-from services.compartido.calculo.formulas_Services import evaluar_formula
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL, es_inconsistente
-from services.compartido.semaforo.color_semaforo_Services import semaforizar_reporte
+from services.calculo.formulas_Services import evaluar_formula
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL, es_inconsistente
+from services.semaforo.color_semaforo_Services import semaforizar_reporte
 from shared.MESES import MESES_ESTANDAR
 
 

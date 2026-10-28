@@ -9,7 +9,7 @@ import xlsxwriter
 
 from schemas.model.excel_Model import HojaIndicador
 from schemas.model.reporte_guardado_Model import UnidadDatos
-from services.compartido.calculo.mensual_acumulado_Services import acumula_sumando_meses, calcular_mensual_acumulado
+from services.calculo.mensual_acumulado_Services import acumula_sumando_meses, calcular_mensual_acumulado
 from services.excel.escribir_hoja_indicador_Services import escribir_hoja_indicador
 from services.excel.estilos_excel_Services import obtener_estilos_excel
 from shared.MESES import MESES_ESTANDAR

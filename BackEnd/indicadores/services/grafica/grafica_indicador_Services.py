@@ -5,13 +5,13 @@ Usado en: Controller/reportes_Controller.py
 """
 from datos.lectura_mapeo.mapeo_indicadores_Datos import bloque_mapeo
 from schemas.model.reporte_guardado_Model import MesReporte
-from services.compartido.calculo.mensual_acumulado_Services import acumula_sumando_meses, calcular_mensual_acumulado
-from services.compartido.reporte_guardado_Services import cargar_reporte_indicador, cargar_semanal
+from services.calculo.mensual_acumulado_Services import acumula_sumando_meses, calcular_mensual_acumulado
 from services.extractor.catalogo_extractor_Services import indicadores_extractor_de_corte
 from services.grafica.estadisticas_grafica_Services import estadisticas_de_reporte
 from services.grafica.perfil_indicador_Services import perfil_de_indicador
 from services.grafica.serie_cortes_Services import serie_de_cortes
 from services.informacion.ficha_indicador_Services import obtener_ficha_indicador
+from services.reporte_guardado.reporte_guardado_Services import cargar_reporte_indicador, cargar_semanal
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import nombre_canonico_iaas
 

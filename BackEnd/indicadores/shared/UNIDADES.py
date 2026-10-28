@@ -4,7 +4,7 @@ Catalogos de unidades medicas, leidos de mapeo/unidades/:
   - hospitales.json: hospitales de 2o nivel por clave, para indicadores que se agrupan por el
                      hospital que atiende (MT, Neonatal) y no por la UMF de adscripcion
   - iaas.json:       hospitales de IAAS y su tipo (para el semaforo agrupado de IAAS 01)
-Usado en: services/*, datos/*, services/compartido/semaforo/color_semaforo_Services.py
+Usado en: services/*, datos/*, services/semaforo/color_semaforo_Services.py
 """
 import json
 from pathlib import Path

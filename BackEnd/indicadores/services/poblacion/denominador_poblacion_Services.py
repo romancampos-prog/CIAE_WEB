@@ -6,7 +6,7 @@ Usado en: services/ftp/extraer_indicador_ftp_Services.py, services/poblacion/rec
 """
 from datos.bd_ciae.poblacion_Datos import leer_poblacion, ruta_poblacion
 from schemas.model.unidad_resultado_Model import DatosExtraidosUnidad
-from services.compartido.calculo.formulas_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
+from services.calculo.formulas_Services import UMBRAL_SUBE_REDONDEO, evaluar_lado
 from shared.UNIDADES import NOMBREUNIDADESARCHIVO
 
 

@@ -3,8 +3,7 @@ Por cada archivo que usa el Extractor y cada mes del año, si ya esta subido (pa
 la pagina de Generar del Extractor).
 Usado en: Controller/extractor_Controller.py
 """
-from datos.bd_ciae.extractor_partes_Datos import leer_partes
-from datos.bd_ciae.extractor_reporte_Datos import leer_reporte_extractor
+from datos.bd_ciae.extractor_Datos import leer_partes, leer_reporte_extractor
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from services.extractor.catalogo_extractor_Services import (
     ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, configuracion_cruce, indicadores_extractor,

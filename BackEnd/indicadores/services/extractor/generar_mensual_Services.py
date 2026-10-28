@@ -5,9 +5,9 @@ Usado en: services/extractor/generar_*_Services.py, services/extractor/subir_arc
 """
 from datos.bd_ciae.guardar_mes_Datos import guardar_mes_definitivo
 from schemas.model.mapeo_extractor_Model import IndicadorExtractorMapeo
-from services.compartido.calculo.formulas_Services import evaluar_formula
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL, calcular_unidades
-from services.compartido.semaforo.color_semaforo_Services import semaforizar_unidades
+from services.calculo.formulas_Services import evaluar_formula
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL, calcular_unidades
+from services.semaforo.color_semaforo_Services import semaforizar_unidades
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import FUERA_DEL_TOTAL_OOAD
 

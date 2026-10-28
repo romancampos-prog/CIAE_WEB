@@ -24,24 +24,26 @@ _EXPLICACION = {
 }
 
 
-def _clave(periodicidad: str | None) -> str:
+def clave_periodicidad(periodicidad: str | None) -> str:
+    """Forma normalizada ("Mensual - Mensual Acumulado" -> "mensual mensual acumulado") para comparar."""
     return " ".join((periodicidad or "").lower().replace(" - ", " ").replace("-", " ").split())
 
 
+##--------------------------------------
+
 def indices_de_meses(periodicidad: str | None) -> list[int]:
     """Indices 0-based de los meses que se muestran como columna."""
-    return _MESES_DE_CORTE.get(_clave(periodicidad), list(range(12)))
+    return _MESES_DE_CORTE.get(clave_periodicidad(periodicidad), list(range(12)))
 
+
+##--------------------------------------
 
 def es_periodicidad_de_corte(periodicidad: str | None) -> bool:
     """True si el indicador se publica solo en meses de corte (ej. Semestral Anualizado), no cada mes."""
-    return _clave(periodicidad) in _MESES_DE_CORTE
+    return clave_periodicidad(periodicidad) in _MESES_DE_CORTE
 
 
-def clave_periodicidad(periodicidad: str | None) -> str:
-    """Forma normalizada ("Mensual - Mensual Acumulado" -> "mensual mensual acumulado") para comparar."""
-    return _clave(periodicidad)
-
+##--------------------------------------
 
 def descripcion_periodicidad(periodicidad: str | None) -> str | None:
     """Ej. "Mensual Trimestralizado: cada mes acumula los últimos 3 meses"; None si el indicador no tiene periodicidad."""
@@ -49,5 +51,5 @@ def descripcion_periodicidad(periodicidad: str | None) -> str | None:
     if not periodicidad:
         return None
 
-    explicacion = _EXPLICACION.get(_clave(periodicidad))
+    explicacion = _EXPLICACION.get(clave_periodicidad(periodicidad))
     return f"{periodicidad}: {explicacion}" if explicacion else periodicidad

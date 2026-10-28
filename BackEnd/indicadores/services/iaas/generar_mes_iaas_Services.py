@@ -12,11 +12,11 @@ from compartido.validar_archivo_Services import validar_archivo_subido
 from datos.bd_ciae.guardar_mes_Datos import guardar_mes_definitivo
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_iaas
 from schemas.model.iaas_Model import DenominadoresCapturados
-from services.compartido.calculo.resultado_unidades_Services import calcular_unidades
-from services.compartido.semaforo.color_semaforo_Services import semaforizar_unidades
+from services.calculo.resultado_unidades_Services import calcular_unidades
 from services.iaas.catalogo_iaas_Services import INDICADORES_IAAS, unidades_del_indicador
 from services.iaas.estado_mes_iaas_Services import leer_mes_guardado_iaas, pendientes_del_mes
 from services.iaas.numerador_denominador_iaas_Services import obtener_denominador_iaas01, obtener_numerador
+from services.semaforo.color_semaforo_Services import semaforizar_unidades
 from shared.MESES import nombre_del_mes
 from shared.UNIDADES import UNIDADES_SIN_OOAD_IAAS
 

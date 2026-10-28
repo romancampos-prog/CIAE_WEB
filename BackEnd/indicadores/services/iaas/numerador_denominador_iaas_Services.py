@@ -12,7 +12,7 @@ from compartido.extraccion_excel.modos_por_filtro.coincide_unidad_Services impor
 from compartido.extraccion_excel.motor_extraccion_Services import ERRORES, extraer
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_iaas
 from schemas.model.mapeo_iaas_Model import FuenteExcelWeb
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL
 from services.iaas.leer_excel_iaas_Services import ErroresValidacionExcel, leer_hoja_excel_iaas, validar_pertenencia_unidad
 from shared.UNIDADES import ORDEN_IAAS01
 

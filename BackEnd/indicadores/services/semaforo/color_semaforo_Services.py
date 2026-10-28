@@ -6,7 +6,7 @@ Usado en: services/*
 """
 from schemas.model.reporte_guardado_Model import UnidadDatos
 from schemas.model.unidad_resultado_Model import ResultadoUnidad, UnidadSemaforizada
-from services.compartido.semaforo.umbrales_semaforo_Services import condicion_de_umbral, es_formato_explicito, umbrales_para
+from services.semaforo.umbrales_semaforo_Services import condicion_de_umbral, es_formato_explicito, umbrales_para
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import grupo_de_unidad_iaas01
 

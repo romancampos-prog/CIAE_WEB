@@ -4,9 +4,9 @@ meta por mes (y por unidad en IAAS 01), unidad de medida, si es por corte y el u
 denominador chico, para que el front no deduzca reglas por su cuenta.
 Usado en: services/grafica/grafica_indicador_Services.py
 """
-from services.compartido.calculo.formulas_Services import evaluar_formula
-from services.compartido.semaforo.umbrales_semaforo_Services import es_agrupado, es_formato_explicito, umbrales_para
+from services.calculo.formulas_Services import evaluar_formula
 from services.grafica.metas_semaforo_Services import meta_numerica, tipo_de_meta
+from services.semaforo.umbrales_semaforo_Services import es_agrupado, es_formato_explicito, umbrales_para
 from shared.MESES import MESES_ESTANDAR
 from shared.reglas_periodicidad import es_periodicidad_de_corte
 from shared.UNIDADES import grupo_de_unidad_iaas01

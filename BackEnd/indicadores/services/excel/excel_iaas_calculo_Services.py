@@ -5,8 +5,8 @@ Usado en: services/excel/excel_iaas_Services.py, services/excel/excel_iaas_dibuj
 """
 from datos.bd_ciae.historico_indicador_Datos import leer_historico_indicador
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_iaas
-from services.compartido.calculo.resultado_unidades_Services import CLAVE_TOTAL, calcular_resultado
-from services.compartido.semaforo.color_semaforo_Services import color_de_resultado
+from services.calculo.resultado_unidades_Services import CLAVE_TOTAL, calcular_resultado
+from services.semaforo.color_semaforo_Services import color_de_resultado
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import ORDEN_DEMAS_IAAS, alias_hgsz
 

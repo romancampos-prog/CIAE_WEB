@@ -2,7 +2,7 @@
 Lo que el mapeo dice de los indicadores del Extractor: cuales son, cuales van por corte, que
 archivos usa cada uno, si llevan cruce con Egresos y si se reportan en otro mes que el del
 archivo (desfase).
-Usado en: services/extractor/*, services/compartido/reporte_guardado_Services.py, services/grafica/*, services/excel/*
+Usado en: services/extractor/*, services/reporte_guardado/reporte_guardado_Services.py, services/grafica/*, services/excel/*
 """
 from functools import lru_cache
 

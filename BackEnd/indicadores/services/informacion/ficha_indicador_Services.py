@@ -5,7 +5,7 @@ Usado en: Controller/informacion_Controller.py, services/grafica/grafica_indicad
 """
 from datos.lectura_mapeo.mapeo_indicadores_Datos import bloque_mapeo, catalogo_archivos_extractor
 from schemas.model.ficha_indicador_Model import FichaTecnicaCompleta, FuenteCalculo, InfoIndicador, ReporteFicha
-from services.compartido.semaforo.umbrales_semaforo_Services import es_agrupado
+from services.semaforo.umbrales_semaforo_Services import es_agrupado
 from shared.UNIDADES import UNIDAD_TIPO_IAAS01
 
 
