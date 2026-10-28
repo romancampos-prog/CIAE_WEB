@@ -24,6 +24,18 @@ MODOS_EXTRACCION = {
 }
 
 
+class _FalloUnidad(Exception):
+    """Una unidad que no se pudo leer: su tipo del catalogo de errores FTP y el detalle (ruta o mensaje)."""
+
+    def __init__(self, tipo: str, detalle: str):
+        super().__init__(detalle)
+        self.tipo = tipo
+        self.detalle = detalle
+
+
+##--------------------------------------
+
+
 def ftp_Extraer_Epidemeologia(ano: int, mes: int, semana: int | None, archivo: str) -> tuple[str, dict]:
 
     #1- Obtener mapeo del archivo
@@ -48,11 +60,14 @@ def ftp_Extraer_Epidemeologia(ano: int, mes: int, semana: int | None, archivo: s
     try:
         for reporte, config in mapeo.archivo.items():
             for unidad_ruta, unidad in zip(unidades_ruta, NOMBREUNIDADESARCHIVO):
+                # tipo = id de compartido/ftp_imss/catalogo_errores_ftp.py: la consulta los agrupa por tipo
                 try:
                     filas_unidad = _filas_de_la_unidad(ftp, reporte, config, ano, mes_texto, semana, unidad_ruta)
                     filas += [{"Unidad": unidad, **fila} for fila in filas_unidad]
+                except _FalloUnidad as fallo:
+                    errores.append({"tipo": fallo.tipo, "unidad": unidad, "reporte": reporte, "detalle": fallo.detalle})
                 except Exception as error:
-                    errores.append({"unidad": unidad, "reporte": reporte, "error": str(error)})
+                    errores.append({"tipo": "DESCARGA_FALLIDA", "unidad": unidad, "reporte": reporte, "detalle": str(error)})
     finally:
         desconectar_ftp(ftp)
 
@@ -71,11 +86,11 @@ def _filas_de_la_unidad(ftp: FTP, reporte: str, config: Archivo, ano: int, mes: 
 
     carpeta, navegacion = navegar_alguna_ruta(ftp, rutas_de_la_unidad(reporte, str(ano), mes, unidad_ruta, semana))
     if not navegacion.ok:
-        raise ValueError(f"{carpeta} · fallo en '{navegacion.segmento_fallido}' — {navegacion.diagnostico}")
+        raise _FalloUnidad("RUTA_INVALIDA", f"{carpeta}  ✗ fallo en: '{navegacion.segmento_fallido}' — {navegacion.diagnostico}")
 
     archivos = listar_reportes(ftp, reporte)
     if not archivos:
-        raise ValueError(f"No esta el {reporte} en {carpeta}")
+        raise _FalloUnidad("ARCHIVO_NO_ENCONTRADO", carpeta)
 
     buffer = descargar_archivo(ftp, elegir_archivo_del_periodo(archivos, str(ano), mes))
 
@@ -86,7 +101,11 @@ def _filas_de_la_unidad(ftp: FTP, reporte: str, config: Archivo, ano: int, mes: 
     extraer = MODOS_EXTRACCION[config.modoExtraccion]
     filas: list[dict] = []
 
-    for df in libro.values():
-        filas += extraer(df, config)
+    for nombre_hoja, df in libro.items():
+        try:
+            filas += extraer(df, config)
+        except ValueError as error:
+            # el modo valida los encabezados del mapeo contra la hoja
+            raise _FalloUnidad("ENCABEZADO_DISTINTO", f"Hoja {nombre_hoja}: {error}")
 
     return filas

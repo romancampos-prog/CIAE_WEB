@@ -496,7 +496,8 @@ FrontEnd/src/
 │   ├── cliente/          axiosClient.ts (cookie de sesión + 401), mensajeDeError.ts
 │   ├── auth/             authApi.ts                       /auth
 │   ├── indicadores/      informacionApi, reportesApi, excelApi, ftpApi, poblacionApi, iaasApi, extractorApi
-│   └── dengue/           archivosApi, pipelineApi, reportesApi         /epidemiologia/*
+│   ├── dengue/           archivosApi, pipelineApi, reportesApi         /epidemiologia/*
+│   └── epidemiologia/    ftpApi (ftpEpidemiologiaApi)                  /epidemiologia/ftp/*
 ├── app/
 │   ├── providers/        AppProvider (TanStack Query, tema, sesión, router) y ThemeProvider
 │   ├── layouts/          MainLayout (con Footer) y AuthLayout (login)
@@ -504,9 +505,9 @@ FrontEnd/src/
 ├── pages/                una página por ruta: solo acomoda piezas, sin lógica
 │   ├── login/  inicio/
 │   ├── indicadores/      Hub, GenerarHub, Graficas, ftp/, iaas/, extractor/
-│   └── epidemiologia/    Portada y dengue/ (Carga, Canal, Mapa, Alertas, Duplicados)
+│   └── epidemiologia/    Portada, dengue/ (Carga, Canal, Mapa, Alertas, Duplicados) y acciones/ (OC30)
 ├── features/             cada funcionalidad encapsulada
-│   ├── auth/  indicadores/  graficas/  generar-ftp/  generar-iaas/  generar-extractor/  dengue/
+│   ├── auth/  indicadores/  graficas/  generar-ftp/  generar-iaas/  generar-extractor/  dengue/  acciones/
 │   │   ├── components/   piezas visuales de la feature
 │   │   ├── hooks/        estado y llamadas (useQuery / useMutation)
 │   │   ├── constants/  utils/  context/   (donde haga falta)
@@ -540,8 +541,9 @@ Todas viven en `app/routes/AppRoutes.tsx`:
 /CIAE/IndicadoresMedicos/IAAS                MenuIaasPagina        │ trabajador_ftp,
 /CIAE/IndicadoresMedicos/IAAS/Reporte        GenerarIaasPagina     │ trabajador_IAAS
 /CIAE/IndicadoresMedicos/Extractor           GenerarExtractorPagina┘ (también /Extractor/Generar)
-/CIAE/Epidemiologia                          PortadaEpidemiologiaPagina  ┐
-/CIAE/Epidemiologia/dengue                   CargaPagina                 │
+/CIAE/Epidemiologia                          PortadaEpidemiologiaPagina  ┐ admin, unidad
+/CIAE/Epidemiologia/acciones                 AccionesPagina              ┘
+/CIAE/Epidemiologia/dengue                   CargaPagina                 ┐
 /CIAE/Epidemiologia/dengue/canal             CanalPagina                 │ solo admin
 /CIAE/Epidemiologia/dengue/mapa/:tipo        MapaPagina                  │
 /CIAE/Epidemiologia/dengue/alertas           AlertasSiscepPagina         │

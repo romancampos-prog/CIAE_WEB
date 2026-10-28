@@ -19,7 +19,7 @@ epidemiologia/
 │   ├── archivos_Controller.py      — subir base operativa / SisCep            (ApiResponse)
 │   ├── pipeline_Controller.py      — estado y ejecutar el pipeline            (ApiResponse)
 │   ├── reportes_Controller.py      — resultados por sección                   (dato DIRECTO)
-│   └── ftp.py                      — reportes SIAIS del FTP (en construcción)
+│   └── epiFTP.py                   — Acciones: extraer el OC30 del FTP y consultar lo guardado (ApiResponse)
 ├── services/                       — orquestan: leen con datos/, calculan con modulos/
 │   └── dengue/
 │       ├── subir_bases_Services.py  — validar .xlsx y peso, guardar, auditar
@@ -33,6 +33,11 @@ epidemiologia/
 │       ├── alertas_Services.py      — alertas SisCep para el front
 │       ├── clustering_Services.py   — conteos, coordenadas, brotes y GeoJSON
 │       └── mapa_Services.py         — GeoJSON con casos por municipio para Leaflet
+│   ├── ftp/
+│   │   ├── ftpExtraer.py                     — baja el reporte de cada unidad, aplica el modo del mapeo y guarda
+│   │   ├── consulta_extraccion_Services.py   — lee el definitivo del mes o, si no hay, su última semana; recorta a la unidad del usuario, errores solo admin, + estadísticas (404 si no hay nada)
+│   │   └── periodos_extraccion_Services.py   — meses del año con extracción (definitivo / última semana)
+│   └── mapeo/mapeo_Services.py      — lee y valida mapeo/ftp/{archivo}.json (schemas/model/accionesAchivo_Dto.py)
 ├── datos/                          — lo ÚNICO que lee y escribe archivos
 │   └── dengue/
 │       ├── bases_dengue_Datos.py   — leer/guardar base operativa y SisCep
@@ -40,6 +45,7 @@ epidemiologia/
 │       ├── catalogos_geo_Datos.py  — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/dengue/)
 │       ├── resultados_pipeline_Datos.py — resultados/{clave}.json y fecha del último reporte
 │       └── modelo_duplicados_Datos.py   — el modelo entrenado de duplicados (hoy no existe)
+│   └── ftp/extracciones_ftp_Datos.py — guardar/leer FTP/{extraccion}/{año}/{extraccion}_{año}{mes}[_S{semana}].json
 ├── modulos/                        — algoritmos puros: reciben y regresan DataFrames, sin archivos
 │   └── dengue/
 │       ├── fechas.py               — semana epidemiológica SUIVE (semana_epidemiologica)
@@ -51,6 +57,9 @@ epidemiologia/
 │       │                             brotes_espaciales, brotes_temporales
 │       ├── canal_endemico.py       — canal por cuartiles, zonas y semanas anómalas
 │       └── alertas.py              — las 5 alertas SisCep y negativos por unidad
+│   └── ftp/filtro_seleccion.py     — modo FILTRO_SELECCION: filas que pasan filtroColumna, columnas de 'seleccionar'
+│       ftp/estadisticas_extraccion.py — conteos de las filas: total, por columna del filtroColumna (ej. Clave de la Acción) y por unidad
+│       ftp/errores_por_tipo.py     — errores guardados {tipo, unidad, reporte, detalle} agrupados por tipo con la misma forma que las restricciones de indicadores FTP (el front usa el mismo ModalRestricciones), nombre/descripción de compartido/ftp_imss/catalogo_errores_ftp.py (el mismo catálogo que indicadores FTP)
 ├── entrenamiento/
 │   └── entrenar_duplicados.py      — se corre a mano: MLP vs Random Forest -> modelos/mlp_duplicados.pkl
 └── mapeo/
@@ -58,7 +67,7 @@ epidemiologia/
     │   ├── gto_normalizado.json    — GeoJSON de los municipios de Guanajuato
     │   └── cp_coordenadas.csv      — código postal -> LAT, LON (fuera de git: *.csv en .gitignore)
     └── ftp/
-        └── AccionesUP86.json       — un archivo por extracción: del OC30, las acciones UP86 (filtro + columnas)
+        └── AccionesOC30.json       — un archivo por extracción: del OC30, las claves de acción del filtro + columnas a guardar
 
 Cada tema tiene su carpeta en services/, modulos/, datos/ y mapeo/ (hoy dengue/; lo nuevo, ej.
 ftp/, va en su propia carpeta). El FTP en sí (conectar, navegar, catálogo SIAIS) es compartido
@@ -84,8 +93,13 @@ con indicadores y vive en BackEnd/compartido/ftp_imss/.
 | `GET /epidemiologia/reportes/alertas-siscep` | Alertas SisCep | `resultado_guardado("alertas")` |
 | `GET /epidemiologia/reportes/duplicados` | Registros eliminados por duplicado | `resultado_guardado("duplicados")` |
 | `GET /epidemiologia/reportes/posibles-duplicados` | Pares parecidos no confirmados (revisión a mano) | `resultado_guardado("posibles_duplicados")` |
+| `POST /epidemiologia/ftp/extraer/OC30?ano=&mes=[&semana=]` | Acciones: bajar el OC30 de las unidades, extraer y guardar en `BD_CIAE/EPIDEMIOLOGIA/FTP/AccionesOC30/` | `ftp/ftpExtraer.ftp_Extraer_Epidemeologia` |
+| `GET /epidemiologia/ftp/extraccion/OC30?ano=&mes=` | Acciones (admin, unidad): el definitivo del mes o, mientras no hay, su última semana `{extraccion, ano, mes, semana, filas, errores, estadisticas}`; el rol `unidad` solo recibe sus filas y solo el admin recibe `errores` (`{tipo: {nombreError, descripcionError, unidades}}`, como las restricciones de FTP; `{}` si no es admin) (404 si no hay nada) | `ftp/consulta_extraccion_Services.consultar_extraccion` |
+| `GET /epidemiologia/ftp/extraccion/OC30/periodos?ano=` | Acciones (admin, unidad): `[{mes, definitivo, ultimaSemana}]` de los meses con extracción | `ftp/periodos_extraccion_Services.periodos_de_extraccion` |
 
-Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corrido.
+Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corrido. Los de `/ftp` responden `ApiResponse`.
+
+En el front, Acciones es la tarjeta junto a Dengue en la portada (`/CIAE/Epidemiologia/acciones`, `features/acciones`, `api/epidemiologia/ftpApi.ts`): el admin extrae el periodo y la tabla muestra las columnas tal cual llegan (Unidad + `seleccionar` del mapeo).
 
 ## El pipeline
 

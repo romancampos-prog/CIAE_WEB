@@ -1,0 +1,247 @@
+/* Acciones (Epidemiología, OC30): web en dos columnas (panel lateral + tabla), móvil en una. */
+
+.acc-main {
+  flex: 1; position: relative; z-index: 1; overflow-y: auto;
+  width: 100%; max-width: 1680px; margin: 0 auto; box-sizing: border-box;
+  padding: 24px 32px 32px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* ── Encabezado ── */
+.acc-encabezado { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.acc-titulo { font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 800; color: var(--texto); margin: 0 0 2px; }
+.acc-subtitulo { font-size: 13px; color: var(--texto-tenue); margin: 0; }
+.acc-periodo {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; background: var(--tinte-marca); color: var(--marca-texto);
+  border: 1px solid var(--borde-marca);
+}
+.acc-periodo--previo { background: var(--tinte-aviso); color: var(--aviso-texto); border-color: var(--borde-aviso); }
+
+/* ── Navegación por meses ── */
+.acc-meses { display: flex; align-items: center; gap: 10px; }
+.acc-meses-lista { display: flex; gap: 6px; flex: 1; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.acc-mes {
+  flex: 1 0 68px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 8px; border-radius: 10px; font-family: inherit; cursor: pointer;
+  border: 1px solid var(--borde); background: var(--superficie); color: var(--texto);
+}
+.acc-mes:disabled { opacity: 0.35; cursor: not-allowed; }
+.acc-mes:not(:disabled):hover { border-color: var(--marca); }
+.acc-mes--activo { background: var(--marca); border-color: var(--marca); color: #fff; }
+.acc-mes-nombre { font-size: 12px; font-weight: 700; }
+.acc-mes-estado { font-size: 9px; opacity: 0.85; white-space: nowrap; }
+
+/* ── Campos ── */
+.acc-campo { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; color: var(--texto-tenue); min-width: 0; }
+.acc-control {
+  width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 10px;
+  font-size: 13px; font-family: inherit; color: var(--texto);
+  border: 1px solid var(--borde); background: var(--superficie);
+}
+.acc-control:focus, .acc-buscar:focus-within { outline: none; border-color: var(--marca); }
+
+/* ── Cuerpo: panel lateral + detalle ── */
+.acc-cuerpo { display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.acc-lateral { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.acc-tarjeta {
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 16px;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+.acc-tarjeta-titulo { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--texto); margin: 0; }
+.acc-tarjeta-nota { font-size: 11px; color: var(--texto-tenue); margin: -8px 0 0; }
+
+/* ── Generar ── */
+.acc-segmentado { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; gap: 3px; border-radius: 12px; background: var(--superficie-alterna); border: 1px solid var(--borde); }
+.acc-segmento {
+  display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px;
+  border: none; border-radius: 9px; font-family: inherit; font-size: 12px; font-weight: 700;
+  background: transparent; color: var(--texto-suave); cursor: pointer;
+}
+.acc-segmento--activo { background: var(--marca); color: #fff; }
+.acc-generar-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.acc-generar-campos .acc-campo--ancho { grid-column: 1 / -1; }
+.acc-boton {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  padding: 10px 16px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 700;
+  color: #fff; background: var(--marca); cursor: pointer;
+}
+.acc-boton:disabled { opacity: 0.5; cursor: not-allowed; }
+.acc-boton--trabajando:disabled { opacity: 0.8; cursor: wait; }
+.acc-mensaje { font-size: 12px; margin: 0; padding: 8px 10px; border-radius: 10px; }
+.acc-mensaje--ok { background: var(--tinte-exito); color: var(--exito-texto); }
+.acc-mensaje--error { background: var(--tinte-peligro); color: var(--peligro-texto); }
+
+/* ── Estadísticas ── */
+.acc-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.acc-kpi { border-left: 4px solid var(--marca); gap: 4px; }
+.acc-kpi-valor { font-size: 26px; font-weight: 800; color: var(--texto); line-height: 1; }
+.acc-kpi-texto { font-size: 11px; color: var(--texto-tenue); }
+.acc-barras { display: flex; flex-direction: column; gap: 2px; max-height: 280px; overflow-y: auto; }
+.acc-barra {
+  display: grid; grid-template-columns: minmax(80px, 45%) 1fr 34px; align-items: center; gap: 8px;
+  padding: 4px 6px; border-radius: 8px; border: 1px solid transparent; background: transparent;
+  font-family: inherit; font-size: 12px; text-align: left; color: var(--texto-medio); cursor: pointer;
+}
+.acc-barra:hover { background: var(--superficie-alterna); }
+.acc-barra--activa { border-color: var(--marca); background: var(--tinte-marca); }
+.acc-barra-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-barra-pista { height: 8px; border-radius: 4px; background: var(--superficie-alterna); overflow: hidden; }
+.acc-barra-relleno { display: block; height: 100%; border-radius: 4px; background: var(--marca); }
+.acc-barra-cantidad { text-align: right; font-weight: 700; color: var(--texto); }
+
+/* ── Aviso de errores (solo admin) y su panel ── */
+.acc-aviso {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px;
+  border-radius: 12px; font-family: inherit; font-size: 12px; cursor: pointer; text-align: left;
+  background: var(--tinte-aviso); color: var(--aviso-texto); border: 1px solid var(--borde-aviso);
+}
+.acc-aviso:hover { border-color: var(--aviso-texto); }
+.acc-aviso-texto { flex: 1; font-weight: 700; }
+.acc-aviso-ver { display: inline-flex; align-items: center; gap: 2px; font-weight: 600; white-space: nowrap; }
+/* ── Detalle: filtros + tabla ── */
+.acc-detalle { padding: 0; gap: 0; overflow: hidden; }
+.acc-filtros { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--borde); }
+.acc-filtros-fila { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+
+.acc-buscar {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 280px; min-width: 0;
+  padding: 0 12px; height: 40px; box-sizing: border-box; border-radius: 12px;
+  border: 1px solid var(--borde); background: var(--superficie-alterna); color: var(--texto-tenue);
+  transition: border-color 0.15s, background 0.15s;
+}
+.acc-buscar:focus-within { border-color: var(--marca); background: var(--superficie); }
+.acc-buscar input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; color: var(--texto); font: inherit; font-size: 13px; }
+.acc-buscar-borrar {
+  display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: none; border-radius: 50%;
+  background: var(--borde); color: var(--texto-medio); cursor: pointer;
+}
+
+/* Select con su etiqueta adentro, a la misma altura que la búsqueda */
+.acc-selector {
+  position: relative; display: flex; flex-direction: column; justify-content: center; flex: 0 1 220px; min-width: 150px;
+  height: 40px; box-sizing: border-box; padding: 0 12px; border-radius: 12px;
+  border: 1px solid var(--borde); background: var(--superficie-alterna);
+}
+.acc-selector:focus-within { border-color: var(--marca); background: var(--superficie); }
+.acc-selector-etiqueta { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--texto-tenue); line-height: 1.2; }
+.acc-selector select {
+  border: none; outline: none; background: transparent; padding: 0; margin: 0;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; width: 100%;
+}
+.acc-selector select option { background: var(--superficie); color: var(--texto); }
+
+.acc-contador { margin-left: auto; align-self: center; font-size: 12px; color: var(--texto-tenue); white-space: nowrap; }
+.acc-contador strong { font-size: 15px; color: var(--texto); }
+
+.acc-filtros-activos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.acc-chip-filtro {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  background: var(--tinte-marca); color: var(--marca-texto); border: 1px solid var(--borde-marca);
+}
+.acc-chip-filtro:hover { border-color: var(--marca); }
+.acc-limpiar {
+  border: none; background: transparent; padding: 4px 6px; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 600; color: var(--texto-suave); text-decoration: underline;
+}
+
+/* ── Tabla ── */
+.acc-tabla-caja { overflow: auto; max-height: calc(100vh - 320px); min-height: 240px; }
+.acc-tabla { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.acc-tabla th {
+  position: sticky; top: 0; z-index: 2; padding: 0; text-align: left; white-space: nowrap;
+  background: var(--superficie); border-bottom: 1px solid var(--borde);
+  box-shadow: 0 1px 0 var(--borde);
+}
+.acc-th-boton {
+  display: inline-flex; align-items: center; gap: 4px; width: 100%; padding: 11px 14px;
+  border: none; background: transparent; cursor: pointer; text-align: left;
+  font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: var(--texto-suave);
+}
+.acc-th-boton:hover { color: var(--texto); }
+.acc-tabla th[aria-sort='ascending'] .acc-th-boton,
+.acc-tabla th[aria-sort='descending'] .acc-th-boton { color: var(--marca-texto); }
+.acc-tabla td { padding: 9px 14px; border-bottom: 1px solid var(--borde); color: var(--texto-medio); white-space: nowrap; background: var(--superficie); }
+.acc-tabla tbody tr:nth-child(even) td { background: var(--superficie-alterna); }
+.acc-tabla tbody tr:hover td { background: var(--tinte-marca); }
+.acc-tabla tbody tr:last-child td { border-bottom: none; }
+
+/* # y Unidad se quedan fijas al desplazar a la derecha */
+.acc-col-numero { box-sizing: border-box; width: 44px; min-width: 44px; max-width: 44px; text-align: right !important; color: var(--texto-tenue) !important; font-size: 11px; padding: 9px 8px 9px 4px !important; }
+.acc-tabla th.acc-col-numero { padding: 11px 8px 11px 4px !important; font-size: 11px; color: var(--texto-tenue); }
+.acc-tabla .acc-col-numero { position: sticky; left: 0; z-index: 1; }
+.acc-tabla th.acc-col-numero { z-index: 3; }
+.acc-tabla td:nth-child(2) { position: sticky; left: 44px; z-index: 1; font-weight: 700; color: var(--texto); box-shadow: 1px 0 0 var(--borde); }
+.acc-tabla th:nth-child(2) { position: sticky; left: 44px; z-index: 3; box-shadow: 1px 0 0 var(--borde), 0 1px 0 var(--borde); }
+
+.acc-clave {
+  padding: 2px 9px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 11.5px; font-weight: 700;
+  background: var(--tinte-marca); color: var(--marca-texto); border: 1px solid var(--borde-marca);
+}
+.acc-clave:hover { border-color: var(--marca); }
+
+.acc-vacio { font-size: 13px; color: var(--texto-tenue); margin: 0; padding: 24px; text-align: center; }
+
+/* ── Tablet: una columna; el panel lateral se acomoda en dos ── */
+@media (max-width: 1100px) {
+  .acc-cuerpo { grid-template-columns: 1fr; }
+  .acc-lateral { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .acc-tabla-caja { max-height: 70vh; }
+}
+
+/* ── Móvil ── */
+@media (max-width: 640px) {
+  .acc-main { padding: 16px; gap: 12px; }
+  .acc-lateral { grid-template-columns: 1fr; }
+  .acc-meses { flex-direction: column; align-items: stretch; }
+  .acc-mes { flex: 0 0 64px; }
+  .acc-buscar { flex-basis: 100%; }
+  .acc-selector { flex: 1 1 140px; }
+  .acc-contador { margin-left: 0; }
+  .acc-tabla td:nth-child(2), .acc-tabla th:nth-child(2) { position: static; box-shadow: none; }
+}
+
+/* ── Paleta por papel (60-30-10) ──
+   Verde (marca)  = estructura e interacción: mes elegido, segmentado, barras, encabezado de tabla.
+   Dorado         = acento escaso, solo para resaltar: clave de acción, orden activo, previo, línea del título.
+   Guinda         = solo lo que pide atención: aviso y ventana de errores.
+   El resto, superficies neutras. */
+.acc-main {
+  --acc-guinda: #691c32;          /* fondo con texto blanco, igual en claro y oscuro */
+  --acc-dorado: rgb(var(--oro-rgb));
+}
+
+.acc-titulo { position: relative; padding-bottom: 10px; }
+.acc-titulo::after {
+  content: ''; position: absolute; left: 0; bottom: 0; width: 48px; height: 3px; border-radius: 2px;
+  background: var(--acc-dorado);
+}
+.acc-periodo--previo { background: rgba(var(--oro-rgb), 0.12); color: var(--dorado-texto); border-color: rgba(var(--oro-rgb), 0.35); }
+
+/* KPIs: mismo tratamiento, sin color propio cada uno */
+.acc-kpi { border-left-color: var(--marca); }
+.acc-kpi-valor { color: var(--marca-texto); }
+
+/* Tabla: encabezado verde muy tenue, clave en dorado */
+.acc-tabla th { background: linear-gradient(var(--tinte-marca), var(--tinte-marca)), var(--superficie); }
+.acc-th-boton { color: var(--marca-texto); }
+.acc-tabla th[aria-sort='ascending'] .acc-th-boton,
+.acc-tabla th[aria-sort='descending'] .acc-th-boton { color: var(--dorado-texto); }
+.acc-tabla th[aria-sort='ascending'], .acc-tabla th[aria-sort='descending'] { box-shadow: inset 0 -2px 0 var(--acc-dorado); }
+.acc-clave { background: rgba(var(--oro-rgb), 0.12); color: var(--dorado-texto); border-color: rgba(var(--oro-rgb), 0.35); }
+.acc-clave:hover { border-color: var(--acc-dorado); }
+
+/* Errores: el único lugar con guinda (el detalle abre el ModalRestricciones de FTP) */
+.acc-aviso { background: rgba(var(--tinto-rgb), 0.06); color: var(--tinto-texto); border-color: rgba(var(--tinto-rgb), 0.25); }
+.acc-aviso:hover { border-color: var(--tinto-texto); }
+
+/* Transiciones suaves y foco visible para teclado */
+.acc-mes, .acc-segmento, .acc-barra, .acc-chip-filtro, .acc-clave, .acc-th-boton, .acc-aviso, .acc-boton {
+  transition: background-color 0.18s, border-color 0.18s, color 0.18s;
+}
+.acc-main button:focus-visible, .acc-main select:focus-visible {
+  outline: 2px solid var(--acc-dorado); outline-offset: 2px;
+}

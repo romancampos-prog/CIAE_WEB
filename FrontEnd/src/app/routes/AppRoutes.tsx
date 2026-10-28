@@ -1,5 +1,5 @@
 // react
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 // propios
 import type { Rol } from '@/types/api/auth';
 import { DengueLayout, PipelineProvider } from '@/features/dengue';
@@ -22,9 +22,11 @@ import CanalPagina                  from '@/pages/epidemiologia/dengue/CanalPagi
 import MapaPagina                   from '@/pages/epidemiologia/dengue/MapaPagina';
 import AlertasSiscepPagina          from '@/pages/epidemiologia/dengue/AlertasSiscepPagina';
 import DuplicadosPagina             from '@/pages/epidemiologia/dengue/DuplicadosPagina';
+import AccionesPagina               from '@/pages/epidemiologia/acciones/AccionesPagina';
 
 // Visitante solo puede ver gráficas: generar (FTP/IAAS/Extractor) queda bloqueado por ruta.
 const ROLES_GENERAR: Rol[] = ['admin', 'trabajador_ftp', 'trabajador_IAAS'];
+const ROLES_EPIDEMIOLOGIA: Rol[] = ['admin', 'unidad'];
 
 /** Todas las rutas de la aplicación en un solo lugar. */
 export default function AppRoutes() {
@@ -60,11 +62,15 @@ export default function AppRoutes() {
               </Route>
             </Route>
 
-            {/* Epidemiología: solo admin, incluso por URL directa */}
-            <Route element={<ProtectedRoute roles={['admin']} />}>
-              <Route path="CIAE/Epidemiologia" element={<PipelineProvider><Outlet /></PipelineProvider>}>
-                <Route index element={<PortadaEpidemiologiaPagina />} />
-                <Route path="dengue" element={<DengueLayout />}>
+            {/* Epidemiología: portada y Acciones también para el usuario de unidad (el back solo le manda
+                sus filas); Dengue solo admin, incluso por URL directa */}
+            <Route path="CIAE/Epidemiologia">
+              <Route element={<ProtectedRoute roles={ROLES_EPIDEMIOLOGIA} />}>
+                <Route index           element={<PortadaEpidemiologiaPagina />} />
+                <Route path="acciones" element={<AccionesPagina />} />
+              </Route>
+              <Route element={<ProtectedRoute roles={['admin']} />}>
+                <Route path="dengue" element={<PipelineProvider><DengueLayout /></PipelineProvider>}>
                   <Route index             element={<CargaPagina />} />
                   <Route path="canal"      element={<CanalPagina />} />
                   <Route path="mapa/:tipo" element={<MapaPagina />} />

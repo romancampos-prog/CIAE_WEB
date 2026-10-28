@@ -141,7 +141,7 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `ftp/pagina_generar_ftp_Services.py` | Indicadores de la página Generar FTP y meses ya generados |
 | `ftp/extraer_indicador_ftp_Services.py` | Agrupa por reporte, conecta y junta lo leído + población |
 | `ftp/extraer_reporte_ftp_Services.py` | Recorre las 46 unidades, baja cada reporte una vez y extrae los dos lados |
-| `ftp/errores_extraccion_ftp_Services.py` | Catálogo de errores ("restricciones") y registrar uno |
+| `ftp/errores_extraccion_ftp_Services.py` | Registrar un error ("restricción"); el catálogo está en `compartido/ftp_imss/catalogo_errores_ftp.py` (también lo usa epidemiología) |
 | `ftp/calcular_indicador_ftp_Services.py` | Fórmulas por unidad + `TOTAL_OOAD` |
 | `ftp/generar_indicador_ftp_Services.py` | Generar / regenerar un indicador |
 | `ftp/generar_categoria_ftp_Services.py` | Generar / regenerar una categoría |

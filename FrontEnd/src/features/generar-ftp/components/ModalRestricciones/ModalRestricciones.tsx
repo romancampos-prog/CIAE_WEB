@@ -47,10 +47,15 @@ interface Props {
   isOpen: boolean;
   restricciones: Restricciones | null;
   indicador?: string;
+  /** Texto del pie; epidemiología (Acciones) pone el suyo. */
+  nota?: string;
   onClose: () => void;
 }
 
-const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }: Props) => {
+const ModalRestricciones = ({
+  isOpen, restricciones, indicador, onClose,
+  nota = 'Los indicadores sin restricciones se generaron y descargaron correctamente.',
+}: Props) => {
   const entries = Object.entries(restricciones ?? {});
 
   const [abierto, setAbierto] = useState(() =>
@@ -202,9 +207,7 @@ const ModalRestricciones = ({ isOpen, restricciones, indicador, onClose }: Props
 
         {/* ── Pie ── */}
         <div className="mrest-modal-footer">
-          <p className="mrest-modal-note">
-            Los indicadores sin restricciones se generaron y descargaron correctamente.
-          </p>
+          <p className="mrest-modal-note">{nota}</p>
           <button className="mrest-btn-ok" onClick={onClose}>Entendido</button>
         </div>
 

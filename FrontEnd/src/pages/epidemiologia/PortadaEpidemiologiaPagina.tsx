@@ -1,7 +1,8 @@
 // react
 import { useNavigate } from 'react-router-dom'
 // propios
-import { IconoEpidemiologia } from '@/components/icons';
+import { IconoDocumento, IconoEpidemiologia } from '@/components/icons';
+import { useRol } from '@/features/auth';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
 import '@/styles/inicio.css';
@@ -14,6 +15,8 @@ const IconMosquito = () => (
 
 export default function PortadaEpidemiologiaPagina() {
   const navigate = useNavigate()
+  // Dengue es solo de admin; el usuario de unidad solo ve Acciones.
+  const { esAdmin } = useRol()
 
   return (
     <div className="epi-root">
@@ -52,15 +55,28 @@ export default function PortadaEpidemiologiaPagina() {
 
         <div className="home-cards">
 
+          {esAdmin && (
+            <NavCard
+              titulo="Dengue"
+              eyebrow="Módulo activo"
+              desc="Canal endémico, mapa de casos por municipio, alertas SisCep y detección de registros duplicados."
+              chips={['Canal', 'Mapa', 'Alertas SisCep', 'Duplicados']}
+              color="tinto"
+              onClick={() => navigate('/CIAE/Epidemiologia/dengue')}
+            >
+              <IconMosquito />
+            </NavCard>
+          )}
+
           <NavCard
-            titulo="Dengue"
-            eyebrow="Módulo activo"
-            desc="Canal endémico, mapa de casos por municipio, alertas SisCep y detección de registros duplicados."
-            chips={['Canal', 'Mapa', 'Alertas SisCep', 'Duplicados']}
-            color="tinto"
-            onClick={() => navigate('/CIAE/Epidemiologia/dengue')}
+            titulo="Acciones"
+            eyebrow="Reporte OC30 · FTP"
+            desc="Acciones registradas por unidad en el reporte OC30 del FTP: estadísticas por clave y unidad, y el detalle por mes."
+            chips={['OC30', 'Por unidad']}
+            color="green"
+            onClick={() => navigate('/CIAE/Epidemiologia/acciones')}
           >
-            <IconMosquito />
+            <IconoDocumento />
           </NavCard>
 
         </div>
