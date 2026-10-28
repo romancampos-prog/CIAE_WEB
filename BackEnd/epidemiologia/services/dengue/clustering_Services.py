@@ -12,14 +12,10 @@ from epidemiologia.modulos.dengue.clustering.coordenadas_cp import asignar_coord
 from epidemiologia.modulos.dengue.clustering.municipios_y_ventanas import construir_ventanas, normalizar_municipio
 
 
-def ejecutar_clustering(df, ruta_json, ruta_catalogo):
+def procesar_clustering(df) -> dict:
     """
-    Pipeline completo del módulo de clustering geoespacial.
-
-    Parámetros:
-        df            — DataFrame depurado (salida de depuracion.py)
-        ruta_json     — ruta al archivo gto_normalizado.json
-        ruta_catalogo — ruta al CSV datos/catalogos/cp_coordenadas.csv
+    Pipeline completo del módulo de clustering geoespacial sobre el DataFrame depurado.
+    El catálogo de CPs y el GeoJSON salen de mapeo/dengue/ (rutas en config.py).
 
     Devuelve un dict con claves:
         geojson         — GeoJSON de Guanajuato (para mapa_Services)
@@ -48,7 +44,7 @@ def ejecutar_clustering(df, ruta_json, ruta_catalogo):
     df_uni_confirm = contar_casos(df, 'DES_UNI_MED_NOTIF', solo_confirmados=True, ordenar=True)
 
     print("\n[4] Cargando catálogo de CPs y asignando coordenadas...")
-    df_cp         = cargar_catalogo_cp(ruta_catalogo)
+    df_cp         = cargar_catalogo_cp(str(RUTA_CATALOGO_EPI))
     df_con_coords = asignar_coordenadas(df, df_cp)
 
     print("\n[5] Detectando brotes — análisis espacial (DBSCAN + LOF adaptativo)...")
@@ -58,7 +54,7 @@ def ejecutar_clustering(df, ruta_json, ruta_catalogo):
     brotes_temporal = detectar_brotes_temporal(df_con_coords, ventanas)
 
     print("\n[7] Cargando archivo geográfico...")
-    geojson = cargar_geojson(ruta_json)
+    geojson = cargar_geojson(str(RUTA_GTO_JSON))
 
     print("\n" + "=" * 55)
     print("CLUSTERING COMPLETADO")
@@ -73,9 +69,3 @@ def ejecutar_clustering(df, ruta_json, ruta_catalogo):
         'brotes_espacial' : brotes_espacial,
         'brotes_temporal' : brotes_temporal,
     }
-
-
-##--------------------------------------
-
-def procesar_clustering(df) -> dict:
-    return ejecutar_clustering(df, str(RUTA_GTO_JSON), str(RUTA_CATALOGO_EPI))
