@@ -62,7 +62,7 @@ epidemiologia/
 
 Cada tema tiene su carpeta en services/, modulos/, datos/ y mapeo/ (hoy dengue/; lo nuevo, ej.
 ftp/, va en su propia carpeta). El FTP en sí (conectar, navegar, catálogo SIAIS) es compartido
-con indicadores y vive en BackEnd/service/ftp_imss/.
+con indicadores y vive en BackEnd/compartido/ftp_imss/.
 ```
 
 ## Respuestas: dos formatos

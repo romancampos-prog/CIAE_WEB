@@ -5,10 +5,10 @@ Usado en: Controller/ftp_Controller.py
 """
 from fastapi import HTTPException
 
+from compartido.validar_archivo_Services import exigir_contrasena
 from schemas.model.generacion_ftp_Model import ResultadoCategoria, ResultadoGeneracion
 from services.ftp.generar_indicador_ftp_Services import generar_indicador_ftp
 from services.informacion.lista_indicadores_Services import todos_los_indicadores
-from shared.validarArchivo_service import exigir_contrasena
 
 
 def generar_categoria(categoria: str, ano: str, mes: str, semana: str | None = None) -> tuple[bool, str, dict]:

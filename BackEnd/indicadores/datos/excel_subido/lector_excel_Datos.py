@@ -10,7 +10,7 @@ import io
 import pandas as pd
 from openpyxl.utils import get_column_letter
 
-from service.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
 
 
 

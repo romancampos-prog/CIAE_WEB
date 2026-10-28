@@ -2,9 +2,9 @@
 INTERSECCION_FILA: los valores de columna_dato en filas fijas (numeradas como en Excel).
 Usado en: motor_extraccion_Services.py
 """
-from service.extraccion_excel.columnas_excel import letra_a_numero
-from service.extraccion_excel.detalle_extraccion_Model import DetalleInterseccionFila
-from service.extraccion_excel.valores_celda_Services import a_numero
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.detalle_extraccion_Model import DetalleInterseccionFila
+from compartido.extraccion_excel.valores_celda_Services import a_numero
 
 
 def interseccion_fila(df, detalle: DetalleInterseccionFila):

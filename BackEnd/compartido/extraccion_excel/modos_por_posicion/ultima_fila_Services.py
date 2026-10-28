@@ -4,8 +4,8 @@ Usado en: motor_extraccion_Services.py
 """
 import pandas as pd
 
-from service.extraccion_excel.columnas_excel import letra_a_numero
-from service.extraccion_excel.detalle_extraccion_Model import DetalleUltimaFila
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.detalle_extraccion_Model import DetalleUltimaFila
 
 
 def ultima_fila(df, detalle: DetalleUltimaFila):

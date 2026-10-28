@@ -3,13 +3,13 @@ Subir el Egresos por separado: completa la via 2 de cada indicador con cruce con
 SUI-13 de ese mes, guarda el mes y genera o recalcula el corte.
 Usado en: Controller/extractor_Controller.py
 """
+from compartido.validar_archivo_Services import validar_archivo_subido
 from datos.bd_ciae.extractor_cruce_Datos import leer_pendiente_cruce
 from datos.excel_subido.lector_excel_Datos import LectorExcel
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from services.extractor.catalogo_extractor_Services import configuracion_cruce, indicadores_extractor
 from services.extractor.generar_corte_Services import guardar_mes_de_corte, sumar_validados
 from services.extractor.subir_archivo_extractor_Services import respuesta_de_subida, validar_mes
-from shared.validarArchivo_service import validar_archivo_subido
 
 
 def completar_cruce(usuario: str | None, anio: int, mes: str, nombre_archivo: str, contenido: bytes, peso: int) -> tuple[str, dict]:

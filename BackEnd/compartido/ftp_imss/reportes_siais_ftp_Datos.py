@@ -1,12 +1,12 @@
 """
 Los reportes SIAIS dentro del FTP: las rutas de un reporte en una unidad (con las plantillas y los
-nombres de carpeta de service/ftp_imss/catalogo_ftp.json), listar los reportes de la carpeta y elegir el del
-periodo. Navegar y descargar esta en service/ftp_imss/navegacion_ftp_Datos.py.
+nombres de carpeta de compartido/ftp_imss/catalogo_ftp.json), listar los reportes de la carpeta y elegir el del
+periodo. Navegar y descargar esta en compartido/ftp_imss/navegacion_ftp_Datos.py.
 Usado en: indicadores/services/ftp/extraer_reporte_ftp_Services.py (y epidemiologia)
 """
 from ftplib import FTP
 
-from service.ftp_imss.catalogo_reportes_ftp_Datos import CARPETAS, RUTAS, codigo_base, periodo_en_nombre, subcarpeta_de_reporte
+from compartido.ftp_imss.catalogo_reportes_ftp_Datos import CARPETAS, RUTAS, codigo_base, periodo_en_nombre, subcarpeta_de_reporte
 
 _EXTENSIONES_EXCEL = (".XLS", ".XLSX")
 

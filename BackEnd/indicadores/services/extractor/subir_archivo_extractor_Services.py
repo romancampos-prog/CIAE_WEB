@@ -17,15 +17,15 @@ from schemas.model.mapeo_extractor_Model import FuenteExtractor
 from services.extractor.catalogo_extractor_Services import (
     ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, indicadores_extractor, tiene_desfase,
 )
+from compartido.auditoria_Services import registrar
+from compartido.validar_archivo_Services import validar_archivo_subido
 from services.extractor.conteo_por_unidad_Services import contar_por_unidad
 from services.extractor.generar_con_desfase_Services import procesar_con_desfase
 from services.extractor.generar_corte_Services import procesar_corte
 from services.extractor.generar_mensual_Services import calcular_y_guardar_mes
 from services.extractor.generar_por_partes_Services import procesar_mes_por_partes
-from shared.auditoria_service import registrar
 from shared.MESES import MESES_ESTANDAR
 from shared.reglas_periodicidad import clave_periodicidad, es_periodicidad_de_corte
-from shared.validarArchivo_service import validar_archivo_subido
 
 # Lo que el Extractor sabe procesar hoy; otra periodicidad en un indicador
 # "Extractor" es un error claro, no un guardado a medias.

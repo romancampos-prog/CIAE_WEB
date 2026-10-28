@@ -3,9 +3,9 @@ INTERSECCION_COLUMNA: busca en una columna la fila con un texto (ej. "TOTAL DE L
 toma de esa fila los valores de columna_dato (las letras pueden depender del mes).
 Usado en: motor_extraccion_Services.py
 """
-from service.extraccion_excel.columnas_excel import letra_a_numero
-from service.extraccion_excel.detalle_extraccion_Model import DetalleInterseccionColumna
-from service.extraccion_excel.valores_celda_Services import a_numero
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.detalle_extraccion_Model import DetalleInterseccionColumna
+from compartido.extraccion_excel.valores_celda_Services import a_numero
 
 
 # Modos "formula" -- mismo algoritmo que ya probo la extraccion de FTP, solo se

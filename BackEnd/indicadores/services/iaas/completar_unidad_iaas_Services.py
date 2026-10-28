@@ -7,6 +7,8 @@ import json
 
 from fastapi import HTTPException
 
+from compartido.auditoria_Services import registrar
+from compartido.validar_archivo_Services import exigir_contrasena, validar_archivo_subido
 from datos.bd_ciae.guardar_mes_Datos import guardar_mes_definitivo
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_iaas
 from schemas.model.unidad_resultado_Model import ResultadoUnidad
@@ -16,10 +18,8 @@ from services.iaas.catalogo_iaas_Services import unidades_del_indicador
 from services.iaas.estado_mes_iaas_Services import leer_mes_guardado_iaas, pendientes_del_mes
 from services.iaas.leer_excel_iaas_Services import validar_excel_unidad
 from services.iaas.numerador_denominador_iaas_Services import obtener_denominador_iaas01_unidad, obtener_numerador
-from shared.auditoria_service import registrar
 from shared.MESES import nombre_del_mes
 from shared.UNIDADES import UNIDADES_SIN_OOAD_IAAS
-from shared.validarArchivo_service import exigir_contrasena, validar_archivo_subido
 
 
 def completar_unidad_tardia(

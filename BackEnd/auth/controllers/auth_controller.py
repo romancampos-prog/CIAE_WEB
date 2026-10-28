@@ -4,14 +4,14 @@ Carpeta : auth/controllers/
 Qué hace: Endpoint POST /auth/login — recibe usuario y contraseña, devuelve token JWT.
 Usado en: main.py (registrado con prefix /auth)
 """
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from auth.models.auth_models import LoginRequest, LoginResponse
 from auth.services.auth_service import verificar_credenciales, generar_token
-from auth.services.rate_limit_service import revisar_bloqueo, registrar_fallo, registrar_exito
 from auth.services.jwt_utils import verificar_token
-from shared.auditoria_service import registrar
-from configs.response import ApiResponse
+from auth.services.rate_limit_service import revisar_bloqueo, registrar_fallo, registrar_exito
+from compartido.auditoria_Services import registrar
 from configs.cors import AMBIENTE
+from configs.response import ApiResponse
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 router = APIRouter()
 

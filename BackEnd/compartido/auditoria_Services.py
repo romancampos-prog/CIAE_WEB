@@ -1,6 +1,6 @@
 """
-Módulo  : auditoria_service.py
-Carpeta : shared/
+Módulo  : auditoria_Services.py
+Carpeta : compartido/
 Qué hace: Registra eventos importantes (login, subida de archivos, etc.) en un
           archivo de log, para poder investigar después quién hizo qué y cuándo.
 Usado en: cualquier controller que quiera dejar constancia de una acción

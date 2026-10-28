@@ -5,9 +5,9 @@ Usado en: indicadores/services/extractor/leer_archivo_extractor_Services.py, mod
 """
 import pandas as pd
 
-from service.extraccion_excel.columnas_excel import letra_a_numero
-from service.extraccion_excel.detalle_extraccion_Model import CondicionFiltro, DetalleFiltroConteo
-from service.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.detalle_extraccion_Model import CondicionFiltro, DetalleFiltroConteo
+from compartido.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
 
 
 def _columna_cumple(df, letra: str, cfg: CondicionFiltro) -> pd.Series:

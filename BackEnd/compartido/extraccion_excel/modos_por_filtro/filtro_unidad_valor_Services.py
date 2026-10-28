@@ -2,12 +2,12 @@
 FILTRO_UNIDAD_VALOR: la fila de una unidad y el valor de otra columna de esa fila (IAAS).
 Usado en: motor_extraccion_Services.py
 """
-from service.extraccion_excel.columnas_excel import letra_a_numero
-from service.extraccion_excel.detalle_extraccion_Model import DetalleFiltroUnidadValor
-from service.extraccion_excel.modos_por_filtro.coincide_unidad_Services import coincide_unidad
-from service.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
-from service.extraccion_excel.modos_por_filtro.fila_cumple_Services import fila_cumple
-from service.extraccion_excel.valores_celda_Services import a_numero
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.detalle_extraccion_Model import DetalleFiltroUnidadValor
+from compartido.extraccion_excel.modos_por_filtro.coincide_unidad_Services import coincide_unidad
+from compartido.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
+from compartido.extraccion_excel.modos_por_filtro.fila_cumple_Services import fila_cumple
+from compartido.extraccion_excel.valores_celda_Services import a_numero
 
 
 def filtro_unidad_valor(df, detalle: DetalleFiltroUnidadValor, nombre_unidad_buscada: str | None = None):

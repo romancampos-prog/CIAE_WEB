@@ -6,10 +6,10 @@ Usado en: services/extractor/conteo_*_Services.py
 """
 import pandas as pd
 
+from compartido.extraccion_excel.detalle_extraccion_Model import DetalleFiltroConteo
+from compartido.extraccion_excel.modos_por_filtro.mascara_filtros_Services import mascara_filtros
+from compartido.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 from datos.excel_subido.lector_excel_Datos import LectorExcel, numeros_escritos_como_texto
-from service.extraccion_excel.detalle_extraccion_Model import DetalleFiltroConteo
-from service.extraccion_excel.modos_por_filtro.mascara_filtros_Services import mascara_filtros
-from service.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import CATALOGOS_UNIDADES
 

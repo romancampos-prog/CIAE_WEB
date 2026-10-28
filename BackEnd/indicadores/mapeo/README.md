@@ -42,7 +42,7 @@ mapeo/
 ├── catalogos/
 │   ├── familias.json              nombre, ícono y color de cada familia
 │   └── archivos_extractor.json    nombre legible de cada archivo del Extractor
-│   (el mapa del FTP ya no está aquí: BackEnd/service/ftp_imss/catalogo_ftp.json)
+│   (el mapa del FTP ya no está aquí: BackEnd/compartido/ftp_imss/catalogo_ftp.json)
 ├── unidades/
 │   ├── ftp.json                   las 46 UMF: carpeta en el FTP, nombre y clave
 │   ├── hospitales.json            hospitales de 2º nivel (MT y Neonatal del Extractor)
@@ -67,10 +67,10 @@ mapeo/
 `nombre` se muestra en las páginas de Generar (`nombreCategoria`); `imagen` y `color` los
 pinta el front (ícono con `urlIcono`, color con la variable CSS `--ic`).
 
-### `service/ftp_imss/catalogo_ftp.json` (fuera del mapeo)
+### `compartido/ftp_imss/catalogo_ftp.json` (fuera del mapeo)
 
-El mapa del FTP: dónde vive cada reporte SIAIS. Vive en `BackEnd/service/ftp_imss/` porque lo comparten
-indicadores y epidemiología. Lo lee `service/ftp_imss/catalogo_reportes_ftp_Datos.py`
+El mapa del FTP: dónde vive cada reporte SIAIS. Vive en `BackEnd/compartido/ftp_imss/` porque lo comparten
+indicadores y epidemiología. Lo lee `compartido/ftp_imss/catalogo_reportes_ftp_Datos.py`
 **al arrancar** (si lo cambias, reinicia el backend).
 
 ```json
@@ -256,7 +256,7 @@ es el nombre que se usa en la fórmula.
 *(DM 01)*
 
 - La **carpeta** del FTP donde vive cada código (`Salud Pública`, `Indicadores`...) está en
-  `service/ftp_imss/catalogo_ftp.json`. Si usas un reporte nuevo que no está ahí, agrégalo en su carpeta.
+  `compartido/ftp_imss/catalogo_ftp.json`. Si usas un reporte nuevo que no está ahí, agrégalo en su carpeta.
 - `PB02` es especial: no está en la carpeta de cada unidad sino en
   `ArchsDataMart_{año}/Piramides para {año} por unidades`, un archivo por unidad que se
   encuentra por su clave (`PB02U{clave}...`).
@@ -323,7 +323,7 @@ grupo se vuelve un nombre que se usa en la fórmula del denominador:
 
 ## 4. Modos de extracción (`modoExtraccion`)
 
-El motor único es `BackEnd/service/extraccion_excel/motor_extraccion_Services.py`. Recibe la hoja ya cargada y el
+El motor único es `BackEnd/compartido/extraccion_excel/motor_extraccion_Services.py`. Recibe la hoja ya cargada y el
 bloque del mapeo, lo **valida** contra un modelo (si al mapeo le falta un campo, falla con
 `DETALLE_INVALIDO` antes de leer) y extrae.
 
@@ -341,7 +341,7 @@ desde 1, igual que en Excel.
 
 Agregar un modo nuevo = un modelo `Detalle...` + una función + una entrada en `EXTRACTORES`
 y en `MODELOS_DETALLE` (y en el `Literal ModoExtraccion` de `schemas/model/ficha_indicador_Model.py`; el modelo del detalle va en
-`service/extraccion_excel/detalle_extraccion_Model.py` y la funcion en su propio archivo dentro de `modos_por_posicion/` o `modos_por_filtro/`).
+`compartido/extraccion_excel/detalle_extraccion_Model.py` y la funcion en su propio archivo dentro de `modos_por_posicion/` o `modos_por_filtro/`).
 
 ### INTERSECCION_COLUMNA
 
@@ -714,7 +714,7 @@ Sin ningún encabezado esperado, el sistema no sabe qué hoja leer y rechaza el 
 ### FTP
 
 1. Busca el reporte en el FTP y en `WEB_CIAE/encabezados_reportes/` para ver hojas y letras.
-2. Si el código del reporte no está en `service/ftp_imss/catalogo_ftp.json`, agrégalo en su carpeta (y reinicia el backend).
+2. Si el código del reporte no está en `compartido/ftp_imss/catalogo_ftp.json`, agrégalo en su carpeta (y reinicia el backend).
 3. Escribe `reporte.numerador`/`denominador` con `fuente: "ftp"`, `hoja` y el modo que
    corresponda (casi siempre `INTERSECCION_COLUMNA` con `buscar: "TOTAL DE LA UNIDAD"`).
 4. Escribe `operacion` usando los códigos como nombres.

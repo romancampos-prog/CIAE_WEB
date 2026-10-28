@@ -3,6 +3,7 @@ Generar (o regenerar) un indicador de FTP de un mes: extrae de los reportes SIAI
 asigna el semaforo y guarda en BD_CIAE (definitivo, o semanal si trae semana).
 Usado en: Controller/ftp_Controller.py, services/ftp/generar_categoria_ftp_Services.py
 """
+from compartido.validar_archivo_Services import exigir_contrasena
 from datos.bd_ciae.guardar_mes_Datos import guardar_mes_definitivo
 from datos.bd_ciae.poblacion_Datos import texto_poblacion_vigente
 from datos.bd_ciae.semanal_Datos import borrar_mes_semanal, guardar_mes_semanal
@@ -12,7 +13,6 @@ from schemas.model.mapeo_comun_Model import FuentePoblacionInfoSalud
 from services.compartido.semaforo.color_semaforo_Services import semaforizar_unidades
 from services.ftp.calcular_indicador_ftp_Services import calcular_indicador
 from services.ftp.extraer_indicador_ftp_Services import extraer_indicador
-from shared.validarArchivo_service import exigir_contrasena
 
 
 def generar_indicador_ftp(indicador: str, ano: str, mes: str, semana: str | int | None = None) -> ResultadoGeneracion:

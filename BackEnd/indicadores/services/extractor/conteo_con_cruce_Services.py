@@ -3,12 +3,12 @@ Conteo de los indicadores de corte con cruce (EH 03, DM 04): via 1 (cumple el fi
 candidatos de la via 2, que se confirman contra el archivo de Egresos del mismo mes.
 Usado en: services/extractor/generar_corte_Services.py
 """
+from compartido.extraccion_excel.columnas_excel import letra_a_numero
+from compartido.extraccion_excel.detalle_extraccion_Model import CondicionFiltro
+from compartido.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
+from compartido.extraccion_excel.modos_por_filtro.fila_cumple_Services import fila_cumple
+from compartido.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 from datos.excel_subido.lector_excel_Datos import LectorExcel, numeros_escritos_como_texto
-from service.extraccion_excel.columnas_excel import letra_a_numero
-from service.extraccion_excel.detalle_extraccion_Model import CondicionFiltro
-from service.extraccion_excel.modos_por_filtro.cumple_condicion_Services import cumple_condicion
-from service.extraccion_excel.modos_por_filtro.fila_cumple_Services import fila_cumple
-from service.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 from services.extractor.leer_archivo_extractor_Services import columnas_por_nombre, validar_mes_anio_archivo
 from shared.UNIDADES import CLAVE_UNIDADES_F
 

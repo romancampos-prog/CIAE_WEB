@@ -4,17 +4,17 @@ Usado en: controllers/archivos_controller.py
 """
 from fastapi import HTTPException
 
+from compartido.auditoria_Services import registrar
+from compartido.validar_archivo_Services import validar_peso_archivo
 from epidemiologia.config import RUTA_OPERATIVA, RUTA_SISCEP
 from epidemiologia.datos.dengue.bases_dengue_datos import guardar_base
-from shared.auditoria_service import registrar
-from shared.validarArchivo_service import validarPeso_Archivo
 
 
 def _subir_base(usuario: str | None, nombre_archivo: str, contenido: bytes, peso: int, ruta, nombre_auditoria: str) -> dict:
     # 1. Validar que sea .xlsx y que pese lo que dijo el front
     if not nombre_archivo.lower().endswith(".xlsx"):
         raise HTTPException(status_code=400, detail="Solo se aceptan archivos .xlsx")
-    if not validarPeso_Archivo(contenido, peso):
+    if not validar_peso_archivo(contenido, peso):
         raise HTTPException(status_code=413, detail="Archivo demasiado grande o tamaño inconsistente")
 
     # 2. Guardar (reemplaza la anterior)

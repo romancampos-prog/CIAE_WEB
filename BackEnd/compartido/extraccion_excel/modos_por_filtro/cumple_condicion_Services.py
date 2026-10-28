@@ -7,8 +7,8 @@ import re
 
 import pandas as pd
 
-from service.extraccion_excel.detalle_extraccion_Model import CondicionFiltro
-from service.extraccion_excel.valores_celda_Services import es_vacio
+from compartido.extraccion_excel.detalle_extraccion_Model import CondicionFiltro
+from compartido.extraccion_excel.valores_celda_Services import es_vacio
 
 
 def cumple_condicion(valor, cfg: CondicionFiltro) -> bool:

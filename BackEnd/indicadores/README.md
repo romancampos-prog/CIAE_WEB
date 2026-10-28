@@ -97,10 +97,10 @@ Las capas:
 | `excel_subido/lector_excel_Datos.py` | `LectorExcel` (busca la hoja por su contenido), validar encabezados, números escritos como texto |
 | `excel_subido/excel_poblacion_Datos.py` | Lee el Excel nacional de población, filtra Guanajuato y lo guarda |
 
-La extracción de Excel (motor, modos y `letra_a_numero`) vive en `BackEnd/service/extraccion_excel/`, un archivo por
+La extracción de Excel (motor, modos y `letra_a_numero`) vive en `BackEnd/compartido/extraccion_excel/`, un archivo por
 modo (`modos_por_posicion/`, `modos_por_filtro/`), compartida con epidemiología.
 
-El FTP ya no está en `datos/`: vive en `BackEnd/service/ftp_imss/` porque también lo usa epidemiología
+El FTP ya no está en `datos/`: vive en `BackEnd/compartido/ftp_imss/` porque también lo usa epidemiología
 (`conexion_ftp_Datos`, `navegacion_ftp_Datos` con el diagnóstico de rutas, `catalogo_reportes_ftp_Datos`
 que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, listar y elegir el del periodo).
 
@@ -237,7 +237,7 @@ Los servicios de los tres módulos siguen los mismos pasos y los marcan con come
 |---|---|---|
 | 1. Validar | Mes/año, peso y tipo de archivo, contraseña si se sobrescribe | `shared/validarArchivo_service.py` |
 | 2. Mapeo | Se lee el bloque del indicador | `datos/lectura_mapeo/mapeo_por_modulo_Datos.cargar_indicador_*` |
-| 3. Extracción | Se cargan los Excel y se sacan numerador y denominador por unidad | capa 1 en `services/<modulo>/` (+ `service/ftp_imss/`, `datos/excel_subido/`), capa 2 en `service/extraccion_excel/` |
+| 3. Extracción | Se cargan los Excel y se sacan numerador y denominador por unidad | capa 1 en `services/<modulo>/` (+ `compartido/ftp_imss/`, `datos/excel_subido/`), capa 2 en `compartido/extraccion_excel/` |
 | 4. Cálculo | Fórmulas del mapeo por unidad + `TOTAL_OOAD` | `services/compartido/calculo/` |
 | 5. Semáforo | Color de cada unidad | `services/compartido/semaforo/color_semaforo_Services.py` |
 | 6. Guardado | En `BD_CIAE/INDICADORES/...` | `datos/bd_ciae/` |
@@ -358,7 +358,7 @@ del FTP no congela el servidor.
        `PB02U{clave}...` (no depende del mes ni de la semana).
 
      Las plantillas de ruta y la carpeta de cada reporte (con los nombres que tiene de verdad en el
-     FTP, ej. `Planificacion Familiar` sin acento en el semanal) salen de `service/ftp_imss/catalogo_ftp.json`;
+     FTP, ej. `Planificacion Familiar` sin acento en el semanal) salen de `compartido/ftp_imss/catalogo_ftp.json`;
      la carpeta de la unidad, de `UNIDADES_FINALES` (o `UNIDADES_PREVIOS` si es semanal).
    - Entra carpeta por carpeta; si una falla, `diagnosticar_segmento` explica por qué
      (espacios de más, mayúsculas, carpeta parecida...).
@@ -634,7 +634,7 @@ está claro en el código y conviene revisarlo.
 | Carpeta del FTP ≠ clave de la unidad | Salvatierra: carpeta `11130220 UMFH 08` (empieza con 111302) pero su clave en `CLAVE_UNIDADES_F` es `111303`. Por eso PB02 se busca con la clave del catálogo, no con la carpeta (`_CLAVE_POR_UNIDAD`) |
 | Carpeta semanal ≠ carpeta definitiva | `UNIDADES_PREVIOS` usa `11050602 HGSMF 2` y `11090220 UMFH 6`; `UNIDADES_FINALES` usa `HGZMF 02` y `UMFH 06` |
 | Nombres distintos entre fuentes | Población: `alias` en `POBLACION.json` (ej. `"hgzmf 2 irapuato"` → `"HGSMF 2 IRAPUATO"`). IAAS: `HGSZ`/`HGSZMF` se unifica a `HGS`/`HGSMF` (`UNIDADES.alias_hgsz`) |
-| Archivo duplicado en el FTP | Si hay más de un archivo con el mismo prefijo, se usa el que termina con el **periodo del mes** (`periodoEnNombre` de `service/ftp_imss/catalogo_ftp.json`: junio 2026 → `...052026062026`); si ninguno lo trae, el primero que lista el servidor. Igual se avisa `ARCHIVO_DUPLICADO` |
+| Archivo duplicado en el FTP | Si hay más de un archivo con el mismo prefijo, se usa el que termina con el **periodo del mes** (`periodoEnNombre` de `compartido/ftp_imss/catalogo_ftp.json`: junio 2026 → `...052026062026`); si ninguno lo trae, el primero que lista el servidor. Igual se avisa `ARCHIVO_DUPLICADO` |
 | Población solo para el Extractor | Hoy ningún indicador de FTP tiene `poblacionInfoSalud`; el recálculo por población solo cambia los cortes de EH 03/DM 04 |
 
 ### Pendientes que no están en el mapeo

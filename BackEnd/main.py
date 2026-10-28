@@ -22,7 +22,7 @@ from auth.controllers.auth_controller import router as auth_router
 
 from epidemiologia.Routes import epidemiologia_Route
 from indicadores.Routes import indicadores_Route
-from middleware.endPoints_Middleware import ErroresEndpointsMiddleware
+from middleware.errores_endpoints_Middleware import ErroresEndpointsMiddleware
 
 DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')
 

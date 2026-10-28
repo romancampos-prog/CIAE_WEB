@@ -13,14 +13,14 @@ from typing import Any, NamedTuple
 
 from pydantic import ValidationError
 
-from service.extraccion_excel.detalle_extraccion_Model import (
+from compartido.extraccion_excel.detalle_extraccion_Model import (
     DetalleFiltroConteo, DetalleFiltroUnidadValor, DetalleInterseccionColumna, DetalleInterseccionFila, DetalleUltimaFila,
 )
-from service.extraccion_excel.modos_por_filtro.filtro_conteo_Services import filtro_conteo
-from service.extraccion_excel.modos_por_filtro.filtro_unidad_valor_Services import filtro_unidad_valor
-from service.extraccion_excel.modos_por_posicion.interseccion_columna_Services import interseccion_columna
-from service.extraccion_excel.modos_por_posicion.interseccion_fila_Services import interseccion_fila
-from service.extraccion_excel.modos_por_posicion.ultima_fila_Services import ultima_fila
+from compartido.extraccion_excel.modos_por_filtro.filtro_conteo_Services import filtro_conteo
+from compartido.extraccion_excel.modos_por_filtro.filtro_unidad_valor_Services import filtro_unidad_valor
+from compartido.extraccion_excel.modos_por_posicion.interseccion_columna_Services import interseccion_columna
+from compartido.extraccion_excel.modos_por_posicion.interseccion_fila_Services import interseccion_fila
+from compartido.extraccion_excel.modos_por_posicion.ultima_fila_Services import ultima_fila
 
 # Errores de CONTENIDO del Excel. Los de capa 1 (RUTA_INVALIDA, ARCHIVO_NO_ENCONTRADO,
 # ARCHIVO_DUPLICADO, DESCARGA_FALLIDA, PB_JSON_ERROR) dependen de como se consiguio

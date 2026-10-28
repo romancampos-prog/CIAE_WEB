@@ -4,11 +4,11 @@ Usado en: Controller/poblacion_Controller.py
 """
 from fastapi import HTTPException
 
+from compartido.auditoria_Services import registrar
+from compartido.validar_archivo_Services import validar_archivo_subido
 from datos.bd_ciae.poblacion_Datos import leer_poblacion
 from datos.excel_subido.excel_poblacion_Datos import procesar_archivo_poblacion
 from schemas.model.poblacion_Model import ResultadoCargaPoblacion
-from shared.auditoria_service import registrar
-from shared.validarArchivo_service import validar_archivo_subido
 
 
 def archivo_poblacion_actual(anio: str | None) -> dict:
