@@ -1,10 +1,10 @@
 """
 Clustering geoespacial: conteos por municipio y unidad, coordenadas por CP, brotes espaciales
-y temporales, y el GeoJSON de Guanajuato (de datos/catalogos_geo_datos.py).
-Usado en: services/dengue/pipeline/pasos_pipeline_service.py
+y temporales, y el GeoJSON de Guanajuato (de datos/catalogos_geo_Datos.py).
+Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
 from epidemiologia.config import RUTA_CATALOGO_EPI, RUTA_GTO_JSON
-from epidemiologia.datos.dengue.catalogos_geo_datos import cargar_catalogo_cp, cargar_geojson
+from epidemiologia.datos.dengue.catalogos_geo_Datos import cargar_catalogo_cp, cargar_geojson
 from epidemiologia.modulos.dengue.clustering.brotes_espaciales import detectar_brotes_dbscan_lof
 from epidemiologia.modulos.dengue.clustering.brotes_temporales import detectar_brotes_temporal
 from epidemiologia.modulos.dengue.clustering.conteo_casos import contar_casos
@@ -22,7 +22,7 @@ def ejecutar_clustering(df, ruta_json, ruta_catalogo):
         ruta_catalogo — ruta al CSV datos/catalogos/cp_coordenadas.csv
 
     Devuelve un dict con claves:
-        geojson         — GeoJSON de Guanajuato (para mapa_service)
+        geojson         — GeoJSON de Guanajuato (para mapa_Services)
         df_municipio    — conteo por municipio
         df_confirmados  — conteo confirmados por municipio
         df_unidades     — conteo por unidad médica

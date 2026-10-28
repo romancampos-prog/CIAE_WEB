@@ -5,7 +5,7 @@ poblacion InfoSalud que usan como denominador esta en poblacion_Controller.py.
 """
 from fastapi import APIRouter, Depends, Query
 
-from auth.services.jwt_utils import solo_roles
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from schemas.DTO.ftp_ViewModel import (
     GenerarCategoriaRequest, GenerarIndicadorRequest, RegenerarCategoriaRequest, RegenerarIndicadorRequest,

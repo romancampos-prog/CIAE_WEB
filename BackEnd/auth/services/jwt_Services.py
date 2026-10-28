@@ -1,5 +1,5 @@
 """
-Módulo  : jwt_utils.py
+Módulo  : jwt_Services.py
 Carpeta : auth/services/
 Qué hace: Verifica tokens JWT. Se usa como dependencia en endpoints protegidos.
 Usado en: cualquier controller que requiera autenticación

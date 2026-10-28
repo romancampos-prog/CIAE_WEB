@@ -1,7 +1,7 @@
 """
 Historico de dengue (BD_CIAE/EPIDEMIOLOGIA/Dengue/historico/{año}.xlsx) con la semana
 epidemiologica de cada caso, para el canal endemico.
-Usado en: services/dengue/canal_service.py
+Usado en: services/dengue/canal_Services.py
 """
 import os
 

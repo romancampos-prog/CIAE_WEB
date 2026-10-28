@@ -1,10 +1,10 @@
 """
 Estado del pipeline (corriendo, paso, error, ultimo reporte) y sus resultados en memoria. Al
 arrancar el servidor se cargan los resultados guardados en disco.
-Usado en: controllers/pipeline_controller.py, controllers/reportes_controller.py, services/dengue/pipeline/*
+Usado en: Controller/pipeline_Controller.py, Controller/reportes_Controller.py, services/dengue/pipeline/*
 """
 from epidemiologia.config import RUTA_OPERATIVA, RUTA_SISCEP
-from epidemiologia.datos.dengue.resultados_pipeline_datos import cargar_resultados, cargar_ultimo_reporte
+from epidemiologia.datos.dengue.resultados_pipeline_Datos import cargar_resultados, cargar_ultimo_reporte
 
 ESTADO = {
     "corriendo"      : False,

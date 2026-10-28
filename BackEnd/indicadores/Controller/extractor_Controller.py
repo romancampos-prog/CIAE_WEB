@@ -4,7 +4,7 @@ procesa para los indicadores del motor Extractor que el mapeo le asigna (mapeo/e
 """
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
-from auth.services.jwt_utils import solo_roles
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from services.extractor.completar_cruce_Services import completar_cruce
 from services.extractor.estado_archivos_Services import estado_archivos

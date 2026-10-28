@@ -1,7 +1,7 @@
 """
 El modelo entrenado de duplicados (epidemiologia/modelos/mlp_duplicados.pkl). Hoy ese archivo
 NO existe: la deteccion usa el umbral de similitud. Lo escribe entrenamiento/entrenar_duplicados.py.
-Usado en: services/dengue/duplicados_service.py, entrenamiento/entrenar_duplicados.py
+Usado en: services/dengue/duplicados_Services.py, entrenamiento/entrenar_duplicados.py
 """
 import os
 

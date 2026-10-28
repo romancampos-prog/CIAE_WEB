@@ -1,10 +1,10 @@
 """
-Canal endemico de dengue: historico (datos/historico_datos.py) contra los casos del año, y la
+Canal endemico de dengue: historico (datos/historico_Datos.py) contra los casos del año, y la
 respuesta para el front.
-Usado en: services/dengue/pipeline/pasos_pipeline_service.py
+Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
 from epidemiologia.config import AÑO_ACTUAL
-from epidemiologia.datos.dengue.historico_datos import cargar_historico_series
+from epidemiologia.datos.dengue.historico_Datos import cargar_historico_series
 from epidemiologia.modulos.dengue.canal_endemico import (
     calcular_canal_endemico, detectar_anomalias, generar_resumen_alertas, preparar_año_actual,
 )

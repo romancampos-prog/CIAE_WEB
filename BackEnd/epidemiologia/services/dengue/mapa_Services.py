@@ -1,7 +1,7 @@
 """
 Transforma los resultados del clustering en el GeoJSON (con casos por municipio) y las listas
 que pinta el mapa Leaflet del front.
-Usado en: services/dengue/pipeline/pasos_pipeline_service.py
+Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
 import copy
 

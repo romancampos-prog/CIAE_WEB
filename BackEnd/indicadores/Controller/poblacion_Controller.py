@@ -5,7 +5,7 @@ Sigue colgando de /ftp para no cambiarle la ruta al front.
 """
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
-from auth.services.jwt_utils import solo_roles
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from schemas.DTO.poblacion_ViewModel import RecalcularPoblacionRequest
 from services.poblacion.archivo_poblacion_Services import archivo_poblacion_actual, subir_poblacion

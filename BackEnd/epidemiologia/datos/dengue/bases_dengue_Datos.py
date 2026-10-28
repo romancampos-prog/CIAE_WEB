@@ -1,6 +1,6 @@
 """
 Las dos bases que sube el usuario (BD_CIAE/EPIDEMIOLOGIA/Dengue/bases): guardarlas y leerlas.
-Usado en: services/dengue/subir_bases_service.py, services/dengue/depuracion_service.py
+Usado en: services/dengue/subir_bases_Services.py, services/dengue/depuracion_Services.py
 """
 import pandas as pd
 

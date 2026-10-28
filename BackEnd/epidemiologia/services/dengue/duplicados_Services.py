@@ -1,13 +1,13 @@
 """
 Duplicados del pipeline: detectar (con el modelo entrenado si existe), y armar la tabla de los
 registros eliminados con los datos del paciente para el front.
-Usado en: services/dengue/pipeline/pasos_pipeline_service.py
+Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
 import json
 
 import pandas as pd
 
-from epidemiologia.datos.dengue.modelo_duplicados_datos import cargar_modelo_duplicados
+from epidemiologia.datos.dengue.modelo_duplicados_Datos import cargar_modelo_duplicados
 from epidemiologia.modulos.dengue.duplicados.deteccion import detectar_duplicados
 
 _COLS_PACIENTE = [

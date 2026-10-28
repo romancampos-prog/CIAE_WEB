@@ -1,21 +1,22 @@
 """
-Módulo  : auth_controller.py
-Carpeta : auth/controllers/
+Módulo  : auth_Controller.py
+Carpeta : auth/Controller/
 Qué hace: Endpoint POST /auth/login — recibe usuario y contraseña, devuelve token JWT.
 Usado en: main.py (registrado con prefix /auth)
 """
-from auth.models.auth_models import LoginRequest, LoginResponse
-from auth.services.auth_service import verificar_credenciales, generar_token
-from auth.services.jwt_utils import verificar_token
-from auth.services.rate_limit_service import revisar_bloqueo, registrar_fallo, registrar_exito
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+
+from auth.schemas.auth_Model import LoginRequest, LoginResponse
+from auth.services.auth_Services import verificar_credenciales, generar_token
+from auth.services.jwt_Services import verificar_token
+from auth.services.rate_limit_Services import revisar_bloqueo, registrar_fallo, registrar_exito
 from compartido.auditoria_Services import registrar
 from configs.cors import AMBIENTE
 from configs.response import ApiResponse
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 router = APIRouter()
 
-# la cookie dura lo mismo que el JWT (ver auth_service.generar_token: 4 horas)
+# la cookie dura lo mismo que el JWT (ver auth_Services.generar_token: 4 horas)
 DURACION_COOKIE_SEGUNDOS = 4 * 60 * 60
 
 

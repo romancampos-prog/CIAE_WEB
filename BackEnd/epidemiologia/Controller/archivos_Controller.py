@@ -1,14 +1,14 @@
 """
-Módulo  : archivos_controller.py
-Carpeta : epidemiologia/controllers/
+Módulo  : archivos_Controller.py
+Carpeta : epidemiologia/Controller/
 Qué hace: Endpoints para subir la base operativa y la base SisCep (responden ApiResponse).
 Usado en: Routes/epidemiologia_Route.py (prefix /epidemiologia/archivos)
 """
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
-from auth.services.jwt_utils import solo_roles
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
-from epidemiologia.services.dengue.subir_bases_service import subir_base_operativa, subir_base_siscep
+from epidemiologia.services.dengue.subir_bases_Services import subir_base_operativa, subir_base_siscep
 
 archivosApi = APIRouter()
 

@@ -1,8 +1,8 @@
 """
-Módulo  : auth_service.py
+Módulo  : auth_Services.py
 Carpeta : auth/services/
 Qué hace: Verifica credenciales contra el .env y genera tokens JWT.
-Usado en: auth_controller.py
+Usado en: auth_Controller.py
 """
 
 import os

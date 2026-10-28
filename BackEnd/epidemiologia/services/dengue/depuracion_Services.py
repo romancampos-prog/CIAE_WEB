@@ -1,9 +1,9 @@
 """
 Depuracion de la base operativa: leerla, filtrar IMSS Guanajuato, limpiar texto, ubicacion,
 cruce con SisCep, semana epidemiologica y clasificacion final del caso.
-Usado en: services/dengue/pipeline/pasos_pipeline_service.py
+Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
-from epidemiologia.datos.dengue.bases_dengue_datos import cargar_base, cargar_siscep
+from epidemiologia.datos.dengue.bases_dengue_Datos import cargar_base, cargar_siscep
 from epidemiologia.modulos.dengue.depuracion.asignar_semana import asignar_semana_epi
 from epidemiologia.modulos.dengue.depuracion.clasificacion_caso import clasificar_caso_final
 from epidemiologia.modulos.dengue.depuracion.cruce_siscep import cruzar_siscep

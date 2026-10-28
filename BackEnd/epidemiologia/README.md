@@ -15,31 +15,31 @@ epidemiologia/
 ├── Routes/
 │   └── epidemiologia_Route.py      — junta los controllers (/archivos, /pipeline, /reportes, /ftp); main.py lo monta bajo /epidemiologia
 ├── config.py                       — AÑO_ACTUAL y rutas (BD_CIAE/EPIDEMIOLOGIA/Dengue y mapeo/dengue/)
-├── controllers/
-│   ├── archivos_controller.py      — subir base operativa / SisCep            (ApiResponse)
-│   ├── pipeline_controller.py      — estado y ejecutar el pipeline            (ApiResponse)
-│   ├── reportes_controller.py      — resultados por sección                   (dato DIRECTO)
+├── Controller/
+│   ├── archivos_Controller.py      — subir base operativa / SisCep            (ApiResponse)
+│   ├── pipeline_Controller.py      — estado y ejecutar el pipeline            (ApiResponse)
+│   ├── reportes_Controller.py      — resultados por sección                   (dato DIRECTO)
 │   └── ftp.py                      — reportes SIAIS del FTP (en construcción)
 ├── services/                       — orquestan: leen con datos/, calculan con modulos/
 │   └── dengue/
-│       ├── subir_bases_service.py  — validar .xlsx y peso, guardar, auditar
+│       ├── subir_bases_Services.py  — validar .xlsx y peso, guardar, auditar
 │       ├── pipeline/
-│       │   ├── estado_pipeline_service.py   — ESTADO y RESULTADOS en memoria (estado_del_pipeline, resultado_guardado)
-│       │   ├── iniciar_pipeline_service.py  — 409 si ya corre, 400 si falta una base; arranca el hilo
-│       │   └── pasos_pipeline_service.py    — los pasos en orden (ver abajo)
-│       ├── depuracion_service.py   — los 7 pasos de la depuración
-│       ├── duplicados_service.py   — detectar + tabla de eliminados con datos del paciente
-│       ├── canal_service.py        — canal endémico (histórico vs año actual)
-│       ├── alertas_service.py      — alertas SisCep para el front
-│       ├── clustering_service.py   — conteos, coordenadas, brotes y GeoJSON
-│       └── mapa_service.py         — GeoJSON con casos por municipio para Leaflet
+│       │   ├── estado_pipeline_Services.py   — ESTADO y RESULTADOS en memoria (estado_del_pipeline, resultado_guardado)
+│       │   ├── iniciar_pipeline_Services.py  — 409 si ya corre, 400 si falta una base; arranca el hilo
+│       │   └── pasos_pipeline_Services.py    — los pasos en orden (ver abajo)
+│       ├── depuracion_Services.py   — los 7 pasos de la depuración
+│       ├── duplicados_Services.py   — detectar + tabla de eliminados con datos del paciente
+│       ├── canal_Services.py        — canal endémico (histórico vs año actual)
+│       ├── alertas_Services.py      — alertas SisCep para el front
+│       ├── clustering_Services.py   — conteos, coordenadas, brotes y GeoJSON
+│       └── mapa_Services.py         — GeoJSON con casos por municipio para Leaflet
 ├── datos/                          — lo ÚNICO que lee y escribe archivos
 │   └── dengue/
-│       ├── bases_dengue_datos.py   — leer/guardar base operativa y SisCep
-│       ├── historico_datos.py      — histórico {año}.xlsx con su semana epidemiológica
-│       ├── catalogos_geo_datos.py  — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/dengue/)
-│       ├── resultados_pipeline_datos.py — resultados/{clave}.json y fecha del último reporte
-│       └── modelo_duplicados_datos.py   — el modelo entrenado de duplicados (hoy no existe)
+│       ├── bases_dengue_Datos.py   — leer/guardar base operativa y SisCep
+│       ├── historico_Datos.py      — histórico {año}.xlsx con su semana epidemiológica
+│       ├── catalogos_geo_Datos.py  — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/dengue/)
+│       ├── resultados_pipeline_Datos.py — resultados/{clave}.json y fecha del último reporte
+│       └── modelo_duplicados_Datos.py   — el modelo entrenado de duplicados (hoy no existe)
 ├── modulos/                        — algoritmos puros: reciben y regresan DataFrames, sin archivos
 │   └── dengue/
 │       ├── fechas.py               — semana epidemiológica SUIVE (semana_epidemiologica)
@@ -67,18 +67,18 @@ con indicadores y vive en BackEnd/compartido/ftp_imss/.
 
 ## Respuestas: dos formatos
 
-- `archivos_controller` y `pipeline_controller` responden **`ApiResponse(success, message, data)`**.
-- `reportes_controller` responde **el dato directo** (sin `ApiResponse`): el front de dengue lee
+- `archivos_Controller` y `pipeline_Controller` responden **`ApiResponse(success, message, data)`**.
+- `reportes_Controller` responde **el dato directo** (sin `ApiResponse`): el front de dengue lee
   `data` como el objeto mismo. Si se cambia, hay que cambiar el front al mismo tiempo.
 
 ## Endpoints
 
 | Método y ruta | Para qué | Servicio |
 |---|---|---|
-| `POST /epidemiologia/archivos/operativa` | Subir la base operativa (`.xlsx`) | `dengue/subir_bases_service.subir_base_operativa` |
-| `POST /epidemiologia/archivos/siscep` | Subir la base SisCep (`.xlsx`) | `dengue/subir_bases_service.subir_base_siscep` |
-| `GET /epidemiologia/pipeline/estado` | `{corriendo, paso, completado, error, ultimo_reporte, archivos: {operativa, siscep}}` (polling) | `dengue/pipeline/estado_pipeline_service.estado_del_pipeline` |
-| `POST /epidemiologia/pipeline/ejecutar` | Arrancar el pipeline | `dengue/pipeline/iniciar_pipeline_service.iniciar_pipeline` |
+| `POST /epidemiologia/archivos/operativa` | Subir la base operativa (`.xlsx`) | `dengue/subir_bases_Services.subir_base_operativa` |
+| `POST /epidemiologia/archivos/siscep` | Subir la base SisCep (`.xlsx`) | `dengue/subir_bases_Services.subir_base_siscep` |
+| `GET /epidemiologia/pipeline/estado` | `{corriendo, paso, completado, error, ultimo_reporte, archivos: {operativa, siscep}}` (polling) | `dengue/pipeline/estado_pipeline_Services.estado_del_pipeline` |
+| `POST /epidemiologia/pipeline/ejecutar` | Arrancar el pipeline | `dengue/pipeline/iniciar_pipeline_Services.iniciar_pipeline` |
 | `GET /epidemiologia/reportes/canal` | Canal endémico | `resultado_guardado("canal")` |
 | `GET /epidemiologia/reportes/mapa/{situacion\|confirmados}` | Mapa de casos y brotes | `resultado_guardado("mapa")[tipo]` |
 | `GET /epidemiologia/reportes/alertas-siscep` | Alertas SisCep | `resultado_guardado("alertas")` |
@@ -90,18 +90,18 @@ Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corr
 ## El pipeline
 
 `POST /pipeline/ejecutar` revisa que no esté corriendo y que existan las dos bases, y corre
-`pasos_pipeline_service.ejecutar_pasos` en un hilo. Cada paso actualiza `ESTADO["paso"]`:
+`pasos_pipeline_Services.ejecutar_pasos` en un hilo. Cada paso actualiza `ESTADO["paso"]`:
 
-1. **Depurar** (`depuracion_service.depurar_base`): leer la base operativa, filtrar IMSS
+1. **Depurar** (`depuracion_Services.depurar_base`): leer la base operativa, filtrar IMSS
    Guanajuato (institución 2, estado 11), limpiar texto, ubicación (colonia > CP > "Sin
    ubicación"), cruzar con SisCep (`VEC_ID` = `FOLIO SINAVE` → `ESTATUS_SISCEP`), semana
    epidemiológica y `CLASIFICACION_FINAL`.
-2. **Duplicados** (`duplicados_service.procesar_duplicados`): por cada par candidato (mismo
+2. **Duplicados** (`duplicados_Services.procesar_duplicados`): por cada par candidato (mismo
    Soundex del apellido paterno) → excepciones de negocio → modelo entrenado o umbral de
    similitud → reglas de resolución (cuál se elimina).
-3. **Canal endémico** (`canal_service`): histórico por cuartiles contra los casos del año.
-4. **Alertas SisCep** (`alertas_service`).
-5. **Clustering y mapas** (`clustering_service`, `mapa_service`): situación y confirmados.
+3. **Canal endémico** (`canal_Services`): histórico por cuartiles contra los casos del año.
+4. **Alertas SisCep** (`alertas_Services`).
+5. **Clustering y mapas** (`clustering_Services`, `mapa_Services`): situación y confirmados.
 6. **Guardar** en `resultados/{clave}.json` y la fecha en `fecha_ultimo_repo/utimoReporte.json`.
 
 Si un paso truena, `ESTADO.error` trae el mensaje y no se guarda nada de esa corrida.
@@ -119,7 +119,7 @@ quita el entrenamiento.
 1. El algoritmo en `modulos/dengue/` (recibe y regresa DataFrames, sin leer archivos).
 2. Si necesita leer algo, su lectura en `datos/dengue/`.
 3. Un servicio en `services/dengue/` que lo orqueste y arme la respuesta para el front.
-4. Agregar el paso en `services/dengue/pipeline/pasos_pipeline_service.py`, su clave en
-   `CLAVES_RESULTADOS` (`datos/dengue/resultados_pipeline_datos.py`) y el endpoint en
-   `controllers/reportes_controller.py` (dato directo).
+4. Agregar el paso en `services/dengue/pipeline/pasos_pipeline_Services.py`, su clave en
+   `CLAVES_RESULTADOS` (`datos/dengue/resultados_pipeline_Datos.py`) y el endpoint en
+   `Controller/reportes_Controller.py` (dato directo).
 5. En el front: la función en la API de dengue y su página.

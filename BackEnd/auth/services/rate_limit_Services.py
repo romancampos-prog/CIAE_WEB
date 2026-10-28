@@ -1,9 +1,9 @@
 """
-Módulo  : rate_limit_service.py
+Módulo  : rate_limit_Services.py
 Carpeta : auth/services/
 Qué hace: Bloquea temporalmente a una IP después de varios intentos fallidos
           de login, para dificultar ataques de fuerza bruta.
-Usado en: auth_controller.py
+Usado en: auth_Controller.py
 """
 import time
 from fastapi import HTTPException, status

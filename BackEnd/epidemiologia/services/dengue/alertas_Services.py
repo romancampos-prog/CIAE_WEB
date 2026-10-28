@@ -1,7 +1,7 @@
 """
 Alertas de SisCep para el front: muestras rechazadas, pendientes, recibidas adecuadas, sin
 muestra, graves sin muestra y negativos por unidad.
-Usado en: services/dengue/pipeline/pasos_pipeline_service.py
+Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
 from epidemiologia.modulos.dengue.alertas import ejecutar_alertas_siscep
 

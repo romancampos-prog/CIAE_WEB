@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from configs.cors import AMBIENTE, ORIGINS
 
-from auth.controllers.auth_controller import router as auth_router
+from auth.Controller.auth_Controller import router as auth_router
 
 from epidemiologia.Routes import epidemiologia_Route
 from indicadores.Routes import indicadores_Route

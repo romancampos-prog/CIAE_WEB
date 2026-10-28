@@ -20,7 +20,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import resample
 
-from epidemiologia.datos.dengue.modelo_duplicados_datos import RUTA_MODELO
+from epidemiologia.datos.dengue.modelo_duplicados_Datos import RUTA_MODELO
 from epidemiologia.modulos.dengue.duplicados.campos_registro import texto_limpio
 from epidemiologia.modulos.dengue.duplicados.similitud import NOMBRES_FEATURES, calcular_vector
 

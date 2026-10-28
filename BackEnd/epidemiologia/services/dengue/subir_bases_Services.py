@@ -1,13 +1,13 @@
 """
 Subir la base operativa o la de SisCep: validar que sea .xlsx y su peso, guardarla y auditar.
-Usado en: controllers/archivos_controller.py
+Usado en: Controller/archivos_Controller.py
 """
 from fastapi import HTTPException
 
 from compartido.auditoria_Services import registrar
 from compartido.validar_archivo_Services import validar_peso_archivo
 from epidemiologia.config import RUTA_OPERATIVA, RUTA_SISCEP
-from epidemiologia.datos.dengue.bases_dengue_datos import guardar_base
+from epidemiologia.datos.dengue.bases_dengue_Datos import guardar_base
 
 
 def _subir_base(usuario: str | None, nombre_archivo: str, contenido: bytes, peso: int, ruta, nombre_auditoria: str) -> dict:

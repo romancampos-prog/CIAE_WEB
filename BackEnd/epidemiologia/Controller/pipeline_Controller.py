@@ -1,15 +1,15 @@
 """
-Módulo  : pipeline_controller.py
-Carpeta : epidemiologia/controllers/
+Módulo  : pipeline_Controller.py
+Carpeta : epidemiologia/Controller/
 Qué hace: Endpoints para consultar el estado del pipeline y ejecutarlo (responden ApiResponse).
 Usado en: Routes/epidemiologia_Route.py (prefix /epidemiologia/pipeline)
 """
 from fastapi import APIRouter, Depends
 
-from auth.services.jwt_utils import solo_roles
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
-from epidemiologia.services.dengue.pipeline.estado_pipeline_service import estado_del_pipeline
-from epidemiologia.services.dengue.pipeline.iniciar_pipeline_service import iniciar_pipeline
+from epidemiologia.services.dengue.pipeline.estado_pipeline_Services import estado_del_pipeline
+from epidemiologia.services.dengue.pipeline.iniciar_pipeline_Services import iniciar_pipeline
 
 pipelineApi = APIRouter()
 

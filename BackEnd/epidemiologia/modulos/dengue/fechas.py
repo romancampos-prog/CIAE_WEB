@@ -1,7 +1,7 @@
 """
 Calendario de semana epidemiologica SUIVE: inicio de la semana 1 de un año, numero de semana
 y la semana de una fecha (la usan la depuracion de la base y el historico del canal endemico).
-Usado en: modulos/dengue/depuracion/asignar_semana.py, datos/dengue/historico_datos.py
+Usado en: modulos/dengue/depuracion/asignar_semana.py, datos/dengue/historico_Datos.py
 """
 import pandas as pd
 

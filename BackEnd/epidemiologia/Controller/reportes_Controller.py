@@ -1,14 +1,14 @@
 """
-Módulo  : reportes_controller.py
-Carpeta : epidemiologia/controllers/
+Módulo  : reportes_Controller.py
+Carpeta : epidemiologia/Controller/
 Qué hace: Endpoints para consultar canal endémico, mapas, alertas y duplicados de dengue.
           Responden el dato directo (SIN ApiResponse): el front depende de eso.
 Usado en: Routes/epidemiologia_Route.py (prefix /epidemiologia/reportes)
 """
 from fastapi import APIRouter, Depends, HTTPException
 
-from auth.services.jwt_utils import solo_roles
-from epidemiologia.services.dengue.pipeline.estado_pipeline_service import resultado_guardado
+from auth.services.jwt_Services import solo_roles
+from epidemiologia.services.dengue.pipeline.estado_pipeline_Services import resultado_guardado
 
 reportesApi = APIRouter()
 

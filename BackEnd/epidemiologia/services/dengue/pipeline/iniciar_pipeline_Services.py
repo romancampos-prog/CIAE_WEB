@@ -1,14 +1,14 @@
 """
 Arrancar el pipeline en segundo plano si se puede (no esta corriendo y estan las dos bases).
-Usado en: controllers/pipeline_controller.py
+Usado en: Controller/pipeline_Controller.py
 """
 import threading
 
 from fastapi import HTTPException
 
 from epidemiologia.config import RUTA_OPERATIVA, RUTA_SISCEP
-from epidemiologia.services.dengue.pipeline.estado_pipeline_service import ESTADO
-from epidemiologia.services.dengue.pipeline.pasos_pipeline_service import ejecutar_pasos
+from epidemiologia.services.dengue.pipeline.estado_pipeline_Services import ESTADO
+from epidemiologia.services.dengue.pipeline.pasos_pipeline_Services import ejecutar_pasos
 
 
 def iniciar_pipeline() -> tuple[str, None]:

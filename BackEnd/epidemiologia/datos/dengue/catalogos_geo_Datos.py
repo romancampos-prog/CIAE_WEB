@@ -1,7 +1,7 @@
 """
 Catalogos geograficos del mapeo (epidemiologia/mapeo/): codigos postales con su latitud y
 longitud, y el GeoJSON de los municipios de Guanajuato.
-Usado en: services/dengue/clustering_service.py
+Usado en: services/dengue/clustering_Services.py
 """
 import json
 

@@ -1,7 +1,7 @@
 """
 Modulo: Autenticación
 Que hace? : Modelos Pydantic para login 
-Usado: auth_controller.py
+Usado: auth_Controller.py
 
 request  = palabra asociada a que es para "enviar"
 response = palabra asociada a que es para "recibir"

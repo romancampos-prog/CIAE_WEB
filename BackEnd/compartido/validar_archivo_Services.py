@@ -7,7 +7,7 @@ Usado en: services/*, epidemiologia (validar_peso_archivo)
 """
 from fastapi import HTTPException
 
-from auth.services.auth_service import verificar_credenciales
+from auth.services.auth_Services import verificar_credenciales
 
 PESO_MAXIMO = 10 * 1024 * 1024  # 10 MB, para que un archivo no llene la RAM del servidor
 

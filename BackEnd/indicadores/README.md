@@ -651,7 +651,7 @@ está claro en el código y conviene revisarlo.
 # Controller/ejemplo_Controller.py
 from fastapi import APIRouter, Depends
 
-from auth.services.jwt_utils import solo_roles
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from services.ftp.pagina_generar_ftp_Services import meses_generados_ftp
 

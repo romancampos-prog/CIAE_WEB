@@ -1,8 +1,8 @@
 """
 Deteccion de duplicados en produccion: por cada par candidato, 1) excepciones de negocio,
 2) clasificacion (modelo entrenado si existe; si no, umbral de similitud) y 3) reglas de
-resolucion para saber cual se elimina. El modelo lo carga quien llama (datos/modelo_duplicados_datos.py).
-Usado en: services/dengue/duplicados_service.py
+resolucion para saber cual se elimina. El modelo lo carga quien llama (datos/modelo_duplicados_Datos.py).
+Usado en: services/dengue/duplicados_Services.py
 """
 from epidemiologia.modulos.dengue.duplicados.campos_registro import DIFF_DIAS_MAX
 from epidemiologia.modulos.dengue.duplicados.candidatos import generar_candidatos
