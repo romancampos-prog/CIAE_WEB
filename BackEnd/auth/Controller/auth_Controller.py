@@ -37,7 +37,7 @@ async def login(datos: LoginRequest, request: Request, response: Response):
 
     registrar_exito(ip)
     registrar("LOGIN_EXITOSO", usuario=usuario["usuario"], ip=ip)
-    token = generar_token(usuario["usuario"], usuario["rol"])
+    token = generar_token(usuario["usuario"], usuario["rol"], usuario["unidades"])
 
     response.set_cookie(
         key="token",

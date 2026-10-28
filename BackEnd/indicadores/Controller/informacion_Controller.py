@@ -11,7 +11,7 @@ from services.informacion.lista_indicadores_Services import todos_los_indicadore
 
 informacionApi = APIRouter()
 
-ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
+ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante", "unidad")
 
 
 #Get Indicadores/informacion/indicadores?campo=mostrarGenerar&modulo=ftp  (familias con sus indicadores)

@@ -13,7 +13,7 @@ const InicioPagina = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const { saludo, icono } = getGreeting();
-  const { esVisitante, puedeGenFTP, puedeGenIAAS, puedeVerEpi } = useRol();
+  const { esVisitante, esUnidad, puedeGenFTP, puedeGenIAAS, puedeVerEpi } = useRol();
 
   const handleLogout = () => {
     logout();
@@ -75,12 +75,12 @@ const InicioPagina = () => {
             <IconoIndicadores />
           </NavCard>
 
-          {(puedeGenFTP || puedeGenIAAS) && (
+          {(puedeGenFTP || puedeGenIAAS || esUnidad) && (
             <NavCard
               titulo="Epidemiología"
               eyebrow="Módulo activo"
               desc="Vigilancia Epidemiológica: Análisis y seguimiento de enfermedades prioritarias en el OOAD Guanajuato."
-              chips={['Dengue']}
+              chips={esUnidad ? ['Acciones'] : ['Dengue', 'Acciones']}
               color="tinto"
               disabled={!puedeVerEpi}
               onClick={() => navigate('/CIAE/Epidemiologia')}

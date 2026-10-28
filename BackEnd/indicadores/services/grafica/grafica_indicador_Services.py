@@ -10,16 +10,18 @@ from services.extractor.catalogo_extractor_Services import indicadores_extractor
 from services.grafica.estadisticas_grafica_Services import estadisticas_de_reporte
 from services.grafica.perfil_indicador_Services import perfil_de_indicador
 from services.grafica.serie_cortes_Services import serie_de_cortes
+from services.grafica.unidades_del_usuario_Services import reporte_solo_de_unidades, serie_cortes_solo_de_unidades
 from services.informacion.ficha_indicador_Services import obtener_ficha_indicador
 from services.reporte_guardado.reporte_guardado_Services import cargar_reporte_indicador, cargar_semanal
 from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import nombre_canonico_iaas
 
 
-def consultar_grafica_indicador(indicador: str, ano: str) -> dict | None:
+def consultar_grafica_indicador(indicador: str, ano: str, unidades_usuario: list[str] | None = None) -> dict | None:
     """
     Ficha + reporte + estadisticas + perfil de un indicador para las graficas. El modulo sale del
     mapeo (la carpeta del indicador), no de lo que mande el front. None si no existe en el mapeo.
+    unidades_usuario: los nombres de la unidad de un usuario de unidad (sale del token); None = todas.
     """
 
     # 1. Leer el mapeo y el reporte guardado del año
@@ -61,7 +63,11 @@ def consultar_grafica_indicador(indicador: str, ano: str) -> dict | None:
             ultimo_corte = max(cortes, key=MESES_ESTANDAR.index) if cortes else None
             reporte.MESES = {ultimo_corte: cortes[ultimo_corte]} if ultimo_corte else {}
 
-    # 6. Perfil: lo que la grafica necesita saber del indicador (meta, niveles, unidad de medida...)
+        # 6. Usuario de unidad: solo su unidad (antes de estadisticas y perfil)
+        if unidades_usuario is not None:
+            reporte = reporte_solo_de_unidades(reporte, unidades_usuario)
+
+    # 7. Perfil: lo que la grafica necesita saber del indicador (meta, niveles, unidad de medida...)
     unidades = []
 
     for contenido in (reporte.MESES.values() if reporte else []):
@@ -70,9 +76,10 @@ def consultar_grafica_indicador(indicador: str, ano: str) -> dict | None:
     perfil = perfil_de_indicador(bloque, unidades)
 
     if modulo == "extractor" and indicador in indicadores_extractor_de_corte():
-        perfil["serieCortes"] = serie_de_cortes(indicador, ano)
+        serie = serie_de_cortes(indicador, ano)
+        perfil["serieCortes"] = serie_cortes_solo_de_unidades(serie, unidades_usuario) if unidades_usuario is not None else serie
 
-    # 7. Juntar ficha, reporte, estadisticas y perfil
+    # 8. Juntar ficha, reporte, estadisticas y perfil
     return {
         "ficha": obtener_ficha_indicador(indicador),
         "reporte": reporte,

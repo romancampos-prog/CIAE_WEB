@@ -2,6 +2,7 @@
 import { useState } from 'react';
 // propios
 import { IconoInfo, IconoTendencia } from '@/components/icons';
+import { useRol } from '@/features/auth';
 import { useGraficaIndicador } from '@/features/graficas/hooks/useGraficaIndicador';
 import SelectorMes from './SelectorMes';
 import PestanasGrafica from './PestanasGrafica';
@@ -40,6 +41,7 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
     vista, setVista, unidadSel, setUnidadSel, acumulado, setAcumulado, tieneAcumulado,
     descargarIndicador, descargarFamilia,
   } = useGraficaIndicador(indSel, indsHermanos);
+  const { puedeDescargarExcel } = useRol();
 
   const color      = colorFamilia;
   const semana     = reporte?.SEMANA?.SEMANA;
@@ -103,14 +105,16 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
             </button>
           )}
           <span className="ig-year-chip">{anio}</span>
-          <MenuDescarga
-            disabled={descargando || !hayDatos}
-            cargando={descargando}
-            opciones={[
-              { label: `Descargar ${indSel}`, onClick: descargarIndicador },
-              { label: `Descargar todo ${categoria}`, onClick: descargarFamilia, multiple: true },
-            ]}
-          />
+          {puedeDescargarExcel && (
+            <MenuDescarga
+              disabled={descargando || !hayDatos}
+              cargando={descargando}
+              opciones={[
+                { label: `Descargar ${indSel}`, onClick: descargarIndicador },
+                { label: `Descargar todo ${categoria}`, onClick: descargarFamilia, multiple: true },
+              ]}
+            />
+          )}
         </div>
       </header>
 

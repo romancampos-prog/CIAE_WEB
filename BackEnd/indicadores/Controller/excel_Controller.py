@@ -4,17 +4,21 @@ lo que ya esta guardado en BD_CIAE.
 """
 import logging
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from services.excel.generar_excel_Services import ExcelSinDatosError, generar_excel
 
 excelApi = APIRouter()
 
+# Sin "unidad": el Excel trae todas las unidades y el usuario de unidad solo ve su grafica.
+ROLES_EXCEL = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
+
 
 #Get Indicadores/excel?indicadores=EH 03&indicadores=DM 04&ano=2026&mes=Junio (mes es opcional)
 @excelApi.get("")
-async def excel_de_indicadores(ano: int, indicadores: list[str] = Query(...), mes: str | None = None):
+async def excel_de_indicadores(ano: int, indicadores: list[str] = Query(...), mes: str | None = None, usuario: dict = Depends(solo_roles(*ROLES_EXCEL))):
     try:
         mensaje, datos = generar_excel(indicadores, ano, mes)
     except ValueError as error:

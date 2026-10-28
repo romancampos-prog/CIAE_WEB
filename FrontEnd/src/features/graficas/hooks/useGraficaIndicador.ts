@@ -59,9 +59,11 @@ export function useGraficaIndicador(indicador: string, indsHermanos: string[]) {
   // Arranca en el último mes cerrado (el que tiene resumen); si no hay, en el parcial.
   const mesSel = delIndicador.mes ?? mesesCerrados[mesesCerrados.length - 1] ?? mesSemanal ?? '';
 
-  // La unidad de la tendencia se conserva entre indicadores si también existe en este; si no, el estatal.
+  // La unidad de la tendencia se conserva entre indicadores si también existe en este; si no, el
+  // estatal. El usuario de unidad no recibe el estatal: entonces la única unidad que trae.
   const unidades  = Object.values(reporte?.MESES ?? {}).flatMap(m => Object.keys(m.Reporte ?? {}));
-  const unidadSel = unidades.includes(unidadElegida) ? unidadElegida : CLAVE_ESTATAL;
+  const respaldo  = unidades.includes(CLAVE_ESTATAL) ? CLAVE_ESTATAL : (unidades[0] ?? CLAVE_ESTATAL);
+  const unidadSel = unidades.includes(unidadElegida) ? unidadElegida : respaldo;
 
   const indiceResumen = resumenes.findIndex(r => r.mes === mesSel);
   const resumen       = indiceResumen >= 0 ? resumenes[indiceResumen] : null;
