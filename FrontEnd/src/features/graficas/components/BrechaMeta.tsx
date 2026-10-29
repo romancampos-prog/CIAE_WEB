@@ -3,7 +3,7 @@ import { useState } from 'react';
 // propios
 import type { BrechaUnidad, TipoMeta } from '@/types/api/indicadores/reportes';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import { formatoNumero as formato } from '@/features/graficas/utils/datosGrafica';
+import { formatoNumero as formato, textoMeta } from '@/features/graficas/utils/datosGrafica';
 import './estadisticas.css';
 
 const VISIBLES = 8;
@@ -58,7 +58,7 @@ const BrechaMeta = ({ brechas = [], mes, aplica, onSelectUnidad, tipoMeta }: Pro
                   <span className="ige-brecha-unidad">{b.unidad}</span>
                   <span className="ige-brecha-actual">
                     <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[b.desempeno] }} />
-                    {formato(b.resultado)} <span className="ige-brecha-meta">meta {b.meta}</span>
+                    {formato(b.resultado)} <span className="ige-brecha-meta">meta {textoMeta(b.meta)}</span>
                   </span>
                   <span className="ige-brecha-casos">
                     {b.sentido === 'faltan' ? 'Faltan' : 'Sobran'} <strong>{b.casos.toLocaleString('es-MX')}</strong>

@@ -5,7 +5,7 @@ import type { Desempeno, PerfilIndicador } from '@/types/api/indicadores/reporte
 import type { FilaUnidad } from '@/types/pantallas/graficas';
 import LeyendaSemaforo from './LeyendaSemaforo';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import { formatoNumero, formatoValor, metaDe } from '@/features/graficas/utils/datosGrafica';
+import { formatoNumero, formatoValor, metaDe, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   filas: FilaUnidad[];
@@ -65,7 +65,7 @@ const CompararRango = ({ filas, perfil, mes, grupoDeUnidad, onVerUnidad }: Props
           <span className="gi-derecha">◀ Abajo de su rango</span>
           <span className="gi-centro">Dentro</span>
           <span>Arriba de su rango ▶</span>
-          <span className="gi-derecha">Resultado · su rango</span>
+          <span className="gi-derecha">Resultado · rango de la meta</span>
         </div>
 
         <ol className="gi-comparar-lista">
@@ -80,7 +80,7 @@ const CompararRango = ({ filas, perfil, mes, grupoDeUnidad, onVerUnidad }: Props
                   className={`gi-rango-fila${conTipo ? ' gi-rango--con-tipo' : ''}`}
                   style={{ '--status': COLOR_SEMAFORO[fila.desempeno] }}
                   onClick={() => onVerUnidad(fila.unidad)}
-                  title={`${fila.unidad}: ${formatoValor(fila.resultado, perfil?.unidadMedida)} (${estado}) · rango ${fila.rango?.texto ?? '—'}`}
+                  title={`${fila.unidad}: ${formatoValor(fila.resultado, perfil?.unidadMedida)} (${estado}) · rango ${textoMeta(fila.rango)}`}
                 >
                   <span className="gi-comparar-unidad">{fila.unidad}</span>
                   {conTipo && <span className="gi-rango-tipo">{grupoDeUnidad?.[fila.unidad] ?? '—'}</span>}
@@ -94,8 +94,8 @@ const CompararRango = ({ filas, perfil, mes, grupoDeUnidad, onVerUnidad }: Props
                     {fila.arriba > 0 && <><span className="gi-rango-barra" style={{ width: ancho(fila.arriba) }} /><small>+{formatoNumero(fila.arriba)}</small></>}
                   </span>
                   <span className="gi-comparar-valor">
-                    {formatoValor(fila.resultado, perfil?.unidadMedida)}
-                    <small>{fila.rango?.minimo != null ? `${formatoNumero(fila.rango.minimo)}–${formatoNumero(fila.rango.maximo)}` : ''}</small>
+                    <strong>{formatoValor(fila.resultado, perfil?.unidadMedida)}</strong>
+                    {fila.rango && <span className="gi-rango-chip" title="Rango de la meta de esta unidad">{textoMeta(fila.rango)}</span>}
                     {chico && <small className="gi-aviso-chico" title={`Denominador de ${fila.denominador}: un solo caso mueve mucho el resultado`}>den. {fila.denominador}</small>}
                   </span>
                 </button>

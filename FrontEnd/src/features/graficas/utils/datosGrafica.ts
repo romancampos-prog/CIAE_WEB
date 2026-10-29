@@ -1,12 +1,14 @@
 // propios
-import type { PerfilIndicador, ReporteIndicador, TipoMeta, UnidadDatos } from '@/types/api/indicadores/reportes';
+import type { MetaNumerica, PerfilIndicador, ReporteIndicador, TipoMeta, UnidadDatos } from '@/types/api/indicadores/reportes';
 import type { FilaUnidad, PuntoSerie } from '@/types/pantallas/graficas';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
 
-// Clave con la que el backend manda el estatal (total OOAD) dentro de cada mes.
+// Clave con la que el backend manda el total OOAD dentro de cada mes.
 export const CLAVE_ESTATAL = 'TOTAL_OOAD';
+// Cómo se rotula en pantalla: lo mismo que dice el JSON (TOTAL_OOAD), legible.
+export const ETIQUETA_TOTAL = 'Total OOAD';
 
-export const nombreUnidad = (unidad: string): string => (unidad === CLAVE_ESTATAL ? 'Estatal' : unidad);
+export const nombreUnidad = (unidad: string): string => (unidad === CLAVE_ESTATAL ? ETIQUETA_TOTAL : unidad);
 
 export const mesCorto = (mes: string | null | undefined): string => (mes ? mes.slice(0, 3) : '');
 
@@ -45,6 +47,31 @@ const aFila = (unidad: string, dato: UnidadDatos | undefined): FilaUnidad => ({
   denominador: dato?.denominador ?? null,
   desempeno:   dato?.desempeno ?? 'Gris',
 });
+
+/**
+ * El texto de la meta para leerse en pantalla, con los mismos números del backend:
+ * ">= 18.0" → "≥ 18"; un rango (">= 4 a <= 7", con minimo/maximo) → "4 a 7".
+ */
+export function textoMeta(meta: MetaNumerica | string | null | undefined): string {
+  if (!meta) return '—';
+  if (typeof meta !== 'string' && meta.minimo != null && meta.maximo != null) return `${formatoNumero(meta.minimo)} a ${formatoNumero(meta.maximo)}`;
+  const texto = typeof meta === 'string' ? meta : meta.texto;
+  // El resumen y la brecha mandan solo el texto: el rango ">= 4 a <= 7" también queda "4 a 7"
+  const rango = texto.match(/^\s*>=\s*(-?[\d.]+)\s+a\s+<=\s*(-?[\d.]+)\s*$/);
+  if (rango) return `${formatoNumero(Number(rango[1]))} a ${formatoNumero(Number(rango[2]))}`;
+  return texto
+    .replace(/>=/g, '≥').replace(/<=/g, '≤')
+    .replace(/-?\d+(\.\d+)?/g, n => formatoNumero(Number(n)));
+}
+
+/** La misma meta para todas: entonces se dibuja como UNA línea (o franja) continua, no un pedazo por fila/columna. */
+export function metaComun(metas: (MetaNumerica | null | undefined)[]): MetaNumerica | null {
+  const conMeta = metas.filter((m): m is MetaNumerica => m != null && (m.valor != null || m.minimo != null));
+  if (!conMeta.length || conMeta.length !== metas.length) return null;
+  const [primera] = conMeta;
+  const igual = conMeta.every(m => m.valor === primera.valor && m.minimo === primera.minimo && m.maximo === primera.maximo);
+  return igual ? primera : null;
+}
 
 /** La meta que aplica a una unidad en un mes: la de su grupo si el semáforo va por grupo (IAAS 01), si no la del mes. */
 export const metaDe = (perfil: PerfilIndicador | null, mes: string, unidad: string) =>

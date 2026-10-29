@@ -5,7 +5,7 @@ import ListaUnidades from './ListaUnidades';
 import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
 import LeyendaSemaforo from './LeyendaSemaforo';
-import { datosDelMes, formatoValor, mesCorto, nombreUnidad, serieDeUnidad } from '@/features/graficas/utils/datosGrafica';
+import { ETIQUETA_TOTAL, datosDelMes, formatoValor, mesCorto, nombreUnidad, serieDeUnidad, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   reporte: ReporteIndicador | null;
@@ -46,7 +46,7 @@ const TendenciaUnidad = ({
 
   const puntos = serie.map((p): PuntoColumna => {
     const estado = p.desempeno === 'Gris' ? 'sin dato' : p.desempeno;
-    const extra = [p.meta && `Meta ${p.meta.texto}`, p.estatal != null && `Estatal ${formatoValor(p.estatal, perfil?.unidadMedida)}`]
+    const extra = [p.meta && `Meta ${textoMeta(p.meta)}`, p.estatal != null && `${ETIQUETA_TOTAL} ${formatoValor(p.estatal, perfil?.unidadMedida)}`]
       .filter(Boolean).join(' · ');
     return {
       ...p,
@@ -66,7 +66,7 @@ const TendenciaUnidad = ({
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">
           Todos los meses de {nombreUnidad(unidadSel)}{acumulado ? ' (acumulado desde enero)' : ''}. Cada barra lleva el color de su semáforo;
-          {esRango ? ' la franja es el rango de la meta' : ' la raya punteada es la meta de ese mes'} y el punto es el estatal. Da clic en un mes para elegirlo.
+          {esRango ? ' la franja es el rango de la meta' : ' la línea punteada es la meta de cada mes'} y el punto es el {ETIQUETA_TOTAL}. Da clic en un mes para elegirlo.
         </p>
 
         <DatosUnidad
@@ -87,7 +87,7 @@ const TendenciaUnidad = ({
           {esRango
             ? <li><span className="gi-leyenda-rango" />Rango de la meta</li>
             : serie.some(p => p.meta?.valor != null) && <li><span className="gi-leyenda-meta" />Meta del mes</li>}
-          {serie.some(p => p.estatal != null) && <li><span className="gi-leyenda-estatal" />Estatal</li>}
+          {serie.some(p => p.estatal != null) && <li><span className="gi-leyenda-estatal" />{ETIQUETA_TOTAL}</li>}
           {mesParcial && <li><span className="gi-leyenda-parcial" />{mesParcial} parcial (semana {semana})</li>}
         </LeyendaSemaforo>
       </div>

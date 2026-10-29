@@ -5,7 +5,7 @@ import ListaUnidades from './ListaUnidades';
 import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
 import LeyendaSemaforo from './LeyendaSemaforo';
-import { CLAVE_ESTATAL, datosDelMes, formatoNumero, formatoValor, mesCorto, nombreUnidad, techoDe } from '@/features/graficas/utils/datosGrafica';
+import { CLAVE_ESTATAL, ETIQUETA_TOTAL, datosDelMes, formatoNumero, formatoValor, mesCorto, nombreUnidad, techoDe, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   reporte: ReporteIndicador | null;
@@ -43,7 +43,7 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
       etiqueta: `${mesCorto(corte.mes)} ${corte.anio}`,
       etiquetaLarga: `Corte de ${corte.mes.toLowerCase()} ${corte.anio}`,
       valorTexto: formatoValor(dato?.resultado, perfil?.unidadMedida),
-      extra: [meta && `Meta ${meta.texto}`, estatalCorte != null && `Estatal ${formatoNumero(estatalCorte)}`].filter(Boolean).join(' · '),
+      extra: [meta && `Meta ${textoMeta(meta)}`, estatalCorte != null && `${ETIQUETA_TOTAL} ${formatoNumero(estatalCorte)}`].filter(Boolean).join(' · '),
       resultado: dato?.resultado ?? null,
       desempeno: dato?.desempeno ?? 'Gris',
       numerador: dato?.numerador ?? null,
@@ -51,7 +51,7 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
       meta,
       estatal: estatalCorte,
       titulo: `Corte ${corte.mes.toLowerCase()} ${corte.anio}: ${formatoValor(dato?.resultado, perfil?.unidadMedida)} (${estado})`
-        + `${meta ? ` · meta ${meta.texto}` : ''}${estatalCorte != null ? ` · estatal ${formatoNumero(estatalCorte)}` : ''}`,
+        + `${meta ? ` · meta ${textoMeta(meta)}` : ''}${estatalCorte != null ? ` · ${ETIQUETA_TOTAL} ${formatoNumero(estatalCorte)}` : ''}`,
     };
   });
 
@@ -68,7 +68,7 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">
           Los cortes de {nombreUnidad(unidadSel)} y, abajo, los casos de cada mes que los forman.
-          La raya punteada es la meta y el punto es el estatal.
+          La raya punteada es la meta y el punto es el {ETIQUETA_TOTAL}.
         </p>
 
         <DatosUnidad
@@ -87,7 +87,7 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
         {puntos.length ? <ColumnasTendencia puntos={puntos} activo={corteActivo} /> : <p className="ige-vacio">Todavía no hay cortes cerrados.</p>}
         <LeyendaSemaforo niveles={perfil?.niveles} conGris={puntos.some(p => p.resultado == null)}>
           {puntos.some(p => p.meta?.valor != null) && <li><span className="gi-leyenda-meta" />Meta</li>}
-          {puntos.some(p => p.estatal != null) && <li><span className="gi-leyenda-estatal" />Estatal</li>}
+          {puntos.some(p => p.estatal != null) && <li><span className="gi-leyenda-estatal" />{ETIQUETA_TOTAL}</li>}
         </LeyendaSemaforo>
 
         <h3 className="gi-subtitulo">Casos por mes</h3>

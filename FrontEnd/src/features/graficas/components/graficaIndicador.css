@@ -58,9 +58,11 @@
   font-size: .84rem; color: var(--texto-medio);
 }
 
-/* ── Tarjeta de la vista (pestañas) ── */
+/* ── Tarjeta de la vista (pestañas): plana, sin la sombra grande de la tarjeta general ── */
 .ig-chart-card.gi-vista {
   position: relative;
+  background: var(--superficie); backdrop-filter: none;
+  border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
   display: flex; flex-direction: column; gap: 14px; padding: 18px 24px 22px;
 }
 /* Franja delgada con el color de la familia arriba de la tarjeta, como acento. */
@@ -154,46 +156,77 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 }
 .gi-tip-numden strong { color: var(--texto-medio); font-variant-numeric: tabular-nums; }
 
-/* ── Comparar: barras horizontales ordenadas ── */
-.gi-comparar { display: flex; flex-direction: column; gap: 8px; }
+/* ── Comparar: barras horizontales ordenadas ──
+   Encabezado, filas y la guía de la meta comparten las MISMAS columnas (la del resultado
+   con ancho fijo): así la pista mide igual en todas las filas y la meta queda recta. */
+.gi-comparar { display: flex; flex-direction: column; gap: 8px; --col-unidad: minmax(120px, 240px); --col-valor: 9.5rem; }
 .gi-comparar-encabezado,
-.gi-comparar-fila {
-  display: grid; grid-template-columns: minmax(120px, 230px) minmax(0, 1fr) minmax(96px, auto);
-  gap: 12px; align-items: center;
+.gi-comparar-fila,
+.gi-comparar-guia {
+  display: grid; grid-template-columns: var(--col-unidad) minmax(0, 1fr) var(--col-valor);
+  gap: 16px; align-items: center;
+  box-sizing: border-box; padding: 0 10px; border-left: 3px solid transparent;
 }
 .gi-comparar-encabezado {
   font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
-  color: var(--texto-tenue); padding: 0 8px;
+  color: var(--texto-tenue); padding-bottom: 2px;
 }
-.gi-comparar-meta-etiqueta { position: relative; height: 16px; }
-.gi-comparar-meta-etiqueta span { position: absolute; transform: translateX(-50%); white-space: nowrap; color: var(--texto-suave); text-transform: none; letter-spacing: 0; }
-.gi-comparar-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.gi-comparar-meta-etiqueta { position: relative; height: 18px; }
+.gi-comparar-meta-etiqueta span {
+  position: absolute; transform: translateX(-50%); white-space: nowrap; text-transform: none; letter-spacing: 0;
+  font-size: .7rem; font-weight: 700; color: var(--texto-medio);
+  padding: 1px 8px; border-radius: 100px; background: var(--superficie); border: 1px solid rgba(var(--borde-rgb), 0.9);
+}
+.gi-comparar-cuerpo { position: relative; }
+.gi-comparar-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .gi-comparar-fila {
   all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
-  display: grid; grid-template-columns: minmax(120px, 230px) minmax(0, 1fr) minmax(96px, auto);
-  gap: 12px; align-items: center; min-height: 36px; padding: 3px 8px;
+  display: grid; grid-template-columns: var(--col-unidad) minmax(0, 1fr) var(--col-valor);
+  gap: 16px; align-items: center; min-height: 40px; padding: 4px 10px;
   border-left: 3px solid transparent; border-radius: 0 10px 10px 0;
+  border-bottom: 1px solid rgba(var(--contraste-rgb), 0.045);
   transition: background 0.15s, border-color 0.15s;
 }
-.gi-comparar-fila:hover { background: color-mix(in srgb, var(--ic, var(--marca)) 6%, transparent); border-left-color: var(--acento); }
+.gi-comparar-lista li:last-child .gi-comparar-fila { border-bottom: none; }
+.gi-comparar-fila:hover { background: color-mix(in srgb, var(--ic, var(--marca)) 5%, transparent); border-left-color: var(--acento); }
 .gi-comparar-fila:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
 .gi-comparar-unidad { font-size: .78rem; font-weight: 600; color: var(--texto-secundario); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gi-barra-pista { position: relative; height: 20px; border-radius: 100px; background: rgba(var(--contraste-rgb), 0.04); }
+/* Barras planas: color sólido del semáforo, sin degradado ni sombra */
+.gi-barra-pista { position: relative; height: 12px; border-radius: 4px; background: rgba(var(--contraste-rgb), 0.05); }
 .gi-barra {
-  position: absolute; left: 0; top: 0; bottom: 0; border-radius: 100px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--status) 78%, white), var(--status));
-  opacity: 0.92; box-shadow: 0 2px 6px color-mix(in srgb, var(--status) 25%, transparent);
-  transform-origin: left; animation: gi-crecer-ancho 0.7s ease-out both;
+  position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px;
+  background: var(--status); opacity: 0.9;
+  transform-origin: left; animation: gi-crecer-ancho 0.6s ease-out both;
 }
-.gi-barra-meta { position: absolute; top: -5px; bottom: -5px; border-left: 2px dashed var(--texto); }
-.gi-barra-pista .gi-tip { top: auto; bottom: calc(100% + 8px); left: auto; right: 0; transform: none; }
+.gi-comparar-fila:hover .gi-barra { opacity: 1; }
+.gi-barra-pista .gi-tip { top: auto; bottom: calc(100% + 10px); left: auto; right: 0; transform: none; }
 .gi-comparar-fila:hover .gi-tip,
 .gi-comparar-fila:focus-visible .gi-tip { display: flex; }
 .gi-comparar-valor {
-  display: inline-flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 2px 6px;
-  font-size: .86rem; font-weight: 800; color: var(--texto); font-variant-numeric: tabular-nums; text-align: right;
+  display: flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 2px 8px;
+  font-variant-numeric: tabular-nums; text-align: right;
 }
-.gi-comparar-valor small { font-size: .68rem; font-weight: 600; color: var(--texto-suave); }
+.gi-comparar-valor strong { font-size: .86rem; font-weight: 800; color: var(--texto); }
+.gi-comparar-valor small { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 600; color: var(--texto-suave); }
+.gi-punto { width: 7px; height: 7px; border-radius: 50%; background: var(--status); flex-shrink: 0; }
+
+/* Meta: línea punteada (límite) o franja (rango) */
+.gi-meta-linea { position: absolute; width: 0; border-left: 2px dashed var(--texto); z-index: 2; pointer-events: none; }
+.gi-meta-rango {
+  position: absolute; z-index: 0; pointer-events: none;
+  background: color-mix(in srgb, var(--semaforo-esperado) 13%, transparent);
+  border-left: 1.5px dashed var(--semaforo-esperado); border-right: 1.5px dashed var(--semaforo-esperado);
+}
+/* En cada fila: marca corta que sobresale de la pista */
+.gi-meta--fila.gi-meta-linea { top: -6px; bottom: -6px; border-left-style: solid; border-left-width: 2.5px; border-radius: 2px; }
+.gi-meta--fila.gi-meta-rango { top: -5px; bottom: -5px; border-radius: 3px; }
+/* La guía continua cruza toda la lista con las mismas columnas que las filas */
+.gi-comparar-guia { position: absolute; inset: 0; pointer-events: none; }
+.gi-comparar-guia-pista { position: relative; align-self: stretch; }
+.gi-meta--continua { top: 0; bottom: 0; }
+.gi-meta--continua.gi-meta-linea { opacity: .75; }
+/* Con meta común, la marca por fila sobra (la guía ya la dibuja) */
+.gi-comparar--meta-comun .gi-meta--fila { display: none; }
 .gi-aviso-chico {
   padding: 1px 6px; border-radius: 6px;
   background: var(--tinte-aviso); border: 1px solid var(--borde-aviso); color: var(--aviso-texto-fuerte) !important;
@@ -227,12 +260,11 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 .gi-rango-lado--abajo { justify-content: flex-end; }
 .gi-rango-lado small { font-size: .74rem; font-weight: 800; color: var(--texto); white-space: nowrap; }
 .gi-rango-barra {
-  height: 16px; min-width: 4px; border-radius: 0 100px 100px 0;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--status) 78%, white), var(--status));
-  box-shadow: 0 2px 6px color-mix(in srgb, var(--status) 25%, transparent);
-  transform-origin: left; animation: gi-crecer-ancho 0.7s ease-out both;
+  height: 12px; min-width: 4px; border-radius: 0 4px 4px 0;
+  background: var(--status); opacity: .9;
+  transform-origin: left; animation: gi-crecer-ancho 0.6s ease-out both;
 }
-.gi-rango-lado--abajo .gi-rango-barra { border-radius: 100px 0 0 100px; transform-origin: right; }
+.gi-rango-lado--abajo .gi-rango-barra { border-radius: 4px 0 0 4px; transform-origin: right; }
 .gi-rango-centro {
   height: 28px; border-radius: 100px; display: flex; align-items: center; justify-content: center;
   font-size: .74rem; font-weight: 700; color: var(--texto-suave);
@@ -240,6 +272,12 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 .gi-rango-centro--dentro {
   background: color-mix(in srgb, var(--semaforo-esperado) 14%, var(--superficie)); color: var(--semaforo-esperado);
   border: 1px solid color-mix(in srgb, var(--semaforo-esperado) 30%, transparent);
+}
+.gi-rango-chip {
+  font-size: .68rem; font-weight: 700; white-space: nowrap; padding: 2px 8px; border-radius: 100px;
+  color: var(--semaforo-esperado);
+  background: color-mix(in srgb, var(--semaforo-esperado) 10%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--semaforo-esperado) 45%, transparent);
 }
 .gi-rango-centro--sin-dato { background: rgba(var(--contraste-rgb), 0.04); font-style: italic; }
 
@@ -295,17 +333,14 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 /* Datos de la unidad: el primero como la tarjeta del TOTAL de antes (teñida con su semáforo) */
 .gi-datos-unidad { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .gi-dato {
-  padding: 12px 16px; border-radius: 16px; min-width: 0;
-  background: color-mix(in srgb, var(--ic, var(--marca)) 4%, var(--superficie));
-  border: 1px solid rgba(var(--borde-rgb), 0.85);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 12px 16px; border-radius: 12px; min-width: 0;
+  background: color-mix(in srgb, var(--ic, var(--marca)) 3%, var(--superficie));
+  border: 1px solid rgba(var(--borde-rgb), 0.9);
 }
-.gi-dato:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
 .gi-dato--principal {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--status) 12%, var(--superficie)), color-mix(in srgb, var(--status) 4%, var(--superficie)));
-  border: 1.5px solid color-mix(in srgb, var(--status) 32%, transparent);
-  box-shadow: 0 2px 14px color-mix(in srgb, var(--status) 14%, transparent);
+  background: color-mix(in srgb, var(--status) 8%, var(--superficie));
+  border: 1px solid color-mix(in srgb, var(--status) 35%, transparent);
+  border-left: 4px solid var(--status);
 }
 .gi-dato-etiqueta {
   margin: 0; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;
@@ -370,20 +405,43 @@ button.gi-columna { cursor: pointer; }
   display: flex; justify-content: center; align-items: flex-end;
 }
 .gi-columna-barra {
-  position: relative; width: 64%; max-width: 56px; border-radius: 8px 8px 0 0;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--status) 78%, white), var(--status));
-  opacity: 0.92; box-shadow: 0 -2px 10px color-mix(in srgb, var(--status) 22%, transparent);
-  transform-origin: bottom; animation: gi-crecer-alto 0.7s ease-out both;
-  transition: filter 0.15s, opacity 0.15s;
+  position: relative; width: 58%; max-width: 48px; border-radius: 4px 4px 0 0;
+  background: var(--status); opacity: 0.88;
+  transform-origin: bottom; animation: gi-crecer-alto 0.6s ease-out both;
+  transition: opacity 0.15s;
 }
-.gi-columna:hover .gi-columna-barra { opacity: 1; filter: saturate(1.15); }
+.gi-columna:hover .gi-columna-barra { opacity: 1; }
+
+/* Meta común a todos los periodos: una línea/franja que cruza todas las columnas */
+/* Sin z-index propio: la línea queda sobre las columnas (z 1) y la franja del rango detrás */
+.gi-columnas-guia { position: absolute; top: 18px; left: 0; right: 0; height: var(--alto-columna); pointer-events: none; }
+.gi-columnas-guia-linea { position: absolute; left: 0; right: 0; z-index: 2; border-top: 2px dashed var(--texto); opacity: .75; }
+.gi-columnas-guia-rango {
+  position: absolute; left: 0; right: 0; z-index: 0;
+  background: color-mix(in srgb, var(--semaforo-esperado) 12%, transparent);
+  border-top: 1.5px dashed var(--semaforo-esperado); border-bottom: 1.5px dashed var(--semaforo-esperado);
+}
+.gi-columnas-guia-texto {
+  position: absolute; right: 4px; bottom: 100%; margin-bottom: 3px;
+  font-size: .64rem; font-weight: 700; white-space: nowrap; color: var(--texto-medio);
+  padding: 1px 7px; border-radius: 100px; background: var(--superficie); border: 1px solid rgba(var(--borde-rgb), 0.9);
+}
+.gi-columnas-guia-rango .gi-columnas-guia-texto { color: var(--semaforo-esperado); border-color: color-mix(in srgb, var(--semaforo-esperado) 35%, transparent); }
 .gi-columna--parcial .gi-columna-barra { opacity: .5; outline: 2px dashed var(--texto-suave); outline-offset: -2px; }
 .gi-columna-valor {
   position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px;
   font-size: .68rem; font-weight: 700; color: var(--texto-secundario); white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 .gi-columna-sin-dato { font-size: .8rem; color: var(--texto-tenue); padding-bottom: 4px; }
-.gi-columna-meta { position: absolute; left: 6%; right: 6%; border-top: 2.5px dashed var(--texto); z-index: 1; }
+/* Meta distinta por periodo: un trazo punteado en escalón sobre las columnas */
+.gi-columnas-meta-escalon {
+  position: absolute; top: 18px; left: 0; width: 100%; height: var(--alto-columna);
+  z-index: 2; overflow: visible; pointer-events: none;
+}
+.gi-columnas-meta-escalon polyline {
+  fill: none; stroke: var(--texto); stroke-width: 2; stroke-dasharray: 6 4; opacity: .55;
+  stroke-linejoin: round; vector-effect: non-scaling-stroke;
+}
 .gi-columna-rango {
   position: absolute; left: 4%; right: 4%;
   background: color-mix(in srgb, var(--semaforo-esperado) 16%, transparent);
@@ -402,13 +460,11 @@ button.gi-columna { cursor: pointer; }
 .gi-casos-columna { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .gi-casos-cuerpo { position: relative; width: 100%; height: 110px; border-bottom: 1.5px solid rgba(var(--borde-rgb), 0.95); display: flex; justify-content: center; align-items: flex-end; }
 .gi-casos-barra {
-  position: relative; width: 62%; max-width: 34px; min-height: 2px; border-radius: 6px 6px 0 0;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--texto-tenue) 70%, white), var(--texto-tenue));
-  transform-origin: bottom; animation: gi-crecer-alto 0.7s ease-out both;
+  position: relative; width: 58%; max-width: 30px; min-height: 2px; border-radius: 4px 4px 0 0;
+  background: var(--texto-tenue);
+  transform-origin: bottom; animation: gi-crecer-alto 0.6s ease-out both;
 }
-.gi-casos-columna--en-curso .gi-casos-barra {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--ic, var(--marca)) 70%, white), var(--ic, var(--marca)));
-}
+.gi-casos-columna--en-curso .gi-casos-barra { background: var(--ic, var(--marca)); }
 
 /* ── Mapa dentro de la tarjeta de la vista: sin segunda tarjeta encima ── */
 .gi-vista .ige-mapa { background: transparent; border: none; padding: 0; box-shadow: none; backdrop-filter: none; }
@@ -428,10 +484,31 @@ button.gi-columna { cursor: pointer; }
   .gi-selector-mes { flex: 1 1 100%; }
   .gi-selector-mes .ig-select { width: 100%; min-width: 0; }
   .ig-chart-card.gi-vista { padding: 14px 14px 18px; }
-  .gi-comparar-encabezado,
-  .gi-comparar-fila { grid-template-columns: minmax(90px, 130px) minmax(0, 1fr) minmax(70px, auto); gap: 8px; }
+  .gi-comparar { --col-unidad: minmax(90px, 150px); --col-valor: 6.5rem; }
+  .gi-comparar-encabezado, .gi-comparar-fila, .gi-comparar-guia { gap: 10px; }
   .gi-lista-unidades { max-width: none; flex-basis: 100%; padding-right: 0; border-right: none; }
   .gi-lista-scroll { max-height: 220px; }
+}
+
+/* ── Celular: en Comparar la unidad y el resultado arriba, la barra abajo a todo lo ancho ── */
+@media (max-width: 560px) {
+  .gi-comparar-encabezado, .gi-comparar-guia { display: none; }
+  .gi-comparar-fila {
+    grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "unidad valor" "barra barra";
+    row-gap: 7px; padding: 9px 10px;
+  }
+  .gi-comparar-unidad { grid-area: unidad; white-space: normal; }
+  .gi-comparar-fila .gi-barra-pista { grid-area: barra; }
+  .gi-comparar-valor { grid-area: valor; }
+  /* Sin guía continua, cada fila lleva su marca de meta */
+  .gi-comparar--meta-comun .gi-meta--fila { display: block; }
+}
+
+/* ── Pantallas anchas: se aprovecha el ancho (la página crece y la escala de las barras también) ── */
+@media (min-width: 1600px) {
+  .ig-main.gi-main { max-width: 1880px; --alto-columna: 290px; }
+  .gi-comparar { --col-unidad: minmax(160px, 300px); --col-valor: 11rem; }
+  .gi-comparar-fila { min-height: 42px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

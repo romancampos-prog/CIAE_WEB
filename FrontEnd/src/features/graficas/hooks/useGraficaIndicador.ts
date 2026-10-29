@@ -7,8 +7,9 @@ import { excelApi } from '@/api/indicadores/excelApi';
 import { reportesApi } from '@/api/indicadores/reportesApi';
 import { descargarB64 } from '@/features/indicadores';
 import { CLAVE_ESTATAL, ordenarMeses } from '@/features/graficas/utils/datosGrafica';
+import { anioDelMesAnterior } from '@/utils/anios';
 
-const ANIO = '2026';
+const ANIO = String(anioDelMesAnterior());
 
 /** Lo que el usuario eligió para UN indicador: al cambiar de indicador se vuelve a lo de por defecto. */
 interface EleccionDelIndicador {

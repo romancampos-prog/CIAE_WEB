@@ -2,7 +2,7 @@
 import type { Desempeno, PerfilIndicador, ResumenMes } from '@/types/api/indicadores/reportes';
 import { IconoChevronAbajo, IconoChevronArriba } from '@/components/icons';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import { formatoNumero as formato } from '@/features/graficas/utils/datosGrafica';
+import { ETIQUETA_TOTAL, formatoNumero as formato, textoMeta } from '@/features/graficas/utils/datosGrafica';
 import './estadisticas.css';
 
 const IconoFlecha = ({ sube }: { sube: boolean }) => (sube
@@ -40,6 +40,11 @@ const ResumenKpis = ({ resumen, mesAnterior, niveles = ['Esperado', 'Medio', 'Ba
   const { mes, estatal, desempenoEstatal, cambio, meta, mejora, unidades, unidadesConDato, acumulado, desempenoAcumulado } = resumen;
   const sufijo = unidadMedida === '%' ? ' %' : '';
   const otrosNiveles = niveles.filter(n => n !== 'Esperado').map(n => `${unidades[n] ?? 0} en ${n}`);
+  // Barra del reparto: los niveles del indicador (y Gris si hay) con sus conteos del backend
+  const repartidos: Desempeno[] = unidades.Gris ? [...niveles, 'Gris'] : niveles;
+  const total = repartidos.reduce((suma, n) => suma + (unidades[n] ?? 0), 0);
+  // El backend manda mejora = null cuando la meta es un rango
+  const esRango = mejora == null && meta != null;
 
   // El color del cambio depende de si en este indicador subir es bueno ("mas") o malo ("menos").
   const tonoCambio = cambio == null || cambio === 0 || !mejora
@@ -49,7 +54,7 @@ const ResumenKpis = ({ resumen, mesAnterior, niveles = ['Esperado', 'Medio', 'Ba
   return (
     <section className="ige-kpis" aria-label={`Resumen de ${mes}`}>
       <div className="ige-kpi ige-kpi--principal">
-        <p className="ige-kpi-etiqueta">Estatal {esCorte ? 'corte de ' : ''}{mes.toLowerCase()}</p>
+        <p className="ige-kpi-etiqueta">{ETIQUETA_TOTAL} · {esCorte ? 'corte de ' : ''}{mes.toLowerCase()}</p>
         <p className="ige-kpi-valor">{formato(estatal)}{estatal != null && sufijo}</p>
         <Estado desempeno={desempenoEstatal} />
         {unidadMedida && unidadMedida !== '%' && <p className="ige-kpi-nota">{unidadMedida}</p>}
@@ -59,6 +64,8 @@ const ResumenKpis = ({ resumen, mesAnterior, niveles = ['Esperado', 'Medio', 'Ba
         <p className="ige-kpi-etiqueta">Cambio vs {mesAnterior ? mesAnterior.toLowerCase() : esCorte ? 'corte anterior' : 'mes anterior'}</p>
         <p className={`ige-kpi-valor ige-kpi-valor--${tonoCambio}`}>
           {cambio == null ? '—' : <>{cambio !== 0 && <IconoFlecha sube={cambio > 0} />}{cambio > 0 ? '+' : ''}{formato(cambio)}</>}
+          {/* La diferencia entre dos porcentajes son puntos porcentuales, no % */}
+          {cambio != null && unidadMedida === '%' && <span className="ige-kpi-de">puntos</span>}
         </p>
         <p className="ige-kpi-nota">
           {tonoCambio === 'bueno' ? 'Mejoró' : tonoCambio === 'malo' ? 'Empeoró' : cambio == null ? (esCorte ? 'Sin corte anterior' : 'Sin mes anterior') : cambio === 0 ? 'Sin cambio' : cambio > 0 ? 'Subió' : 'Bajó'}
@@ -66,9 +73,9 @@ const ResumenKpis = ({ resumen, mesAnterior, niveles = ['Esperado', 'Medio', 'Ba
       </div>
 
       <div className="ige-kpi">
-        <p className="ige-kpi-etiqueta">Meta (Esperado)</p>
-        <p className="ige-kpi-valor ige-kpi-valor--texto">{meta ?? '—'}</p>
-        <p className="ige-kpi-nota">{desempenoEstatal === 'Esperado' ? 'El estatal la cumple' : desempenoEstatal === 'Gris' ? 'Sin dato estatal' : 'El estatal no la cumple'}</p>
+        <p className="ige-kpi-etiqueta">{esRango ? 'Rango de la meta' : 'Meta'}</p>
+        <p className="ige-kpi-valor ige-kpi-valor--texto">{textoMeta(meta)}</p>
+        <p className="ige-kpi-nota">{desempenoEstatal === 'Esperado' ? `El ${ETIQUETA_TOTAL} la cumple` : desempenoEstatal === 'Gris' ? `Sin dato del ${ETIQUETA_TOTAL}` : `El ${ETIQUETA_TOTAL} no la cumple`}</p>
       </div>
 
       <div className="ige-kpi">
@@ -76,6 +83,13 @@ const ResumenKpis = ({ resumen, mesAnterior, niveles = ['Esperado', 'Medio', 'Ba
         <p className="ige-kpi-valor">
           {unidades.Esperado}<span className="ige-kpi-de"> de {unidadesConDato}</span>
         </p>
+        {total > 0 && (
+          <span className="ige-reparto" aria-hidden>
+            {repartidos.map(n => (
+              <span key={n} style={{ flexGrow: unidades[n] ?? 0, background: COLOR_SEMAFORO[n] }} />
+            ))}
+          </span>
+        )}
         <p className="ige-kpi-nota">{otrosNiveles.join(' · ')}{unidades.Gris ? ` · ${unidades.Gris} sin dato` : ''}</p>
       </div>
 

@@ -2,7 +2,7 @@
 import type { BrechaUnidad, Desempeno, PerfilIndicador } from '@/types/api/indicadores/reportes';
 import type { FilaUnidad } from '@/types/pantallas/graficas';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import { CLAVE_ESTATAL, formatoNumero, formatoValor, nombreUnidad, ordenarPorResultado } from '@/features/graficas/utils/datosGrafica';
+import { CLAVE_ESTATAL, ETIQUETA_TOTAL, formatoNumero, formatoValor, nombreUnidad, ordenarPorResultado } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   unidad: string;
@@ -53,7 +53,7 @@ const DatosUnidad = ({ unidad, periodo, fila, estatal, filas, perfil, brecha, br
 
       {!esEstatal && (
         <div className="gi-dato">
-          <p className="gi-dato-etiqueta">Contra el estatal</p>
+          <p className="gi-dato-etiqueta">Contra el {ETIQUETA_TOTAL}</p>
           <p className="gi-dato-valor">
             {diferencia == null ? '—' : `${diferencia > 0 ? '+' : ''}${formatoNumero(diferencia)}`}
             <small>{diferencia == null ? '' : diferencia > 0 ? 'arriba' : diferencia < 0 ? 'abajo' : 'igual'}</small>
@@ -78,7 +78,7 @@ const DatosUnidad = ({ unidad, periodo, fila, estatal, filas, perfil, brecha, br
 
       {mostrarLugar && (
         <div className="gi-dato">
-          <p className="gi-dato-etiqueta">Lugar en el estado</p>
+          <p className="gi-dato-etiqueta">Lugar entre las unidades</p>
           <p className="gi-dato-valor">{lugar}<small>de {conDato.length}</small></p>
         </div>
       )}
