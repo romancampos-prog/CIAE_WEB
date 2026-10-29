@@ -29,17 +29,26 @@ def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: lis
     if contenido is None:
         raise HTTPException(404, f"{archivo}: no hay extraccion guardada de {ano}-{mes_texto}.")
 
-    #2- Usuario de unidad: solo sus filas
+    #2- Usuario de unidad: solo sus filas (las extracciones viejas no traen unidadesSinResultados)
+    contenido.setdefault("unidadesSinResultados", [])
     if unidades_usuario is not None:
         contenido["filas"] = [fila for fila in contenido["filas"] if fila.get("Unidad") in unidades_usuario]
+        contenido["unidadesSinResultados"] = [u for u in contenido["unidadesSinResultados"] if u in unidades_usuario]
 
     #3- Los errores de la extraccion solo los ve el admin, agrupados por tipo (como en indicadores FTP)
     contenido["errores"] = errores_por_tipo(contenido["errores"]) if ver_errores else {}
 
     #4- Estadisticas por las columnas del filtro del mapeo (ej. Clave de la Accion) y por unidad
     mapeo = ExtraerMapeoFTP(archivo)
-    columnas_conteo = [filtro.nombreColumna for config in mapeo.archivo.values() for filtro in config.filtroColumna.values() if filtro.nombreColumna]
-    contenido["estadisticas"] = estadisticas_de_filas(contenido["filas"], list(dict.fromkeys(columnas_conteo)))
+    # {columna: valores del filtro}: se cuentan todos, tambien los que no trajeron filas
+    columnas_conteo = {
+        filtro.nombreColumna: filtro.filtro
+        for config in mapeo.archivo.values() for filtro in config.filtroColumna.values() if filtro.nombreColumna
+    }
+    contenido["estadisticas"] = estadisticas_de_filas(contenido["filas"], columnas_conteo, contenido["unidadesSinResultados"])
+
+    #5- Lo que filtra el mapeo (ej. Clave de la Accion: UP87, UP407...), para decirlo en pantalla
+    contenido["filtrosMapeo"] = [{"columna": columna, "valores": valores} for columna, valores in columnas_conteo.items()]
 
     tipo = "definitivo" if contenido["semana"] is None else f"previo semana {contenido['semana']}"
     mensaje = f"{archivo} {ano}-{mes_texto} ({tipo}): {len(contenido['filas'])} filas."

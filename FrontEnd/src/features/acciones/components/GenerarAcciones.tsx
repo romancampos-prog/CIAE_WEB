@@ -18,7 +18,7 @@ export default function GenerarAcciones({ generacion: g }: Props) {
           <IconoReloj tamano={12} strokeWidth="2" /> Previo
         </button>
         <button role="tab" aria-selected={g.tipo === 'final'} className={`acc-segmento${g.tipo === 'final' ? ' acc-segmento--activo' : ''}`} onClick={() => g.setTipo('final')}>
-          <IconoPalomita tamano={12} strokeWidth="2" /> Final
+          <IconoPalomita tamano={12} strokeWidth="2" /> Definitivo
         </button>
       </div>
 
@@ -56,7 +56,7 @@ export default function GenerarAcciones({ generacion: g }: Props) {
       {g.resultado && (
         <p className="acc-mensaje acc-mensaje--ok">
           Listo ({g.resultado.semana === null ? 'definitivo' : `previo semana ${g.resultado.semana}`}):
-          {' '}{g.resultado.filas.length} filas, {g.resultado.errores.length} unidades con error.
+          {' '}{g.resultado.mensaje}
         </p>
       )}
     </section>

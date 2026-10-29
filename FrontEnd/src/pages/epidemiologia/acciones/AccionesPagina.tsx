@@ -39,7 +39,10 @@ export default function AccionesPagina() {
         <header className="acc-encabezado">
           <div>
             <h1 className="acc-titulo">Acciones</h1>
-            <p className="acc-subtitulo">Reporte OC30 del FTP · acciones configuradas en el mapeo</p>
+            <p className="acc-subtitulo">
+              Reporte OC30 del FTP
+              {datos?.filtrosMapeo.map(f => <span key={f.columna}> · {f.columna}: {f.valores.join(', ')}</span>)}
+            </p>
           </div>
           {datos && (
             <span className={`acc-periodo${datos.semana !== null ? ' acc-periodo--previo' : ''}`}>
@@ -59,8 +62,8 @@ export default function AccionesPagina() {
             {estadisticas && (
               <EstadisticasAcciones
                 estadisticas={estadisticas}
-                claveActiva={filtros.clave} onClave={clave => consulta.cambiarFiltro({ clave })}
-                unidadActiva={filtros.unidad} onUnidad={unidad => consulta.cambiarFiltro({ unidad })}
+                clavesActivas={filtros.claves} onClave={clave => consulta.alternarFiltro('claves', clave)}
+                unidadesActivas={filtros.unidades} onUnidad={unidad => consulta.alternarFiltro('unidades', unidad)}
               />
             )}
             {esAdmin && datos && <ErroresExtraccion errores={datos.errores} />}
@@ -80,6 +83,8 @@ export default function AccionesPagina() {
                 <FiltrosAcciones
                   filtros={filtros}
                   columnaClave={consulta.columnaClave}
+                  columnaFecha={consulta.columnaFecha}
+                  fechas={consulta.fechas}
                   claves={estadisticas.porColumna[0]?.conteos ?? []}
                   unidades={estadisticas.porUnidad}
                   total={datos.filas.length}
@@ -90,7 +95,8 @@ export default function AccionesPagina() {
                 <TablaExtraccion
                   filas={consulta.filasVisibles}
                   columnaClave={consulta.columnaClave}
-                  onFiltrarClave={clave => consulta.cambiarFiltro({ clave })}
+                  columnaFecha={consulta.columnaFecha}
+                  onFiltrarClave={clave => consulta.alternarFiltro('claves', clave)}
                 />
               </>
             )}

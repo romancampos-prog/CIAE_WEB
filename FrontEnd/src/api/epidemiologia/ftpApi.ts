@@ -7,10 +7,11 @@ import type { RespuestaApi } from '@/types/api/respuestaApi';
 
 export const ftpEpidemiologiaApi = {
   /** Baja el OC30 de las unidades del FTP, extrae las acciones y lo guarda en BD_CIAE (solo admin). semana null = definitivo. */
-  async extraerOC30(ano: number, mes: number, semana: number | null): Promise<ExtraccionGuardada> {
+  /** Con el mensaje del backend: él cuenta unidades con error y con archivo duplicado. */
+  async extraerOC30(ano: number, mes: number, semana: number | null): Promise<ExtraccionGuardada & { mensaje: string }> {
     const params = { ano, mes, ...(semana !== null && { semana }) };
     const { data } = await api.post<RespuestaApi<ExtraccionGuardada>>('/epidemiologia/ftp/extraer/OC30', null, { params });
-    return data.data;
+    return { ...data.data, mensaje: data.message };
   },
 
   /** Lo guardado del mes: el definitivo o, si aún no hay, su última semana (404 si no hay nada). */

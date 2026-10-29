@@ -39,12 +39,16 @@ export interface ExtraccionGuardada {
   semana: number | null;
   filas: FilaExtraccion[];
   errores: ErrorGuardado[];
+  /** Unidades que se leyeron bien pero no traen ninguna fila del filtro (no es error). */
+  unidadesSinResultados: string[];
 }
 
 /** GET /epidemiologia/ftp/extraccion/OC30 (dentro de ApiResponse): errores con la forma de las restricciones de FTP ({} si no es admin) y estadísticas. */
 export interface ExtraccionFtp extends Omit<ExtraccionGuardada, 'errores'> {
   errores: Restricciones;
   estadisticas: EstadisticasExtraccion;
+  /** El filtroColumna del mapeo: qué columna y qué valores se extraen (ej. Clave de la Acción: UP87, UP407...). */
+  filtrosMapeo: { columna: string; valores: string[] }[];
 }
 
 /** GET /epidemiologia/ftp/extraccion/OC30/periodos: un mes con extracción guardada. */

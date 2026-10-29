@@ -2,8 +2,9 @@
 
 .acc-main {
   flex: 1; position: relative; z-index: 1; overflow-y: auto;
-  width: 100%; max-width: 1680px; margin: 0 auto; box-sizing: border-box;
-  padding: 24px 32px 32px;
+  width: 100%; box-sizing: border-box;
+  /* A todo lo ancho para que el scroll quede en la orilla de la pantalla; el contenido se centra a 1680px con el padding */
+  padding: 24px max(32px, calc((100% - 1680px) / 2 + 32px)) 32px;
   display: flex; flex-direction: column; gap: 16px;
 }
 
@@ -90,7 +91,9 @@
 .acc-barra-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acc-barra-pista { height: 8px; border-radius: 4px; background: var(--superficie-alterna); overflow: hidden; }
 .acc-barra-relleno { display: block; height: 100%; border-radius: 4px; background: var(--marca); }
-.acc-barra-cantidad { text-align: right; font-weight: 700; color: var(--texto); }
+.acc-barra-cantidad { display: flex; justify-content: flex-end; font-weight: 700; color: var(--texto); }
+/* Unidad leída sin resultados: tenue, con un guion en vez del número */
+.acc-barra--sin .acc-barra-texto, .acc-barra--sin .acc-barra-cantidad { color: var(--texto-tenue); }
 
 /* ── Aviso de errores (solo admin) y su panel ── */
 .acc-aviso {
@@ -103,12 +106,14 @@
 .acc-aviso-ver { display: inline-flex; align-items: center; gap: 2px; font-weight: 600; white-space: nowrap; }
 /* ── Detalle: filtros + tabla ── */
 .acc-detalle { padding: 0; gap: 0; overflow: hidden; }
-.acc-filtros { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--borde); }
-.acc-filtros-fila { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+.acc-filtros { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--borde); }
+.acc-filtros-fila { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+/* Selectores repartidos a lo ancho: al envolver no dejan huecos */
+.acc-filtros-fila--selectores { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); align-items: stretch; }
 
 .acc-buscar {
-  display: flex; align-items: center; gap: 8px; flex: 1 1 280px; min-width: 0;
-  padding: 0 12px; height: 40px; box-sizing: border-box; border-radius: 12px;
+  display: flex; align-items: center; gap: 10px; flex: 1 1 320px; min-width: 0;
+  padding: 0 14px; height: 44px; box-sizing: border-box; border-radius: 12px;
   border: 1px solid var(--borde); background: var(--superficie-alterna); color: var(--texto-tenue);
   transition: border-color 0.15s, background 0.15s;
 }
@@ -121,10 +126,83 @@
 
 /* Select con su etiqueta adentro, a la misma altura que la búsqueda */
 .acc-selector {
-  position: relative; display: flex; flex-direction: column; justify-content: center; flex: 0 1 220px; min-width: 150px;
-  height: 40px; box-sizing: border-box; padding: 0 12px; border-radius: 12px;
+  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 1px; min-width: 0;
+  height: 44px; box-sizing: border-box; padding: 0 12px; border-radius: 12px;
   border: 1px solid var(--borde); background: var(--superficie-alterna);
+  transition: border-color 0.15s, background 0.15s;
 }
+.acc-selector:hover { border-color: var(--texto-tenue); }
+
+/* Selector de varias opciones: el botón luce como .acc-selector y abre una lista con casillas */
+.acc-multi { position: relative; min-width: 0; }
+.acc-multi-boton { width: 100%; padding-right: 30px; text-align: left; font-family: inherit; cursor: pointer; }
+.acc-multi-boton::after {
+  content: ''; position: absolute; right: 14px; top: 50%; width: 6px; height: 6px; margin-top: -5px;
+  border-right: 1.5px solid var(--texto-tenue); border-bottom: 1.5px solid var(--texto-tenue);
+  transform: rotate(45deg); transition: transform 0.15s; pointer-events: none;
+}
+.acc-multi-boton--abierto { border-color: var(--marca); background: var(--superficie); }
+.acc-multi-boton--abierto::after { transform: rotate(-135deg); margin-top: -1px; }
+.acc-multi-resumen { font-size: 13px; font-weight: 600; color: var(--texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.acc-multi-lista {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; min-width: 100%; width: max-content; max-width: min(360px, 90vw);
+  max-height: 260px; overflow-y: auto; box-sizing: border-box; padding: 6px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+.acc-multi-todas {
+  align-self: flex-start; border: none; background: transparent; padding: 4px 8px; cursor: pointer;
+  font-family: inherit; font-size: 11px; font-weight: 600; color: var(--texto-suave); text-decoration: underline;
+}
+.acc-multi-todas:disabled { opacity: 0.4; cursor: default; text-decoration: none; }
+.acc-multi-opcion {
+  display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 10px;
+  min-height: 36px; padding: 6px 8px; border: none; border-radius: 8px; background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 13px; text-align: left; color: var(--texto-medio);
+}
+.acc-multi-opcion:hover { background: var(--superficie-alterna); }
+.acc-multi-opcion--elegida { color: var(--texto); font-weight: 600; }
+.acc-multi-casilla {
+  display: grid; place-items: center; width: 16px; height: 16px; box-sizing: border-box;
+  border: 1.5px solid var(--borde); border-radius: 4px; color: var(--superficie);
+}
+.acc-multi-opcion--elegida .acc-multi-casilla { background: var(--marca); border-color: var(--marca); }
+.acc-multi-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-multi-cantidad { font-size: 11px; color: var(--texto-tenue); font-variant-numeric: tabular-nums; }
+
+/* Rango de fechas: ícono + dos tramos (desde | hasta) en una sola caja; ocupa dos lugares de la rejilla */
+.acc-rango {
+  grid-column: span 2; display: flex; align-items: stretch; min-width: 0;
+  height: 44px; box-sizing: border-box; border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--borde); background: var(--superficie-alterna);
+  transition: border-color 0.15s;
+}
+.acc-rango:hover { border-color: var(--texto-tenue); }
+.acc-rango:focus-within { border-color: var(--marca); }
+.acc-rango-icono { display: grid; place-items: center; padding: 0 4px 0 12px; color: var(--texto-tenue); flex-shrink: 0; }
+
+.acc-rango-tramo {
+  position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  padding: 0 28px 0 10px; cursor: pointer; transition: background 0.15s;
+}
+.acc-rango-tramo:hover, .acc-rango-tramo:focus-within { background: var(--superficie); }
+/* Flecha propia: la nativa se iba al otro extremo del tramo */
+.acc-rango-tramo::after {
+  content: ''; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; margin-top: -5px;
+  border-right: 1.5px solid var(--texto-tenue); border-bottom: 1.5px solid var(--texto-tenue);
+  transform: rotate(45deg); pointer-events: none;
+}
+.acc-rango-tramo select {
+  appearance: none; -webkit-appearance: none; border: none; outline: none; background: transparent;
+  padding: 0; margin: 0; width: 100%; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--texto-suave); font-variant-numeric: tabular-nums;
+}
+.acc-rango-tramo select option { background: var(--superficie); color: var(--texto); }
+/* El lado que sí recorta se nota más que el que solo muestra el extremo */
+.acc-rango-tramo--activo select { color: var(--texto); font-weight: 700; }
+.acc-rango-division { width: 1px; margin: 9px 0; background: var(--borde); flex-shrink: 0; }
 .acc-selector:focus-within { border-color: var(--marca); background: var(--superficie); }
 .acc-selector-etiqueta { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--texto-tenue); line-height: 1.2; }
 .acc-selector select {
@@ -133,8 +211,12 @@
 }
 .acc-selector select option { background: var(--superficie); color: var(--texto); }
 
-.acc-contador { margin-left: auto; align-self: center; font-size: 12px; color: var(--texto-tenue); white-space: nowrap; }
-.acc-contador strong { font-size: 15px; color: var(--texto); }
+.acc-contador {
+  margin-left: auto; display: inline-flex; align-items: baseline; gap: 4px; height: 44px; box-sizing: border-box;
+  padding: 0 4px; line-height: 44px; font-size: 12px; color: var(--texto-tenue); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.acc-contador strong { font-size: 18px; font-weight: 800; color: var(--texto); }
 
 .acc-filtros-activos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .acc-chip-filtro {
@@ -188,7 +270,9 @@
 /* ── Tablet: una columna; el panel lateral se acomoda en dos ── */
 @media (max-width: 1100px) {
   .acc-cuerpo { grid-template-columns: 1fr; }
-  .acc-lateral { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  /* Las tarjetas no se estiran a la altura de su vecina; los totales van arriba a todo lo ancho */
+  .acc-lateral { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+  .acc-lateral .acc-kpis { grid-column: 1 / -1; order: -1; }
   .acc-tabla-caja { max-height: 70vh; }
 }
 
@@ -198,9 +282,11 @@
   .acc-lateral { grid-template-columns: 1fr; }
   .acc-meses { flex-direction: column; align-items: stretch; }
   .acc-mes { flex: 0 0 64px; }
+  .acc-filtros { padding: 14px; }
   .acc-buscar { flex-basis: 100%; }
-  .acc-selector { flex: 1 1 140px; }
-  .acc-contador { margin-left: 0; }
+  .acc-filtros-fila--selectores { grid-template-columns: 1fr; }
+  .acc-rango { grid-column: auto; }
+  .acc-contador { margin-left: 0; height: auto; line-height: 1.4; }
   .acc-tabla td:nth-child(2), .acc-tabla th:nth-child(2) { position: static; box-shadow: none; }
 }
 
@@ -219,7 +305,10 @@
   content: ''; position: absolute; left: 0; bottom: 0; width: 48px; height: 3px; border-radius: 2px;
   background: var(--acc-dorado);
 }
-.acc-periodo--previo { background: rgba(var(--oro-rgb), 0.12); color: var(--dorado-texto); border-color: rgba(var(--oro-rgb), 0.35); }
+/* Título y periodo en el dorado de la plantilla (los tokens ya se aclaran en oscuro); el previo se distingue con borde punteado */
+.acc-titulo { color: var(--dorado-texto); }
+.acc-periodo, .acc-periodo--previo { background: rgba(var(--oro-rgb), 0.12); color: var(--dorado-texto); border-color: rgba(var(--oro-rgb), 0.4); }
+.acc-periodo--previo { border-style: dashed; }
 
 /* KPIs: mismo tratamiento, sin color propio cada uno */
 .acc-kpi { border-left-color: var(--marca); }

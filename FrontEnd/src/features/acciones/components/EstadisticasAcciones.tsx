@@ -1,23 +1,24 @@
 // propios
 import type { ConteoValor, EstadisticasExtraccion } from '@/types/api/epidemiologia/ftp';
+import { IconoGuion } from '@/components/icons';
 
 interface Props {
   estadisticas: EstadisticasExtraccion;
-  claveActiva: string;
+  clavesActivas: string[];
   onClave: (clave: string) => void;
-  unidadActiva: string;
+  unidadesActivas: string[];
   onUnidad: (unidad: string) => void;
 }
 
 interface PropsBarras {
   titulo: string;
   conteos: ConteoValor[];
-  activo: string;
+  activos: string[];
   onElegir?: (valor: string) => void;
 }
 
-/** Barras de un conteo; con onElegir, un clic filtra la tabla por ese valor (otro clic lo quita). */
-function BarrasConteo({ titulo, conteos, activo, onElegir }: PropsBarras) {
+/** Barras de un conteo; con onElegir, un clic agrega ese valor al filtro de la tabla (otro clic lo quita). */
+function BarrasConteo({ titulo, conteos, activos, onElegir }: PropsBarras) {
   const maximo = Math.max(1, ...conteos.map(c => c.cantidad));
 
   return (
@@ -26,18 +27,21 @@ function BarrasConteo({ titulo, conteos, activo, onElegir }: PropsBarras) {
       <div className="acc-barras">
         {conteos.map(({ valor, cantidad }) => {
           const texto = valor ?? '(vacío)';
-          const elegido = activo === texto;
+          const elegido = activos.includes(texto);
+          const sinResultados = cantidad === 0;
           return (
             <button
               key={texto}
-              className={`acc-barra${elegido ? ' acc-barra--activa' : ''}`}
-              onClick={() => onElegir?.(elegido ? '' : texto)}
+              className={`acc-barra${elegido ? ' acc-barra--activa' : ''}${sinResultados ? ' acc-barra--sin' : ''}`}
+              onClick={() => onElegir?.(texto)}
               disabled={!onElegir}
-              title={`${texto}: ${cantidad}`}
+              title={sinResultados ? `${texto}: se leyó, sin resultados` : `${texto}: ${cantidad}`}
             >
               <span className="acc-barra-texto">{texto}</span>
               <span className="acc-barra-pista"><span className="acc-barra-relleno" style={{ width: `${(cantidad / maximo) * 100}%` }} /></span>
-              <span className="acc-barra-cantidad">{cantidad}</span>
+              <span className="acc-barra-cantidad">
+                {sinResultados ? <IconoGuion tamano={14} aria-label="Sin resultados" /> : cantidad}
+              </span>
             </button>
           );
         })}
@@ -48,7 +52,7 @@ function BarrasConteo({ titulo, conteos, activo, onElegir }: PropsBarras) {
 
 
 /** Totales y conteos que manda el backend (por la columna del filtro del mapeo y por unidad). */
-export default function EstadisticasAcciones({ estadisticas, claveActiva, onClave, unidadActiva, onUnidad }: Props) {
+export default function EstadisticasAcciones({ estadisticas, clavesActivas, onClave, unidadesActivas, onUnidad }: Props) {
   return (
     <>
       <div className="acc-kpis">
@@ -65,11 +69,11 @@ export default function EstadisticasAcciones({ estadisticas, claveActiva, onClav
       {estadisticas.porColumna.map((c, i) => (
         // Solo la primera columna del filtro tiene filtro en la tabla.
         <BarrasConteo key={c.columna} titulo={`Por ${c.columna}`} conteos={c.conteos}
-          activo={i === 0 ? claveActiva : ''} onElegir={i === 0 ? onClave : undefined} />
+          activos={i === 0 ? clavesActivas : []} onElegir={i === 0 ? onClave : undefined} />
       ))}
 
       {estadisticas.porUnidad.length > 1 && (
-        <BarrasConteo titulo="Por unidad" conteos={estadisticas.porUnidad} activo={unidadActiva} onElegir={onUnidad} />
+        <BarrasConteo titulo="Por unidad" conteos={estadisticas.porUnidad} activos={unidadesActivas} onElegir={onUnidad} />
       )}
     </>
   );
