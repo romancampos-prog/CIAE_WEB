@@ -3,7 +3,8 @@ import { z } from 'zod';
 
 const esquemaEnv = z.object({
   DEV: z.boolean(),
-  VITE_API_URL: z.url().optional(),
+  // `VITE_API_URL=` vacía en el .env llega como "": se toma como no definida.
+  VITE_API_URL: z.preprocess(valor => (valor === '' ? undefined : valor), z.url().optional()),
 });
 
 // Si VITE_API_URL viene mal escrita, la app truena al arrancar con un mensaje claro
@@ -15,4 +16,5 @@ const env = esquemaEnv.parse(import.meta.env);
 // son "sitios distintos", el navegador no guarda ni manda la cookie y todo responde 401.
 export const URL_API = env.DEV
   ? `${window.location.protocol}//${window.location.hostname}:8005`
-  : (env.VITE_API_URL ?? 'http://localhost:8005');
+  // Sin VITE_API_URL: el mismo origen de la página (en producción uvicorn sirve el front y el API juntos).
+  : (env.VITE_API_URL ?? window.location.origin);
