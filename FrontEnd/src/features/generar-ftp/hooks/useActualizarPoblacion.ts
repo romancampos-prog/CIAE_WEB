@@ -5,9 +5,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AdvertenciasCarga } from '@/types/pantallas/generarFtp';
 import { poblacionApi } from '@/api/indicadores/poblacionApi';
 import { mensajeDeError } from '@/api/cliente/mensajeDeError';
+import { anioDelMesAnterior } from '@/utils/anios';
 import { CLAVE_POBLACION_ACTUAL } from './usePoblacionActual';
 
-export const ANO_ACTIVO = '2026';
+export const ANO_ACTIVO = String(anioDelMesAnterior());
 
 /**
  * Los dos pasos del modal de población: subir el Excel (con sus advertencias) y, después,

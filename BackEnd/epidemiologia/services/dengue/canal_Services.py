@@ -3,7 +3,6 @@ Canal endemico de dengue: historico (datos/historico_Datos.py) contra los casos 
 respuesta para el front.
 Usado en: services/dengue/pipeline/pasos_pipeline_Services.py
 """
-from epidemiologia.config import AÑO_ACTUAL
 from epidemiologia.datos.dengue.historico_Datos import cargar_historico_series
 from epidemiologia.modulos.dengue.canal_endemico import (
     calcular_canal_endemico, detectar_anomalias, generar_resumen_alertas, preparar_año_actual,
@@ -40,7 +39,7 @@ def ejecutar_series_tiempo(df_actual):
 
 ##--------------------------------------
 
-def procesar_canal(df, año: int = AÑO_ACTUAL) -> dict:
+def procesar_canal(df, año: int) -> dict:
     df_combinado, alertas = ejecutar_series_tiempo(df)
 
     return {

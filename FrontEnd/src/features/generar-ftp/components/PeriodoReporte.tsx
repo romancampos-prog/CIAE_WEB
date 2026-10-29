@@ -4,6 +4,7 @@ import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import type { PeriodoFtp } from '@/types/api/indicadores/ftp';
 import type { TipoReporte } from '@/types/pantallas/generarFtp';
 import { IconoActividad, IconoCalendarioAnio, IconoCalendarioMes, IconoPalomita, IconoReloj } from '@/components/icons';
+import { aniosHastaHoy } from '@/utils/anios';
 
 interface Props {
   tipo: TipoReporte;
@@ -52,8 +53,7 @@ const PeriodoReporte = ({ tipo, datos, mesesDisponibles, catColor, esVisor, styl
           <IconoCalendarioAnio className="cfg-select-icon" />
           <select className="cfg-select" value={datos.ano}
             onChange={e => onDatosChange({ ...datos, ano: e.target.value, mes: '' })}>
-            <option value="2026">2026</option>
-            <option value="2025">2025</option>
+            {aniosHastaHoy(1).map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
       </div>

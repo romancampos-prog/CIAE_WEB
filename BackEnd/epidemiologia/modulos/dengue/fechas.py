@@ -54,6 +54,15 @@ def _numero_semana(fecha, inicio_sem1):
 
 ##--------------------------------------
 
+def año_epidemiologico_actual() -> int:
+    """El año epidemiologico de hoy: del 1 de enero al inicio de la semana 1 todavia cuenta el año anterior."""
+
+    hoy = pd.Timestamp.today().normalize()
+    return hoy.year if hoy >= _inicio_sem1(hoy.year) else hoy.year - 1
+
+
+##--------------------------------------
+
 def semana_epidemiologica(fecha):
     """
     Semana SUIVE de una fecha; None si no hay fecha. Las fechas anteriores al inicio de la

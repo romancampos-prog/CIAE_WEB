@@ -18,7 +18,7 @@ const Footer = () => (
           <a href="mailto:rblvcblh1110@gmail.com" className="cf-mail">rblvcblh1110@gmail.com</a>
         </span>
         <span className="cf-dot">·</span>
-        <span className="cf-copy">© 2026 IMSS · León, Gto.</span>
+        <span className="cf-copy">© {new Date().getFullYear()} IMSS · León, Gto.</span>
       </div>
 
     </div>

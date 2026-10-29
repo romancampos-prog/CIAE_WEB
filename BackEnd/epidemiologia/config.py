@@ -1,8 +1,6 @@
 from pathlib import Path
 from configs.settings import DATA_DIR
 
-AÑO_ACTUAL = 2026
-
 _MAPEO = Path(__file__).parent / "mapeo" / "dengue"
 _MAPEO_FTP = Path(__file__).parent / "mapeo" / "ftp"
 

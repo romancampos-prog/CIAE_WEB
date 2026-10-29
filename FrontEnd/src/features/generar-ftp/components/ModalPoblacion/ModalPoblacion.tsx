@@ -34,12 +34,12 @@ const ModalPoblacion = ({ onClose, archivoActual }: Props) => {
                             <span>
                                 El archivo debe descargarse de:{' '}
                                 <a
-                                    href="http://infosalud.imss.gob.mx:8080/PAGINAS/poblacion2026.html"
+                                    href={`http://infosalud.imss.gob.mx:8080/PAGINAS/poblacion${ANO_ACTIVO}.html`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="mpob-source-link"
                                 >
-                                    infosalud.imss.gob.mx — Población 2026
+                                    infosalud.imss.gob.mx — Población {ANO_ACTIVO}
                                 </a>
                             </span>
                         </div>
