@@ -36,6 +36,7 @@ main.py
          ├─ /ftp/poblacion  → Controller/poblacion_Controller.py
          ├─ /iaas           → Controller/iaas_Controller.py
          ├─ /extractor      → Controller/extractor_Controller.py
+         ├─ /censo-dm       → Controller/censo_dm_Controller.py
          ├─ /reportes       → Controller/reportes_Controller.py
          ├─ /informacion    → Controller/informacion_Controller.py
          └─ /excel          → Controller/excel_Controller.py
@@ -73,6 +74,7 @@ Las capas:
 | `Routes/indicadores_Route.py` | Junta los 7 controllers bajo `/Indicadores/<prefijo>` |
 | `Controller/ftp_Controller.py` | Indicadores y meses generados de FTP, generar/regenerar (indicador o categoría) |
 | `Controller/poblacion_Controller.py` | Población InfoSalud: archivo cargado, subir, recalcular (sigue bajo `/ftp/poblacion`) |
+| `Controller/censo_dm_Controller.py` | Censo de pacientes con DM (denominador de DM 05): censos subidos y subir uno |
 | `Controller/iaas_Controller.py` | Unidades e indicadores IAAS, estado del mes, generar el mes, completar una unidad tardía |
 | `Controller/extractor_Controller.py` | Indicadores del Extractor, estado de cortes y archivos, subir el Excel del mes, completar el cruce con Egresos |
 | `Controller/reportes_Controller.py` | Datos de la gráfica de un indicador |
@@ -89,11 +91,14 @@ Las capas:
 | `bd_ciae/semanal_Datos.py` | Semanal de FTP: guardar, leer y borrar el mes al llegar el definitivo |
 | `bd_ciae/extractor_Datos.py` | JSON del Extractor: el reporte (numerador crudo del mes), `EXTRACTOR_PARTES` (conteo de cada archivo, Neonatal 04 y 06) y `EXTRACTOR_CRUCE` (vía 1 + candidatos que dejó el SUI-13) |
 | `bd_ciae/poblacion_Datos.py` | `POBLACION_{año}.json`: leer, su periodo y guardar |
+| `bd_ciae/censo_dm_Datos.py` | `BD_CIAE/CENSO_DM/CENSO_DM_{año}.json`: leer, guardar y qué años hay |
 | `lectura_mapeo/mapeo_indicadores_Datos.py` | **Único** lector del mapeo: `bloque_mapeo`, catálogos de familias y de archivos del Extractor |
 | `lectura_mapeo/mapeo_por_modulo_Datos.py` | El mapeo tipado de cada módulo: `cargar_indicador_ftp`, `cargar_indicador_iaas`, `cargar_indicador_extractor` |
 | `lectura_mapeo/mapeo_poblacion_Datos.py` | `mapeo/POBLACION.json` (cómo viene el Excel nacional) |
+| `lectura_mapeo/mapeo_censo_dm_Datos.py` | `mapeo/CENSO_DM.json` (cómo viene el Excel del censo) |
 | `excel_subido/lector_excel_Datos.py` | `LectorExcel` (busca la hoja por su contenido), validar encabezados, números escritos como texto |
 | `excel_subido/excel_poblacion_Datos.py` | Lee el Excel nacional de población, filtra Guanajuato y lo guarda |
+| `excel_subido/excel_censo_dm_Datos.py` | Lee el Excel del Censo DM por unidad de adscripción (Guanajuato, sexo y grupo de edad) |
 
 La extracción de Excel (motor, modos y `letra_a_numero`) vive en `BackEnd/compartido/extraccion_excel/`, un archivo por
 modo (`modos_por_posicion/`, `modos_por_filtro/`), compartida con epidemiología.
@@ -122,10 +127,15 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `poblacion/archivo_poblacion_Services.py` | Archivo de población cargado y subir uno nuevo |
 | `poblacion/denominador_poblacion_Services.py` | Denominador de población por unidad con la fórmula del mapeo |
 | `poblacion/recalcular_poblacion_Services.py` | Recalcular FTP y los cortes del Extractor con la población nueva |
+| `censo_dm/archivo_censo_dm_Services.py` | Censos DM subidos y subir uno nuevo |
+| `censo_dm/denominador_censo_dm_Services.py` | Qué censo le toca a un mes (ene-nov: año anterior; dic: el del año) y el denominador por unidad |
+| `censo_dm/recalcular_censo_dm_Services.py` | Al subir un censo, generar o recalcular los meses que lo usan |
 | `grafica/grafica_indicador_Services.py` | Arma la respuesta de la gráfica (reglas de cada módulo) |
-| `grafica/estadisticas_grafica_Services.py` | Resumen por mes, mapa de calor, brechas |
+| `grafica/estadisticas_grafica_Services.py` | Resumen por mes (del mes y del acumulado) y mapa de calor |
 | `grafica/perfil_indicador_Services.py` | Perfil: tipo de meta, niveles, unidad de medida... |
 | `grafica/metas_semaforo_Services.py` | La meta (Esperado) leída para la gráfica |
+| `grafica/franjas_semaforo_Services.py` | Las franjas del semáforo en números `[{desde, hasta, nivel}]` (con el mismo `evaluar_color`): el fondo de las gráficas |
+| `grafica/resumen_por_mes_Services.py` | Resumen de cada mes (Total OOAD con num/den, meta, unidades por semáforo); del mes y del acumulado |
 | `grafica/serie_cortes_Services.py` | Cortes y casos por mes del Extractor de corte |
 | `excel/generar_excel_Services.py` | Orquesta el Excel genérico y su nombre de archivo |
 | `excel/leer_hoja_excel_Services.py` | Lee de la BD lo de cada pestaña con la regla de su módulo |
@@ -155,7 +165,7 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `extractor/catalogo_extractor_Services.py` | Qué indicadores y archivos tiene el Extractor, cuáles van por corte, cruce y desfase |
 | `extractor/pagina_generar_extractor_Services.py` | Indicadores de la página Generar Extractor |
 | `extractor/leer_archivo_extractor_Services.py` | Hoja del Excel, mes/año del archivo, filas que cuentan y fechas |
-| `extractor/conteo_por_unidad_Services.py` | Conteo por unidad (y por mes de nacimiento, Neonatal 04) |
+| `extractor/conteo_por_unidad_Services.py` | Conteo por unidad (y por mes de nacimiento, Neonatal 04, o de una fecha de la fila, DM 05) |
 | `extractor/conteo_con_cruce_Services.py` | Vía 1 / vía 2 y el cruce con Egresos (EH 03, DM 04) |
 | `extractor/subir_archivo_extractor_Services.py` | Subir un archivo del mes: decide el flujo de cada indicador |
 | `extractor/generar_corte_Services.py` | Mes de un indicador de corte (+ cortes que lo incluyen) |
@@ -163,6 +173,8 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `extractor/generar_mensual_Services.py` | Resultado mensual (calcular, semaforizar, guardar) |
 | `extractor/generar_por_partes_Services.py` | Dos archivos y anualizado (Neonatal 06) |
 | `extractor/generar_con_desfase_Services.py` | Sobrevida con desfase (Neonatal 04) |
+| `extractor/generar_anualizado_censo_Services.py` | Subir el SUI-13 de un indicador anualizado con el Censo DM (DM 05) |
+| `extractor/mes_anualizado_censo_Services.py` | Un mes de DM 05: ingresos dentro de la ventana de 12 meses / censo del mes |
 | `extractor/completar_cruce_Services.py` | Subir el Egresos después del SUI-13 |
 | `extractor/estado_archivos_Services.py`, `estado_cortes_Services.py` | Tablas de archivos subidos y de meses por corte |
 
@@ -202,6 +214,8 @@ incluye `trabajador_IAAS`); generar FTP/Extractor = `admin`, `trabajador_ftp`; g
 | `GET /ftp/poblacion/archivo-actual?anio=` | Qué población está cargada | `poblacion/archivo_poblacion_Services.archivo_poblacion_actual` |
 | `POST /ftp/poblacion/subir` | Subir el Excel de población | `poblacion/archivo_poblacion_Services.subir_poblacion` |
 | `POST /ftp/poblacion/recalcular` | Recalcular con la población nueva | `poblacion/recalcular_poblacion_Services.recalcular_poblacion` |
+| `GET /censo-dm/subidos` | Censos DM subidos | `censo_dm/archivo_censo_dm_Services.censos_dm_subidos` |
+| `POST /censo-dm/subir` | Subir el Censo DM (genera/recalcula DM 05) | `censo_dm/archivo_censo_dm_Services.subir_censo_dm` |
 | `GET /iaas/unidades` | Hospitales de IAAS | `iaas/pagina_generar_iaas_Services.unidades_iaas` |
 | `GET /iaas/indicadores` | Indicadores de la página Generar IAAS | `iaas/pagina_generar_iaas_Services.indicadores_para_generar` |
 | `GET /iaas/meses-generados?anio=` | Meses ya guardados | `iaas/estado_mes_iaas_Services.meses_generados_iaas` |
@@ -474,6 +488,7 @@ Lo que pasa en el paso 3 depende de la **periodicidad** del mapeo:
 | Mensual, mismo archivo | MT 03, MT 04, MT 05, Neonatal 02, Neonatal 03 | Cuenta numerador y denominador del archivo, calcula, semaforiza y guarda como FTP/IAAS |
 | Mensual con el denominador en otro archivo | Neonatal 06 | Guarda el lado que trae este archivo; genera cuando están los dos |
 | `Mensual Anualizado` | Neonatal 06 | Además, cada mes se reporta con la suma de sus últimos 12 meses |
+| `Mensual Anualizado` con el Censo DM | DM 05 | Cuenta por fecha de ingreso; el denominador es el censo, no se suma por mes |
 
 ### Mensual (mismo archivo)
 
@@ -522,6 +537,23 @@ indicadores tienen `mensual` y `mensualAcumulado` en `peridocidadGenerada`.
 - `GET /extractor/estado-archivos?anio=` marca cada archivo por **su** lado (puede estar
   subido aunque el mes todavía no se pueda reportar).
 
+### Anualizado con el Censo DM: DM 05
+
+- Numerador = SUI-13 (amputación 84.13-84.19 en intervención/procedimientos, ≥20 años, ingreso
+  1/2, sin traumáticas ni dx principal no relacionado: todo en el mapeo). Cada fila se cuenta
+  en el mes de su `fechaIngreso` (`columnaMesDeConteo`): la parte del archivo se guarda como
+  `{"AAAA-MM": {unidad: n}}` en `EXTRACTOR_PARTES`.
+- El mes **N** suma, de los SUI-13 de N-11..N, solo los ingresos de N-11..N (así cuadra con el
+  oficial: jul 2025-jun 2026 = 246). Sin `catalogoUnidades` se agrupa por la UMF de adscripción
+  (6 primeras cifras de `undadAdscripcion`); los casos sin UMF de Guanajuato no tienen
+  resultado propio pero suman al `TOTAL_OOAD` (`FUERA_DE_UNIDADES`).
+- Denominador = `fuente: "censoDM"` (`BD_CIAE/CENSO_DM/CENSO_DM_{año}.json`, se sube en la
+  página del Extractor): enero-noviembre usan el censo del año anterior y diciembre el del año.
+  Si falta el censo el mes queda pendiente; al subirlo se generan los meses que ya tenían su
+  ventana. La leyenda del Excel dice qué censo se usó ("Censo DM 2025").
+- El censo publicado no es el mismo corte que usa el oficial (queda ~4-5% abajo), así que la
+  tasa sale un poco más alta que la oficial; el numerador sí coincide.
+
 ---
 
 ## 9. Gráficas
@@ -539,14 +571,15 @@ indicadores tienen `mensual` y `mensualAcumulado` en `peridocidadGenerada`.
        (se detiene en el primer mes que falte).
      - Extractor de corte: `MESES` se reemplaza por **el último corte cerrado** (no los
        numeradores crudos).
-   - `estadisticas` (`grafica/estadisticas_grafica_Services.py`, con la fórmula y el semáforo del
-     mapeo): `resumenPorMes` (estatal, cambio contra el mes anterior, meta, unidades por color,
-     acumulado), `mapaCalor` (resultado y color de cada unidad en cada mes) y `brechas`
-     (cuántos casos le faltan o sobran a cada unidad para llegar a Esperado; no aplica a metas
-     en rango como IAAS). `null` si no hay datos.
+   - `estadisticas` (`grafica/estadisticas_grafica_Services.py`, con el semáforo del mapeo):
+     `resumenPorMes` y `resumenAcumuladoPorMes` (`grafica/resumen_por_mes_Services.py`: Total OOAD
+     con num/den, meta, unidades por color) y
+     `mapaCalor` (resultado y color de cada unidad en cada mes). `null` si no hay datos.
 
    - `perfil` (`grafica/perfil_indicador_Services.py`): tipo de meta, niveles del semáforo, meta
-     por mes, unidad de medida, si es por corte y, en el Extractor de corte, `serieCortes`.
+     por mes, `franjasPorMes` (y `franjasDeUnidad` cuando el semáforo va por grupo, IAAS 01),
+     unidad de medida, si es por corte y, en el Extractor de corte, `serieCortes`. El front dibuja
+     todos los indicadores igual, sobre esas franjas: la periodicidad solo cambia las etiquetas.
 
 ---
 
@@ -586,7 +619,7 @@ está claro en el código y conviene revisarlo.
 | Semáforo por tipo de hospital | IAAS 01 | Umbral distinto para HGS / HGZ / HGR / HGO / HGP; el total usa `OOAD`. La ficha manda `grupoDeUnidad` al front | `umbrales_semaforo_Services.umbrales_para`, `UNIDADES.UNIDAD_TIPO_IAAS01` |
 | Semáforo por mes | CACU 01, CAMA 01/40-49/50-69, CUPN 01, DM 01, EH 01, S_Ob 01 | La meta crece mes a mes (acumulado desde enero) | mapeo |
 | Sin nivel Medio | EH 03, DM 04 | `"Medio": null`: solo verde o rojo; el Excel no imprime leyenda Medio | mapeo, `leyendas_semaforo_excel_Services._texto_medio` |
-| Metas en rango | IAAS, MT 03 | `">= 4 a <= 7"`, `"< 1 o > 7"`. En gráficas no se calcula brecha | `umbrales_semaforo_Services.condicion_de_umbral` |
+| Metas en rango | IAAS, MT 03 | `">= 4 a <= 7"`, `"< 1 o > 7"`. En gráficas se dibujan con fondo de color | `umbrales_semaforo_Services.condicion_de_umbral` |
 | Promedios, no porcentajes | CE 01, CE 02, CUPN 05, CUPN 07 | `resultado` sin `* 100`. En CUPN 05/07 el acumulado suma numeradores y denominadores (promedio ponderado) | mapeo |
 | Tasas | IAAS 01/03-06, Neonatal 06 (x1,000); EH 03, DM 04 (x100,000) | Solo cambia la fórmula | mapeo |
 | Redondeo propio | FTP y población | Numerador y denominador suben de entero solo con decimal ≥ 0.60 | `formulas_Services.redondeo_personalizado` |

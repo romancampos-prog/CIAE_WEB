@@ -13,7 +13,9 @@
             "titulo": "CE 01 - Promedio de atenciones preventivas por personal de enfermería.",
             "objetivo": "Medir la productividad diaria del personal auxiliar de enfermería en salud pública que proporciona atenciones preventivas (80).",
             "descNum": "Total de atenciones preventivas otorgadas del personal auxiliar de enfermería en salud pública (servicio 80) en el periodo evaluado",
-            "descDen": "Días laborados del personal auxiliar de enfermería en salud pública (servicio 80) durante el periodo evaluado"
+            "descDen": "Días laborados del personal auxiliar de enfermería en salud pública (servicio 80) durante el periodo evaluado",
+            "etiquetaNumerador": "atenciones",
+            "etiquetaDenominador": "días laborados"
         },
         "reporte": {
             "numerador": {
@@ -75,7 +77,9 @@
             "titulo": "CE 02 - Promedio de atenciones integrales por personal de enfermería especialista en medicina de familia.",
             "objetivo": "Medir la productividad diaria del personal de enfermería especialista en medicina de familia que proporciona atenciones integrales.",
             "descNum": "Total de atenciones integrales otorgadas del personal de enfermería especialista en medicina de familia (servicio 87) en el periodo evaluado.",
-            "descDen": "Días laborados del personal de enfermería especialista en medicina de familia (servicio 87) durante el periodo evaluado."
+            "descDen": "Días laborados del personal de enfermería especialista en medicina de familia (servicio 87) durante el periodo evaluado.",
+            "etiquetaNumerador": "atenciones",
+            "etiquetaDenominador": "días laborados"
         },
         "reporte": {
             "numerador": {

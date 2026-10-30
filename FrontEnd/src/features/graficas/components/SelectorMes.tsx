@@ -1,6 +1,6 @@
 /**
  * El único selector de mes de la página: lo que se elige aquí lo usan los KPIs, las
- * tres pestañas y la brecha. Los indicadores por corte lo rotulan como "Corte".
+ * tres pestañas. Los indicadores por corte lo rotulan como "Corte".
  *
  * Props:
  *   meses       — ["Enero", ..., "Agosto"] en orden
@@ -29,7 +29,7 @@ const SelectorMes = ({ meses, mesSel, mesParcial, semana, anio, esCorte, onCambi
 
   return (
     <label className="gi-selector-mes">
-      <span>{esCorte ? 'Corte de toda la página' : 'Mes de toda la página'}</span>
+      <span>{esCorte ? 'Corte' : 'Mes'}</span>
       <select className="ig-select" value={mesSel} onChange={e => onCambiar(e.target.value)} disabled={!meses.length}>
         {[...meses].reverse().map(mes => <option key={mes} value={mes}>{etiqueta(mes)}</option>)}
       </select>

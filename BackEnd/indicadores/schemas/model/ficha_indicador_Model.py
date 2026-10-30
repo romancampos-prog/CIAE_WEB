@@ -26,6 +26,9 @@ class InformacionFicha(BaseModel):
     objetivo: str
     descNum: str
     descDen: str
+    # Palabras cortas para leer los numeros en pantalla: "97,885 tamizadas de 716,966 mujeres de 25 a 64"
+    etiquetaNumerador: str | None = None
+    etiquetaDenominador: str | None = None
 
 
 ##--------------------------------------

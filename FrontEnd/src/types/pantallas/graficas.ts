@@ -1,7 +1,7 @@
 // Pantalla de Gráficas: filas, puntos de la tendencia, vista y grupos del selector.
 
 // propios
-import type { Desempeno, MetaNumerica } from '@/types/api/indicadores/reportes';
+import type { Desempeno, Franja, MetaNumerica } from '@/types/api/indicadores/reportes';
 
 /** Una unidad en un mes, ya lista para pintar. */
 export interface FilaUnidad {
@@ -21,6 +21,7 @@ export interface PuntoSerie {
   denominador: number | null;
   estatal: number | null;
   meta: MetaNumerica | null;
+  franjas: Franja[];
   parcial: boolean;
 }
 
@@ -41,6 +42,7 @@ export interface PuntoColumna {
   numerador: number | null;
   denominador: number | null;
   meta: MetaNumerica | null;
+  franjas: Franja[];
   estatal: number | null;
   parcial?: boolean;
 }

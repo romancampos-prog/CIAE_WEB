@@ -1,39 +1,35 @@
 // propios
-import type { BrechaUnidad, Desempeno, PerfilIndicador } from '@/types/api/indicadores/reportes';
+import type { Desempeno, Franja, PerfilIndicador } from '@/types/api/indicadores/reportes';
 import type { FilaUnidad } from '@/types/pantallas/graficas';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import { CLAVE_ESTATAL, ETIQUETA_TOTAL, formatoNumero, formatoValor, nombreUnidad, ordenarPorResultado } from '@/features/graficas/utils/datosGrafica';
+import { CLAVE_ESTATAL, textoNivel, formatoValor, nombreUnidad, ordenarPorResultado } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   unidad: string;
   periodo: string;
   fila: { resultado: number | null; desempeno: Desempeno } | undefined;
-  estatal: number | null;
   filas: FilaUnidad[];
   perfil: PerfilIndicador | null;
-  brecha: BrechaUnidad | null;
-  brechaAplica: boolean | undefined;
   enEsperado: { dentro: number; total: number };
+  /** El semáforo de ESTA unidad en el periodo (en IAAS 01 cambia por tipo de hospital). */
+  franjas: Franja[];
 }
 
 /**
- * Cuatro datos rápidos de la unidad elegida en el periodo elegido: su resultado, la
- * diferencia contra el estatal, la brecha a la meta (del backend) y su lugar en el estado.
+ * Datos rápidos de la unidad elegida en el periodo elegido: su resultado, su semáforo en
+ * números, cuántos periodos lleva en Esperado y su lugar en el estado.
  *
  * Props:
  *   unidad       — unidad elegida
  *   periodo      — texto del mes o corte ("agosto", "corte de junio 2026")
  *   fila         — { resultado, desempeno } de la unidad en el periodo
- *   estatal      — resultado estatal del periodo (o null)
  *   filas        — todas las unidades del periodo (para el lugar)
  *   perfil       — perfil del backend
- *   brecha       — { sentido, casos } de estadisticas.brechas para la unidad, o null
- *   brechaAplica — false cuando el backend no calcula brecha (rangos, sin fórmula)
  *   enEsperado   — { dentro, total } meses (o cortes) en Esperado
+ *   franjas      — semáforo de la unidad en el periodo: sus rangos en números
  */
-const DatosUnidad = ({ unidad, periodo, fila, estatal, filas, perfil, brecha, brechaAplica, enEsperado }: Props) => {
+const DatosUnidad = ({ unidad, periodo, fila, filas, perfil, enEsperado, franjas }: Props) => {
   const esEstatal = unidad === CLAVE_ESTATAL;
-  const diferencia = !esEstatal && fila?.resultado != null && estatal != null ? fila.resultado - estatal : null;
   const conDato = ordenarPorResultado(filas, perfil?.tipoMeta).filter(f => f.resultado != null);
   const lugar = conDato.findIndex(f => f.unidad === unidad) + 1;
   const mostrarLugar = !esEstatal && perfil?.tipoMeta && perfil.tipoMeta !== 'rango' && lugar > 0;
@@ -51,23 +47,18 @@ const DatosUnidad = ({ unidad, periodo, fila, estatal, filas, perfil, brecha, br
         </p>
       </div>
 
-      {!esEstatal && (
+      {franjas.length > 0 && (
         <div className="gi-dato">
-          <p className="gi-dato-etiqueta">Contra el {ETIQUETA_TOTAL}</p>
-          <p className="gi-dato-valor">
-            {diferencia == null ? '—' : `${diferencia > 0 ? '+' : ''}${formatoNumero(diferencia)}`}
-            <small>{diferencia == null ? '' : diferencia > 0 ? 'arriba' : diferencia < 0 ? 'abajo' : 'igual'}</small>
-          </p>
-        </div>
-      )}
-
-      {brechaAplica && !esEstatal && (
-        <div className="gi-dato">
-          <p className="gi-dato-etiqueta">Para la meta</p>
-          <p className="gi-dato-valor">
-            {brecha ? formatoNumero(brecha.casos) : fila?.desempeno === 'Esperado' ? '✓' : '—'}
-            <small>{brecha ? `casos ${brecha.sentido === 'faltan' ? 'que faltan' : 'de más'}` : fila?.desempeno === 'Esperado' ? 'ya está en Esperado' : ''}</small>
-          </p>
+          <p className="gi-dato-etiqueta">Su semáforo · {periodo}</p>
+          <ul className="ige-rangos">
+            {(perfil?.niveles ?? ['Esperado', 'Medio', 'Bajo']).map(n => (
+              <li key={n} className={fila?.desempeno === n ? 'ige-rangos--actual' : ''}>
+                <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[n] }} />
+                <span className="ige-rangos-nivel">{n}</span>
+                <span className="ige-rangos-numeros">{textoNivel(franjas, n)}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

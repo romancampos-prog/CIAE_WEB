@@ -13,7 +13,9 @@
             "titulo": "Neonatal 02 - Porcentaje de personas recién nacidas de término (con 37 semanas o más de gestación), que son alimentadas mediante lactancia materna exclusiva al egreso de la Unidad de Segundo o de Tercer Nivel de atención.",
             "objetivo": "Conocer el porcentaje de personas recién nacidas de término (con 37 semanas o más de gestación), que nacen en las Unidades de Segundo o de Tercer Nivel de atención y que son alimentados al egreso mediante lactancia materna exclusiva.",
             "descNum": "Total de personas recién nacidas de término (con 37 semanas o más de gestación), alimentadas mediante lactancia materna exclusiva al egreso de la unidad, durante el periodo a evaluar.",
-            "descDen": "Total de personas recién nacidas de término (con 37 semanas o más de gestación), egresadas de unidades de segundo o de tercer nivel de atención, durante el periodo a evaluar."
+            "descDen": "Total de personas recién nacidas de término (con 37 semanas o más de gestación), egresadas de unidades de segundo o de tercer nivel de atención, durante el periodo a evaluar.",
+            "etiquetaNumerador": "con lactancia exclusiva",
+            "etiquetaDenominador": "recién nacidos de término"
         },
         "reporte": {
             "numerador": {
@@ -93,7 +95,9 @@
             "titulo": "Neonatal 03 - Proporción de prematuros (menores de 37 semanas) con peso menor o igual a 1,000 g.",
             "objetivo": "Medir el porcentaje de recién nacidos prematuros (menores de 37 semanas), con peso menor o igual a 1,000 g para establecer acciones preventivas y asistenciales que disminuyan la prematurez de recién nacidos con peso extremadamente bajo, principal causa de morbilidad y mortalidad en los neonatos.",
             "descNum": "Total de recién nacidos vivos prematuros (menor de 37 semanas), con peso menor o igual a 1,000 g en un periodo y área geográfica determinados.",
-            "descDen": "Total de recién nacidos vivos en un periodo y área geográfica determinados."
+            "descDen": "Total de recién nacidos vivos en un periodo y área geográfica determinados.",
+            "etiquetaNumerador": "prematuros ≤ 1,000 g",
+            "etiquetaDenominador": "nacidos vivos"
         },
         "reporte": {
             "numerador": {
@@ -180,7 +184,9 @@
             "titulo": "Neonatal 04 - Porcentaje de sobrevida a 28 días de recién nacidos prematuros con peso menor o igual a 1,200 g al nacimiento.",
             "objetivo": "Medir el porcentaje de sobrevida de los recién nacidos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g. al nacimiento, para establecer acciones de atención integral que incrementen la sobrevida a 28 días de recién nacidos con peso extremadamente bajo, principal causa de morbilidad y mortalidad en los neonatos.",
             "descNum": "Total de recién nacidos prematuros vivos (menor de 37 semanas), con peso menor o igual a 1,200 g, al nacimiento en un periodo y área geográfica determinados, menos el total de defunciones de recién nacidos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g, al nacimiento en un periodo y área geográfica determinados.",
-            "descDen": "Total de recién nacidos vivos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g al nacimiento en un periodo y área geográfica determinados."
+            "descDen": "Total de recién nacidos vivos prematuros (menor de 37 semanas), con peso menor o igual a 1,200 g al nacimiento en un periodo y área geográfica determinados.",
+            "etiquetaNumerador": "sobrevivientes",
+            "etiquetaDenominador": "prematuros ≤ 1,200 g"
         },
         "reporte": {
             "numerador": {
@@ -295,7 +301,9 @@
             "titulo": "Neonatal 06 - Tasa de mortalidad hospitalaria por síndrome de dificultad respiratoria del recién nacido (Tipo I) y sus complicaciones.",
             "objetivo": "Muestra la oportunidad, calidad y la estructura disponible de los servicios de salud para la atención del prematuro menor de 28 días, con diagnóstico de Síndrome de Dificultad Respiratoria del Recién Nacido y sus complicaciones.",
             "descNum": "Defunciones de recién nacidos vivos sucedidas desde el nacimiento hasta antes de los 28 días de vida, por Síndrome de Dificultad Respiratoria del Recién Nacido y sus complicaciones (CIE 10: P22.0, P22.8, P22.9, P25, P26, P52.0, P52.1, P52.2, P52.3).",
-            "descDen": "Total de recién nacidos vivos."
+            "descDen": "Total de recién nacidos vivos.",
+            "etiquetaNumerador": "defunciones",
+            "etiquetaDenominador": "nacidos vivos"
         },
         "reporte": {
             "numerador": {

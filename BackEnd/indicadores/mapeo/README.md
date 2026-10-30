@@ -47,7 +47,8 @@ mapeo/
 │   ├── ftp.json                   las 46 UMF: carpeta en el FTP, nombre y clave
 │   ├── hospitales.json            hospitales de 2º nivel (MT y Neonatal del Extractor)
 │   └── iaas.json                  hospitales de IAAS, su tipo y su orden
-└── POBLACION.json                 cómo leer el Excel de población InfoSalud
+├── POBLACION.json                 cómo leer el Excel de población InfoSalud
+└── CENSO_DM.json                  cómo leer el Excel del Censo de pacientes con DM (DM 05)
 ```
 
 - **La carpeta es el módulo.** Ningún indicador escribe `"modulo"`: el backend se lo pone
@@ -170,7 +171,7 @@ Todos los indicadores, de cualquier carpeta, tienen la misma forma por fuera. Ej
 | `mostrarGrafica` | Si aparece en Gráficas / descargas | `true` / `false` | `todos_los_indicadores("mostrarGrafica")` (default de `/informacion/indicadores`) |
 | `periodicidad` | Cómo se publica el indicador (texto de la ficha) | ver tabla abajo | Excel (qué columnas de mes), Extractor (qué proceso sigue), texto de ayuda |
 | `peridocidadGenerada` | Qué datos guarda/arma el sistema (opcional; sin él, nada se suma) | `{"mensual": bool, "mensualAcumulado": bool}` | `acumula_sumando_meses` (gráfica y Excel); no se manda al front |
-| `informacion` | Textos de la ficha | `titulo`, `objetivo`, `descNum`, `descDen` (los 4 obligatorios) | ficha, gráficas, Excel |
+| `informacion` | Textos de la ficha | `titulo`, `objetivo`, `descNum`, `descDen` (los 4 obligatorios); `etiquetaNumerador` / `etiquetaDenominador` = palabras cortas para leer los números en gráficas ("tamizadas" / "mujeres de 25 a 64") | ficha, gráficas, Excel |
 | `reporte` | Reglas de extracción y cálculo. `{}` en `sin_generar/` | ver sección 3 | generación |
 | `semaforo` | Umbrales de color | ver sección 8 | generación, gráficas, Excel |
 
@@ -233,6 +234,7 @@ FTP lo baja una sola vez y el Extractor lee cada hoja una sola vez.
 | `xlsxWeb` | Un Excel que la persona sube por la web | IAAS | `modoExtraccion`, `encabezado`, `nombreArchivo`, filtros |
 | `capturaWeb` | Un número que se escribe a mano en un formulario | IAAS 02-06 (denominador) | ninguno |
 | `extractor` | Un Excel crudo mensual (una fila por paciente o evento) | Extractor | `archivo`, `modoExtraccion`, `agrupacion`, filtros... |
+| `censoDM` | `BD_CIAE/CENSO_DM/CENSO_DM_{año}.json` (Censo de pacientes con DM, se sube en el Extractor) | Extractor (DM 05) | `gruposEdad` |
 
 ### `fuente: "ftp"`
 
@@ -275,6 +277,18 @@ grupo se vuelve un nombre que se usa en la fórmula del denominador:
 "operacion": { "denominador": "sum(Todos)", ... }
 ```
 *(EH 03; los nombres de columna deben ser idénticos a `encabezados_edad` de `POBLACION.json`)*
+
+### `fuente: "censoDM"`
+
+Suma ambos sexos en los grupos de edad que se listan (con el texto exacto del Excel del censo).
+Enero-noviembre usan el censo del año anterior y diciembre el del año en curso (regla de la ficha,
+en `services/censo_dm/denominador_censo_dm_Services.py`):
+
+```json
+"denominador": { "fuente": "censoDM", "gruposEdad": ["20-24 años", "...", "85 años y más"] },
+"operacion": { "numerador": "numerador", "denominador": "denominador", "resultado": "round((numerador / denominador) * 100000, 2)" }
+```
+*(DM 05. En su numerador, `"columnaMesDeConteo": "fechaIngreso"` cuenta cada fila en el mes de esa fecha)*
 
 ### `fuente: "xlsxWeb"` (IAAS)
 

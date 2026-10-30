@@ -13,7 +13,9 @@
             "titulo": "DM 01 - Cobertura de detección de diabetes en población derechohabiente de 20 años y más.",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más a los que se realizó la medición de glucosa en el primer nivel de atención, para identificar niveles elevados que permitan la detección temprana de prediabetes o de diabetes tipo 2.",
             "descNum": "Número de derechohabientes de 20 años y más, con detección de diabetes acumuladas al mes del reporte",
-            "descDen": "Población de 20 años y más adscrita a médico familiar menos Prevalencias de diabetes tipo 2 específicas por grupo de edad y sexo"
+            "descDen": "Población de 20 años y más adscrita a médico familiar menos Prevalencias de diabetes tipo 2 específicas por grupo de edad y sexo",
+            "etiquetaNumerador": "detecciones",
+            "etiquetaDenominador": "población de 20 y más"
         },
         "reporte": {
             "numerador": {
@@ -147,7 +149,9 @@
             "titulo": "DM 02 - Índice de confirmación de diabetes en casos sospechosos, población derechohabiente de 20 años y más.",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más, a quienes se les confirmó el diagnóstico de diabetes, clasificados inicialmente como casos sospechosos en la detección mediante glucosa capilar.",
             "descNum": "Número de derechohabientes de 20 años y más sospechosos de diabetes, resultado de la medición con glucosa capilar (UP-14) en quienes se le confirmó el padecimiento (CIE-10: E11.0 - E14.9)",
-            "descDen": "Población derechohabiente de 20 años y más con resultado anormal en la detección con glucosa capilar (UP-14: 192 o 193)"
+            "descDen": "Población derechohabiente de 20 años y más con resultado anormal en la detección con glucosa capilar (UP-14: 192 o 193)",
+            "etiquetaNumerador": "confirmados",
+            "etiquetaDenominador": "sospechosos"
         },
         "reporte": {
             "numerador": {
@@ -202,7 +206,9 @@
             "titulo": "DM 03 - Porcentaje de pacientes que viven con diabetes en control glucémico con hemoglobina glucosilada (HbA1c) menor o igual a 7%.",
             "objetivo": "Evaluar la eficiencia del control de los pacientes que viven con diabetes tipo 2, mediante el seguimiento de los resultados de la hemoglobina glucosilada (HbA1c).",
             "descNum": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con resultado de hemoglobina glucosilada (HbA1c) menor o igual a 7% del periodo evaluado .",
-            "descDen": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con registro de hemoglobina glucosilada (HbA1c) del periodo evaluado."
+            "descDen": "Total de pacientes de 20 años y más con diagnóstico de diabetes (CIE 10:E11 a E14) subsecuente con registro de hemoglobina glucosilada (HbA1c) del periodo evaluado.",
+            "etiquetaNumerador": "en control (HbA1c ≤ 7)",
+            "etiquetaDenominador": "con HbA1c"
         },
         "reporte": {
             "numerador": {

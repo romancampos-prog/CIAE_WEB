@@ -1,11 +1,11 @@
 // propios
-import type { BrechaUnidad, PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
+import type { PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
 import type { PuntoColumna } from '@/types/pantallas/graficas';
 import ListaUnidades from './ListaUnidades';
 import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
 import LeyendaSemaforo from './LeyendaSemaforo';
-import { CLAVE_ESTATAL, ETIQUETA_TOTAL, datosDelMes, formatoNumero, formatoValor, mesCorto, nombreUnidad, techoDe, textoMeta } from '@/features/graficas/utils/datosGrafica';
+import { datosDelMes, franjasDe, formatoValor, mesCorto, nombreUnidad, techoDe, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   reporte: ReporteIndicador | null;
@@ -14,8 +14,6 @@ interface Props {
   anio: string;
   unidadSel: string;
   onElegirUnidad: (unidad: string) => void;
-  brecha: BrechaUnidad | null;
-  brechaAplica: boolean | undefined;
 }
 
 /**
@@ -25,9 +23,8 @@ interface Props {
  * Props:
  *   reporte, perfil, mesSel, anio
  *   unidadSel, onElegirUnidad
- *   brecha, brechaAplica — como en TendenciaUnidad
  */
-const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnidad, brecha, brechaAplica }: Props) => {
+const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnidad }: Props) => {
   const { filas, estatal } = datosDelMes(reporte, mesSel, false);
   const cortes = perfil?.serieCortes?.cortes ?? [];
   const casosPorMes = perfil?.serieCortes?.casosPorMes ?? [];
@@ -37,21 +34,21 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
     const dato = corte.unidades[unidadSel];
     const estado = !dato || dato.desempeno === 'Gris' ? 'sin dato' : dato.desempeno;
     const meta = perfil?.metaPorMes?.[corte.mes] ?? null;
-    const estatalCorte = unidadSel === CLAVE_ESTATAL ? null : corte.unidades[CLAVE_ESTATAL]?.resultado ?? null;
     return {
       clave: `${corte.mes}-${corte.anio}`,
       etiqueta: `${mesCorto(corte.mes)} ${corte.anio}`,
       etiquetaLarga: `Corte de ${corte.mes.toLowerCase()} ${corte.anio}`,
       valorTexto: formatoValor(dato?.resultado, perfil?.unidadMedida),
-      extra: [meta && `Meta ${textoMeta(meta)}`, estatalCorte != null && `${ETIQUETA_TOTAL} ${formatoNumero(estatalCorte)}`].filter(Boolean).join(' · '),
+      extra: meta ? `Meta ${textoMeta(meta)}` : '',
       resultado: dato?.resultado ?? null,
       desempeno: dato?.desempeno ?? 'Gris',
       numerador: dato?.numerador ?? null,
       denominador: dato?.denominador ?? null,
       meta,
-      estatal: estatalCorte,
+      franjas: franjasDe(perfil, corte.mes, unidadSel),
+      estatal: null,
       titulo: `Corte ${corte.mes.toLowerCase()} ${corte.anio}: ${formatoValor(dato?.resultado, perfil?.unidadMedida)} (${estado})`
-        + `${meta ? ` · meta ${textoMeta(meta)}` : ''}${estatalCorte != null ? ` · ${ETIQUETA_TOTAL} ${formatoNumero(estatalCorte)}` : ''}`,
+        + `${meta ? ` · meta ${textoMeta(meta)}` : ''}`,
     };
   });
 
@@ -68,27 +65,22 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">
           Los cortes de {nombreUnidad(unidadSel)} y, abajo, los casos de cada mes que los forman.
-          La raya punteada es la meta y el punto es el {ETIQUETA_TOTAL}.
+          El fondo son las franjas del semáforo de cada corte.
         </p>
 
         <DatosUnidad
           unidad={unidadSel}
           periodo={`corte de ${mesSel.toLowerCase()} ${anio}`}
           fila={fila}
-          estatal={estatal?.resultado ?? null}
           filas={filas}
           perfil={perfil}
-          brecha={brecha}
-          brechaAplica={brechaAplica}
           enEsperado={{ dentro: conDato.filter(p => p.desempeno === 'Esperado').length, total: conDato.length }}
+          franjas={franjasDe(perfil, mesSel, unidadSel)}
         />
 
         <h3 className="gi-subtitulo">Sus cortes</h3>
-        {puntos.length ? <ColumnasTendencia puntos={puntos} activo={corteActivo} /> : <p className="ige-vacio">Todavía no hay cortes cerrados.</p>}
-        <LeyendaSemaforo niveles={perfil?.niveles} conGris={puntos.some(p => p.resultado == null)}>
-          {puntos.some(p => p.meta?.valor != null) && <li><span className="gi-leyenda-meta" />Meta</li>}
-          {puntos.some(p => p.estatal != null) && <li><span className="gi-leyenda-estatal" />{ETIQUETA_TOTAL}</li>}
-        </LeyendaSemaforo>
+        {puntos.length ? <ColumnasTendencia puntos={puntos} activo={corteActivo} comoPuntos={perfil?.tipoMeta === 'rango'} etiquetaNumerador={perfil?.etiquetaNumerador} etiquetaDenominador={perfil?.etiquetaDenominador} /> : <p className="ige-vacio">Todavía no hay cortes cerrados.</p>}
+        <LeyendaSemaforo niveles={perfil?.niveles} conGris={puntos.some(p => p.resultado == null)} franjas={franjasDe(perfil, mesSel, unidadSel)} />
 
         <h3 className="gi-subtitulo">Casos por mes</h3>
         <p className="gi-vista-ayuda">

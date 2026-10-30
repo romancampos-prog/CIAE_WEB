@@ -13,7 +13,9 @@
             "titulo": "EH 01 - Cobertura de detección de hipertensión arterial en población derechohabiente de 20 años y más",
             "objetivo": "Medir la proporción de derechohabientes de 20 años y más, con medición de tensión arterial en el primer nivel de atención, que permita la identificación temprana de hipertensión arterial y prehipertensión.",
             "descNum": "Número de derechohabiente de 20 años y más, con detección de hipertensión arterial, acumulados al mes del reporte",
-            "descDen": "Población de 20 años y más, adscrita a Médico Familiar menos Prevalencia de hipertensión arterial específicas por grupo de edad y sexo"
+            "descDen": "Población de 20 años y más, adscrita a Médico Familiar menos Prevalencia de hipertensión arterial específicas por grupo de edad y sexo",
+            "etiquetaNumerador": "detecciones",
+            "etiquetaDenominador": "población de 20 y más"
         },
         "reporte": {
             "numerador": {
@@ -151,7 +153,9 @@
             "titulo": "EH 02 - Porcentaje de pacientes de 20 años y más en control de hipertensión arterial en Medicina Familiar",
             "objetivo": "Medir el porcentaje de pacientes hipertensos mayores de 20 años, con cifras de tensión arterial en control adecuado (sistólica menor de 140 mmHg y diastólica menor de 90 mm Hg), que acudieron a consulta en el periodo de medición (mes, año), para conocer la eficiencia de la atención en este grupo de pacientes",
             "descNum": "Número de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial (CIE-10: I10 - I15) con cifras de tensión arterial sistólica menor de 140 mmHg y diastólica menor de 90 mmHg atendidos en el período",
-            "descDen": "Total de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial atendidos en el período"
+            "descDen": "Total de pacientes subsecuentes de 20 años y más con diagnóstico de hipertensión arterial atendidos en el período",
+            "etiquetaNumerador": "controlados",
+            "etiquetaDenominador": "pacientes"
         },
         "reporte": {
             "numerador": {

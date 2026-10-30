@@ -52,13 +52,13 @@ export function useGraficaIndicador(indicador: string, indsHermanos: string[]) {
   const delIndicador = eleccion.indicador === indicador ? eleccion : { indicador };
 
   // Meses del selector: los cerrados y, al final, el del semanal si todavía no cierra.
-  const mesesCerrados = resumenes.map(r => r.mes);
+  const mesesCerrados = resumenes.filter(r => !r.parcial).map(r => r.mes);
   const mesSemanal    = Object.keys(reporte?.SEMANA?.MES ?? {})[0] ?? null;
   const mesParcial    = mesSemanal && !mesesCerrados.includes(mesSemanal) ? mesSemanal : null;
   const meses         = ordenarMeses(mesParcial ? [...mesesCerrados, mesParcial] : mesesCerrados);
 
-  // Arranca en el último mes cerrado (el que tiene resumen); si no hay, en el parcial.
-  const mesSel = delIndicador.mes ?? mesesCerrados[mesesCerrados.length - 1] ?? mesSemanal ?? '';
+  // Arranca en el último reporte que haya, sea previo (semanal) o definitivo.
+  const mesSel = delIndicador.mes ?? meses[meses.length - 1] ?? '';
 
   // La unidad de la tendencia se conserva entre indicadores si también existe en este; si no, el
   // estatal. El usuario de unidad no recibe el estatal: entonces la única unidad que trae.
@@ -66,9 +66,11 @@ export function useGraficaIndicador(indicador: string, indsHermanos: string[]) {
   const respaldo  = unidades.includes(CLAVE_ESTATAL) ? CLAVE_ESTATAL : (unidades[0] ?? CLAVE_ESTATAL);
   const unidadSel = unidades.includes(unidadElegida) ? unidadElegida : respaldo;
 
-  const indiceResumen = resumenes.findIndex(r => r.mes === mesSel);
-  const resumen       = indiceResumen >= 0 ? resumenes[indiceResumen] : null;
-  const mesAnterior   = indiceResumen > 0 ? resumenes[indiceResumen - 1].mes : null;
+  // El resumen de arriba sigue al switch: con Acumulado encendido, el del acumulado
+  const acumulado     = delIndicador.acumulado ?? false;
+  const delResumen    = (acumulado && estadisticas?.resumenAcumuladoPorMes) || resumenes;
+  const indiceResumen = delResumen.findIndex(r => r.mes === mesSel);
+  const resumen       = indiceResumen >= 0 ? delResumen[indiceResumen] : null;
 
   const elegir = (cambios: Omit<EleccionDelIndicador, 'indicador'>) =>
     setEleccion(previa => ({ ...(previa.indicador === indicador ? previa : { indicador }), ...cambios }));
@@ -87,10 +89,10 @@ export function useGraficaIndicador(indicador: string, indsHermanos: string[]) {
     reporte, estadisticas,
     meses, mesParcial, mesSel,
     setMesSel: (mes: string) => elegir({ mes }),
-    resumen, mesAnterior,
+    resumen,
     vista, setVista,
     unidadSel, setUnidadSel,
-    acumulado: delIndicador.acumulado ?? false,
+    acumulado,
     setAcumulado: (acumulado: boolean) => elegir({ acumulado }),
     tieneAcumulado: Object.keys(reporte?.MENSUAL_ACUMULADO ?? {}).length > 0,
     descargarIndicador: () => descargar([indicador]),

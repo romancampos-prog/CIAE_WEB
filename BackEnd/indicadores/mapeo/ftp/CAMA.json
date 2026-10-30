@@ -13,7 +13,9 @@
             "titulo": "CAMA 01 - Cobertura de detección de cáncer de mama por mastografía en mujeres de 40 a 69 años.",
             "objetivo": "Medir el porcentaje de mujeres entre 40 y 69 años, a quienes se realizó la mastografía de tamizaje para identificar alteraciones radiográficas sugestivas de cáncer.",
             "descNum": "Número de mujeres entre 40 y 69 años con mastografía de tamizaje acumuladas al mes de reporte.",
-            "descDen": "Población de mujeres entre 40 y 69 años adscrita a médico familiar menos Prevalencia de cáncer de mama en mujeres de 40 a 69 años."
+            "descDen": "Población de mujeres entre 40 y 69 años adscrita a médico familiar menos Prevalencia de cáncer de mama en mujeres de 40 a 69 años.",
+            "etiquetaNumerador": "mastografías",
+            "etiquetaDenominador": "mujeres de 40 a 69"
         },
         "reporte": {
             "numerador": {
@@ -145,7 +147,9 @@
             "titulo": "CAMA 40-49 - Cobertura de mastografía de tamizaje de primera vez en mujeres entre 40 y 49 años.",
             "objetivo": "Medir el porcentaje de mujeres entre 40 y 49 años, a quienes se realizó la mastografía de tamizaje para identificar alteraciones radiográficas sugestivas de cáncer.",
             "descNum": "Número de mujeres entre 40 y 49 años con mastografía de tamizaje de primera vez acumuladas al mes de reporte",
-            "descDen": "Población de mujeres entre 40 y 49 años adscritas a médico familiar"
+            "descDen": "Población de mujeres entre 40 y 49 años adscritas a médico familiar",
+            "etiquetaNumerador": "mastografías",
+            "etiquetaDenominador": "mujeres de 40 a 49"
         },
         "reporte": {
             "numerador": {
@@ -259,7 +263,9 @@
             "titulo": "CAMA 50-69 - Cobertura de mastografía de tamizaje de primera vez en mujeres entre 50 y 69 años.",
             "objetivo": "Medir el porcentaje de mujeres entre 50 y 69 años, a quienes se realizó la mastografía de tamizaje para identificar alteraciones radiográficas sugestivas de cáncer.",
             "descNum": "Número de mujeres entre 50 y 69 años con mastografía de tamizaje de cáncer de mama, de primera vez acumuladas al mes de reporte.",
-            "descDen": "Población de mujeres entre 50 y 69 años adscritas a médico familiar."
+            "descDen": "Población de mujeres entre 50 y 69 años adscritas a médico familiar.",
+            "etiquetaNumerador": "mastografías",
+            "etiquetaDenominador": "mujeres de 50 a 69"
         },
         "reporte": {
             "numerador": {

@@ -9,7 +9,9 @@
             "titulo": "DM 06 - Tasa de incidencia de invalidez por diabetes y sus complicaciones por cada 100,000 trabajadores asegurados, según unidad médica de adscripción del trabajador.",
             "objetivo": "Medir el impacto de los programas de prevención y detección oportuna de la diabetes; así como de las acciones de atención médica para el control adecuado de los trabajadores, para evitar la aparición de complicaciones tardías que resulten en la imposibilidad de que los trabajadores asegurados en el ramo de invalidez y vida continúen realizando sus actividades laborales.",
             "descNum": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de diabetes y sus complicaciones, según OOAD de origen acumulados al trimestre del reporte.",
-            "descDen": "Promedio de trabajadores asegurados en invalidez y vida en el OOAD de origen, al trimestre del reporte."
+            "descDen": "Promedio de trabajadores asegurados en invalidez y vida en el OOAD de origen, al trimestre del reporte.",
+            "etiquetaNumerador": "dictámenes de invalidez",
+            "etiquetaDenominador": "trabajadores asegurados"
         },
         "reporte": {},
         "semaforo": {

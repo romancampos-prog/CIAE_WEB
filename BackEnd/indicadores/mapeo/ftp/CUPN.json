@@ -13,7 +13,9 @@
             "titulo": "CUPN 01 - Cobertura de acciones preventivas PrevenIMSS en población derechohabiente",
             "objetivo": "Medir la proporción de población derechohabiente que recibió, en el último año, acciones preventivas de acuerdo con su grupo de edad y sexo, para conocer la población beneficiada con PrevenIMSS.",
             "descNum": "Número de derechohabientes a los que se les otorgó acciones preventivas en los últimos 12 meses ",
-            "descDen": "Total de población derechohabiente adscrita a médico familiar"
+            "descDen": "Total de población derechohabiente adscrita a médico familiar",
+            "etiquetaNumerador": "con acciones preventivas",
+            "etiquetaDenominador": "derechohabientes"
         },
         "reporte": {
             "numerador": {
@@ -157,7 +159,9 @@
             "titulo": "CUPN 04 - Porcentaje de derechohabientes referidos al segundo nivel de atención por medicina familiar.",
             "objetivo": "Medir el porcentaje de derechohabientes que requieren atención con mayor grado de especialización y recursos, para conocer la capacidad resolutiva de las Unidades de Medicina Familiar.",
             "descNum": "Número de derechohabientes referidos al segundo nivel de atención con ocasión de servicio de primera vez, por las Unidades de Medicina Familiar",
-            "descDen": "Número de consultas otorgadas en Medicina Familiar"
+            "descDen": "Número de consultas otorgadas en Medicina Familiar",
+            "etiquetaNumerador": "referidos a segundo nivel",
+            "etiquetaDenominador": "consultas"
         },
         "reporte": {
             "numerador": {
@@ -214,7 +218,9 @@
             "titulo": "CUPN 05 - Promedio de consultas de Medicina Familiar por hora/médico.",
             "objetivo": "Medir la productividad y la eficiencia en el aprovechamiento del turno del Médico Familiar.",
             "descNum": "Número de consultas otorgadas en Medicina Familiar (servicio 04)",
-            "descDen": "Número de horas trabajadas por los médicos familiares (servicio 04)"
+            "descDen": "Número de horas trabajadas por los médicos familiares (servicio 04)",
+            "etiquetaNumerador": "consultas",
+            "etiquetaDenominador": "horas médico"
         },
         "reporte": {
             "numerador": {
@@ -271,7 +277,9 @@
             "titulo": "CUPN 07 - Promedio de consultas de los servicios de Estomatología asistencial por hora estomatólogo.",
             "objetivo": "Medir la productividad y la eficiencia en el aprovechamiento de la jornada laboral del estomatólogo.",
             "descNum": "Número total de consultas otorgadas en el servicio de Estomatología",
-            "descDen": "Total de horas trabajadas por el estomatólogo"
+            "descDen": "Total de horas trabajadas por el estomatólogo",
+            "etiquetaNumerador": "consultas dentales",
+            "etiquetaDenominador": "horas estomatólogo"
         },
         "reporte": {
             "numerador": {

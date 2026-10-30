@@ -1,11 +1,11 @@
 // propios
-import type { BrechaUnidad, PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
+import type { PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
 import type { PuntoColumna } from '@/types/pantallas/graficas';
 import ListaUnidades from './ListaUnidades';
 import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
 import LeyendaSemaforo from './LeyendaSemaforo';
-import { ETIQUETA_TOTAL, datosDelMes, formatoValor, mesCorto, nombreUnidad, serieDeUnidad, textoMeta } from '@/features/graficas/utils/datosGrafica';
+import { datosDelMes, franjasDe, formatoValor, mesCorto, nombreUnidad, serieDeUnidad, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   reporte: ReporteIndicador | null;
@@ -18,25 +18,21 @@ interface Props {
   unidadSel: string;
   onElegirUnidad: (unidad: string) => void;
   onElegirMes: (mes: string) => void;
-  brecha: BrechaUnidad | null;
-  brechaAplica: boolean | undefined;
   grupoDeUnidad?: Record<string, string> | null;
 }
 
 /**
- * Tendencia: todos los meses de UNA unidad (el estatal como punto de referencia). Si la meta
- * es un rango, se dibuja como franja detrás de cada barra.
+ * Tendencia: todos los meses de UNA unidad contra su meta. Si la meta
+ * es un rango, cada mes va como punto en vez de barra. Todo sobre las franjas del semáforo.
  *
  * Props:
  *   reporte, perfil, meses, mesSel, mesParcial, semana, acumulado
  *   unidadSel, onElegirUnidad, onElegirMes
- *   brecha        — { sentido, casos } de la unidad en el mes, o null
- *   brechaAplica  — del resumen del mes
  *   grupoDeUnidad — de la ficha (IAAS 01) o null
  */
 const TendenciaUnidad = ({
   reporte, perfil, meses, mesSel, mesParcial, semana, acumulado,
-  unidadSel, onElegirUnidad, onElegirMes, brecha, brechaAplica, grupoDeUnidad,
+  unidadSel, onElegirUnidad, onElegirMes, grupoDeUnidad,
 }: Props) => {
   const { filas, estatal } = datosDelMes(reporte, mesSel, acumulado);
   const serie = serieDeUnidad(reporte, meses, unidadSel, perfil, acumulado, mesParcial);
@@ -46,10 +42,11 @@ const TendenciaUnidad = ({
 
   const puntos = serie.map((p): PuntoColumna => {
     const estado = p.desempeno === 'Gris' ? 'sin dato' : p.desempeno;
-    const extra = [p.meta && `Meta ${textoMeta(p.meta)}`, p.estatal != null && `${ETIQUETA_TOTAL} ${formatoValor(p.estatal, perfil?.unidadMedida)}`]
-      .filter(Boolean).join(' · ');
+    const extra = p.meta ? `Meta ${textoMeta(p.meta)}` : '';
     return {
       ...p,
+      // Sin el punto del Total OOAD: la tendencia es solo de la unidad contra su meta
+      estatal: null,
       clave: p.mes,
       etiqueta: p.parcial ? `${mesCorto(p.mes)} S${semana}` : mesCorto(p.mes),
       etiquetaLarga: p.parcial ? `${p.mes} (parcial · semana ${semana})` : p.mes,
@@ -65,31 +62,23 @@ const TendenciaUnidad = ({
 
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">
-          Todos los meses de {nombreUnidad(unidadSel)}{acumulado ? ' (acumulado desde enero)' : ''}. Cada barra lleva el color de su semáforo;
-          {esRango ? ' la franja es el rango de la meta' : ' la línea punteada es la meta de cada mes'} y el punto es el {ETIQUETA_TOTAL}. Da clic en un mes para elegirlo.
+          Todos los meses de {nombreUnidad(unidadSel)}{acumulado ? ' (acumulado desde enero)' : ''}. Cada {esRango ? 'punto' : 'barra'} lleva el color de su semáforo
+          y el fondo son las franjas del semáforo de cada mes. Da clic en un mes para elegirlo.
         </p>
 
         <DatosUnidad
           unidad={unidadSel}
           periodo={mesSel.toLowerCase()}
           fila={fila}
-          estatal={estatal?.resultado ?? null}
           filas={filas}
           perfil={perfil}
-          brecha={brecha}
-          brechaAplica={brechaAplica && !acumulado}
           enEsperado={{ dentro: cerrados.filter(p => p.desempeno === 'Esperado').length, total: cerrados.length }}
+          franjas={franjasDe(perfil, mesSel, unidadSel)}
         />
 
-        <ColumnasTendencia puntos={puntos} activo={mesSel} onElegir={onElegirMes} />
+        <ColumnasTendencia puntos={puntos} activo={mesSel} comoPuntos={esRango} etiquetaNumerador={perfil?.etiquetaNumerador} etiquetaDenominador={perfil?.etiquetaDenominador} onElegir={onElegirMes} />
 
-        <LeyendaSemaforo niveles={perfil?.niveles} conGris={serie.some(p => p.resultado == null)}>
-          {esRango
-            ? <li><span className="gi-leyenda-rango" />Rango de la meta</li>
-            : serie.some(p => p.meta?.valor != null) && <li><span className="gi-leyenda-meta" />Meta del mes</li>}
-          {serie.some(p => p.estatal != null) && <li><span className="gi-leyenda-estatal" />{ETIQUETA_TOTAL}</li>}
-          {mesParcial && <li><span className="gi-leyenda-parcial" />{mesParcial} parcial (semana {semana})</li>}
-        </LeyendaSemaforo>
+        <LeyendaSemaforo niveles={perfil?.niveles} conGris={serie.some(p => p.resultado == null)} franjas={franjasDe(perfil, mesSel, unidadSel)} />
       </div>
     </div>
   );

@@ -13,7 +13,9 @@
             "titulo": "S_Ob 01 - Cobertura de medición de peso y talla de la población derechohabiente, en unidad médica de primer nivel.",
             "objetivo": "Medir el porcentaje de población derechohabiente con medición de peso y talla para identificar peso bajo, peso normal, sobrepeso y obesidad a través del Índice de Masa Corporal (IMC).",
             "descNum": "Número de derechohabientes con medición de peso y talla acumulado al mes evaluado ",
-            "descDen": "Población derechohabiente adscrita a médico familiar"
+            "descDen": "Población derechohabiente adscrita a médico familiar",
+            "etiquetaNumerador": "con peso y talla",
+            "etiquetaDenominador": "derechohabientes"
         },
         "reporte": {
             "numerador": {
@@ -149,7 +151,9 @@
             "titulo": "S_Ob 02 - Proporción de obesidad en derechohabientes de 20 años y más que acudieron a medición de peso y talla.",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad, para identificar un factor de riesgo para desarrollar enfermedades crónicas.",
             "descNum": "Número de derechohabientes de 20 años y más, con obesidad en el mes evaluado ",
-            "descDen": "Total de población derechohabiente de 20 años y más adscrita a médico familiar con medición de peso y talla en el mes evaluado"
+            "descDen": "Total de población derechohabiente de 20 años y más adscrita a médico familiar con medición de peso y talla en el mes evaluado",
+            "etiquetaNumerador": "con obesidad",
+            "etiquetaDenominador": "medidos"
         },
         "reporte": {
             "numerador": {
@@ -206,7 +210,9 @@
             "titulo": "S_Ob 03 - Proporción de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0).",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), como factor de riesgo de desarrollo de enfermedades crónicas.",
             "descNum": "Número de derechohabientes de 20 años y más con obesidad grado III (IMC igual o superior a 40.0), en el periodo evaluado.",
-            "descDen": "Total, de población derechohabiente de 20 años y más años, adscrita a Médico Familiar con medición de peso y talla en periodo evaluado"
+            "descDen": "Total, de población derechohabiente de 20 años y más años, adscrita a Médico Familiar con medición de peso y talla en periodo evaluado",
+            "etiquetaNumerador": "con obesidad grado III",
+            "etiquetaDenominador": "medidos"
         },
         "reporte": {
             "numerador": {
@@ -264,7 +270,9 @@
             "titulo": "S_Ob 04 - Porcentaje de confirmación diagnóstica de obesidad en Medicina Familiar de derechohabientes de 20 años y más, con índice de masa corporal igual o mayor a 30 kg/m2",
             "objetivo": "Medir el porcentaje de derechohabientes de 20 años y más a los que se les confirmó Obesidad, una vez que se le realizó una prueba de detección con Índice de masa corporal con datos de obesidad.",
             "descNum": "Número de derechohabientes de 20 años y más con UP161 en Módulos PrevenIMSS a quienes se les confirmó un diagnóstico de Obesidad en Medicina Familiar (CIE 10: E66X, E66.1, E66.2, E66.8, E66.9, E66.0) ",
-            "descDen": "Número de derechohabientes de 20 años y más con UP 161 en Módulos PrevenIMSS."
+            "descDen": "Número de derechohabientes de 20 años y más con UP 161 en Módulos PrevenIMSS.",
+            "etiquetaNumerador": "confirmados",
+            "etiquetaDenominador": "con UP161"
         },
         "reporte": {
             "numerador": {

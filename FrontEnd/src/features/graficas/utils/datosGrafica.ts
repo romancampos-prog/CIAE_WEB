@@ -1,5 +1,5 @@
 // propios
-import type { MetaNumerica, PerfilIndicador, ReporteIndicador, TipoMeta, UnidadDatos } from '@/types/api/indicadores/reportes';
+import type { Franja, MetaNumerica, PerfilIndicador, ReporteIndicador, TipoMeta, UnidadDatos } from '@/types/api/indicadores/reportes';
 import type { FilaUnidad, PuntoSerie } from '@/types/pantallas/graficas';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
 
@@ -56,7 +56,7 @@ export function textoMeta(meta: MetaNumerica | string | null | undefined): strin
   if (!meta) return '—';
   if (typeof meta !== 'string' && meta.minimo != null && meta.maximo != null) return `${formatoNumero(meta.minimo)} a ${formatoNumero(meta.maximo)}`;
   const texto = typeof meta === 'string' ? meta : meta.texto;
-  // El resumen y la brecha mandan solo el texto: el rango ">= 4 a <= 7" también queda "4 a 7"
+  // El resumen manda solo el texto: el rango ">= 4 a <= 7" también queda "4 a 7"
   const rango = texto.match(/^\s*>=\s*(-?[\d.]+)\s+a\s+<=\s*(-?[\d.]+)\s*$/);
   if (rango) return `${formatoNumero(Number(rango[1]))} a ${formatoNumero(Number(rango[2]))}`;
   return texto
@@ -64,18 +64,59 @@ export function textoMeta(meta: MetaNumerica | string | null | undefined): strin
     .replace(/-?\d+(\.\d+)?/g, n => formatoNumero(Number(n)));
 }
 
-/** La misma meta para todas: entonces se dibuja como UNA línea (o franja) continua, no un pedazo por fila/columna. */
-export function metaComun(metas: (MetaNumerica | null | undefined)[]): MetaNumerica | null {
-  const conMeta = metas.filter((m): m is MetaNumerica => m != null && (m.valor != null || m.minimo != null));
-  if (!conMeta.length || conMeta.length !== metas.length) return null;
-  const [primera] = conMeta;
-  const igual = conMeta.every(m => m.valor === primera.valor && m.minimo === primera.minimo && m.maximo === primera.maximo);
-  return igual ? primera : null;
-}
-
 /** La meta que aplica a una unidad en un mes: la de su grupo si el semáforo va por grupo (IAAS 01), si no la del mes. */
 export const metaDe = (perfil: PerfilIndicador | null, mes: string, unidad: string) =>
   perfil?.metaDeUnidad?.[unidad] ?? perfil?.metaPorMes?.[mes] ?? null;
+
+/** Las franjas del semáforo que aplican a una unidad en un mes: las de su grupo (IAAS 01) o las del mes. */
+export const franjasDe = (perfil: PerfilIndicador | null, mes: string, unidad: string): Franja[] =>
+  perfil?.franjasDeUnidad?.[unidad] ?? perfil?.franjasPorMes?.[mes] ?? [];
+
+/** Los límites con número de unas franjas, para que la escala de la gráfica las alcance. */
+export const limitesDe = (franjas: Franja[]): number[] =>
+  franjas.flatMap(f => [f.desde, f.hasta]).filter((v): v is number => v != null);
+
+/**
+ * Los cortes de unas franjas con su color: verde donde empieza (o termina) Esperado y rojo donde
+ * empieza Bajo; entre los dos queda Medio. Con dos niveles, solo el verde.
+ */
+export function cortesConTono(franjas: Franja[]): { valor: number; tono: 'Esperado' | 'Bajo' }[] {
+  return franjas.slice(1)
+    .filter(arriba => arriba.desde != null)
+    .map((arriba, i) => ({
+      valor: arriba.desde as number,
+      tono: [franjas[i].nivel, arriba.nivel].includes('Esperado') ? 'Esperado' as const : 'Bajo' as const,
+    }));
+}
+
+/** El rango de un nivel para la leyenda: "≥ 20.3", "15.4 a 20.3"; si el nivel sale dos veces (rangos), "≤ 3.9 o ≥ 10". */
+export function textoNivel(franjas: Franja[], nivel: string): string {
+  return franjas
+    .filter(f => f.nivel === nivel)
+    .map(f => (f.desde == null ? `≤ ${formatoNumero(f.hasta)}` : f.hasta == null ? `≥ ${formatoNumero(f.desde)}` : `${formatoNumero(f.desde)} a ${formatoNumero(f.hasta)}`))
+    .join(' o ');
+}
+
+/**
+ * Semáforo por tipo de hospital (IAAS 01): los tipos que comparten las mismas franjas van juntos
+ * ("HGZ, HGR, HGO"), así la tabla dice cada rango una sola vez.
+ */
+export function franjasPorGrupo(
+  perfil: PerfilIndicador | null,
+  grupoDeUnidad: Record<string, string> | null | undefined,
+): { grupos: string[]; franjas: Franja[] }[] {
+  if (!perfil?.franjasDeUnidad || !grupoDeUnidad) return [];
+  const porClave = new Map<string, { grupos: string[]; franjas: Franja[] }>();
+  Object.entries(perfil.franjasDeUnidad).forEach(([unidad, franjas]) => {
+    const grupo = grupoDeUnidad[unidad];
+    if (!grupo || !franjas.length) return;
+    const clave = JSON.stringify(franjas);
+    const fila = porClave.get(clave) ?? { grupos: [], franjas };
+    if (!fila.grupos.includes(grupo)) fila.grupos.push(grupo);
+    porClave.set(clave, fila);
+  });
+  return [...porClave.values()];
+}
 
 /**
  * Ordena para comparar: las que tienen dato primero, la mejor arriba según el tipo de meta
@@ -108,6 +149,7 @@ export function serieDeUnidad(
       denominador: fila?.denominador ?? null,
       estatal:     unidad === CLAVE_ESTATAL ? null : estatal?.resultado ?? null,
       meta:        metaDe(perfil, mes, unidad),
+      franjas:     franjasDe(perfil, mes, unidad),
       parcial:     mes === mesParcial,
     };
   });

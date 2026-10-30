@@ -29,26 +29,17 @@ export interface ReporteIndicador {
 
 export interface ResumenMes {
   mes: string;
+  /** true = el mes del semanal, aún sin cerrar (datos parciales). */
+  parcial: boolean;
   estatal: number | null;
+  numerador: number | null;
+  denominador: number | null;
   desempenoEstatal: Desempeno;
-  cambio: number | null;
   meta: string | null;
   /** Qué dirección del resultado es mejor; null en rangos. */
   mejora: 'mas' | 'menos' | null;
-  brechaAplica: boolean;
   unidades: Record<Desempeno, number>;
   unidadesConDato: number;
-  acumulado: number | null;
-  desempenoAcumulado: Desempeno | null;
-}
-
-export interface BrechaUnidad {
-  unidad: string;
-  resultado: number | null;
-  desempeno: Desempeno;
-  meta: string | null;
-  sentido: 'faltan' | 'sobran';
-  casos: number;
 }
 
 export interface CeldaMapaCalor {
@@ -58,11 +49,12 @@ export interface CeldaMapaCalor {
 
 export interface EstadisticasGrafica {
   resumenPorMes: ResumenMes[];
+  /** Lo mismo con el acumulado (null si el indicador no tiene): se usa con el switch Acumulado. */
+  resumenAcumuladoPorMes: ResumenMes[] | null;
   mapaCalor: {
     meses: string[];
     filas: { unidad: string; valores: (CeldaMapaCalor | null)[] }[];
   };
-  brechas: Record<string, BrechaUnidad[]>;
 }
 
 /** {texto, valor} si la meta es un límite; {texto, minimo, maximo} si es un rango. */
@@ -88,12 +80,25 @@ export interface SerieCortes {
   casosPorMes: { mes: string; anio: number; enCurso?: boolean; unidades: Record<string, number | null> }[];
 }
 
+/** Un tramo del semáforo en números (services/grafica/franjas_semaforo_Services.py); null = sin límite. */
+export interface Franja {
+  desde: number | null;
+  hasta: number | null;
+  nivel: Desempeno;
+}
+
 export interface PerfilIndicador {
   tipoMeta: TipoMeta;
   niveles: Desempeno[];
   metaPorMes: Record<string, MetaNumerica | null>;
   metaDeUnidad: Record<string, MetaNumerica | null> | null;
+  /** Las franjas del semáforo de cada mes (de abajo hacia arriba): la gráfica se dibuja sobre ellas. */
+  franjasPorMes: Record<string, Franja[]>;
+  /** Cuando el semáforo va por grupo (IAAS 01): las franjas de cada unidad. */
+  franjasDeUnidad: Record<string, Franja[]> | null;
   unidadMedida: '%' | 'por 1,000' | 'por 100,000' | 'promedio' | null;
+  etiquetaNumerador: string | null;
+  etiquetaDenominador: string | null;
   esCorte: boolean;
   umbralDenominadorChico: number | null;
   serieCortes: SerieCortes | null;

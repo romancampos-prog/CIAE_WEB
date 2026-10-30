@@ -9,7 +9,9 @@
             "titulo": "CAMA 02 - Tiempo promedio para el diagnóstico de cáncer de mama a partir de la sospecha por mastografía de tamizaje.",
             "objetivo": "Medir el tiempo promedio en días que emplea el Instituto Mexicano del Seguro Social para emitir el diagnóstico de cáncer de mama, una vez que se establece la sospecha a través de la mastografía de tamizaje.",
             "descNum": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos durante el periodo a evaluar y la fecha de toma de la mastografía de tamizaje con interpretación BIRADS 4 o 5.",
-            "descDen": "Total de pacientes que cuentan con fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y con fecha de toma de la mastografía de tamizaje con interpretación BIRADS 4 o 5"
+            "descDen": "Total de pacientes que cuentan con fecha del diagnóstico histopatológico con tipo de conducta “malignos” durante el periodo a evaluar y con fecha de toma de la mastografía de tamizaje con interpretación BIRADS 4 o 5",
+            "etiquetaNumerador": "días",
+            "etiquetaDenominador": "pacientes"
         },
         "reporte": {},
         "semaforo": {
@@ -28,7 +30,9 @@
             "titulo": "CAMA 03 – Tiempo promedio para el inicio del tratamiento del cáncer de mama.",
             "objetivo": "Medir el tiempo promedio en días, que emplea el Institución Mexicano del Seguro Social para iniciar el tratamiento una vez que se establece el diagnóstico histopatológico de cáncer de mama.",
             "descNum": "Total de días naturales transcurridos entre la fecha del diagnóstico histopatológico con tipo de conducta “malignos” y la fecha de inicio de tratamiento por cualquiera de las modalidades de las pacientes incluidas en el periodo a evaluar.",
-            "descDen": "Total de pacientes que cuentan con fecha de diagnóstico histopatológico con tipo de conducta “malignos” y con fecha de inicio de tratamiento por cualquiera de las modalidades durante el periodo a evaluar"
+            "descDen": "Total de pacientes que cuentan con fecha de diagnóstico histopatológico con tipo de conducta “malignos” y con fecha de inicio de tratamiento por cualquiera de las modalidades durante el periodo a evaluar",
+            "etiquetaNumerador": "días",
+            "etiquetaDenominador": "pacientes"
         },
         "reporte": {},
         "semaforo": {
@@ -47,7 +51,9 @@
             "titulo": "CAMA 04 - Tasa de incidencia de invalidez por cáncer de mama por cada 100,000 trabajadoras aseguradas, según unidad médica de adscripción de la trabajadora",
             "objetivo": "Medir el impacto de los programas de prevención y detección oportuna del cáncer de mama, así como de las acciones de atención médica para el tratamiento oportuno y adecuado de las trabajadoras, para evitar que las complicaciones resulten en la imposibilidad de que las trabajadoras aseguradas en el ramo de Invalidez y Vida continúen realizando sus actividades laborales.",
             "descNum": "Total de dictámenes de invalidez iniciales (primera vez) aceptados con diagnóstico de cáncer de mama, según OOAD de origen acumulados al trimestre del reporte ",
-            "descDen": "Promedio de trabajadoras aseguradas en invalidez y vida en el OOAD de origen, al trimestre del reporte."
+            "descDen": "Promedio de trabajadoras aseguradas en invalidez y vida en el OOAD de origen, al trimestre del reporte.",
+            "etiquetaNumerador": "dictámenes de invalidez",
+            "etiquetaDenominador": "trabajadoras aseguradas"
         },
         "reporte": {},
         "semaforo": {

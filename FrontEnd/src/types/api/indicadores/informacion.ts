@@ -18,6 +18,9 @@ export interface InformacionFicha {
   objetivo: string;
   descNum: string;
   descDen: string;
+  /** Palabras cortas para leer los números: "tamizadas" / "mujeres de 25 a 64". */
+  etiquetaNumerador?: string | null;
+  etiquetaDenominador?: string | null;
 }
 
 /** GET /Indicadores/informacion/ficha/{indicador} (modelo InfoIndicador). */

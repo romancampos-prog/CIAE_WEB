@@ -9,7 +9,7 @@ from services.semaforo.umbrales_semaforo_Services import RE_UMBRAL, RE_UMBRAL_CO
 def meta_esperado(umbrales: dict) -> tuple[str, float] | None:
     """
     ("mas", 70.0) si Esperado es ">= 70" (mas es mejor), ("menos", 1.4) si es "<= 1.4".
-    None si el semaforo no permite calcular una brecha (rangos compuestos de IAAS, o vacio).
+    None si la meta no es un solo limite (rangos compuestos de IAAS, o vacio).
     Acepta tambien el formato legado ({"Bajo": n, "Esperado": n} / {"Alto": n, "Esperado": n}).
     """
 

@@ -14,6 +14,8 @@
 @keyframes gi-aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes gi-crecer-alto { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes gi-crecer-ancho { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes gi-trazar { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes gi-punto-entrar { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
 
 /* ── Encabezado: título a la izquierda, mes/acumulado/descarga a la derecha ── */
 .gi-encabezado {
@@ -31,6 +33,13 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 14px rgba(0,0,0,0.04);
 }
+/* En la cabecera de la tarjeta (entre el título y las pestañas): sin caja propia */
+.gi-vista .gi-controles {
+  align-items: center; margin-left: auto; padding: 0;
+  background: none; border: none; box-shadow: none; backdrop-filter: none;
+}
+.gi-vista .gi-selector-mes { flex-direction: row; align-items: center; gap: 8px; }
+.gi-vista .gi-selector-mes .ig-select { min-height: 36px; }
 .gi-controles .ig-acumulado-switch,
 .gi-controles .ig-year-chip,
 .gi-controles .ig-dl-menu-wrap { align-self: center; }
@@ -50,7 +59,6 @@
 
 .gi-contenido { display: flex; flex-direction: column; gap: 18px; transition: opacity .15s; }
 .gi-contenido .ige-kpis { margin: 0; }
-.gi-contenido .ige-detalle { margin: 0; }
 .gi-nota {
   margin: 0; padding: 10px 14px; border-radius: 12px;
   background: color-mix(in srgb, var(--ic, var(--marca)) 5%, var(--superficie));
@@ -71,6 +79,8 @@
   background: linear-gradient(90deg, var(--ic, var(--marca)), color-mix(in srgb, var(--ic, var(--marca)) 15%, transparent));
 }
 .gi-vista > *:not(.ig-chart-watermark) { position: relative; z-index: 1; }
+/* La marca de agua no debe competir con las franjas */
+.gi-vista .ig-chart-watermark { opacity: 0.05; }
 .gi-vista-encabezado { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
 .gi-vista-titulo { margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--texto); display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 .gi-etiqueta-vista {
@@ -127,10 +137,7 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
   color: var(--texto);
 }
 .gi-leyenda-boton:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
-.gi-leyenda-meta { width: 18px; border-top: 2.5px dashed var(--texto); }
-.gi-leyenda-rango { width: 18px; height: 12px; border-radius: 3px; background: color-mix(in srgb, var(--semaforo-esperado) 18%, var(--superficie)); border: 1.5px dashed var(--semaforo-esperado); }
-.gi-leyenda-estatal { width: 11px; height: 11px; border-radius: 50%; background: var(--texto-suave); border: 2px solid var(--superficie); box-shadow: 0 0 0 1px var(--texto-suave); }
-.gi-leyenda-parcial { width: 12px; height: 12px; border-radius: 3px; border: 1.5px dashed var(--texto-suave); }
+.gi-leyenda-rango-texto { font-size: .92em; font-weight: 600; color: var(--texto-suave); }
 .gi-leyenda-casos { width: 12px; height: 12px; border-radius: 3px; background: var(--texto-tenue); }
 .gi-leyenda-casos--en-curso { background: var(--ic, var(--marca)); }
 
@@ -156,13 +163,12 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 }
 .gi-tip-numden strong { color: var(--texto-medio); font-variant-numeric: tabular-nums; }
 
-/* ── Comparar: barras horizontales ordenadas ──
-   Encabezado, filas y la guía de la meta comparten las MISMAS columnas (la del resultado
-   con ancho fijo): así la pista mide igual en todas las filas y la meta queda recta. */
+/* ── Comparar: barras horizontales ordenadas sobre las franjas del semáforo ──
+   Encabezado y filas comparten las MISMAS columnas (la del resultado con ancho fijo):
+   así la pista mide igual en todas las filas y las franjas quedan alineadas. */
 .gi-comparar { display: flex; flex-direction: column; gap: 8px; --col-unidad: minmax(120px, 240px); --col-valor: 9.5rem; }
 .gi-comparar-encabezado,
-.gi-comparar-fila,
-.gi-comparar-guia {
+.gi-comparar-fila {
   display: grid; grid-template-columns: var(--col-unidad) minmax(0, 1fr) var(--col-valor);
   gap: 16px; align-items: center;
   box-sizing: border-box; padding: 0 10px; border-left: 3px solid transparent;
@@ -171,13 +177,12 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
   font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
   color: var(--texto-tenue); padding-bottom: 2px;
 }
-.gi-comparar-meta-etiqueta { position: relative; height: 18px; }
-.gi-comparar-meta-etiqueta span {
-  position: absolute; transform: translateX(-50%); white-space: nowrap; text-transform: none; letter-spacing: 0;
-  font-size: .7rem; font-weight: 700; color: var(--texto-medio);
-  padding: 1px 8px; border-radius: 100px; background: var(--superficie); border: 1px solid rgba(var(--borde-rgb), 0.9);
+.gi-comparar-cortes { position: relative; height: 16px; align-self: end; }
+.gi-comparar-cortes span {
+  position: absolute; bottom: 0; transform: translateX(-50%); padding-bottom: 3px;
+  font-size: .7rem; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--texto-medio);
+  border-bottom: 2px solid rgba(var(--contraste-rgb), 0.25);
 }
-.gi-comparar-cuerpo { position: relative; }
 .gi-comparar-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .gi-comparar-fila {
   all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
@@ -192,9 +197,10 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 .gi-comparar-fila:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
 .gi-comparar-unidad { font-size: .78rem; font-weight: 600; color: var(--texto-secundario); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Barras planas: color sólido del semáforo, sin degradado ni sombra */
-.gi-barra-pista { position: relative; height: 12px; border-radius: 4px; background: rgba(var(--contraste-rgb), 0.05); }
+/* La pista es más alta que la barra: arriba y abajo se ven las franjas del semáforo */
+.gi-barra-pista { position: relative; height: 22px; border-radius: 4px; }
 .gi-barra {
-  position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px;
+  position: absolute; left: 0; top: 6px; bottom: 6px; z-index: 1; border-radius: 3px;
   background: var(--status); opacity: 0.9;
   transform-origin: left; animation: gi-crecer-ancho 0.6s ease-out both;
 }
@@ -210,76 +216,58 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 .gi-comparar-valor small { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 600; color: var(--texto-suave); }
 .gi-punto { width: 7px; height: 7px; border-radius: 50%; background: var(--status); flex-shrink: 0; }
 
-/* Meta: línea punteada (límite) o franja (rango) */
-.gi-meta-linea { position: absolute; width: 0; border-left: 2px dashed var(--texto); z-index: 2; pointer-events: none; }
-.gi-meta-rango {
-  position: absolute; z-index: 0; pointer-events: none;
-  background: color-mix(in srgb, var(--semaforo-esperado) 13%, transparent);
-  border-left: 1.5px dashed var(--semaforo-esperado); border-right: 1.5px dashed var(--semaforo-esperado);
+/* Cortes del semáforo (FranjasSemaforo): líneas punteadas tenues detrás del dato */
+.gi-cortes { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.gi-cortes--vertical { left: -4px; right: -4px; }
+.gi-corte { position: absolute; }
+.gi-cortes--vertical .gi-corte { left: 0; right: 0; border-top: 2px dashed var(--color-corte); }
+/* En comparar la línea sobresale de la pista para unirse con la de la fila de arriba y la de abajo */
+.gi-cortes--horizontal .gi-corte { top: -10px; bottom: -10px; border-left: 2px dashed var(--color-corte); }
+/* Verde = donde empieza/termina Esperado; rojo = donde empieza Bajo (en medio queda Medio) */
+.gi-corte--Esperado { --color-corte: color-mix(in srgb, var(--semaforo-esperado) 55%, transparent); }
+.gi-corte--Bajo     { --color-corte: color-mix(in srgb, var(--semaforo-bajo) 50%, transparent); }
+/* Rango (puntos): el fondo pintado por nivel */
+.gi-cortes--fondo { overflow: hidden; }
+.gi-cortes--horizontal.gi-cortes--fondo { border-radius: 4px; }
+.gi-franja { position: absolute; }
+.gi-cortes--vertical .gi-franja { left: 0; right: 0; }
+.gi-cortes--horizontal .gi-franja { top: 0; bottom: 0; }
+/* Tenues: el color fuerte es el de la barra o el punto */
+.gi-franja--Esperado { background: color-mix(in srgb, var(--semaforo-esperado) 8%, transparent); }
+.gi-franja--Medio    { background: color-mix(in srgb, var(--semaforo-medio) 10%, transparent); }
+.gi-franja--Bajo     { background: color-mix(in srgb, var(--semaforo-bajo) 5%, transparent); }
+/* Meta de rango: punto en vez de barra */
+.gi-barra-punto {
+  position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; z-index: 1;
+  background: var(--status); border: 2px solid var(--superficie); box-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
-/* En cada fila: marca corta que sobresale de la pista */
-.gi-meta--fila.gi-meta-linea { top: -6px; bottom: -6px; border-left-style: solid; border-left-width: 2.5px; border-radius: 2px; }
-.gi-meta--fila.gi-meta-rango { top: -5px; bottom: -5px; border-radius: 3px; }
-/* La guía continua cruza toda la lista con las mismas columnas que las filas */
-.gi-comparar-guia { position: absolute; inset: 0; pointer-events: none; }
-.gi-comparar-guia-pista { position: relative; align-self: stretch; }
-.gi-meta--continua { top: 0; bottom: 0; }
-.gi-meta--continua.gi-meta-linea { opacity: .75; }
-/* Con meta común, la marca por fila sobra (la guía ya la dibuja) */
-.gi-comparar--meta-comun .gi-meta--fila { display: none; }
+.gi-columna-punto {
+  position: absolute; left: 50%; width: 20px; height: 20px; margin: 0 0 -10px -10px; border-radius: 50%; z-index: 3;
+  background: var(--status); border: 3px solid var(--superficie);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--status) 28%, transparent), 0 2px 6px rgba(0,0,0,0.25);
+  animation: gi-punto-entrar .3s ease-out both; animation-delay: calc(var(--orden, 0) * .7s);
+  transition: transform .15s;
+}
+.gi-columna:hover .gi-columna-punto { transform: scale(1.15); }
+/* El valor del punto en una pastilla, para leerse sobre cualquier franja */
+.gi-columna-punto .gi-columna-valor {
+  margin-bottom: 6px; padding: 1px 7px; border-radius: 100px; font-size: .72rem; font-weight: 800; color: var(--texto);
+  background: var(--superficie); box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+/* Total OOAD fijo arriba de la lista */
+.gi-comparar-lista--total { border-bottom: 2px solid rgba(var(--borde-rgb), 0.95); padding-bottom: 4px; margin-bottom: 2px; }
+.gi-comparar-fila--total .gi-comparar-unidad { font-weight: 800; color: var(--acento); }
+/* IAAS 01: un bloque por tipo de hospital */
+.gi-comparar-grupo { display: flex; flex-direction: column; }
+.gi-comparar-grupo-titulo {
+  margin: 10px 0 2px; padding: 0 13px; display: flex; gap: 8px; align-items: baseline;
+  font-size: .74rem; font-weight: 800; color: var(--texto-medio);
+}
+.gi-comparar-grupo-titulo small { font-weight: 600; color: var(--texto-suave); }
 .gi-aviso-chico {
   padding: 1px 6px; border-radius: 6px;
   background: var(--tinte-aviso); border: 1px solid var(--borde-aviso); color: var(--aviso-texto-fuerte) !important;
 }
-
-/* ── Comparar por rango: distancia a su rango ── */
-.gi-rango-scroll { overflow-x: auto; }
-.gi-rango-encabezado,
-.gi-rango-fila {
-  display: grid; min-width: 720px;
-  grid-template-columns: minmax(140px, 220px) minmax(110px, 1fr) 104px minmax(110px, 1fr) minmax(130px, auto);
-  gap: 10px; align-items: center;
-}
-.gi-rango--con-tipo { grid-template-columns: minmax(140px, 220px) 48px minmax(110px, 1fr) 104px minmax(110px, 1fr) minmax(130px, auto); }
-.gi-rango-encabezado {
-  font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
-  color: var(--texto-tenue); padding: 0 8px 4px;
-}
-.gi-rango-encabezado .gi-centro { color: var(--semaforo-esperado); }
-.gi-rango-fila {
-  all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
-  display: grid; min-height: 38px; padding: 3px 8px;
-  border-left: 3px solid transparent; border-radius: 0 10px 10px 0;
-  border-bottom: 1px solid rgba(var(--contraste-rgb), 0.05);
-  transition: background 0.15s, border-color 0.15s;
-}
-.gi-rango-fila:hover { background: color-mix(in srgb, var(--ic, var(--marca)) 6%, transparent); border-left-color: var(--acento); }
-.gi-rango-fila:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
-.gi-rango-tipo { font-size: .66rem; font-weight: 800; text-align: center; padding: 3px 4px; border-radius: 100px; background: color-mix(in srgb, var(--ic, var(--marca)) 9%, transparent); color: var(--acento); }
-.gi-rango-lado { display: flex; align-items: center; gap: 6px; height: 22px; }
-.gi-rango-lado--abajo { justify-content: flex-end; }
-.gi-rango-lado small { font-size: .74rem; font-weight: 800; color: var(--texto); white-space: nowrap; }
-.gi-rango-barra {
-  height: 12px; min-width: 4px; border-radius: 0 4px 4px 0;
-  background: var(--status); opacity: .9;
-  transform-origin: left; animation: gi-crecer-ancho 0.6s ease-out both;
-}
-.gi-rango-lado--abajo .gi-rango-barra { border-radius: 4px 0 0 4px; transform-origin: right; }
-.gi-rango-centro {
-  height: 28px; border-radius: 100px; display: flex; align-items: center; justify-content: center;
-  font-size: .74rem; font-weight: 700; color: var(--texto-suave);
-}
-.gi-rango-centro--dentro {
-  background: color-mix(in srgb, var(--semaforo-esperado) 14%, var(--superficie)); color: var(--semaforo-esperado);
-  border: 1px solid color-mix(in srgb, var(--semaforo-esperado) 30%, transparent);
-}
-.gi-rango-chip {
-  font-size: .68rem; font-weight: 700; white-space: nowrap; padding: 2px 8px; border-radius: 100px;
-  color: var(--semaforo-esperado);
-  background: color-mix(in srgb, var(--semaforo-esperado) 10%, transparent);
-  border: 1px dashed color-mix(in srgb, var(--semaforo-esperado) 45%, transparent);
-}
-.gi-rango-centro--sin-dato { background: rgba(var(--contraste-rgb), 0.04); font-style: italic; }
 
 /* ── Tendencia: panel de unidades (como el de antes) + columnas ── */
 .gi-tendencia { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
@@ -360,30 +348,31 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 /* Columnas (meses o cortes) */
 .gi-columnas { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; }
 .gi-columnas-eje {
-  height: calc(var(--alto-columna) + 38px); box-sizing: border-box; padding: 12px 0 14px;
-  display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+  position: relative; height: var(--alto-columna); margin-top: 18px;
   font-size: .66rem; color: var(--texto-tenue); font-variant-numeric: tabular-nums;
 }
+/* Cada marca a la altura de su valor (bottom en %) */
+.gi-columnas-eje span { position: absolute; right: 0; transform: translateY(50%); white-space: nowrap; }
+/* Los cortes del semáforo: el número donde cambia el color */
+.gi-eje-corte { font-weight: 800; color: var(--texto-medio); }
 .gi-columnas-area { overflow-x: auto; overflow-y: hidden; }
 .gi-columnas-fila {
   position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(44px, 1fr));
   padding-top: 18px;
 }
-.gi-columnas-rejilla,
 .gi-columnas-tendencia {
   position: absolute; top: 18px; left: 0; right: 0; height: var(--alto-columna); pointer-events: none;
 }
-.gi-columnas-rejilla {
-  background: repeating-linear-gradient(to top,
-    transparent 0, transparent calc(25% - 1px),
-    rgba(var(--contraste-rgb), 0.06) calc(25% - 1px), rgba(var(--contraste-rgb), 0.06) 25%);
-}
 .gi-columnas-tendencia { width: 100%; z-index: 2; overflow: visible; }
 .gi-columnas-tendencia polyline {
-  fill: none; stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 5 3;
-  stroke-linejoin: round; vector-effect: non-scaling-stroke;
-  opacity: 0; animation: gi-aparecer 0.6s 0.3s ease-out forwards;
+  /* Gris neutro: el rojo/verde quedan solo para el semáforo (barras, puntos y cortes) */
+  fill: none; stroke: var(--texto-secundario); stroke-width: 3; stroke-opacity: .7;
+  stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  /* Se descubre de izquierda a derecha (con clip, porque el trazo no se escala con la gráfica) */
+  animation: gi-trazar .8s ease-out both;
 }
+/* Con barras la línea solo acompaña: más delgada y tenue */
+.gi-columnas-tendencia--barras polyline { stroke-width: 2; stroke-opacity: .5; }
 .gi-columna {
   all: unset; box-sizing: border-box; position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -397,7 +386,8 @@ button.gi-columna { cursor: pointer; }
 .gi-columna:hover .gi-tip,
 .gi-columna:focus-visible .gi-tip { display: flex; }
 .gi-columna:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; z-index: 3; }
-.gi-columna--activa { background: color-mix(in srgb, var(--ic, var(--marca)) 7%, transparent); }
+/* El mes elegido: solo una rayita bajo su etiqueta, sin tapar las franjas */
+.gi-columna--activa .gi-columna-etiqueta { box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--acento) 60%, transparent); }
 .gi-columna--activa .gi-columna-etiqueta { color: var(--acento); font-weight: 800; }
 .gi-columna-cuerpo {
   position: relative; width: 100%; height: var(--alto-columna);
@@ -412,46 +402,11 @@ button.gi-columna { cursor: pointer; }
 }
 .gi-columna:hover .gi-columna-barra { opacity: 1; }
 
-/* Meta común a todos los periodos: una línea/franja que cruza todas las columnas */
-/* Sin z-index propio: la línea queda sobre las columnas (z 1) y la franja del rango detrás */
-.gi-columnas-guia { position: absolute; top: 18px; left: 0; right: 0; height: var(--alto-columna); pointer-events: none; }
-.gi-columnas-guia-linea { position: absolute; left: 0; right: 0; z-index: 2; border-top: 2px dashed var(--texto); opacity: .75; }
-.gi-columnas-guia-rango {
-  position: absolute; left: 0; right: 0; z-index: 0;
-  background: color-mix(in srgb, var(--semaforo-esperado) 12%, transparent);
-  border-top: 1.5px dashed var(--semaforo-esperado); border-bottom: 1.5px dashed var(--semaforo-esperado);
-}
-.gi-columnas-guia-texto {
-  position: absolute; right: 4px; bottom: 100%; margin-bottom: 3px;
-  font-size: .64rem; font-weight: 700; white-space: nowrap; color: var(--texto-medio);
-  padding: 1px 7px; border-radius: 100px; background: var(--superficie); border: 1px solid rgba(var(--borde-rgb), 0.9);
-}
-.gi-columnas-guia-rango .gi-columnas-guia-texto { color: var(--semaforo-esperado); border-color: color-mix(in srgb, var(--semaforo-esperado) 35%, transparent); }
-.gi-columna--parcial .gi-columna-barra { opacity: .5; outline: 2px dashed var(--texto-suave); outline-offset: -2px; }
 .gi-columna-valor {
   position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px;
   font-size: .68rem; font-weight: 700; color: var(--texto-secundario); white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 .gi-columna-sin-dato { font-size: .8rem; color: var(--texto-tenue); padding-bottom: 4px; }
-/* Meta distinta por periodo: un trazo punteado en escalón sobre las columnas */
-.gi-columnas-meta-escalon {
-  position: absolute; top: 18px; left: 0; width: 100%; height: var(--alto-columna);
-  z-index: 2; overflow: visible; pointer-events: none;
-}
-.gi-columnas-meta-escalon polyline {
-  fill: none; stroke: var(--texto); stroke-width: 2; stroke-dasharray: 6 4; opacity: .55;
-  stroke-linejoin: round; vector-effect: non-scaling-stroke;
-}
-.gi-columna-rango {
-  position: absolute; left: 4%; right: 4%;
-  background: color-mix(in srgb, var(--semaforo-esperado) 16%, transparent);
-  border-top: 1.5px dashed var(--semaforo-esperado); border-bottom: 1.5px dashed var(--semaforo-esperado);
-}
-.gi-columna-estatal {
-  position: absolute; left: 50%; width: 11px; height: 11px; margin: 0 0 -5.5px -5.5px; border-radius: 50%;
-  background: var(--texto-suave); border: 2px solid var(--superficie); z-index: 2;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}
 .gi-columna-etiqueta { font-size: .72rem; font-weight: 600; color: var(--texto-suave); white-space: nowrap; padding-bottom: 2px; }
 .gi-columna-etiqueta small { font-size: .62rem; color: var(--texto-tenue); }
 
@@ -469,14 +424,6 @@ button.gi-columna { cursor: pointer; }
 /* ── Mapa dentro de la tarjeta de la vista: sin segunda tarjeta encima ── */
 .gi-vista .ige-mapa { background: transparent; border: none; padding: 0; box-shadow: none; backdrop-filter: none; }
 
-/* ── Aviso de denominador chico ── */
-.gi-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.gi-chips li {
-  font-size: .76rem; font-weight: 600; padding: 5px 12px; border-radius: 100px;
-  background: var(--tinte-aviso); border: 1px solid var(--borde-aviso); color: var(--texto-medio);
-}
-.gi-chips strong { color: var(--aviso-texto-fuerte); margin-left: 4px; }
-
 /* ── Pantalla angosta ── */
 @media (max-width: 820px) {
   .ig-main.gi-main { --alto-columna: 202px; }
@@ -485,14 +432,14 @@ button.gi-columna { cursor: pointer; }
   .gi-selector-mes .ig-select { width: 100%; min-width: 0; }
   .ig-chart-card.gi-vista { padding: 14px 14px 18px; }
   .gi-comparar { --col-unidad: minmax(90px, 150px); --col-valor: 6.5rem; }
-  .gi-comparar-encabezado, .gi-comparar-fila, .gi-comparar-guia { gap: 10px; }
+  .gi-comparar-encabezado, .gi-comparar-fila { gap: 10px; }
   .gi-lista-unidades { max-width: none; flex-basis: 100%; padding-right: 0; border-right: none; }
   .gi-lista-scroll { max-height: 220px; }
 }
 
 /* ── Celular: en Comparar la unidad y el resultado arriba, la barra abajo a todo lo ancho ── */
 @media (max-width: 560px) {
-  .gi-comparar-encabezado, .gi-comparar-guia { display: none; }
+  .gi-comparar-encabezado { display: none; }
   .gi-comparar-fila {
     grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "unidad valor" "barra barra";
     row-gap: 7px; padding: 9px 10px;
@@ -501,7 +448,6 @@ button.gi-columna { cursor: pointer; }
   .gi-comparar-fila .gi-barra-pista { grid-area: barra; }
   .gi-comparar-valor { grid-area: valor; }
   /* Sin guía continua, cada fila lleva su marca de meta */
-  .gi-comparar--meta-comun .gi-meta--fila { display: block; }
 }
 
 /* ── Pantallas anchas: se aprovecha el ancho (la página crece y la escala de las barras también) ── */
@@ -512,6 +458,6 @@ button.gi-columna { cursor: pointer; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gi-barra, .gi-rango-barra, .gi-columna-barra, .gi-casos-barra,
-  .gi-columnas-tendencia polyline, .gi-comparar, .gi-tendencia, .gi-tip { animation: none; opacity: 1; }
+  .gi-barra, .gi-columna-barra, .gi-casos-barra,
+  .gi-columnas-tendencia polyline, .gi-comparar, .gi-tendencia, .gi-tip, .gi-columna-punto { animation: none; opacity: 1; }
 }

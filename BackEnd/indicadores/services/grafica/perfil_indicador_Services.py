@@ -1,10 +1,11 @@
 """
 El perfil del indicador para la grafica, sacado del mapeo: tipo de meta, niveles del semaforo,
-meta por mes (y por unidad en IAAS 01), unidad de medida, si es por corte y el umbral de
+meta y franjas del semaforo por mes (y por unidad en IAAS 01), unidad de medida, si es por corte y el umbral de
 denominador chico, para que el front no deduzca reglas por su cuenta.
 Usado en: services/grafica/grafica_indicador_Services.py
 """
 from services.calculo.formulas_Services import evaluar_formula
+from services.grafica.franjas_semaforo_Services import franjas_del_semaforo
 from services.grafica.metas_semaforo_Services import meta_numerica, tipo_de_meta
 from services.semaforo.umbrales_semaforo_Services import es_agrupado, es_formato_explicito, umbrales_para
 from shared.MESES import MESES_ESTANDAR
@@ -63,17 +64,27 @@ def perfil_de_indicador(bloque: dict, unidades: list[str]) -> dict:
     tipos = [tipo_de_meta(umbrales_para(semaforo, mes, "OOAD")) for mes in MESES_ESTANDAR] if semaforo else []
     tipo_meta = next((tipo for tipo in tipos if tipo), None)
 
+    # Las franjas (desde, hasta, nivel) de cada mes: la grafica se dibuja sobre ellas
+    franjas_por_mes = {mes: franjas_del_semaforo(umbrales_para(semaforo, mes, "OOAD")) for mes in MESES_ESTANDAR} if semaforo else {}
+
     meta_de_unidad = None
+    franjas_de_unidad = None
 
     if es_agrupado(semaforo):
         meta_de_unidad = {u: meta_numerica(umbrales_para(semaforo, None, grupo_de_unidad_iaas01(u))) for u in unidades}
+        franjas_de_unidad = {u: franjas_del_semaforo(umbrales_para(semaforo, None, grupo_de_unidad_iaas01(u))) for u in unidades}
 
     return {
         "tipoMeta": tipo_meta,
         "niveles": _niveles_semaforo(semaforo),
         "metaPorMes": meta_por_mes,
         "metaDeUnidad": meta_de_unidad,
+        "franjasPorMes": franjas_por_mes,
+        "franjasDeUnidad": franjas_de_unidad,
         "unidadMedida": unidad_medida,
+        # Palabras para leer numerador y denominador ("tamizadas" / "mujeres de 25 a 64"), del mapeo
+        "etiquetaNumerador": (bloque.get("informacion") or {}).get("etiquetaNumerador"),
+        "etiquetaDenominador": (bloque.get("informacion") or {}).get("etiquetaDenominador"),
         "esCorte": es_periodicidad_de_corte(bloque.get("periodicidad")),
         "umbralDenominadorChico": UMBRAL_DENOMINADOR_CHICO if unidad_medida in ("%", "por 1,000", "por 100,000") else None,
         "serieCortes": None,

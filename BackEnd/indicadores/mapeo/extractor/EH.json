@@ -9,7 +9,9 @@
             "titulo": "EH 03 - Tasa de hospitalizaciones evitables por hipertensión arterial en población derechohabiente de 20 a 74 años",
             "objetivo": "Medir el comportamiento de las hospitalizaciones potencialmente evitables por hipertensión arterial en derechohabientes de 20 a 74 años, con el propósito de conocer la magnitud de este problema de salud pública.",
             "descNum": "Número de egresos hospitalarios por hipertensión arterial (códigos CIE-10: I10-I13) en derechohabientes de 20 a 74 años",
-            "descDen": "Población Adscrita a Médico Familiar (PAMF) de 20 a 74 años"
+            "descDen": "Población Adscrita a Médico Familiar (PAMF) de 20 a 74 años",
+            "etiquetaNumerador": "egresos",
+            "etiquetaDenominador": "población de 20 a 74"
         },
         "reporte": {
             "numerador": {

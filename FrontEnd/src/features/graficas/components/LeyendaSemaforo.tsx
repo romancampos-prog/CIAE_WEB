@@ -1,14 +1,17 @@
 // react
 import type { ReactNode } from 'react';
 // propios
-import type { Desempeno } from '@/types/api/indicadores/reportes';
+import type { Desempeno, Franja } from '@/types/api/indicadores/reportes';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
+import { textoNivel } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   niveles?: Desempeno[];
   conGris: boolean;
   filtro?: Desempeno | null;
   onFiltrar?: (nivel: Desempeno | null) => void;
+  /** Si se pasan, junto a cada nivel va su rango (los parámetros del semáforo de ese mes). */
+  franjas?: Franja[];
   children?: ReactNode;
 }
 
@@ -22,15 +25,17 @@ interface Props {
  *   conGris    — true si hay unidades sin dato
  *   filtro     — nivel filtrado (o null)
  *   onFiltrar  — fn(nivel | null), opcional
+ *   franjas    — franjas del semáforo del mes, para escribir el rango de cada nivel
  *   children   — entradas extra de la leyenda (meta, estatal...)
  */
-const LeyendaSemaforo = ({ niveles = [], conGris, filtro, onFiltrar, children }: Props) => {
+const LeyendaSemaforo = ({ niveles = [], conGris, filtro, onFiltrar, franjas, children }: Props) => {
   const estados: Desempeno[] = conGris ? [...niveles, 'Gris'] : niveles;
 
   return (
     <ul className="gi-leyenda" aria-label="Leyenda">
       {estados.map(estado => {
-        const texto = estado === 'Gris' ? 'Sin dato' : estado;
+        const rango = franjas && estado !== 'Gris' ? textoNivel(franjas, estado) : '';
+        const texto = estado === 'Gris' ? 'Sin dato' : <>{estado}{rango && <small className="gi-leyenda-rango-texto"> {rango}</small>}</>;
         const muestra = <span className="gi-leyenda-muestra" style={{ '--status': COLOR_SEMAFORO[estado] }} />;
         return (
           <li key={estado}>

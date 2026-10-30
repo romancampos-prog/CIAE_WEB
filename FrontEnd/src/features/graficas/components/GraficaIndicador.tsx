@@ -8,14 +8,11 @@ import SelectorMes from './SelectorMes';
 import PestanasGrafica from './PestanasGrafica';
 import ResumenKpis from './ResumenKpis';
 import CompararUnidades from './CompararUnidades';
-import CompararRango from './CompararRango';
 import TendenciaUnidad from './TendenciaUnidad';
 import TendenciaCorte from './TendenciaCorte';
 import MapaCalor from './MapaCalor';
-import BrechaMeta from './BrechaMeta';
-import AvisoDenominador from './AvisoDenominador';
 import MenuDescarga from './MenuDescarga';
-import { datosDelMes, nombreUnidad } from '@/features/graficas/utils/datosGrafica';
+import { datosDelMes, franjasPorGrupo, nombreUnidad } from '@/features/graficas/utils/datosGrafica';
 import { textoAcento } from '@/utils/colorAcento';
 import './graficaIndicador.css';
 
@@ -29,7 +26,9 @@ interface Props {
 
 /**
  * Página de gráficas de un indicador (cualquier módulo): un solo mes para toda la página,
- * resumen arriba, las pestañas Tendencia / Comparar / Mapa en medio y la brecha abajo.
+ * resumen arriba y las pestañas Tendencia / Comparar / Mapa abajo.
+ * El mes, el año y la descarga van en la cabecera de la tarjeta: arriba a la derecha está
+ * el botón flotante de indicadores.
  * Cada tipo de indicador (meta de un valor, de rango o por corte) se dibuja a su manera
  * según el perfil que manda el backend.
  */
@@ -37,7 +36,7 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
   const [infoAbierta, setInfoAbierta] = useState(false);
   const {
     anio, cargando, descargando, ficha, perfil, reporte, estadisticas,
-    meses, mesParcial, mesSel, setMesSel, resumen, mesAnterior,
+    meses, mesParcial, mesSel, setMesSel, resumen,
     vista, setVista, unidadSel, setUnidadSel, acumulado, setAcumulado, tieneAcumulado,
     descargarIndicador, descargarFamilia,
   } = useGraficaIndicador(indSel, indsHermanos);
@@ -46,9 +45,7 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
   const color      = colorFamilia;
   const semana     = reporte?.SEMANA?.SEMANA;
   const esParcial  = mesSel !== '' && mesSel === mesParcial;
-  const esRango    = perfil?.tipoMeta === 'rango';
-  const { filas }  = datosDelMes(reporte, mesSel, acumulado);
-  const brechas    = estadisticas?.brechas?.[mesSel] ?? [];
+  const { filas, estatal } = datosDelMes(reporte, mesSel, acumulado);
   const categoria  = indSel.split(' ')[0];
   const hayDatos   = meses.length > 0;
 
@@ -82,40 +79,6 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
           )}
         </div>
 
-        <div className="gi-controles">
-          <SelectorMes
-            meses={meses}
-            mesSel={mesSel}
-            mesParcial={mesParcial}
-            semana={semana}
-            anio={anio}
-            esCorte={perfil?.esCorte}
-            onCambiar={setMesSel}
-          />
-          {tieneAcumulado && (
-            <button
-              type="button"
-              className={`ig-acumulado-switch${acumulado ? ' ig-acumulado-switch--on' : ''}`}
-              onClick={() => setAcumulado(!acumulado)}
-              role="switch"
-              aria-checked={acumulado}
-            >
-              <span className="ig-acumulado-switch-track"><span className="ig-acumulado-switch-thumb" /></span>
-              Acumulado
-            </button>
-          )}
-          <span className="ig-year-chip">{anio}</span>
-          {puedeDescargarExcel && (
-            <MenuDescarga
-              disabled={descargando || !hayDatos}
-              cargando={descargando}
-              opciones={[
-                { label: `Descargar ${indSel}`, onClick: descargarIndicador },
-                { label: `Descargar todo ${categoria}`, onClick: descargarFamilia, multiple: true },
-              ]}
-            />
-          )}
-        </div>
       </header>
 
       {indsHermanos.length > 1 && (
@@ -154,15 +117,19 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
           {resumen && (
             <ResumenKpis
               resumen={resumen}
-              mesAnterior={mesAnterior}
               niveles={perfil?.niveles}
               unidadMedida={perfil?.unidadMedida}
               esCorte={perfil?.esCorte}
+              franjas={perfil?.franjasPorMes?.[resumen.mes]}
+              porTipo={franjasPorGrupo(perfil, ficha?.grupoDeUnidad)}
+              acumulado={acumulado}
+              etiquetaNumerador={perfil?.etiquetaNumerador}
+              etiquetaDenominador={perfil?.etiquetaDenominador}
             />
           )}
           {esParcial && (
             <p className="gi-nota">
-              {mesSel} todavía no cierra (semana {semana}): se ven sus datos parciales; el resumen y la brecha aparecen cuando cierre el mes.
+              {mesSel} todavía no cierra: todo lo de esta página (resumen y gráficas) es con los datos parciales de la semana {semana}; cambia cuando llegue el definitivo.
             </p>
           )}
 
@@ -177,30 +144,59 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
                   {acumulado && vista !== 'mapa' && ' — acumulado'}
                 </span>
               </h2>
+              <div className="gi-controles">
+                <SelectorMes
+                  meses={meses}
+                  mesSel={mesSel}
+                  mesParcial={mesParcial}
+                  semana={semana}
+                  anio={anio}
+                  esCorte={perfil?.esCorte}
+                  onCambiar={setMesSel}
+                />
+                {tieneAcumulado && (
+                  <button
+                    type="button"
+                    className={`ig-acumulado-switch${acumulado ? ' ig-acumulado-switch--on' : ''}`}
+                    onClick={() => setAcumulado(!acumulado)}
+                    role="switch"
+                    aria-checked={acumulado}
+                  >
+                    <span className="ig-acumulado-switch-track"><span className="ig-acumulado-switch-thumb" /></span>
+                    Acumulado
+                  </button>
+                )}
+                <span className="ig-year-chip">{anio}</span>
+                {puedeDescargarExcel && (
+                  <MenuDescarga
+                    disabled={descargando || !hayDatos}
+                    cargando={descargando}
+                    opciones={[
+                      { label: `Descargar ${indSel}`, onClick: descargarIndicador },
+                      { label: `Descargar todo ${categoria}`, onClick: descargarFamilia, multiple: true },
+                    ]}
+                  />
+                )}
+              </div>
               <PestanasGrafica actual={vista} onCambiar={setVista} />
             </div>
 
             {vista === 'comparar' && !filas.length && (
               <p className="ige-vacio">No hay datos {acumulado ? 'acumulados ' : ''}de {mesSel.toLowerCase()}.</p>
             )}
-            {vista === 'comparar' && filas.length > 0 && (esRango
-              ? <CompararRango key={indSel} filas={filas} perfil={perfil} mes={mesSel} grupoDeUnidad={ficha?.grupoDeUnidad} onVerUnidad={verUnidad} />
-              : <CompararUnidades key={indSel} filas={filas} perfil={perfil} mes={mesSel} onVerUnidad={verUnidad} />
+            {vista === 'comparar' && filas.length > 0 && (
+              <CompararUnidades key={indSel} filas={filas} estatal={estatal} perfil={perfil} mes={mesSel} grupoDeUnidad={ficha?.grupoDeUnidad} onVerUnidad={verUnidad} />
             )}
 
             {vista === 'tendencia' && (perfil?.serieCortes
               ? <TendenciaCorte
                   reporte={reporte} perfil={perfil} mesSel={mesSel} anio={anio}
                   unidadSel={unidadSel} onElegirUnidad={setUnidadSel}
-                  brecha={brechas.find(b => b.unidad === unidadSel) ?? null}
-                  brechaAplica={resumen?.brechaAplica}
                 />
               : <TendenciaUnidad
                   reporte={reporte} perfil={perfil} meses={meses} mesSel={mesSel}
                   mesParcial={mesParcial} semana={semana} acumulado={acumulado}
                   unidadSel={unidadSel} onElegirUnidad={setUnidadSel} onElegirMes={setMesSel}
-                  brecha={brechas.find(b => b.unidad === unidadSel) ?? null}
-                  brechaAplica={resumen?.brechaAplica}
                   grupoDeUnidad={ficha?.grupoDeUnidad}
                 />
             )}
@@ -223,21 +219,6 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
               </div>
             )}
           </section>
-
-          {/* ── ¿Qué hacer? ── */}
-          <div className="ige-detalle gi-que-hacer">
-            {resumen && (
-              <BrechaMeta
-                key={`${indSel}-${mesSel}`}
-                brechas={brechas}
-                mes={mesSel}
-                aplica={resumen.brechaAplica}
-                tipoMeta={perfil?.tipoMeta}
-                onSelectUnidad={verUnidad}
-              />
-            )}
-            <AvisoDenominador filas={filas} umbral={perfil?.umbralDenominadorChico} mes={mesSel} />
-          </div>
         </div>
       )}
 

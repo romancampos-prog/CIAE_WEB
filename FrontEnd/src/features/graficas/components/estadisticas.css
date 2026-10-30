@@ -1,4 +1,4 @@
-/* ════════ Vista estadística de gráficas: KPIs, mapa de calor y brecha a la meta ════════
+/* ════════ Vista estadística de gráficas: KPIs y mapa de calor ════════
    Solo tokens del tema (tema.css), así el modo oscuro sale solo. El semáforo entra como
    --status (COLOR_SEMAFORO) y se tiñe con color-mix para que el texto siga legible. */
 
@@ -22,9 +22,10 @@
 }
 .ige-kpi:hover { border-color: rgba(var(--borde-rgb), 1); }
 /* La principal lleva el color de la familia como acento (borde y un tinte muy suave), no como estado. */
+/* Del color del semáforo del Total OOAD (--status), igual que la tarjeta de la unidad en Tendencia */
 .ige-kpi--principal {
-  border-left: 4px solid var(--ic, var(--primario-texto));
-  background: color-mix(in srgb, var(--ic, var(--marca)) 5%, var(--superficie));
+  border-left: 4px solid var(--status);
+  background: color-mix(in srgb, var(--status) 7%, var(--superficie));
 }
 /* Reparto de unidades por nivel del semáforo */
 .ige-reparto { display: flex; gap: 2px; height: 6px; border-radius: 3px; overflow: hidden; margin: 2px 0 1px; }
@@ -51,15 +52,6 @@
 
 .ige-estado { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; color: var(--texto-medio); }
 .ige-estado-punto { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
-/* ── Tarjetas de abajo (mapa y brecha) ── */
-.ige-detalle {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 16px;
-}
-@media (max-width: 1100px) { .ige-detalle { grid-template-columns: minmax(0, 1fr); } }
 
 .ige-tarjeta {
   background: rgba(var(--superficie-rgb), 0.88);
@@ -118,24 +110,6 @@
   border: 1px solid color-mix(in srgb, var(--status) 60%, var(--superficie));
 }
 
-/* ── Brecha a la meta ── */
-.ige-brecha-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.ige-brecha-fila {
-  all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px;
-  padding: 8px 10px; border-radius: 10px;
-  background: var(--superficie-suave);
-}
-.ige-brecha-fila { border-left: 3px solid transparent; transition: background 0.15s, border-color 0.15s; }
-.ige-brecha-fila:hover { background: color-mix(in srgb, var(--ic, var(--marca)) 6%, var(--superficie-suave)); border-left-color: color-mix(in srgb, var(--ic, var(--marca-texto)) var(--acento-peso), var(--texto)); }
-.ige-brecha-fila:focus-visible { outline: 2px solid var(--primario-texto); outline-offset: 1px; }
-.ige-brecha-unidad { font-weight: 700; font-size: .82rem; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ige-brecha-casos { font-size: .8rem; color: var(--texto-suave); text-align: right; white-space: nowrap; }
-.ige-brecha-casos strong { color: var(--texto); font-size: .92rem; font-variant-numeric: tabular-nums; }
-.ige-brecha-actual { display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--texto-medio); }
-.ige-brecha-meta { color: var(--texto-tenue); }
-.ige-brecha-barra { grid-column: 1 / -1; height: 4px; border-radius: 999px; background: var(--superficie-alterna); overflow: hidden; }
-.ige-brecha-barra span { display: block; height: 100%; border-radius: 4px; background: var(--ic, var(--marca)); opacity: .85; }
 .ige-ver-todas {
   all: unset; cursor: pointer; margin-top: 10px;
   font-size: .8rem; font-weight: 700; color: var(--primario-texto);
@@ -147,3 +121,19 @@
   .ige-tarjeta { padding: 14px; }
   .ige-mapa-unidad { min-width: 120px; }
 }
+
+/* Tarjeta Meta: los rangos del semáforo del mes en números; resaltado el nivel en que cae el Total OOAD */
+.ige-rangos { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: .74rem; font-variant-numeric: tabular-nums; }
+.ige-rangos li { display: grid; grid-template-columns: 8px 64px 1fr; align-items: center; gap: 6px; padding: 2px 6px; border-radius: 6px; color: var(--texto-medio); }
+.ige-rangos-nivel { font-weight: 600; }
+.ige-rangos-numeros { font-weight: 700; color: var(--texto); }
+.ige-rangos--actual { background: rgba(var(--contraste-rgb), 0.05); }
+.ige-rangos--actual .ige-rangos-nivel { font-weight: 800; color: var(--texto); }
+
+/* Tarjeta Meta por tipo de hospital (IAAS 01): una fila por tipo, una columna por nivel */
+.ige-rangos-tipo { width: 100%; border-collapse: collapse; font-size: .72rem; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.ige-rangos-tipo th { text-align: left; font-weight: 700; color: var(--texto-suave); padding: 2px 6px 4px 0; white-space: nowrap; }
+.ige-rangos-tipo th .ige-estado-punto { display: inline-block; width: 7px; height: 7px; margin-right: 4px; }
+.ige-rangos-tipo td { padding: 3px 6px 3px 0; font-weight: 700; color: var(--texto); border-top: 1px solid rgba(var(--borde-rgb), 0.8); white-space: nowrap; }
+.ige-rangos-tipo td:first-child { font-weight: 800; color: var(--texto-medio); }
+.ige-rangos-tipo--total td { color: var(--acento); }
