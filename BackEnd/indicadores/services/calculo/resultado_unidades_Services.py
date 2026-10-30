@@ -42,14 +42,15 @@ def calcular_resultado(numerador: int | None, denominador: int | None, formula: 
 
 ##--------------------------------------
 
-def agregar_total_ooad(unidades: dict[str, ResultadoUnidad], formula_resultado: str) -> ResultadoUnidad:
+def agregar_total_ooad(unidades: dict[str, ResultadoUnidad], formula_resultado: str, numerador_solo_total: int = 0) -> ResultadoUnidad:
     """
     TOTAL_OOAD: suma numerador/denominador de las unidades y evalua la misma formula del
     mapeo (nunca un x100 fijo). Unidad incompleta (Gris) no cuenta; numerador>0 con
     denominador=0 es inconsistencia (no se suma); ambos 0 es un cero real y si cuenta.
+    numerador_solo_total: casos sin unidad que igual son del OOAD (DM 05).
     """
 
-    total_num  = 0
+    total_num  = numerador_solo_total
     total_den  = 0
     hay_alguna = False
 
@@ -89,7 +90,7 @@ def agregar_total_ooad(unidades: dict[str, ResultadoUnidad], formula_resultado: 
 
 def calcular_unidades(
     numerador: dict, denominador: dict, formula: str, unidades: list[str] | None = None,
-    excluidas_del_total: list[str] = (), cero_es_sin_dato: bool = False,
+    excluidas_del_total: list[str] = (), cero_es_sin_dato: bool = False, numerador_solo_total: int = 0,
 ) -> dict[str, ResultadoUnidad]:
     """
     {unidad: numerador} + {unidad: denominador} ya contados -> {unidad: resultado} + TOTAL_OOAD.
@@ -97,6 +98,7 @@ def calcular_unidades(
       unidades:            cuales y en que orden (por omision las que traigan dato)
       excluidas_del_total: se calculan y muestran, pero no suman al TOTAL_OOAD
       cero_es_sin_dato:    denominador 0 = no tuvo a quien medir (Gris), no "0 = Esperado"
+      numerador_solo_total: casos sin unidad que solo suman al TOTAL_OOAD (DM 05)
     """
 
     if unidades is None:
@@ -116,6 +118,6 @@ def calcular_unidades(
         )
 
     para_el_total = {unidad: resultado for unidad, resultado in resultados.items() if unidad not in excluidas_del_total}
-    resultados[CLAVE_TOTAL] = agregar_total_ooad(para_el_total, formula)
+    resultados[CLAVE_TOTAL] = agregar_total_ooad(para_el_total, formula, numerador_solo_total)
 
     return resultados

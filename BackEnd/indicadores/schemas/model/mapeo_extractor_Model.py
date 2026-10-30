@@ -8,7 +8,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from schemas.model.ficha_indicador_Model import ModoExtraccion, Operacion
-from schemas.model.mapeo_comun_Model import FichaMapeo, FuentePoblacionInfoSalud
+from schemas.model.mapeo_comun_Model import FichaMapeo, FuenteCensoDM, FuentePoblacionInfoSalud
 
 
 class FuenteExtractor(BaseModel):
@@ -45,8 +45,8 @@ class FuenteExtractor(BaseModel):
 
 class ReporteExtractorMapeo(BaseModel):
     numerador:   FuenteExtractor
-    # Poblacion (EH 03/DM 04, al cerrar el corte) o el mismo SUI-13 (MT 03, cada mes).
-    denominador: Annotated[FuentePoblacionInfoSalud | FuenteExtractor, Field(discriminator="fuente")]
+    # Poblacion (EH 03/DM 04, al cerrar el corte), el mismo SUI-13 (MT 03, cada mes) o el Censo DM (DM 05).
+    denominador: Annotated[FuentePoblacionInfoSalud | FuenteExtractor | FuenteCensoDM, Field(discriminator="fuente")]
     operacion:   Operacion
 
 

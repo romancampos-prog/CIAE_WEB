@@ -422,3 +422,14 @@
   .exa-capa, .exa-panel { animation: none; }
   .exa-celda { transition: none; }
 }
+
+/* Censo de pacientes con DM: años subidos + botón para subir */
+.exc-censo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.exc-censo-lista { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.exc-censo-fila { display: flex; align-items: center; gap: 10px; margin: 0; font-size: .86rem; color: var(--texto-secundario); min-width: 0; }
+.exc-censo-fila svg { color: var(--marca-texto); flex-shrink: 0; }
+.exc-censo-fila strong { color: var(--texto); white-space: nowrap; }
+.exc-censo-fila span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exc-censo-fecha { color: var(--texto-suave); font-size: .78rem; }
+.exc-censo-vacio { margin: 0; font-size: .86rem; color: var(--texto-suave); }
+.exc-censo-boton { display: inline-flex; align-items: center; gap: 8px; }

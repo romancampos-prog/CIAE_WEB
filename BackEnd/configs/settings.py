@@ -18,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR  = BASE_DIR.parent.parent / "BD_CIAE"
 DATA_INDICADORES = BASE_DIR.parent.parent / "BD_CIAE/INDICADORES"
 DATA_POBLACION_INFOSALUD = BASE_DIR.parent.parent / "BD_CIAE/POBLACION_INFOSALUD"
+DATA_CENSO_DM = BASE_DIR.parent.parent / "BD_CIAE/CENSO_DM"
 # Usuarios de cada hospital/UMF (hash, rol y nombres de su unidad): son datos, no van en git.
 DATA_USUARIOS_UNIDADES = BASE_DIR.parent.parent / "BD_CIAE/USUARIOS/usuarios_unidades.json"
 

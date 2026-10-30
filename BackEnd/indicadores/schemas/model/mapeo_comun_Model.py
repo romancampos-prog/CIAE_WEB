@@ -18,6 +18,14 @@ class FuentePoblacionInfoSalud(BaseModel):
 
 ##--------------------------------------
 
+class FuenteCensoDM(BaseModel):
+    """Censo de pacientes con DM por unidad (DM 05): suma ambos sexos en los gruposEdad del mapeo."""
+    fuente:     Literal["censoDM"]
+    gruposEdad: list[str]
+
+
+##--------------------------------------
+
 class FichaMapeo(BaseModel):
     """
     Lo que cualquier pantalla o Excel necesita de un indicador (titulo, semaforo,

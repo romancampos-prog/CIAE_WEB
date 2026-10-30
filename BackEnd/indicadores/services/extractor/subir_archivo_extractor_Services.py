@@ -6,6 +6,7 @@ segun su periodicidad:
   - mensual del mismo archivo (MT 03)             -> generar_mensual_Services
   - mensual con dos archivos o anualizado (Neonatal 06) -> generar_por_partes_Services
   - mensual con desfase (Neonatal 04)             -> generar_con_desfase_Services
+  - anualizado con el Censo DM (DM 05)            -> generar_anualizado_censo_Services
 El cruce con Egresos lo pide el mapeo (cruce.activa), no la periodicidad.
 Usado en: Controller/extractor_Controller.py, services/extractor/completar_cruce_Services.py
 """
@@ -15,11 +16,12 @@ from datos.excel_subido.lector_excel_Datos import LectorExcel
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from schemas.model.mapeo_extractor_Model import FuenteExtractor
 from services.extractor.catalogo_extractor_Services import (
-    ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, indicadores_extractor, tiene_desfase,
+    ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, indicadores_extractor, tiene_desfase, usa_censo_dm,
 )
 from compartido.auditoria_Services import registrar
 from compartido.validar_archivo_Services import validar_archivo_subido
 from services.extractor.conteo_por_unidad_Services import contar_por_unidad
+from services.extractor.generar_anualizado_censo_Services import procesar_anualizado_con_censo
 from services.extractor.generar_con_desfase_Services import procesar_con_desfase
 from services.extractor.generar_corte_Services import procesar_corte
 from services.extractor.generar_mensual_Services import calcular_y_guardar_mes
@@ -46,6 +48,8 @@ def _procesar_indicador(indicador: str, anio: int, mes_nombre: str, lector: Lect
 
     if periodicidad not in PERIODICIDADES_MENSUAL_SOPORTADAS:
         raise ValueError(f"{indicador}: la periodicidad '{mapeo.periodicidad}' no está soportada por el Extractor.")
+    if usa_censo_dm(mapeo):
+        return procesar_anualizado_con_censo(indicador, mapeo, anio, mes_nombre, lector)
     if tiene_desfase(mapeo):
         return procesar_con_desfase(indicador, mapeo, anio, mes_nombre, lector, archivo)
     # Anualizado necesita guardar los conteos de cada mes para sumar la ventana, aunque salgan del mismo archivo.

@@ -53,7 +53,7 @@ def estado_archivos(anio: int) -> dict:
         if fuentes.numerador.archivo == clave and "numerador" not in partes_del_mes:
             return False
 
-        return not (fuentes.denominador.archivo == clave and "denominador" not in partes_del_mes)
+        return not (getattr(fuentes.denominador, "archivo", None) == clave and "denominador" not in partes_del_mes)
 
     # Un bloque por archivo base, cada uno con los indicadores que el mapeo le asigna
     # (incluido el denominador que venga de otro archivo).

@@ -1,8 +1,8 @@
 """
 Lo que el mapeo dice de los indicadores del Extractor: cuales son, cuales van por corte, que
 archivos usa cada uno, si llevan cruce con Egresos y si se reportan en otro mes que el del
-archivo (desfase).
-Usado en: services/extractor/*, services/reporte_guardado/reporte_guardado_Services.py, services/grafica/*, services/excel/*
+archivo (desfase) o usan el Censo DM de denominador.
+Usado en: services/extractor/*, services/censo_dm/*, services/reporte_guardado/reporte_guardado_Services.py, services/grafica/*, services/excel/*
 """
 from functools import lru_cache
 
@@ -93,3 +93,10 @@ def configuracion_cruce(mapeo: IndicadorExtractorMapeo) -> dict | None:
 def tiene_desfase(mapeo: IndicadorExtractorMapeo) -> bool:
     """True si el mapeo dice que el resultado se reporta en otro mes que el del archivo (Neonatal 04)."""
     return bool((mapeo.reporte.denominador.model_extra or {}).get("mesDelReporte"))
+
+
+##--------------------------------------
+
+def usa_censo_dm(mapeo: IndicadorExtractorMapeo) -> bool:
+    """True si el denominador es el Censo de pacientes con DM (DM 05): anualizado por fecha de ingreso con denominador fijo."""
+    return mapeo.reporte.denominador.fuente == "censoDM"

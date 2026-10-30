@@ -4,6 +4,7 @@ from ..Controller import ftp_Controller
 from ..Controller import poblacion_Controller
 from ..Controller import iaas_Controller
 from ..Controller import extractor_Controller
+from ..Controller import censo_dm_Controller
 from ..Controller import excel_Controller
 from ..Controller import informacion_Controller
 from ..Controller import reportes_Controller
@@ -22,6 +23,9 @@ routesIndicadores.include_router(iaas_Controller.iaasApi, prefix="/iaas")
 
 #EndPoints EXTRACTOR (GENERACION DE EH 03 / DM 04 MEDIANTE EXCEL CRUDO MENSUAL)
 routesIndicadores.include_router(extractor_Controller.extractorApi, prefix="/extractor")
+
+#EndPoints CENSO DM (CENSO DE PACIENTES CON DIABETES: DENOMINADOR DE DM 05)
+routesIndicadores.include_router(censo_dm_Controller.censoDmApi, prefix="/censo-dm")
 
 #EndPoints REPORTES (BD_CIAE CONSULTAS DATOS DE LOS INDICADORES)
 routesIndicadores.include_router(reportes_Controller.reportesApi, prefix="/reportes")

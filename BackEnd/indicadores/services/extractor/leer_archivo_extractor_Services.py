@@ -11,7 +11,11 @@ from compartido.extraccion_excel.modos_por_filtro.mascara_filtros_Services impor
 from compartido.extraccion_excel.motor_extraccion_Services import columnas_esperadas
 from datos.excel_subido.lector_excel_Datos import LectorExcel, numeros_escritos_como_texto
 from shared.MESES import MESES_ESTANDAR
-from shared.UNIDADES import CATALOGOS_UNIDADES
+from shared.UNIDADES import CATALOGOS_UNIDADES, CLAVE_UNIDADES_F
+
+# Sin catalogoUnidades se agrupa por la UMF de adscripcion: el SUI-13 trae la clave recortada
+# ("11011125"), y sus 6 primeras cifras identifican la unidad (igual que el cruce de EH 03/DM 04).
+DIGITOS_CLAVE_UMF = 6
 
 
 def columnas_por_nombre(config: dict) -> list[str]:
@@ -26,6 +30,9 @@ def columnas_por_nombre(config: dict) -> list[str]:
     for columna in ("columnaFechaNacimiento", "columnaFechaDefuncion"):
         if regla.get(columna):
             nombres.append(regla[columna])
+
+    if config.get("columnaMesDeConteo"):
+        nombres.append(config["columnaMesDeConteo"])
 
     return nombres
 
@@ -67,16 +74,18 @@ def validar_mes_anio_archivo(df, anio: int, mes_nombre: str, columnas: dict | No
 
 ##--------------------------------------
 
-def filas_que_cuentan(lector: LectorExcel, config: dict, anio: int, mes_nombre: str) -> tuple[pd.DataFrame, dict]:
+def filas_que_cuentan(lector: LectorExcel, config: dict, anio: int, mes_nombre: str,
+                      con_fuera_de_catalogo: bool = False) -> tuple[pd.DataFrame, dict]:
     """
     Las filas del archivo que pasan los filtros del bloque del mapeo (filtroColumna +
     filtroGrupoColumnas, la misma regla que FILTRO_CONTEO), con su unidad en la columna
     "unidad" (de 'agrupacion' buscada en 'catalogoUnidades'); las de unidades fuera del
-    catalogo se quitan. Regresa (filas, catalogo).
+    catalogo se quitan, salvo con_fuera_de_catalogo (quedan con "unidad" vacia: DM 05 las
+    suma al TOTAL_OOAD). Regresa (filas, catalogo).
     """
 
     nombre_catalogo = config.get("catalogoUnidades")
-    catalogo = CATALOGOS_UNIDADES.get(nombre_catalogo)
+    catalogo = CLAVE_UNIDADES_F if nombre_catalogo is None else CATALOGOS_UNIDADES.get(nombre_catalogo)
 
     if catalogo is None:
         raise ValueError(f"catalogoUnidades '{nombre_catalogo}' no existe -- opciones: {list(CATALOGOS_UNIDADES)}")
@@ -89,9 +98,11 @@ def filas_que_cuentan(lector: LectorExcel, config: dict, anio: int, mes_nombre: 
     filas = df[mascara_filtros(df, DetalleFiltroConteo.model_validate(config))].copy()
     # Una clave numerica con celdas vacias en la columna llega como float ("110804012151.0").
     claves = filas[config["agrupacion"]].astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
+    if nombre_catalogo is None:
+        claves = claves.str[:DIGITOS_CLAVE_UMF]
     filas["unidad"] = claves.map(catalogo)
 
-    return filas[filas["unidad"].notna()], catalogo
+    return (filas if con_fuera_de_catalogo else filas[filas["unidad"].notna()]), catalogo
 
 
 ##--------------------------------------
@@ -99,7 +110,8 @@ def filas_que_cuentan(lector: LectorExcel, config: dict, anio: int, mes_nombre: 
 def leer_fecha(columna: pd.Series) -> pd.Series:
     """
     Fechas como vienen en los reportes: 2026 trae fecha de Excel ("2026-01-17 14:32:00") y
-    2025 texto con "p. m." ("28/12/2025 02:12:00 p. m."). Lo que no se pueda leer queda vacio.
+    2025 texto con "p. m." ("28/12/2025 02:12:00 p. m."); el SUI-13 las trae pegadas DDMMAAAA
+    ("11072025", o como numero sin el cero inicial). Lo que no se pueda leer queda vacio.
     """
     texto = columna.astype(str).str.strip().str.replace("p. m.", "PM", regex=False).str.replace("a. m.", "AM", regex=False)
     fechas = pd.Series(pd.NaT, index=columna.index)
@@ -107,4 +119,6 @@ def leer_fecha(columna: pd.Series) -> pd.Series:
     for formato in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%d/%m/%Y %I:%M:%S %p", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y"):
         fechas = fechas.fillna(pd.to_datetime(texto, errors="coerce", format=formato))
 
-    return fechas
+    pegadas = texto.str.replace(r"\.0$", "", regex=True)
+    pegadas = pegadas.where(pegadas.str.fullmatch(r"\d{7,8}")).str.zfill(8)
+    return fechas.fillna(pd.to_datetime(pegadas, errors="coerce", format="%d%m%Y"))
