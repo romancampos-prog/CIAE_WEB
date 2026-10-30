@@ -13,6 +13,9 @@ interface Props {
   mesActivo: string;
   onSelectUnidad?: (unidad: string) => void;
   niveles?: Desempeno[];
+  /** El mes del semanal que aún no cierra: su encabezado dice la semana ("Sep S4"). */
+  mesParcial?: string | null;
+  semana?: number;
 }
 
 /**
@@ -25,9 +28,10 @@ interface Props {
  *   unidadSel        — unidad resaltada
  *   mesActivo        — mes resaltado ("Julio")
  *   onSelectUnidad   — fn(unidad) al dar clic en una fila
+ *   mesParcial, semana — el mes parcial y su semana
  *   niveles          — niveles del semáforo de este indicador (perfil.niveles): la leyenda solo muestra esos
  */
-const MapaCalor = ({ mapa, unidadSel, mesActivo, onSelectUnidad, niveles = ['Esperado', 'Medio', 'Bajo'] }: Props) => {
+const MapaCalor = ({ mapa, unidadSel, mesActivo, onSelectUnidad, niveles = ['Esperado', 'Medio', 'Bajo'], mesParcial, semana }: Props) => {
   if (!mapa?.filas?.length) return null;
   const { meses, filas } = mapa;
   const conGris = filas.some(f => f.valores.some(v => (v?.desempeno ?? 'Gris') === 'Gris'));
@@ -46,7 +50,7 @@ const MapaCalor = ({ mapa, unidadSel, mesActivo, onSelectUnidad, niveles = ['Esp
             <tr>
               <th scope="col" className="ige-mapa-unidad">Unidad</th>
               {meses.map(mes => (
-                <th key={mes} scope="col" className={mes === mesActivo ? 'ige-mapa-mes--activo' : undefined}>{corto(mes)}</th>
+                <th key={mes} scope="col" className={mes === mesActivo ? 'ige-mapa-mes--activo' : undefined}>{corto(mes)}{mes === mesParcial && semana ? ` S${semana}` : ''}</th>
               ))}
             </tr>
           </thead>

@@ -100,7 +100,6 @@ export interface PerfilIndicador {
   etiquetaNumerador: string | null;
   etiquetaDenominador: string | null;
   esCorte: boolean;
-  umbralDenominadorChico: number | null;
   serieCortes: SerieCortes | null;
 }
 

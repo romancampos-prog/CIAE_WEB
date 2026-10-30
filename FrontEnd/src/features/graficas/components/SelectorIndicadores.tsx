@@ -48,7 +48,7 @@ const SelectorIndicadores = ({ grupos, indicador, categoria, color, icono, drawe
       </div>
 
       <div className="ig-drawer-body">
-        {grupos.map(({ cat, color: colorGrupo, inds }) => {
+        {grupos.map(({ cat, color: colorGrupo, icono: iconoGrupo, inds }) => {
           const esActiva = categoria === cat;
           return (
             <div key={cat} className="ig-ind-cat-group">
@@ -57,7 +57,13 @@ const SelectorIndicadores = ({ grupos, indicador, categoria, color, icono, drawe
                 style={{ '--ic': colorGrupo }}
                 onClick={() => seleccionar(esActiva ? indicador : inds[0])}
               >
-                <span>{cat}</span>
+                <span className="ig-ind-cat-nombre">
+                  {/* El ícono de la familia (del catálogo del mapeo), en su color */}
+                  <span className="ig-ind-cat-icono" style={{ background: `${colorGrupo}1f` }}>
+                    {iconoGrupo && <img src={iconoGrupo} alt="" />}
+                  </span>
+                  {cat}
+                </span>
                 <span className="ig-ind-cat-right">
                   <span className="ig-ind-cat-badge">{inds.length}</span>
                 </span>

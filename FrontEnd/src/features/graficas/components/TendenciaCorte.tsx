@@ -2,9 +2,7 @@
 import type { PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
 import type { PuntoColumna } from '@/types/pantallas/graficas';
 import ListaUnidades from './ListaUnidades';
-import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
-import LeyendaSemaforo from './LeyendaSemaforo';
 import { datosDelMes, franjasDe, formatoValor, mesCorto, nombreUnidad, techoDe, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
@@ -55,12 +53,10 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
   const casos = casosPorMes.map(m => ({ ...m, n: m.unidades[unidadSel] ?? null }));
   const techoCasos = techoDe(casos.map(m => m.n));
   const enCurso = casos.filter(m => m.enCurso).length;
-  const fila = puntos.find(p => p.clave === corteActivo);
-  const conDato = puntos.filter(p => p.resultado != null);
 
   return (
     <div className="gi-tendencia">
-      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} onElegir={onElegirUnidad} />
+      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} tipoMeta={perfil?.tipoMeta} onElegir={onElegirUnidad} />
 
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">
@@ -68,19 +64,8 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
           El fondo son las franjas del semáforo de cada corte.
         </p>
 
-        <DatosUnidad
-          unidad={unidadSel}
-          periodo={`corte de ${mesSel.toLowerCase()} ${anio}`}
-          fila={fila}
-          filas={filas}
-          perfil={perfil}
-          enEsperado={{ dentro: conDato.filter(p => p.desempeno === 'Esperado').length, total: conDato.length }}
-          franjas={franjasDe(perfil, mesSel, unidadSel)}
-        />
-
         <h3 className="gi-subtitulo">Sus cortes</h3>
-        {puntos.length ? <ColumnasTendencia puntos={puntos} activo={corteActivo} comoPuntos={perfil?.tipoMeta === 'rango'} etiquetaNumerador={perfil?.etiquetaNumerador} etiquetaDenominador={perfil?.etiquetaDenominador} /> : <p className="ige-vacio">Todavía no hay cortes cerrados.</p>}
-        <LeyendaSemaforo niveles={perfil?.niveles} conGris={puntos.some(p => p.resultado == null)} franjas={franjasDe(perfil, mesSel, unidadSel)} />
+        {puntos.length ? <ColumnasTendencia puntos={puntos} activo={corteActivo} comoPuntos={perfil?.tipoMeta === 'rango'} /> : <p className="ige-vacio">Todavía no hay cortes cerrados.</p>}
 
         <h3 className="gi-subtitulo">Casos por mes</h3>
         <p className="gi-vista-ayuda">

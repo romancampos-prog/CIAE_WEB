@@ -10,9 +10,6 @@ interface Props {
   activo: string;
   /** Meta de rango: un punto en vez de barra (una barra alta no es "mejor"). */
   comoPuntos?: boolean;
-  /** Palabras del mapeo para el numerador y el denominador (perfil). */
-  etiquetaNumerador?: string | null;
-  etiquetaDenominador?: string | null;
   onElegir?: (clave: string) => void;
 }
 
@@ -23,7 +20,7 @@ interface Props {
  *
  * activo = clave del periodo resaltado (el mes de la página); onElegir, si se pasa, elige el periodo al dar clic.
  */
-const ColumnasTendencia = ({ puntos, activo, comoPuntos = false, etiquetaNumerador, etiquetaDenominador, onElegir }: Props) => {
+const ColumnasTendencia = ({ puntos, activo, comoPuntos = false, onElegir }: Props) => {
   const techo = techoDe([...puntos.map(p => p.resultado), ...puntos.flatMap(p => limitesDe(p.franjas))]);
   const porcentaje = (valor: number) => Math.min(100, (valor / techo) * 100);
   const alto = (valor: number) => `${porcentaje(valor)}%`;
@@ -82,8 +79,6 @@ const ColumnasTendencia = ({ puntos, activo, comoPuntos = false, etiquetaNumerad
                     numerador={p.numerador}
                     denominador={p.denominador}
                     extra={p.extra}
-                    etiquetaNumerador={etiquetaNumerador}
-                    etiquetaDenominador={etiquetaDenominador}
                   />
                 </span>
                 <span className="gi-columna-etiqueta">{p.etiqueta}</span>

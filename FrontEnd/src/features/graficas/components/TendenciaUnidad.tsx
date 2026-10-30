@@ -2,10 +2,8 @@
 import type { PerfilIndicador, ReporteIndicador } from '@/types/api/indicadores/reportes';
 import type { PuntoColumna } from '@/types/pantallas/graficas';
 import ListaUnidades from './ListaUnidades';
-import DatosUnidad from './DatosUnidad';
 import ColumnasTendencia from './ColumnasTendencia';
-import LeyendaSemaforo from './LeyendaSemaforo';
-import { datosDelMes, franjasDe, formatoValor, mesCorto, nombreUnidad, serieDeUnidad, textoMeta } from '@/features/graficas/utils/datosGrafica';
+import { datosDelMes, formatoValor, mesCorto, nombreUnidad, serieDeUnidad, textoMeta } from '@/features/graficas/utils/datosGrafica';
 
 interface Props {
   reporte: ReporteIndicador | null;
@@ -36,9 +34,7 @@ const TendenciaUnidad = ({
 }: Props) => {
   const { filas, estatal } = datosDelMes(reporte, mesSel, acumulado);
   const serie = serieDeUnidad(reporte, meses, unidadSel, perfil, acumulado, mesParcial);
-  const fila = serie.find(p => p.mes === mesSel);
   const esRango = perfil?.tipoMeta === 'rango';
-  const cerrados = serie.filter(p => !p.parcial && p.resultado != null);
 
   const puntos = serie.map((p): PuntoColumna => {
     const estado = p.desempeno === 'Gris' ? 'sin dato' : p.desempeno;
@@ -49,16 +45,16 @@ const TendenciaUnidad = ({
       estatal: null,
       clave: p.mes,
       etiqueta: p.parcial ? `${mesCorto(p.mes)} S${semana}` : mesCorto(p.mes),
-      etiquetaLarga: p.parcial ? `${p.mes} (parcial · semana ${semana})` : p.mes,
+      etiquetaLarga: p.parcial ? `${p.mes} · Semana ${semana}` : p.mes,
       valorTexto: formatoValor(p.resultado, perfil?.unidadMedida),
       extra,
-      titulo: `${p.mes}${p.parcial ? ' (parcial)' : ''}: ${formatoValor(p.resultado, perfil?.unidadMedida)} (${estado})${extra ? ` · ${extra}` : ''}`,
+      titulo: `${p.mes}${p.parcial ? ` · Semana ${semana}` : ''}: ${formatoValor(p.resultado, perfil?.unidadMedida)} (${estado})${extra ? ` · ${extra}` : ''}`,
     };
   });
 
   return (
     <div className="gi-tendencia">
-      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} grupoDeUnidad={grupoDeUnidad} onElegir={onElegirUnidad} />
+      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} tipoMeta={perfil?.tipoMeta} grupoDeUnidad={grupoDeUnidad} onElegir={onElegirUnidad} />
 
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">
@@ -66,19 +62,8 @@ const TendenciaUnidad = ({
           y el fondo son las franjas del semáforo de cada mes. Da clic en un mes para elegirlo.
         </p>
 
-        <DatosUnidad
-          unidad={unidadSel}
-          periodo={mesSel.toLowerCase()}
-          fila={fila}
-          filas={filas}
-          perfil={perfil}
-          enEsperado={{ dentro: cerrados.filter(p => p.desempeno === 'Esperado').length, total: cerrados.length }}
-          franjas={franjasDe(perfil, mesSel, unidadSel)}
-        />
+        <ColumnasTendencia puntos={puntos} activo={mesSel} comoPuntos={esRango} onElegir={onElegirMes} />
 
-        <ColumnasTendencia puntos={puntos} activo={mesSel} comoPuntos={esRango} etiquetaNumerador={perfil?.etiquetaNumerador} etiquetaDenominador={perfil?.etiquetaDenominador} onElegir={onElegirMes} />
-
-        <LeyendaSemaforo niveles={perfil?.niveles} conGris={serie.some(p => p.resultado == null)} franjas={franjasDe(perfil, mesSel, unidadSel)} />
       </div>
     </div>
   );

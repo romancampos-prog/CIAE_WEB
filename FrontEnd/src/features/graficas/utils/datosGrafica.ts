@@ -155,6 +155,39 @@ export function serieDeUnidad(
   });
 }
 
+/**
+ * Lo de la unidad elegida en el periodo elegido, para el panel de al lado de la Tendencia: su
+ * dato (resultado, semáforo, num/den) y cuántos periodos cerrados lleva en Esperado. En los
+ * indicadores por corte, los periodos son los cortes.
+ */
+export function datosDeUnidad(
+  reporte: ReporteIndicador | null,
+  perfil: PerfilIndicador | null,
+  meses: string[],
+  mesSel: string,
+  unidad: string,
+  acumulado: boolean,
+  mesParcial: string | null,
+  anio: string,
+): { fila: FilaUnidad | undefined; enEsperado: { dentro: number; total: number } } {
+  if (perfil?.serieCortes) {
+    const cortes = perfil.serieCortes.cortes.map(c => ({ mes: c.mes, anio: String(c.anio), dato: c.unidades[unidad] }));
+    const elegido = cortes.find(c => c.mes === mesSel && c.anio === anio)?.dato;
+    const conDato = cortes.filter(c => c.dato?.resultado != null);
+    return {
+      fila: elegido && { unidad, ...elegido },
+      enEsperado: { dentro: conDato.filter(c => c.dato.desempeno === 'Esperado').length, total: conDato.length },
+    };
+  }
+  const serie = serieDeUnidad(reporte, meses, unidad, perfil, acumulado, mesParcial);
+  const cerrados = serie.filter(p => !p.parcial && p.resultado != null);
+  const elegido = serie.find(p => p.mes === mesSel);
+  return {
+    fila: elegido && { unidad, ...elegido },
+    enEsperado: { dentro: cerrados.filter(p => p.desempeno === 'Esperado').length, total: cerrados.length },
+  };
+}
+
 /** Techo de la escala: el mayor valor a dibujar con un poco de aire, para que nada se salga. */
 export function techoDe(valores: (number | null | undefined)[]): number {
   const mayor = Math.max(0, ...valores.filter((v): v is number => v != null));

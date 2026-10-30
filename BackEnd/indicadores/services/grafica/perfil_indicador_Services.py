@@ -1,7 +1,7 @@
 """
 El perfil del indicador para la grafica, sacado del mapeo: tipo de meta, niveles del semaforo,
-meta y franjas del semaforo por mes (y por unidad en IAAS 01), unidad de medida, si es por corte y el umbral de
-denominador chico, para que el front no deduzca reglas por su cuenta.
+meta y franjas del semaforo por mes (y por unidad en IAAS 01), unidad de medida y si es por corte, para que el
+front no deduzca reglas por su cuenta.
 Usado en: services/grafica/grafica_indicador_Services.py
 """
 from services.calculo.formulas_Services import evaluar_formula
@@ -11,9 +11,6 @@ from services.semaforo.umbrales_semaforo_Services import es_agrupado, es_formato
 from shared.MESES import MESES_ESTANDAR
 from shared.reglas_periodicidad import es_periodicidad_de_corte
 from shared.UNIDADES import grupo_de_unidad_iaas01
-
-# Con menos casos que esto en el denominador, un solo caso mueve mucho el resultado: la grafica lo avisa.
-UMBRAL_DENOMINADOR_CHICO = 20
 
 # Lo que vale la formula con numerador = denominador = 1 dice en que se expresa el resultado.
 _UNIDAD_POR_FACTOR = {1: "promedio", 100: "%", 1000: "por 1,000", 100000: "por 100,000"}
@@ -51,9 +48,7 @@ def perfil_de_indicador(bloque: dict, unidades: list[str]) -> dict:
     """
     Lo que la grafica necesita saber del indicador, sacado del mapeo:
       tipoMeta (mas/menos/rango/None), niveles del semaforo, meta de cada mes (y de cada unidad
-      cuando el semaforo va por grupo, IAAS 01), unidad de medida, si se publica por corte y el
-      umbral de denominador chico (solo en porcentajes y tasas: en un promedio el denominador no
-      son casos, ej. dias laborados).
+      cuando el semaforo va por grupo, IAAS 01), unidad de medida y si se publica por corte.
     """
 
     semaforo = bloque.get("semaforo") or {}
@@ -86,6 +81,5 @@ def perfil_de_indicador(bloque: dict, unidades: list[str]) -> dict:
         "etiquetaNumerador": (bloque.get("informacion") or {}).get("etiquetaNumerador"),
         "etiquetaDenominador": (bloque.get("informacion") or {}).get("etiquetaDenominador"),
         "esCorte": es_periodicidad_de_corte(bloque.get("periodicidad")),
-        "umbralDenominadorChico": UMBRAL_DENOMINADOR_CHICO if unidad_medida in ("%", "por 1,000", "por 100,000") else None,
         "serieCortes": None,
     }

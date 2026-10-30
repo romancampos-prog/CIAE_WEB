@@ -24,7 +24,7 @@ interface Props {
 const SelectorMes = ({ meses, mesSel, mesParcial, semana, anio, esCorte, onCambiar }: Props) => {
   const etiqueta = (mes: string) => {
     const base = esCorte ? `Corte de ${mes.toLowerCase()} ${anio}` : `${mes} ${anio}`;
-    return mes === mesParcial ? `${base} (parcial · semana ${semana})` : base;
+    return mes === mesParcial ? `${base} · Semana ${semana}` : base;
   };
 
   return (

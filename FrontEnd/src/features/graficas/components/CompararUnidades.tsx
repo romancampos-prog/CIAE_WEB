@@ -4,7 +4,6 @@ import { useState } from 'react';
 import type { Desempeno, PerfilIndicador } from '@/types/api/indicadores/reportes';
 import type { FilaUnidad } from '@/types/pantallas/graficas';
 import FranjasSemaforo from './FranjasSemaforo';
-import LeyendaSemaforo from './LeyendaSemaforo';
 import TooltipDato from './TooltipDato';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
 import {
@@ -19,6 +18,8 @@ interface Props {
   mes: string;
   /** { unidad: "HGS" | ... } cuando el semáforo va por grupo (IAAS 01): la lista se agrupa. */
   grupoDeUnidad?: Record<string, string> | null;
+  /** Nivel elegido en el panel de al lado para ver solo esas unidades. */
+  filtro: Desempeno | null;
   onVerUnidad: (unidad: string) => void;
 }
 
@@ -30,8 +31,7 @@ const VISIBLES = 15;
  * rojo y se lee sola. El Total OOAD va fijo arriba. Ordenadas de la mejor a la peor según el
  * tipo de meta del backend.
  */
-const CompararUnidades = ({ filas, estatal, perfil, mes, grupoDeUnidad, onVerUnidad }: Props) => {
-  const [filtro, setFiltro]     = useState<Desempeno | null>(null);
+const CompararUnidades = ({ filas, estatal, perfil, mes, grupoDeUnidad, filtro, onVerUnidad }: Props) => {
   const [verTodas, setVerTodas] = useState(false);
 
   const esRango = perfil?.tipoMeta === 'rango';
@@ -43,7 +43,6 @@ const CompararUnidades = ({ filas, estatal, perfil, mes, grupoDeUnidad, onVerUni
   const todas = estatal ? [estatal, ...filas] : filas;
   const techo = techoDe([...todas.map(f => f.resultado), ...todas.flatMap(f => limitesDe(franjasDe(perfil, mes, f.unidad)))]);
   const porcentaje = (valor: number) => `${Math.min(100, (valor / techo) * 100)}%`;
-  const umbral = perfil?.umbralDenominadorChico;
   // Arriba de la lista, el número de cada corte del semáforo alineado con las franjas (si todas comparten semáforo)
   const cortes = porGrupo ? [] : [...new Set(limitesDe(perfil?.franjasPorMes?.[mes] ?? []))].filter(v => v > 0 && v < techo);
   const medida = perfil?.unidadMedida && perfil.unidadMedida !== '%' ? ` (${perfil.unidadMedida})` : '';
@@ -58,7 +57,6 @@ const CompararUnidades = ({ filas, estatal, perfil, mes, grupoDeUnidad, onVerUni
 
   const fila = (f: FilaUnidad, esTotal = false) => {
     const franjas = franjasDe(perfil, mes, f.unidad);
-    const chico = umbral != null && f.denominador != null && f.denominador < umbral;
     const estado = f.desempeno === 'Gris' ? 'Sin dato' : f.desempeno;
     const nombre = esTotal ? ETIQUETA_TOTAL : f.unidad;
     return (
@@ -83,14 +81,11 @@ const CompararUnidades = ({ filas, estatal, perfil, mes, grupoDeUnidad, onVerUni
               numerador={f.numerador}
               denominador={f.denominador}
               extra={null}
-              etiquetaNumerador={perfil?.etiquetaNumerador}
-              etiquetaDenominador={perfil?.etiquetaDenominador}
             />
           </span>
           <span className="gi-comparar-valor">
             <strong>{formatoValor(f.resultado, perfil?.unidadMedida)}</strong>
             <small><span className="gi-punto" />{estado}</small>
-            {chico && <small className="gi-aviso-chico" title={`Denominador de ${f.denominador}: un solo caso mueve mucho el resultado`}>den. {f.denominador}</small>}
           </span>
         </button>
       </li>
@@ -134,13 +129,6 @@ const CompararUnidades = ({ filas, estatal, perfil, mes, grupoDeUnidad, onVerUni
       )}
       {!ordenadas.length && <p className="ige-vacio">Ninguna unidad en ese nivel este mes.</p>}
 
-      <LeyendaSemaforo
-        niveles={perfil?.niveles}
-        conGris={filas.some(f => f.desempeno === 'Gris')}
-        filtro={filtro}
-        onFiltrar={setFiltro}
-        franjas={porGrupo ? undefined : perfil?.franjasPorMes?.[mes]}
-      />
     </div>
   );
 };

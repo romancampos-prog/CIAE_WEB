@@ -1,19 +1,15 @@
+// react
+import type { ReactNode } from 'react';
 // propios
 import type { Desempeno, Franja, PerfilIndicador, ResumenMes } from '@/types/api/indicadores/reportes';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
-import { ETIQUETA_TOTAL, formatoNumero as formato, textoMeta, textoNivel, type franjasPorGrupo } from '@/features/graficas/utils/datosGrafica';
+import { ETIQUETA_TOTAL, formatoNumero as formato, textoNivel, type franjasPorGrupo } from '@/features/graficas/utils/datosGrafica';
 import './estadisticas.css';
 
-const Estado = ({ desempeno }: { desempeno: Desempeno }) => (
-  <span className="ige-estado">
-    <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[desempeno] ?? COLOR_SEMAFORO.Gris }} />
-    {desempeno === 'Gris' ? 'Sin dato' : desempeno}
-  </span>
-);
-
 /**
- * Fila de indicadores clave del mes de referencia. Todo viene calculado del backend
- * (estadisticas.resumenPorMes, o resumenAcumuladoPorMes con el switch): aquí solo se pinta.
+ * Panel angosto al lado de la gráfica con lo del mes: el Total OOAD con su Num y Den (en Tendencia, en su lugar, lo de la unidad elegida) y el semáforo con los rangos de cada nivel y cuántas
+ * unidades hay en cada uno; al tocar un nivel, la lista de unidades se filtra a ese color.
+ * Todo viene calculado del backend (resumenPorMes, o resumenAcumuladoPorMes con el switch).
  *
  * Props:
  *   resumen      — un elemento de resumenPorMes
@@ -23,7 +19,9 @@ const Estado = ({ desempeno }: { desempeno: Desempeno }) => (
  *   franjas      — franjas del semáforo del mes (perfil.franjasPorMes): los números de cada nivel
  *   porTipo      — cuando el semáforo va por tipo de hospital (IAAS 01): las franjas de cada tipo
  *   acumulado    — true con el switch Acumulado: el resumen es de enero al mes
- *   etiquetaNumerador, etiquetaDenominador — palabras del mapeo ("tamizadas" / "mujeres de 25 a 64")
+ *   filtro, onFiltrar — nivel elegido para filtrar las unidades (null = todas)
+ *   bloqueSuperior — en Tendencia, lo de la unidad elegida: va en lugar del bloque del Total OOAD
+ *   bloqueExtra    — en Comparar, la mejor y la peor unidad: va debajo del Total OOAD
  */
 interface Props {
   resumen: ResumenMes | null;
@@ -33,97 +31,94 @@ interface Props {
   franjas?: Franja[];
   porTipo?: ReturnType<typeof franjasPorGrupo>;
   acumulado?: boolean;
-  etiquetaNumerador?: string | null;
-  etiquetaDenominador?: string | null;
+  filtro: Desempeno | null;
+  onFiltrar: (nivel: Desempeno | null) => void;
+  bloqueSuperior?: ReactNode;
+  bloqueExtra?: ReactNode;
 }
 
-/** "97,885 tamizadas de 716,966 mujeres de 25 a 64" (sin etiquetas: "97,885 de 716,966"). */
-const textoNumDen = (numerador: number | null, denominador: number | null, etiquetaNum?: string | null, etiquetaDen?: string | null) =>
-  numerador == null || denominador == null ? null
-    : `${formato(numerador, 0)}${etiquetaNum ? ` ${etiquetaNum}` : ''} de ${formato(denominador, 0)}${etiquetaDen ? ` ${etiquetaDen}` : ''}`;
-
-const ResumenKpis = ({ resumen, niveles = ['Esperado', 'Medio', 'Bajo'], unidadMedida, esCorte, franjas = [], porTipo = [], acumulado = false, etiquetaNumerador, etiquetaDenominador }: Props) => {
+const ResumenKpis = ({
+  resumen, niveles = ['Esperado', 'Medio', 'Bajo'], unidadMedida, esCorte, franjas = [], porTipo = [], acumulado = false,
+  filtro, onFiltrar, bloqueSuperior, bloqueExtra,
+}: Props) => {
   if (!resumen) return null;
-  const {
-    mes, estatal, numerador, denominador, desempenoEstatal, meta, mejora, unidades, unidadesConDato,
-  } = resumen;
+  const { mes, estatal, numerador, denominador, desempenoEstatal, unidades } = resumen;
   const sufijo = unidadMedida === '%' ? ' %' : '';
-  const otrosNiveles = niveles.filter(n => n !== 'Esperado').map(n => `${unidades[n] ?? 0} en ${n}`);
-  // Barra del reparto: los niveles del indicador (y Gris si hay) con sus conteos del backend
-  const repartidos: Desempeno[] = unidades.Gris ? [...niveles, 'Gris'] : niveles;
-  const total = repartidos.reduce((suma, n) => suma + (unidades[n] ?? 0), 0);
-  // El backend manda mejora = null cuando la meta es un rango
-  const esRango = mejora == null && meta != null;
+  const conteos: Desempeno[] = unidades.Gris ? [...niveles, 'Gris'] : niveles;
 
   return (
-    <section className="ige-kpis" aria-label={`Resumen de ${mes}`}>
-      <div className="ige-kpi ige-kpi--principal" style={{ '--status': COLOR_SEMAFORO[desempenoEstatal] }}>
-        <p className="ige-kpi-etiqueta">{ETIQUETA_TOTAL} · {esCorte ? 'corte de ' : ''}{acumulado ? `enero–${mes.toLowerCase()} (acumulado)` : mes.toLowerCase()}</p>
-        <p className="ige-kpi-valor">{formato(estatal)}{estatal != null && sufijo}</p>
-        <Estado desempeno={desempenoEstatal} />
-        {textoNumDen(numerador, denominador, etiquetaNumerador, etiquetaDenominador) && (
-          <p className="ige-kpi-nota">{textoNumDen(numerador, denominador, etiquetaNumerador, etiquetaDenominador)}</p>
-        )}
-        {unidadMedida && unidadMedida !== '%' && <p className="ige-kpi-nota">{unidadMedida}</p>}
-      </div>
-
-      <div className="ige-kpi">
-        <p className="ige-kpi-etiqueta">{porTipo.length ? 'Rango de la meta por tipo de hospital' : `${esRango ? 'Rango de la meta' : 'Meta'} · semáforo de ${mes.toLowerCase()}`}</p>
-        {!porTipo.length && <p className="ige-kpi-valor ige-kpi-valor--texto">{textoMeta(meta)}</p>}
-        {/* Por tipo de hospital: cada tipo con su rango; el Total OOAD usa el del OOAD */}
-        {porTipo.length > 0 && (
-          <table className="ige-rangos-tipo">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                {niveles.map(n => <th key={n}><span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[n] }} />{n}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {porTipo.map(({ grupos, franjas: delTipo }) => (
-                <tr key={grupos.join()}>
-                  <td>{grupos.join(', ')}</td>
-                  {niveles.map(n => <td key={n}>{textoNivel(delTipo, n)}</td>)}
-                </tr>
-              ))}
-              <tr className="ige-rangos-tipo--total">
-                <td>{ETIQUETA_TOTAL}</td>
-                {niveles.map(n => <td key={n}>{textoNivel(franjas, n)}</td>)}
-              </tr>
-            </tbody>
-          </table>
-        )}
-        {/* Los números de cada nivel, tal cual el semáforo del mapeo para ese mes */}
-        {porTipo.length === 0 && franjas.length > 0 && (
-          <ul className="ige-rangos">
-            {niveles.map(n => (
-              <li key={n} className={desempenoEstatal === n ? 'ige-rangos--actual' : ''}>
-                <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[n] }} />
-                <span className="ige-rangos-nivel">{n}</span>
-                <span className="ige-rangos-numeros">{textoNivel(franjas, n)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="ige-kpi-nota">{desempenoEstatal === 'Esperado' ? `El ${ETIQUETA_TOTAL} la cumple` : desempenoEstatal === 'Gris' ? `Sin dato del ${ETIQUETA_TOTAL}` : `El ${ETIQUETA_TOTAL} no la cumple`}</p>
-      </div>
-
-      <div className="ige-kpi">
-        <p className="ige-kpi-etiqueta">Unidades en Esperado</p>
-        <p className="ige-kpi-valor">
-          {unidades.Esperado}<span className="ige-kpi-de"> de {unidadesConDato}</span>
-        </p>
-        {total > 0 && (
-          <span className="ige-reparto" aria-hidden>
-            {repartidos.map(n => (
-              <span key={n} style={{ flexGrow: unidades[n] ?? 0, background: COLOR_SEMAFORO[n] }} />
-            ))}
+    <aside className="gi-panel" aria-label={`Resumen de ${mes}`}>
+      {bloqueSuperior ?? (
+      <section className="gi-panel-bloque gi-panel-bloque--estado" style={{ '--status': COLOR_SEMAFORO[desempenoEstatal] }}>
+        <p className="gi-panel-titulo">{ETIQUETA_TOTAL} · {esCorte ? 'corte de ' : ''}{acumulado ? `enero–${mes.toLowerCase()}` : mes.toLowerCase()}</p>
+        <p className="gi-panel-valor">
+          {formato(estatal)}{estatal != null && sufijo}
+          <span className="ige-estado">
+            <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[desempenoEstatal] }} />
+            {desempenoEstatal === 'Gris' ? 'Sin dato' : desempenoEstatal}
           </span>
+        </p>
+        {numerador != null && denominador != null && (
+          <p className="gi-panel-numden">
+            <span>Num <strong>{formato(numerador, 0)}</strong></span>
+            <span>Den <strong>{formato(denominador, 0)}</strong></span>
+          </p>
         )}
-        <p className="ige-kpi-nota">{otrosNiveles.join(' · ')}{unidades.Gris ? ` · ${unidades.Gris} sin dato` : ''}</p>
-      </div>
+      </section>
+      )}
+      {bloqueExtra}
 
-    </section>
+      <section className="gi-panel-bloque">
+        <p className="gi-panel-titulo">Semáforo de {mes.toLowerCase()}</p>
+
+        {/* IAAS 01: un bloque por tipo de hospital con sus rangos; al final el del Total OOAD */}
+        {porTipo.length > 0 && (
+          <div className="gi-panel-tipos">
+            {[...porTipo, { grupos: [ETIQUETA_TOTAL], franjas }].map(({ grupos, franjas: delTipo }) => (
+              <div key={grupos.join()} className="gi-panel-tipo">
+                <p className="gi-panel-tipo-nombre">{grupos.join(', ')}</p>
+                <ul className="gi-panel-tipo-rangos">
+                  {niveles.map(n => (
+                    <li key={n}>
+                      <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[n] }} />
+                      <span>{n}</span>
+                      <strong>{textoNivel(delTipo, n)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Cada nivel: su rango (si no va por tipo) y cuántas unidades tiene; al tocarlo, filtra */}
+        <ul className="gi-panel-niveles">
+          {conteos.map(n => (
+            <li key={n}>
+              <button
+                type="button"
+                className={`gi-panel-nivel${filtro === n ? ' gi-panel-nivel--activo' : ''}`}
+                style={{ '--status': COLOR_SEMAFORO[n] }}
+                aria-pressed={filtro === n}
+                onClick={() => onFiltrar(filtro === n ? null : n)}
+              >
+                <span className="ige-estado-punto" style={{ background: COLOR_SEMAFORO[n] }} />
+                <span className="gi-panel-nivel-nombre">
+                  {n === 'Gris' ? 'Sin dato' : n}
+                  {porTipo.length === 0 && n !== 'Gris' && <small>{textoNivel(franjas, n)}</small>}
+                </span>
+                <span className="gi-panel-nivel-cuenta">{unidades[n] ?? 0}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="gi-panel-nota">
+          {filtro
+            ? <button type="button" className="gi-panel-limpiar" onClick={() => onFiltrar(null)}>Ver todas las unidades</button>
+            : 'Toca un color para ver solo esas unidades.'}
+        </p>
+      </section>
+    </aside>
   );
 };
 

@@ -293,7 +293,7 @@ html[data-theme="dark"] .ig-hermano-btn--active {
      scroll en 0; en cuanto se abre el drawer con la página desplazada,
      ese hueco dejaba ver lo que hubiera quedado ahí en vez del header. */
   position: fixed; right: 0; top: 0; bottom: 0; z-index: 200;
-  width: 300px;
+  width: 340px; max-width: 92vw;
   background: var(--superficie-elevada);
   border-left: 1px solid rgba(var(--borde-rgb), 0.9);
   display: flex; flex-direction: column;
@@ -341,7 +341,7 @@ html[data-theme="dark"] .ig-hermano-btn--active {
 
 .ig-ind-cat-btn {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 10px; border-radius: 10px;
+  padding: 10px 12px; border-radius: 12px;
   border: none; background: transparent;
   font-size: 0.8rem; font-weight: 700; color: var(--texto-secundario);
   cursor: pointer; font-family: inherit; text-align: left;
@@ -355,6 +355,10 @@ html[data-theme="dark"] .ig-hermano-btn--active {
 }
 
 .ig-ind-cat-right { display: flex; align-items: center; gap: 6px; }
+/* Ícono de la familia junto a su nombre */
+.ig-ind-cat-nombre { display: flex; align-items: center; gap: 12px; font-size: .88rem; }
+.ig-ind-cat-icono { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; }
+.ig-ind-cat-icono img { width: 22px; height: 22px; object-fit: contain; }
 
 .ig-ind-cat-badge {
   font-size: 0.62rem; font-weight: 700;

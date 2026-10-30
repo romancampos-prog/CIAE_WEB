@@ -10,9 +10,6 @@ interface Props {
   numerador: number | null;
   denominador: number | null;
   extra?: string | null;
-  /** Palabras del mapeo para numerador y denominador; sin ellas, "Num" y "Den". */
-  etiquetaNumerador?: string | null;
-  etiquetaDenominador?: string | null;
 }
 
 /**
@@ -28,7 +25,7 @@ interface Props {
  *   numerador, denominador
  *   extra       — línea opcional (meta, estatal)
  */
-const TooltipDato = ({ titulo, valor, desempeno, numerador, denominador, extra, etiquetaNumerador, etiquetaDenominador }: Props) => (
+const TooltipDato = ({ titulo, valor, desempeno, numerador, denominador, extra }: Props) => (
   <span className="gi-tip" role="tooltip" style={{ '--status': COLOR_SEMAFORO[desempeno ?? 'Gris'] }}>
     <span className="gi-tip-titulo">{titulo}</span>
     <span className="gi-tip-fila">
@@ -38,8 +35,8 @@ const TooltipDato = ({ titulo, valor, desempeno, numerador, denominador, extra, 
     </span>
     {extra && <span className="gi-tip-extra">{extra}</span>}
     <span className="gi-tip-numden">
-      <span><strong>{formatoNumero(numerador)}</strong> {etiquetaNumerador ?? 'Num'}</span>
-      <span>de <strong>{formatoNumero(denominador)}</strong> {etiquetaDenominador ?? 'Den'}</span>
+      <span>Num <strong>{formatoNumero(numerador)}</strong></span>
+      <span>Den <strong>{formatoNumero(denominador)}</strong></span>
     </span>
   </span>
 );
