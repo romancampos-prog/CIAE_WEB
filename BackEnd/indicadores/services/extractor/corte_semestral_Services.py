@@ -1,11 +1,11 @@
 """
-El corte "Semestral Anualizado" (EH 03, DM 04): cuando ya estan los 12 meses de numerador crudo
-de una ventana, se suma, se trae el denominador de poblacion (misma lectura y formula del mapeo
+El corte "Semestral Anualizado" (EH 03, DM 04): cuando ya estan los 12 SUI-13 de una ventana,
+se suman los ingresos que caen dentro de ella, se trae el denominador de poblacion (misma lectura y formula del mapeo
 que FTP), se semaforiza y se guarda en CORTES. Tambien el recalculo de los cortes ya generados
 cuando llega una poblacion nueva.
 Usado en: services/extractor/generar_corte_Services.py, services/poblacion/recalcular_poblacion_Services.py
 """
-from datos.bd_ciae.extractor_Datos import guardar_reporte_extractor, leer_reporte_extractor
+from datos.bd_ciae.extractor_Datos import guardar_reporte_extractor, leer_partes, leer_reporte_extractor
 from datos.bd_ciae.poblacion_Datos import texto_poblacion_vigente
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from schemas.model.reporte_guardado_Model import UnidadDatos
@@ -54,28 +54,30 @@ def intentar_generar_corte(indicador: str, anio: int, mes_nombre: str) -> dict |
         return None
 
     ventana = ventana_corte(mes_nombre, anio)  # [(mes, anio), ...] x12
+    partes_por_anio = {anio_mes: leer_partes(indicador, anio_mes) for anio_mes in {a for _, a in ventana}}
 
-    reportes_cache: dict[int, dict] = {}
+    # Como el oficial: de los 12 SUI-13 de la ventana solo cuentan los ingresos dentro de la
+    # ventana (un egreso de Julio que ingreso en Junio del año anterior queda fuera).
+    meses_de_la_ventana = {f"{anio_mes}-{MESES_ESTANDAR.index(mes) + 1:02d}" for mes, anio_mes in ventana}
     # arranca con las 46 unidades en cero, mismo orden que usan los demas
     # reportes (NOMBREUNIDADESARCHIVO) -- si no, una unidad sin ningun caso en
     # todo el año simplemente no aparecia en el corte, en vez de salir en 0.
     numerador_acumulado: dict[str, int] = {unidad: 0 for unidad in NOMBREUNIDADESARCHIVO}
 
     for mes, anio_mes in ventana:
-        if anio_mes not in reportes_cache:
-            reportes_cache[anio_mes] = leer_reporte_extractor(indicador, anio_mes)
+        por_mes_de_ingreso = partes_por_anio[anio_mes].get(mes, {}).get("numerador")
 
-        # MESES siempre es el dato crudo (ver datos/bd_ciae/extractor_Datos.guardar_numerador_mes)
-        # -- nunca lo sobreescribe un cierre de corte, ni siquiera para el propio mes de
-        # corte, asi que sirve igual si "mes" es Junio/Diciembre o cualquier otro.
-        datos_mes = reportes_cache[anio_mes]["MESES"].get(mes)
-
-        if datos_mes is None:
+        if por_mes_de_ingreso is None:
             return None  # todavia no esta completa la ventana de 12 meses
 
-        for unidad, dato in datos_mes.items():
-            numerador_acumulado[unidad] = numerador_acumulado.get(unidad, 0) + (dato.get("numerador") or 0)
+        for mes_ingreso, por_unidad in por_mes_de_ingreso.items():
+            if mes_ingreso not in meses_de_la_ventana:
+                continue
+            for unidad, cantidad in por_unidad.items():
+                if unidad in numerador_acumulado:   # sin FUERA_DE_UNIDADES: el total es la suma de las 46
+                    numerador_acumulado[unidad] += cantidad
 
+    reportes_cache: dict[int, dict] = {anio: leer_reporte_extractor(indicador, anio)}
     mapeo = cargar_indicador_extractor(indicador)
 
     # Poblacion base del corte: Junio usa la del año anterior (el corte

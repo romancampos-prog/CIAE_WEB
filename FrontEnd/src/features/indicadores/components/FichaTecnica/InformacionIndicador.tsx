@@ -136,8 +136,8 @@ const Segmentos = ({ segmentos }: { segmentos: Segmento[] }) => (
   </>
 );
 
-// ── Bloque "filtro" (FILTRO_CONTEO / FILTRO_CONTEO_ACUMULADO / FILTRO_UNIDAD_VALOR) ──
-const BloqueFiltro = ({ hoja, condiciones, cruce }: DescripcionFiltro) => (
+// ── Bloque "filtro" (FILTRO_CONTEO / FILTRO_UNIDAD_VALOR) ──
+const BloqueFiltro = ({ hoja, condiciones }: DescripcionFiltro) => (
   <div className="fuentes-wrap">
     <div className="fuente-card fuente-card--open">
       <div className="fuente-card-toggle">
@@ -147,7 +147,6 @@ const BloqueFiltro = ({ hoja, condiciones, cruce }: DescripcionFiltro) => (
       </div>
       <div className="fuente-card-body">
         <p className="fc-extraccion"><Segmentos segmentos={condiciones} /></p>
-        {cruce && <p className="nota-prevalencia"><Segmentos segmentos={cruce} /></p>}
       </div>
     </div>
   </div>

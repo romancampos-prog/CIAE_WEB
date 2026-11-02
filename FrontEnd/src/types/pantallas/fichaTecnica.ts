@@ -31,7 +31,6 @@ export type Segmento = string | { codigos: (string | number)[] };
 export interface DescripcionFiltro {
   hoja?: string;
   condiciones: Segmento[];
-  cruce: Segmento[] | null;
 }
 
 export type FuenteDescrita =

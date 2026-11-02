@@ -48,7 +48,6 @@ export type ModoExtraccion =
   | 'INTERSECCION_FILA'
   | 'ULTIMA_FILA'
   | 'FILTRO_CONTEO'
-  | 'FILTRO_CONTEO_ACUMULADO'
   | 'FILTRO_UNIDAD_VALOR';
 
 /** Un lado (numerador o denominador) del reporte en el mapeo. `detalle` cambia según el modo. */
@@ -103,14 +102,6 @@ export interface GrupoColumnas {
   coincidencia?: 'CUALQUIERA' | 'NINGUNA';
 }
 
-export interface CruceArchivo {
-  activa?: boolean;
-  codigosCandidatos: string[];
-  archivoCruce: string;
-  columnaLlave: string;
-  codigosValidos: string[];
-}
-
 export interface DetalleFuente {
   archivo?: ConfigsFuente;
   sexo?: ConfigsFuente;
@@ -119,7 +110,6 @@ export interface DetalleFuente {
   filtroColumna?: Record<string, CondicionColumna>;
   filtroGrupoColumnas?: GrupoColumnas[];
   filtroAlternativas?: Record<string, CondicionColumna>[];
-  cruce?: CruceArchivo;
   columnaUnidad?: Record<string, { nombreColumna?: string }>;
   tomarValor?: Record<string, string>;
 }

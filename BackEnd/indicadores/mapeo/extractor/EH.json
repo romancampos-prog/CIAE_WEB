@@ -1,7 +1,7 @@
 {
     "EH 03": {
         "nombreArchivoFinal": "EH_03",
-        "fechaModificacion": "10/09/2026",
+        "fechaModificacion": "02/11/2026",
         "mostrarGenerar": true,
         "mostrarGrafica": true,
         "periodicidad": "Semestral Anualizado",
@@ -16,10 +16,11 @@
         "reporte": {
             "numerador": {
                 "fuente": "extractor",
-                "modoExtraccion": "FILTRO_CONTEO_ACUMULADO",
+                "archivo": "SUI_13",
+                "modoExtraccion": "FILTRO_CONTEO",
                 "encabezado": 1,
                 "agrupacion": "undadAdscripcion",
-                "columnaLlaveCruce": "numeroAfiliacion",
+                "columnaMesDeConteo": "fechaIngreso",
                 "filtroColumna": {
                     "I": {
                         "tipo": "RANGO",
@@ -48,45 +49,18 @@
                             "I130",
                             "I131",
                             "I132",
-                            "I139"
+                            "I139",
+                            "I160",
+                            "I161",
+                            "I169",
+                            "N180",
+                            "N188",
+                            "N189",
+                            "N18X",
+                            "N19X"
                         ],
                         "nombreColumna": "diagnosticoPrincipal"
                     }
-                },
-                "cruce": {
-                    "activa": true,
-                    "codigosCandidatos": [
-                        "I160",
-                        "I161",
-                        "I169",
-                        "N180",
-                        "N188",
-                        "N189",
-                        "N18X",
-                        "N19X"
-                    ],
-                    "archivoCruce": "EGRESOS_PACIENTES_DIARIA",
-                    "encabezado": 1,
-                    "columnaLlave": "AFILIACION",
-                    "columnasDiagnostico": {
-                        "AC": "DiagPrincipalEgreso",
-                        "AD": "PrimerDiagSecundarioEgreso",
-                        "AE": "SegundoDiagSecundarioEgr",
-                        "AF": "TercerDiagSecundario",
-                        "AG": "CuartoDiagSecundario",
-                        "AH": "QuintoDiagSecundario"
-                    },
-                    "codigosValidos": [
-                        "I10X",
-                        "I110",
-                        "I119",
-                        "I120",
-                        "I129",
-                        "I130",
-                        "I131",
-                        "I132",
-                        "I139"
-                    ]
                 }
             },
             "denominador": {

@@ -1,7 +1,7 @@
 """
 La regla unica de "esta celda cumple": filtroColumna con tipo LISTA/RANGO/PREFIJO/SUFIJO, o el
 formato simple (match exacto o "^prefijo") que usa IAAS.
-Usado en: indicadores/services/extractor/conteo_con_cruce_Services.py, modos_por_filtro/fila_cumple_Services.py, modos_por_filtro/filtro_unidad_valor_Services.py, modos_por_filtro/mascara_filtros_Services.py
+Usado en: modos_por_filtro/fila_cumple_Services.py, modos_por_filtro/filtro_unidad_valor_Services.py, modos_por_filtro/mascara_filtros_Services.py
 """
 import re
 

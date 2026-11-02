@@ -23,7 +23,7 @@ export interface IndicadorGenerarExtractor {
   archivos: ArchivoDeIndicador[];
 }
 
-export type EstadoMesArchivo = 'completo' | 'parcial' | 'pendiente' | 'sin_principal' | 'sin_registro';
+export type EstadoMesArchivo = 'completo' | 'parcial' | 'pendiente';
 
 /** GET /Indicadores/extractor/estado-archivos: un archivo y su estado en cada mes. */
 export interface ArchivoExtractor {
@@ -31,7 +31,6 @@ export interface ArchivoExtractor {
   prefijoArchivo: string;
   /** Cómo conviene llamar el archivo, con {MM} y {AAAA} por llenar (catalogos/archivos_extractor.json). */
   nombreSugerido: string;
-  tipo: 'principal' | 'cruce';
   requerido: boolean;
   uso: string;
   indicadores: string[];
@@ -49,7 +48,7 @@ export interface EstadoCorte {
   detalle: { mes: string; anio: number; subido: boolean }[];
 }
 
-/** Lo que pasó con un indicador al procesar un archivo (POST /generar y /completar-cruce). */
+/** Lo que pasó con un indicador al procesar un archivo (POST /generar). */
 export interface ResultadoIndicadorExtractor {
   indicador?: string;
   tipo?: 'corte' | 'mensual';
@@ -58,8 +57,6 @@ export interface ResultadoIndicadorExtractor {
   detalle?: string;
   total?: { numerador: number | null; denominador: number | null; '%': number | null; desempeno: string };
   numerador_por_unidad?: Record<string, number>;
-  validados_via2?: number;
   corte_generado?: boolean;
   cortes_recalculados?: string[];
-  cruce_pendiente?: boolean;
 }

@@ -2,13 +2,12 @@
 Subir el Excel de un mes de un archivo del Extractor (SUI-13, Egresos TOCO, Nacimientos,
 Defunciones...): se procesa para los indicadores que el mapeo le asigna a ESE archivo, cada uno
 segun su periodicidad:
-  - de corte (Semestral Anualizado: EH 03, DM 04) -> generar_corte_Services
+  - de corte (Semestral Anualizado: EH 03, DM 04) -> generar_corte_Services (por fecha de ingreso)
   - mensual del mismo archivo (MT 03)             -> generar_mensual_Services
   - mensual con dos archivos o anualizado (Neonatal 06) -> generar_por_partes_Services
   - mensual con desfase (Neonatal 04)             -> generar_con_desfase_Services
   - anualizado con el Censo DM (DM 05)            -> generar_anualizado_censo_Services
-El cruce con Egresos lo pide el mapeo (cruce.activa), no la periodicidad.
-Usado en: Controller/extractor_Controller.py, services/extractor/completar_cruce_Services.py
+Usado en: Controller/extractor_Controller.py
 """
 from fastapi import HTTPException
 
@@ -36,15 +35,14 @@ PERIODICIDADES_CORTE_SOPORTADAS  = {"semestral anualizado"}   # ventana_corte so
 PERIODICIDADES_MENSUAL_SOPORTADAS = {"mensual", "mensual mensual acumulado", "mensual anualizado"}
 
 
-def _procesar_indicador(indicador: str, anio: int, mes_nombre: str, lector: LectorExcel, lector_cruce: LectorExcel | None,
-                        archivo: str) -> dict:
+def _procesar_indicador(indicador: str, anio: int, mes_nombre: str, lector: LectorExcel, archivo: str) -> dict:
     mapeo = cargar_indicador_extractor(indicador)
     periodicidad = clave_periodicidad(mapeo.periodicidad)
 
     if es_periodicidad_de_corte(mapeo.periodicidad):
         if periodicidad not in PERIODICIDADES_CORTE_SOPORTADAS:
             raise ValueError(f"{indicador}: la periodicidad '{mapeo.periodicidad}' no está soportada por el Extractor.")
-        return procesar_corte(indicador, mapeo, anio, mes_nombre, lector, lector_cruce)
+        return procesar_corte(indicador, mapeo, anio, mes_nombre, lector)
 
     if periodicidad not in PERIODICIDADES_MENSUAL_SOPORTADAS:
         raise ValueError(f"{indicador}: la periodicidad '{mapeo.periodicidad}' no está soportada por el Extractor.")
@@ -110,19 +108,16 @@ def validar_mes(mes: str) -> None:
 ##--------------------------------------
 
 def generar_archivo_mensual(usuario: str | None, anio: int, mes: str, nombre_archivo: str, contenido: bytes, peso: int,
-                            archivo: str, nombre_cruce: str | None, contenido_cruce: bytes | None, peso_cruce: int | None) -> tuple[str, dict]:
+                            archivo: str) -> tuple[str, dict]:
     """
-    Endpoint de subir el Excel de un mes de un archivo base (+ su cruce): se procesa para los
+    Endpoint de subir el Excel de un mes de un archivo base: se procesa para los
     indicadores que el mapeo le asigna a ESE archivo, leyendo cada hoja una sola vez. Si uno
     falla, los demas se guardan igual (su resultado trae "error" en vez de los conteos).
     """
 
-    # 1. Validar el mes y los archivos subidos
+    # 1. Validar el mes y el archivo subido
     validar_mes(mes)
     validar_archivo_subido(contenido, peso, nombre_archivo, archivo)
-
-    if contenido_cruce is not None:
-        validar_archivo_subido(contenido_cruce, peso_cruce, nombre_cruce, "Egresos Pacientes")
 
     # 2. Que indicadores alimenta el archivo (sale del mapeo)
     archivos_base = []
@@ -139,18 +134,16 @@ def generar_archivo_mensual(usuario: str | None, anio: int, mes: str, nombre_arc
 
     # 3. Procesar cada indicador por su cuenta
     lector = LectorExcel(contenido)
-    lector_cruce = LectorExcel(contenido_cruce) if contenido_cruce else None
     resultados = {}
 
     for indicador in indicadores:
         try:
-            resultados[indicador] = _procesar_indicador(indicador, anio, mes, lector, lector_cruce, archivo)
+            resultados[indicador] = _procesar_indicador(indicador, anio, mes, lector, archivo)
         except (FileNotFoundError, KeyError, ValueError) as exc:
             resultados[indicador] = {"indicador": indicador, "anio": anio, "mes": mes, "error": str(exc)}
 
     # 4. Auditar y armar el mensaje
     return respuesta_de_subida(
         resultados, mes, anio, usuario,
-        f"archivo=extractor-{archivo}({mes} {anio}, {nombre_archivo}) bytes={len(contenido)}"
-        + (f" egresos={nombre_cruce}" if contenido_cruce is not None else ""),
+        f"archivo=extractor-{archivo}({mes} {anio}, {nombre_archivo}) bytes={len(contenido)}",
     )

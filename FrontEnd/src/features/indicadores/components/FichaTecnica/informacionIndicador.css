@@ -222,15 +222,6 @@
   border: 1px solid var(--borde-info);
   font-family: 'Consolas', monospace;
 }
-/* ── Nota prevalencia ── */
-.nota-prevalencia {
-  font-size: 12px; color: var(--aviso-texto-fuerte);
-  background: var(--tinte-aviso); border-radius: 8px;
-  padding: 9px 13px; line-height: 1.55;
-  border-left: 3px solid var(--color-oro-institucional);
-  margin-bottom: 12px;
-}
-
 /* ── Caja operación ── */
 .operacion-box {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;

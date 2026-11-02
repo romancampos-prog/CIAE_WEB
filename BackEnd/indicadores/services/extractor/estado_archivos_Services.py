@@ -6,7 +6,7 @@ Usado en: Controller/extractor_Controller.py
 from datos.bd_ciae.extractor_Datos import leer_partes, leer_reporte_extractor
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from services.extractor.catalogo_extractor_Services import (
-    ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, configuracion_cruce, indicadores_extractor,
+    ANUALIZADO, archivo_denominador_aparte, archivos_del_indicador, indicadores_extractor,
     nombre_archivo, nombre_sugerido_archivo, tiene_desfase,
 )
 from services.extractor.generar_con_desfase_Services import clave_defunciones
@@ -16,12 +16,9 @@ from shared.reglas_periodicidad import clave_periodicidad
 
 def estado_archivos(anio: int) -> dict:
     """
-    Por cada archivo que usa el Extractor y cada mes del año, si ya esta subido:
-      - archivo base: "completo" si el mes esta en TODOS sus indicadores, "parcial" si falta en
-        alguno, "pendiente" si no esta en ninguno ('faltan' dice en cuales falta).
-      - archivo de cruce (Egresos): "completo" si ya se cruzo en todos sus indicadores,
-        "pendiente" si el SUI-13 esta pero falta el cruce, "sin_principal" si ni el SUI-13 se
-        ha subido, "sin_registro" si el mes se subio antes de que existiera la marca CRUCE.
+    Por cada archivo que usa el Extractor y cada mes del año, si ya esta subido: "completo" si
+    el mes esta en TODOS sus indicadores, "parcial" si falta en alguno, "pendiente" si no esta
+    en ninguno ('faltan' dice en cuales falta).
     """
 
     todos = indicadores_extractor()
@@ -75,40 +72,8 @@ def estado_archivos(anio: int) -> dict:
 
         archivos.append({
             "archivo": nombre_archivo(clave), "prefijoArchivo": clave, "nombreSugerido": nombre_sugerido_archivo(clave),
-            "tipo": "principal", "requerido": True,
+            "requerido": True,
             "uso": f"Base de {', '.join(inds)}", "indicadores": inds, "meses": meses,
-        })
-
-    # Un bloque por archivo de cruce distinto (hoy solo Egresos); sale del mapeo.
-    por_archivo: dict[str, list[str]] = {}
-
-    for ind in todos:
-        cruce = configuracion_cruce(cargar_indicador_extractor(ind))
-        if cruce:
-            por_archivo.setdefault(cruce.get("archivoCruce"), []).append(ind)
-
-    for archivo_cruce, inds in por_archivo.items():
-        meses = []
-
-        for mes in MESES_ESTANDAR:
-            marcas = [reportes[i].get("CRUCE", {}).get(mes) for i in inds]
-            con_principal = [mes in reportes[i].get("MESES", {}) for i in inds]
-
-            if not all(con_principal):
-                estado = "sin_principal"
-            elif all(m is True for m in marcas):
-                estado = "completo"
-            elif any(m is False for m in marcas):
-                estado = "pendiente"
-            else:
-                estado = "sin_registro"
-
-            meses.append({"mes": mes, "estado": estado})
-
-        archivos.append({
-            "archivo": nombre_archivo(archivo_cruce), "prefijoArchivo": archivo_cruce, "nombreSugerido": nombre_sugerido_archivo(archivo_cruce),
-            "tipo": "cruce", "requerido": False,
-            "uso": "Cruce para validar la vía 2", "indicadores": inds, "meses": meses,
         })
 
     return {"anio": anio, "archivos": archivos}

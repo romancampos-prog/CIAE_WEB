@@ -3,7 +3,7 @@ Rutas y lectura/escritura de los JSON de indicadores en BD_CIAE (el unico lugar 
   Definitivo: {DATA_INDICADORES}/{año}/{familia}/{familia}_{n}.json            -> "MESES"
   Semanal:    {DATA_INDICADORES}/{año}/SEMANAL/{familia}_{n}_{año}_semana.json -> "MES"
   Extractor:  el mismo definitivo (numerador crudo en "MESES" y el corte en "CORTES"),
-              mas {año}/EXTRACTOR_CRUCE y {año}/EXTRACTOR_PARTES.
+              mas {año}/EXTRACTOR_PARTES.
 Usado en: datos/bd_ciae/*, services/reporte_guardado/reporte_guardado_Services.py
 """
 import json
@@ -37,7 +37,7 @@ def ruta_semanal(indicador: str, ano: str | int) -> Path:
 ##--------------------------------------
 
 def ruta_extractor(carpeta: str, indicador: str, anio: int) -> Path:
-    """EXTRACTOR_CRUCE (afiliaciones cifradas, aparte del reporte) o EXTRACTOR_PARTES (conteo de cada archivo)."""
+    """EXTRACTOR_PARTES (conteo de cada archivo, o por mes de ingreso)."""
     return DATA_INDICADORES / validar_ano(anio) / carpeta / (indicador.replace(" ", "_") + ".json")
 
 

@@ -109,7 +109,7 @@ indicadores y epidemiología. Lo lee `compartido/ftp_imss/catalogo_reportes_ftp_
 ### `catalogos/archivos_extractor.json`
 
 Una entrada por cada archivo que se sube en el Extractor. La **clave** (`SUI_13`,
-`EGRESOS_TOCO`, `EGRESOS_NACIMIENTO_TOCO`, `EGRESOS_PACIENTES_DIARIA`, `DEFUNCIONES`) es la
+`EGRESOS_TOCO`, `EGRESOS_NACIMIENTO_TOCO`, `DEFUNCIONES`) es la
 que se escribe en el campo `archivo` del mapeo.
 
 ```json
@@ -350,7 +350,6 @@ desde 1, igual que en Excel.
 | `INTERSECCION_FILA` | Toma valores de filas fijas | `fila`, `columna_dato` | lista de números |
 | `ULTIMA_FILA` | Último número de cada columna | `columna_dato`, `encabezado` | lista de números |
 | `FILTRO_CONTEO` | Cuenta filas que cumplen filtros | `filtroColumna`, `filtroGrupoColumnas`, `filtroAlternativas`, `encabezado` | un número (o, en el Extractor, uno por unidad) |
-| `FILTRO_CONTEO_ACUMULADO` | Igual que `FILTRO_CONTEO` + vía 2 con cruce | lo de `FILTRO_CONTEO` + `cruce` | un número por unidad |
 | `FILTRO_UNIDAD_VALOR` | Ubica la fila de una unidad y toma un valor | `columnaUnidad`, `tomarValor`, `filtroColumna` | un número |
 
 Agregar un modo nuevo = un modelo `Detalle...` + una función + una entrada en `EXTRACTORES`
@@ -427,24 +426,6 @@ Cuenta las filas que cumplen **todo** `filtroColumna`, **todos** los grupos de
 }
 ```
 *(Neonatal 03: recién nacidos vivos, menores de 37 semanas, de 1000 g o menos)*
-
-### FILTRO_CONTEO_ACUMULADO
-
-Solo EH 03 y DM 04 (Extractor, por corte). Cuenta igual que `FILTRO_CONTEO` pero con dos vías:
-
-- **Vía 1:** la fila cumple todos los filtros, incluido el diagnóstico principal → cuenta.
-- **Vía 2:** la fila cumple todo **menos** el diagnóstico, y su diagnóstico principal está en
-  `cruce.codigosCandidatos` → queda como *candidato* y solo cuenta si el archivo de Egresos
-  lo confirma (ver [`cruce`](#cruce)).
-
-Diferencias con `FILTRO_CONTEO` (están en `services/extractor/conteo_con_cruce_Services.py`,
-`contar_filtro_conteo_acumulado`):
-- La unidad sale de los **primeros 6 caracteres** de la columna `agrupacion`
-  (`undadAdscripcion`) buscados en `CLAVE_UNIDADES_F` de `unidades/ftp.json` (las 46 UMF). No
-  usa `catalogoUnidades`.
-- El diagnóstico se reconoce porque su entrada de `filtroColumna` tiene
-  `"nombreColumna": "diagnosticoPrincipal"` (ese texto está fijo en el código).
-- No usa `filtroGrupoColumnas` ni `filtroAlternativas`.
 
 ### FILTRO_UNIDAD_VALOR
 
@@ -543,36 +524,9 @@ uno**. Se suma a lo anterior (además de cumplir `filtroColumna` y los grupos).
 | `agrupacion` | Extractor | **Nombre** (no letra) de la columna que dice de qué unidad es cada fila: `undadAdscripcion` (SUI-13 en EH/DM), `unidad` (SUI-13 en MT 03), `cvePresupuestal` (Egresos), `IMUNI_ATEN` (Defunciones) | obligatorio |
 | `catalogoUnidades` | Extractor (`FILTRO_CONTEO`) | Con qué catálogo se traduce la clave a nombre de unidad. Hoy solo existe `"hospitales"` (`shared/UNIDADES.CATALOGOS_UNIDADES`). La clave debe coincidir **completa**; filas de unidades fuera del catálogo no cuentan. Todas las unidades del catálogo salen, en 0 si no tuvieron casos | obligatorio en `FILTRO_CONTEO` del Extractor (sin él da error) |
 | `columnasPeriodo` | Extractor | **Nombres** de las columnas del propio archivo con su mes y año. Se compara el valor **que más se repite** contra el mes que declaró el usuario; si no coincide, se rechaza. Si el archivo no trae esas columnas, no se valida | `{"mes": "mes", "anio": "anio"}` (SUI-13); Egresos/Defunciones usan `mesm`/`aniom` |
-| `columnaLlaveCruce` | Extractor (con `cruce`) | Nombre de la columna del SUI-13 que identifica al paciente | `"numeroAfiliacion"` |
+| `columnaMesDeConteo` | Extractor (`FILTRO_CONTEO`) | **Nombre** de la columna de fecha con la que cada fila se cuenta en el mes de esa fecha, no en el del archivo. EH 03, DM 04 y DM 05 usan `fechaIngreso`: el corte o la ventana solo suman los ingresos que caen dentro de sus 12 meses | — |
 | `ceroEsSinDato` | Extractor (en el **denominador**) | `true` = denominador 0 significa "no hubo a quién medir" → la unidad sale **Gris**, no "0 = Esperado" | `false` |
 | `nombreArchivo` | IAAS | Etiqueta del archivo para la ficha técnica | — |
-
-### `cruce`
-
-Solo en el numerador de EH 03 y DM 04 (`FILTRO_CONTEO_ACUMULADO`). Es la **vía 2**:
-
-```json
-"cruce": {
-    "activa": true,
-    "codigosCandidatos": ["I160", "I161", "I169", "N180", "N188", "N189", "N18X", "N19X"],
-    "archivoCruce": "EGRESOS_PACIENTES_DIARIA",
-    "encabezado": 1,
-    "columnaLlave": "AFILIACION",
-    "columnasDiagnostico": { "AC": "DiagPrincipalEgreso", "AD": "PrimerDiagSecundarioEgreso", "...": "...", "AH": "QuintoDiagSecundario" },
-    "codigosValidos": ["I10X", "I110", "I119", "I120", "I129", "I130", "I131", "I132", "I139"]
-}
-```
-*(EH 03)*
-
-| Campo | Qué es |
-|---|---|
-| `activa` | Si la vía 2 aplica. Con `false` se ignora todo el bloque |
-| `codigosCandidatos` | Diagnóstico principal (exacto) que vuelve a la fila *candidata* |
-| `archivoCruce` | Clave del segundo archivo (mismo mes). Puede subirse junto con el SUI-13 o después (`/completar-cruce`) |
-| `encabezado` | Fila de títulos del archivo de cruce |
-| `columnaLlave` | **Nombre** de la columna del archivo de cruce con la que se reconoce al mismo paciente (se compara contra `columnaLlaveCruce` del SUI-13) |
-| `columnasDiagnostico` | `{letra: encabezado}` donde se buscan los códigos válidos |
-| `codigosValidos` | Si **alguna** fila de ese paciente en el archivo de cruce trae uno de estos códigos (exacto) en alguna de esas columnas, el candidato cuenta |
 
 ---
 
@@ -695,7 +649,7 @@ para IAAS 01: otro indicador con semáforo por grupo necesitaría generalizar
   (en `datos/excel_subido/lector_excel_Datos.py`) revisa cada pestaña y se queda con la **primera
   que trae, en cada letra, el encabezado que dice el mapeo** (`nombreColumna`, `columnas` de
   los grupos, `tomarValor`) y, además, las columnas que se usan por nombre (`agrupacion`,
-  `columnaLlaveCruce`). Si ninguna cuadra, el error explica la pestaña que más se pareció.
+  `columnaMesDeConteo`). Si ninguna cuadra, el error explica la pestaña que más se pareció.
 
 Consecuencia práctica: **en Extractor e IAAS pon siempre `nombreColumna`** en cada filtro.
 Sin ningún encabezado esperado, el sistema no sabe qué hoja leer y rechaza el archivo.

@@ -16,7 +16,6 @@ ModoExtraccion = Literal[
     "INTERSECCION_FILA",
     "ULTIMA_FILA",
     "FILTRO_CONTEO",
-    "FILTRO_CONTEO_ACUMULADO",
     "FILTRO_UNIDAD_VALOR",
 ]
 

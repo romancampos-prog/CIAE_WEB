@@ -14,7 +14,7 @@ from schemas.model.mapeo_comun_Model import FichaMapeo, FuenteCensoDM, FuentePob
 class FuenteExtractor(BaseModel):
     """
     Excel crudo mensual (SUI-13) del motor Extractor (EH 03, DM 04, MT 03).
-    filtroColumna, filtroGrupoColumnas y cruce se conservan tal cual (extra="allow")
+    filtroColumna, filtroGrupoColumnas y columnaMesDeConteo se conservan tal cual (extra="allow")
     -- los valida el motor de extraccion (compartido/extraccion_excel/), no un modelo aqui.
     catalogoUnidades: con que catalogo se agrupa (ver shared/UNIDADES.CATALOGOS_UNIDADES);
     sin el, se agrupa por las UMF de FTP (lo de EH 03/DM 04).
@@ -36,7 +36,6 @@ class FuenteExtractor(BaseModel):
     modoExtraccion:     ModoExtraccion
     encabezado:         int = 1
     agrupacion:         str
-    columnaLlaveCruce:  str | None = None
     catalogoUnidades:   str | None = None
     columnasPeriodo:    dict[str, str] = {"mes": "mes", "anio": "anio"}
 

@@ -2,16 +2,16 @@
  * operacionParser.ts
  *
  * Traduce el bloque "reporte" del mapeo unificado (indicadores/mapeo/*.json)
- * a texto en lenguaje natural para la ficha técnica. Cubre los 6
+ * a texto en lenguaje natural para la ficha técnica. Cubre los 5
  * modoExtraccion reales que existen hoy en el mapeo:
  *   INTERSECCION_COLUMNA, INTERSECCION_FILA, ULTIMA_FILA  -- fórmula algebraica
- *   FILTRO_CONTEO, FILTRO_CONTEO_ACUMULADO, FILTRO_UNIDAD_VALOR -- cuenta/filtra filas, sin fórmula
+ *   FILTRO_CONTEO, FILTRO_UNIDAD_VALOR -- cuenta/filtra filas, sin fórmula
  * Ver BackEnd/indicadores/services/informacion/ficha_indicador_Services.py::obtener_ficha_tecnica_completa para
  * el lado del backend.
  */
 
 // propios
-import type { CondicionColumna, ConfigArchivo, ConfigsFuente, CruceArchivo, DetalleFuente, FuenteCalculo, GrupoColumnas } from '@/types/api/indicadores/informacion';
+import type { CondicionColumna, ConfigArchivo, ConfigsFuente, DetalleFuente, FuenteCalculo, GrupoColumnas } from '@/types/api/indicadores/informacion';
 import type { CalculoParseado, ConfigFuente, DescripcionFiltro, FuenteAgrupada, FuenteDescrita, Segmento } from '@/types/pantallas/fichaTecnica';
 
 /** Mapas de columnas que cambian por mes ({"MESES_CIP01": {"1": "D", ...}}). */
@@ -283,7 +283,7 @@ export const parsearDenominador = (expr: string, reporte: ConfigsFuente, raiz: C
 export const parsearResultado = (expr: string): string =>
   expr.includes('* 100') ? '( Numerador ÷ Denominador ) × 100' : 'Numerador ÷ Denominador';
 
-// ── Rama "filtro" -- FILTRO_CONTEO / FILTRO_CONTEO_ACUMULADO / FILTRO_UNIDAD_VALOR ──
+// ── Rama "filtro" -- FILTRO_CONTEO / FILTRO_UNIDAD_VALOR ──
 // Estos no tienen fórmula que parsear (operacion.numerador/denominador es
 // literal "(numerador)"/"(denominador)") -- cuentan o filtran filas directo.
 
@@ -343,15 +343,6 @@ const segmentosCondiciones = (detalle: DetalleFuente): Segmento[] => {
   return bloques.flatMap((bloque, i): Segmento[] => (i > 0 ? ['  Y  ', ...bloque] : bloque));
 };
 
-const descripcionCruce = (cruce: CruceArchivo | undefined): Segmento[] | null => {
-  if (!cruce?.activa) return null;
-  return [
-    'Si el diagnóstico es uno de los candidatos (', { codigos: cruce.codigosCandidatos },
-    `), se valida cruzando con "${cruce.archivoCruce}" por "${cruce.columnaLlave}" — si ahí aparece alguno de los códigos válidos (`,
-    { codigos: cruce.codigosValidos }, '), también se cuenta.',
-  ];
-};
-
 const descripcionFiltroUnidadValor = (detalle: DetalleFuente): Segmento[] => {
   const [colUnidad, cfgUnidad] = Object.entries(detalle.columnaUnidad ?? {})[0] ?? [];
   const [colValor, nombreValor] = Object.entries(detalle.tomarValor ?? {})[0] ?? [];
@@ -363,19 +354,13 @@ const descripcionFiltroUnidadValor = (detalle: DetalleFuente): Segmento[] => {
 };
 
 // Un descriptor por cada modoExtraccion de tipo "filtro" -- cada uno devuelve
-// { condiciones, cruce }; agregar un modo nuevo es agregar una entrada aquí.
+// { condiciones }; agregar un modo nuevo es agregar una entrada aquí.
 const DESCRIPTORES_FILTRO: Record<string, (detalle: DetalleFuente) => Omit<DescripcionFiltro, 'hoja'>> = {
   FILTRO_CONTEO: (detalle) => ({
     condiciones: ['Cuenta las filas donde ', ...segmentosCondiciones(detalle), '.'],
-    cruce: null,
-  }),
-  FILTRO_CONTEO_ACUMULADO: (detalle) => ({
-    condiciones: ['Cuenta las filas donde ', ...segmentosCondiciones(detalle), '.'],
-    cruce: descripcionCruce(detalle.cruce),
   }),
   FILTRO_UNIDAD_VALOR: (detalle) => ({
     condiciones: descripcionFiltroUnidadValor(detalle),
-    cruce: null,
   }),
 };
 
@@ -391,11 +376,11 @@ const descripcionFiltro = (modoExtraccion: string, detalle: DetalleFuente): Desc
   const descriptor = DESCRIPTORES_FILTRO[modoExtraccion];
   const partes = descriptor
     ? descriptor(detalle)
-    : { condiciones: [`Modo de extracción "${modoExtraccion}" sin descripción todavía.`], cruce: null };
+    : { condiciones: [`Modo de extracción "${modoExtraccion}" sin descripción todavía.`] };
   return { hoja: detalle.hoja ?? detalle.nombreArchivo, ...partes };
 };
 
-const MODOS_FILTRO: string[] = ['FILTRO_CONTEO', 'FILTRO_CONTEO_ACUMULADO', 'FILTRO_UNIDAD_VALOR'];
+const MODOS_FILTRO: string[] = ['FILTRO_CONTEO', 'FILTRO_UNIDAD_VALOR'];
 
 /**
  * Decide cómo describir un lado (numerador/denominador) de reporte.ficha,

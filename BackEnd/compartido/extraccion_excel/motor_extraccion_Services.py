@@ -6,7 +6,7 @@ subido, SUI-13): cada modulo resuelve sus errores de "como llego el archivo"; aq
 reportan errores de "que esta mal en el contenido".
 Agregar un modo = su modelo (detalle_extraccion_Model.py) + su funcion en su propio archivo
 (modos_por_posicion/ o modos_por_filtro/) + su entrada en EXTRACTORES y MODELOS_DETALLE.
-Usado en: indicadores/services/extractor/conteo_con_cruce_Services.py, indicadores/services/extractor/leer_archivo_extractor_Services.py, indicadores/services/ftp/extraer_reporte_ftp_Services.py, indicadores/services/iaas/leer_excel_iaas_Services.py, indicadores/services/iaas/numerador_denominador_iaas_Services.py
+Usado en: indicadores/services/extractor/leer_archivo_extractor_Services.py, indicadores/services/ftp/extraer_reporte_ftp_Services.py, indicadores/services/iaas/leer_excel_iaas_Services.py, indicadores/services/iaas/numerador_denominador_iaas_Services.py
 """
 import inspect
 from typing import Any, NamedTuple
@@ -40,7 +40,6 @@ EXTRACTORES = {
     "INTERSECCION_FILA":       interseccion_fila,
     "ULTIMA_FILA":             ultima_fila,
     "FILTRO_CONTEO":           filtro_conteo,
-    "FILTRO_CONTEO_ACUMULADO": filtro_conteo,  # el conteo base es igual; el cruce vive aparte (ver indicadores/services/extractor/conteo_con_cruce_Services.py)
     "FILTRO_UNIDAD_VALOR":     filtro_unidad_valor,
 }
 
@@ -49,7 +48,6 @@ MODELOS_DETALLE = {
     "INTERSECCION_FILA":       DetalleInterseccionFila,
     "ULTIMA_FILA":             DetalleUltimaFila,
     "FILTRO_CONTEO":           DetalleFiltroConteo,
-    "FILTRO_CONTEO_ACUMULADO": DetalleFiltroConteo,
     "FILTRO_UNIDAD_VALOR":     DetalleFiltroUnidadValor,
 }
 

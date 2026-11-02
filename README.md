@@ -725,7 +725,7 @@ Cada indicador se guarda en `BD_CIAE/INDICADORES/{año}/{FAMILIA}/{FAMILIA}_{NN}
 
 Para leer o escribir estos archivos usar siempre `datos/bd_ciae/` (y
 `services/reporte_guardado/reporte_guardado_Services.py` para las consultas tipadas). El semanal de FTP, los cortes del
-Extractor (`CORTES`) y las carpetas `EXTRACTOR_CRUCE` / `EXTRACTOR_PARTES` estan explicados en
+Extractor (`CORTES`) y la carpeta `EXTRACTOR_PARTES` estan explicados en
 [BackEnd/indicadores/README.md, seccion 5](BackEnd/indicadores/README.md#5-cómo-se-guarda-en-bd_ciae).
 
 ---

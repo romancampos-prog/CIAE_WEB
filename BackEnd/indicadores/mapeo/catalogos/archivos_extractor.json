@@ -11,10 +11,6 @@
         "nombre": "Egresos Nacimientos TOCO",
         "nombreSugerido": "EGRESOS_NACIMIENTO_TOCO_{MM}_{AAAA}.xlsx"
     },
-    "EGRESOS_PACIENTES_DIARIA": {
-        "nombre": "Egresos Pacientes",
-        "nombreSugerido": "EGRESOS_PACIENTES_DIARIA_{MM}_{AAAA}.xlsx"
-    },
     "DEFUNCIONES": {
         "nombre": "Defunciones (unidad de atención)",
         "nombreSugerido": "DEFUNCIONES_{MM}_{AAAA}.xlsx"

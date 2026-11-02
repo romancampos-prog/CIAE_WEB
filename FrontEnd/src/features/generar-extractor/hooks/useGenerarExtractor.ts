@@ -77,9 +77,8 @@ export function useGenerarExtractor() {
   // ── Panel de subida ────────────────────────────────────────────────────────
 
   const subida = useMutation({
-    mutationFn: ({ panel: p, archivo }: { panel: PanelSubida; archivo: File }) => (p.tipo === 'principal'
-      ? extractorApi.subirArchivoMensual(anio, p.mes, archivo, p.prefijo)
-      : extractorApi.subirCruce(anio, p.mes, archivo)),
+    mutationFn: ({ panel: p, archivo }: { panel: PanelSubida; archivo: File }) =>
+      extractorApi.subirArchivoMensual(anio, p.mes, archivo, p.prefijo),
     onMutate: () => setError(''),
     onSuccess: (res, { panel: p }) => {
       // El resultado se queda en el mismo panel donde se subió, para que no se pierda.
@@ -92,7 +91,7 @@ export function useGenerarExtractor() {
   const subiendo = subida.isPending;
 
   const abrir = (archivo: ArchivoExtractor, mes: string) => {
-    setPanel({ archivo: archivo.archivo, tipo: archivo.tipo, prefijo: archivo.prefijoArchivo, mes });
+    setPanel({ archivo: archivo.archivo, prefijo: archivo.prefijoArchivo, mes });
     setArchivoSeleccionado(null);
     setResultado(null);
     setError('');

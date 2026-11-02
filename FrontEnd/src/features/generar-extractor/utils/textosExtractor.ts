@@ -22,9 +22,7 @@ export const resumenIndicador = (r: ResultadoIndicadorExtractor): { texto: strin
     return { texto: `${r.total.numerador} / ${r.total.denominador} = ${r.total['%']} (${r.total.desempeno}). Mes generado.${r.detalle ? ` ${r.detalle}` : ''}`, tono: 'completo' };
   }
   const casos = Object.values(r.numerador_por_unidad ?? {}).reduce((a, b) => a + b, 0);
-  const via2 = r.validados_via2 ? ` (${r.validados_via2} por vía 2)` : '';
-  if (r.corte_generado) return { texto: `${casos} casos${via2}. Se generó el corte.`, tono: 'completo' };
+  if (r.corte_generado) return { texto: `${casos} casos. Se generó el corte.`, tono: 'completo' };
   const recalc = r.cortes_recalculados?.length ? ` Se recalculó el corte ${r.cortes_recalculados.join(', ')}.` : '';
-  const cruce = r.cruce_pendiente ? ' Falta subir el Egresos Pacientes de este mes para la vía 2.' : '';
-  return { texto: `${casos} casos${via2}. Numerador guardado.${recalc}${cruce}`, tono: r.cruce_pendiente ? 'progreso' : 'completo' };
+  return { texto: `${casos} casos. Numerador guardado.${recalc}`, tono: 'completo' };
 };

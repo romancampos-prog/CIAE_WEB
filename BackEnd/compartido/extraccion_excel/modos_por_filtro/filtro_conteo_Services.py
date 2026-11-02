@@ -1,5 +1,5 @@
 """
-FILTRO_CONTEO (y FILTRO_CONTEO_ACUMULADO): cuantas filas cumplen los filtros.
+FILTRO_CONTEO: cuantas filas cumplen los filtros.
 Usado en: motor_extraccion_Services.py
 """
 from compartido.extraccion_excel.detalle_extraccion_Model import DetalleFiltroConteo

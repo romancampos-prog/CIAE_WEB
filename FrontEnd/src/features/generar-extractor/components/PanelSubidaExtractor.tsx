@@ -14,8 +14,7 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
 
   const estado = estadoDelPanel?.estado;
   const visual = (estado && ESTADO_MES[estado]) || ESTADO_MES.pendiente;
-  const yaSubido = estado === 'completo' || estado === 'parcial' || estado === 'sin_registro';
-  const usaCruce = ex.archivos.some(a => a.tipo === 'cruce' && a.indicadores.some(i => archivoDelPanel.indicadores.includes(i)));
+  const yaSubido = estado === 'completo' || estado === 'parcial';
 
   return (
     <div className="exa-capa" onClick={ex.cerrarPanel}>
@@ -27,7 +26,7 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
         onClick={e => e.stopPropagation()}
       >
         <header className="exa-panel-header">
-          <span className={`exv-archivo-icono${panel.tipo === 'cruce' ? ' exa-icono--cruce' : ''}`}><IconoDocumento /></span>
+          <span className="exv-archivo-icono"><IconoDocumento /></span>
           <div className="exa-panel-titulos">
             <h2 id="exa-panel-titulo">{panel.archivo}</h2>
             <p>{panel.mes} {anio}</p>
@@ -78,8 +77,6 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
                 <p className="ex-aviso-reemplazo">
                   Al procesarlo de nuevo se reemplazan los datos en {archivoDelPanel.indicadores.join(', ')}
                   {' '}y se recalculan los cortes cerrados que lo incluyan.
-                  {panel.tipo === 'principal' && usaCruce
-                    && ' Los indicadores que usan Egresos Pacientes quedan con la vía 2 pendiente: después vuelve a subir el Egresos Pacientes de este mes.'}
                 </p>
               )}
 
@@ -104,7 +101,7 @@ const PanelSubidaExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => {
             <>
               <button type="button" className="exa-boton-secundario" onClick={ex.cerrarPanel}>Cancelar</button>
               <button type="button" className="ex-boton-confirmar" onClick={ex.procesar} disabled={!ex.archivoSeleccionado}>
-                {panel.tipo === 'principal' ? 'Procesar' : 'Cruzar'} {panel.archivo}
+                Procesar {panel.archivo}
               </button>
             </>
           )}

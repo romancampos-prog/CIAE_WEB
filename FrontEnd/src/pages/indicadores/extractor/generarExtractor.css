@@ -294,7 +294,6 @@
 .exa-col-mes { text-align: center; }
 
 .exa-archivo { min-width: 0; padding-left: 12px; border-left: 4px solid var(--primario-texto); }
-.exa-fila--cruce .exa-archivo { border-left-color: var(--dorado-texto); }
 .exa-archivo-nombre { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
 .exa-archivo-nombre strong { font-size: .9rem; font-weight: 800; color: var(--texto); }
 .exa-archivo-pie { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
@@ -324,8 +323,6 @@
 .exa-celda--ok { background: var(--tinte-marca); border-color: var(--borde-marca); color: var(--primario-texto); }
 .exa-celda--parcial { background: var(--tinte-aviso); border-color: var(--borde-aviso); color: var(--dorado-texto); }
 .exa-celda--pendiente { background: var(--superficie); border-style: dashed; border-color: var(--borde-fuerte); color: var(--texto-tenue); }
-.exa-celda--previo { background: var(--superficie-suave); border-style: dashed; border-color: var(--borde-marca); color: var(--primario-texto); }
-.exa-celda--bloqueado { background: var(--superficie-alterna); border-style: dashed; color: var(--texto-tenue); opacity: .7; }
 .exa-celda--futuro { background: transparent; border-color: transparent; color: var(--texto-deshabilitado); }
 .exa-celda--activa { box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px var(--primario-texto); }
 
@@ -365,7 +362,6 @@
   display: flex; align-items: center; gap: 12px;
   padding: 18px 20px; border-bottom: 1px solid var(--borde-suave);
 }
-.exa-icono--cruce { background: var(--tinte-aviso); color: var(--dorado-texto); }
 .exa-panel-titulos { flex: 1; min-width: 0; }
 .exa-panel-titulos h2 { margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--texto); }
 .exa-panel-titulos p { margin: 2px 0 0; font-size: .84rem; font-weight: 600; color: var(--texto-suave); }
@@ -393,7 +389,6 @@
 .exa-estado-mes svg { flex-shrink: 0; }
 .exa-estado-mes--ok { background: var(--tinte-marca); color: var(--primario-texto); }
 .exa-estado-mes--parcial { background: var(--tinte-aviso); color: var(--dorado-texto); }
-.exa-estado-mes--previo { color: var(--primario-texto); }
 
 .exa-resultado-encabezado { display: flex; align-items: flex-start; gap: 10px; }
 .exa-resultado-ok {

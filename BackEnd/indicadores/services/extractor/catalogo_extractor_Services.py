@@ -1,6 +1,6 @@
 """
 Lo que el mapeo dice de los indicadores del Extractor: cuales son, cuales van por corte, que
-archivos usa cada uno, si llevan cruce con Egresos y si se reportan en otro mes que el del
+archivos usa cada uno y si se reportan en otro mes que el del
 archivo (desfase) o usan el Censo DM de denominador.
 Usado en: services/extractor/*, services/censo_dm/*, services/reporte_guardado/reporte_guardado_Services.py, services/grafica/*, services/excel/*
 """
@@ -18,8 +18,8 @@ ANUALIZADO = "mensual anualizado"   # cada mes = ese mes + los 11 anteriores (Ne
 @lru_cache(maxsize=1)
 def indicadores_extractor() -> list[str]:
     """
-    Indicadores que usan el motor "extractor" -- un solo Excel mensual (SUI-13 +
-    su cruce con Egresos) alimenta a todos al mismo tiempo, cada uno con su
+    Indicadores que usan el motor "extractor" -- un solo Excel mensual (SUI-13)
+    alimenta a todos al mismo tiempo, cada uno con su
     propia lista de codigos/filtros (ver su bloque "reporte" en indicadores/mapeo/).
     Se calcula del mapeo (modulo="Extractor" + mostrarGenerar=true), mismo
     mecanismo que ya usan FTP/IAAS (todos_los_indicadores) -- agregar o desactivar un
@@ -78,14 +78,6 @@ def archivo_denominador_aparte(indicador: str) -> str | None:
 def archivos_del_indicador(indicador: str) -> list[str]:
     """Todos los archivos del Extractor que hay que subir para el indicador (el base y, si aplica, el del denominador)."""
     return [cargar_indicador_extractor(indicador).reporte.numerador.archivo, *filter(None, [archivo_denominador_aparte(indicador)])]
-
-
-##--------------------------------------
-
-def configuracion_cruce(mapeo: IndicadorExtractorMapeo) -> dict | None:
-    """El bloque 'cruce' del mapeo si el indicador lo tiene activo; None si no usa cruce."""
-    cruce = (mapeo.reporte.numerador.model_extra or {}).get("cruce") or {}
-    return cruce if cruce.get("activa") else None
 
 
 ##--------------------------------------

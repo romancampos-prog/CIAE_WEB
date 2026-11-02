@@ -1,6 +1,6 @@
 """
 Si una fila cumple todas las condiciones de un filtroColumna.
-Usado en: indicadores/services/extractor/conteo_con_cruce_Services.py, modos_por_filtro/filtro_unidad_valor_Services.py
+Usado en: modos_por_filtro/filtro_unidad_valor_Services.py
 """
 from compartido.extraccion_excel.columnas_excel import letra_a_numero
 from compartido.extraccion_excel.detalle_extraccion_Model import CondicionFiltro

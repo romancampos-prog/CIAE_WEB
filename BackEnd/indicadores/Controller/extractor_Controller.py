@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
-from services.extractor.completar_cruce_Services import completar_cruce
 from services.extractor.estado_archivos_Services import estado_archivos
 from services.extractor.estado_cortes_Services import estado_ventanas
 from services.extractor.pagina_generar_extractor_Services import indicadores_para_generar
@@ -58,34 +57,14 @@ async def generar_mes_extractor(
     archivo:          UploadFile        = File(...),
     pesoArchivo:      int               = Form(...),
     archivoBase:      str               = Form("SUI_13"),   # que archivo es (SUI_13, EGRESOS_TOCO...): decide que indicadores se procesan
-    archivoCruce:     UploadFile | None = File(None),       # Egresos opcional; tambien se puede subir despues en /completar-cruce
-    pesoArchivoCruce: int | None        = Form(None),
     payload:          dict              = Depends(solo_roles(*ROLES_EXTRACTOR)),
 ):
     contenido = await archivo.read()
-    contenido_cruce = await archivoCruce.read() if archivoCruce is not None else None
 
     try:
-        mensaje, datos = generar_archivo_mensual(
-            payload.get("sub"), anio, mes, archivo.filename, contenido, pesoArchivo, archivoBase,
-            archivoCruce.filename if archivoCruce is not None else None, contenido_cruce, pesoArchivoCruce,
-        )
+        mensaje, datos = generar_archivo_mensual(payload.get("sub"), anio, mes, archivo.filename, contenido, pesoArchivo, archivoBase)
     except ERRORES_DE_DATOS as error:
         raise HTTPException(status_code=422, detail=str(error))
 
     return ApiResponse(success=True, message=mensaje, data=datos)
 
-
-##--------------------------------------
-
-#Post Indicadores/extractor/completar-cruce  (Egresos por separado: completa la via 2 con lo que dejo el SUI-13 del mes)
-@extractorApi.post("/completar-cruce")
-async def completar_cruce_mes(
-    anio:        int        = Form(...),
-    mes:         str        = Form(...),
-    archivo:     UploadFile = File(...),   # EGRESOS_PACIENTES_DIARIA_MM_AAAA.xlsx
-    pesoArchivo: int        = Form(...),
-    payload:     dict       = Depends(solo_roles(*ROLES_EXTRACTOR)),
-):
-    mensaje, datos = completar_cruce(payload.get("sub"), anio, mes, archivo.filename, await archivo.read(), pesoArchivo)
-    return ApiResponse(success=True, message=mensaje, data=datos)

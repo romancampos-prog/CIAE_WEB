@@ -6,7 +6,7 @@ Usado en: Controller/extractor_Controller.py
 from datos.lectura_mapeo.mapeo_por_modulo_Datos import cargar_indicador_extractor
 from schemas.model.pagina_generar_Model import ArchivoIndicadorExtractor, IndicadorGenerarExtractor
 from services.extractor.catalogo_extractor_Services import (
-    archivo_denominador_aparte, configuracion_cruce, es_indicador_de_corte, nombre_archivo,
+    archivo_denominador_aparte, es_indicador_de_corte, nombre_archivo,
 )
 from services.informacion.lista_indicadores_Services import indicadores_del_modulo
 from shared.UNIDADES import NOMBRE_AGRUPACION
@@ -30,11 +30,6 @@ def indicadores_para_generar() -> list[IndicadorGenerarExtractor]:
 
         if archivo_denominador:
             archivos.append(ArchivoIndicadorExtractor(archivo=nombre_archivo(archivo_denominador), requerido=True, uso="Denominador"))
-
-        cruce = configuracion_cruce(mapeo)
-
-        if cruce:
-            archivos.append(ArchivoIndicadorExtractor(archivo=nombre_archivo(cruce.get("archivoCruce")), requerido=False, uso="Cruce para validar la vía 2"))
 
         lista.append(IndicadorGenerarExtractor(
             **base.model_dump(),

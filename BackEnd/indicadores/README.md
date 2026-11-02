@@ -76,7 +76,7 @@ Las capas:
 | `Controller/poblacion_Controller.py` | Población InfoSalud: archivo cargado, subir, recalcular (sigue bajo `/ftp/poblacion`) |
 | `Controller/censo_dm_Controller.py` | Censo de pacientes con DM (denominador de DM 05): censos subidos y subir uno |
 | `Controller/iaas_Controller.py` | Unidades e indicadores IAAS, estado del mes, generar el mes, completar una unidad tardía |
-| `Controller/extractor_Controller.py` | Indicadores del Extractor, estado de cortes y archivos, subir el Excel del mes, completar el cruce con Egresos |
+| `Controller/extractor_Controller.py` | Indicadores del Extractor, estado de cortes y archivos, subir el Excel del mes |
 | `Controller/reportes_Controller.py` | Datos de la gráfica de un indicador |
 | `Controller/informacion_Controller.py` | Lista de indicadores, ficha y ficha técnica (sale del mapeo) |
 | `Controller/excel_Controller.py` | Excel de uno o varios indicadores |
@@ -89,7 +89,7 @@ Las capas:
 | `bd_ciae/historico_indicador_Datos.py` | Meses guardados de un indicador, su histórico crudo y sus numeradores |
 | `bd_ciae/guardar_mes_Datos.py` | Guardar el mes definitivo (formato de disco: `%` y `desempeno`) |
 | `bd_ciae/semanal_Datos.py` | Semanal de FTP: guardar, leer y borrar el mes al llegar el definitivo |
-| `bd_ciae/extractor_Datos.py` | JSON del Extractor: el reporte (numerador crudo del mes), `EXTRACTOR_PARTES` (conteo de cada archivo, Neonatal 04 y 06) y `EXTRACTOR_CRUCE` (vía 1 + candidatos que dejó el SUI-13) |
+| `bd_ciae/extractor_Datos.py` | JSON del Extractor: el reporte (numerador crudo del mes) y `EXTRACTOR_PARTES` (conteo de cada archivo, Neonatal 04 y 06, o por mes de ingreso, EH 03, DM 04 y DM 05) |
 | `bd_ciae/poblacion_Datos.py` | `POBLACION_{año}.json`: leer, su periodo y guardar |
 | `bd_ciae/censo_dm_Datos.py` | `BD_CIAE/CENSO_DM/CENSO_DM_{año}.json`: leer, guardar y qué años hay |
 | `lectura_mapeo/mapeo_indicadores_Datos.py` | **Único** lector del mapeo: `bloque_mapeo`, catálogos de familias y de archivos del Extractor |
@@ -162,11 +162,10 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `iaas/estado_mes_iaas_Services.py` | Lo guardado del mes, pendientes y meses generados |
 | `iaas/generar_mes_iaas_Services.py` | Generar los 6 IAAS del mes |
 | `iaas/completar_unidad_iaas_Services.py` | Completar una unidad tardía |
-| `extractor/catalogo_extractor_Services.py` | Qué indicadores y archivos tiene el Extractor, cuáles van por corte, cruce y desfase |
+| `extractor/catalogo_extractor_Services.py` | Qué indicadores y archivos tiene el Extractor, cuáles van por corte y cuáles tienen desfase |
 | `extractor/pagina_generar_extractor_Services.py` | Indicadores de la página Generar Extractor |
 | `extractor/leer_archivo_extractor_Services.py` | Hoja del Excel, mes/año del archivo, filas que cuentan y fechas |
 | `extractor/conteo_por_unidad_Services.py` | Conteo por unidad (y por mes de nacimiento, Neonatal 04, o de una fecha de la fila, DM 05) |
-| `extractor/conteo_con_cruce_Services.py` | Vía 1 / vía 2 y el cruce con Egresos (EH 03, DM 04) |
 | `extractor/subir_archivo_extractor_Services.py` | Subir un archivo del mes: decide el flujo de cada indicador |
 | `extractor/generar_corte_Services.py` | Mes de un indicador de corte (+ cortes que lo incluyen) |
 | `extractor/corte_semestral_Services.py` | Corte Semestral Anualizado y su recálculo con población |
@@ -175,7 +174,6 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 | `extractor/generar_con_desfase_Services.py` | Sobrevida con desfase (Neonatal 04) |
 | `extractor/generar_anualizado_censo_Services.py` | Subir el SUI-13 de un indicador anualizado con el Censo DM (DM 05) |
 | `extractor/mes_anualizado_censo_Services.py` | Un mes de DM 05: ingresos dentro de la ventana de 12 meses / censo del mes |
-| `extractor/completar_cruce_Services.py` | Subir el Egresos después del SUI-13 |
 | `extractor/estado_archivos_Services.py`, `estado_cortes_Services.py` | Tablas de archivos subidos y de meses por corte |
 
 ### shared/ y schemas/
@@ -226,7 +224,6 @@ incluye `trabajador_IAAS`); generar FTP/Extractor = `admin`, `trabajador_ftp`; g
 | `GET /extractor/estado-cortes?anio=` | Cuántos de los 12 meses de cada corte van | `extractor/estado_cortes_Services.estado_ventanas` |
 | `GET /extractor/estado-archivos?anio=` | Por archivo y mes: completo / parcial / pendiente | `extractor/estado_archivos_Services.estado_archivos` |
 | `POST /extractor/generar` | Subir el Excel de un mes de un archivo | `extractor/subir_archivo_extractor_Services.generar_archivo_mensual` |
-| `POST /extractor/completar-cruce` | Subir el Egresos después del SUI-13 | `extractor/completar_cruce_Services.completar_cruce` |
 | `GET /reportes/{indicador}/grafica?ano=` | Ficha + reporte + estadísticas | `grafica/grafica_indicador_Services.consultar_grafica_indicador` |
 | `GET /informacion/indicadores?campo=&modulo=` | Familias con sus indicadores | `informacion/lista_indicadores_Services.todos_los_indicadores` |
 | `GET /informacion/ficha/{indicador}` | Título, objetivo, semáforo, periodicidad | `informacion/ficha_indicador_Services.obtener_ficha_indicador` |
@@ -272,7 +269,6 @@ BD_CIAE/
 ├── INDICADORES/{año}/
 │   ├── {FAMILIA}/{FAMILIA}_{NN}.json     definitivo (ej. CAMA/CAMA_40-49.json, S_Ob/S_Ob_01.json)
 │   ├── SEMANAL/{IND}_{año}_semana.json   semanal de FTP (solo meses sin definitivo)
-│   ├── EXTRACTOR_CRUCE/{IND}.json        vía 1 + candidatos de la vía 2 (EH 03, DM 04)
 │   └── EXTRACTOR_PARTES/{IND}.json       conteo de cada archivo por mes (Neonatal 04 y 06)
 ├── POBLACION_INFOSALUD/POBLACION_{año}.json
 └── auditoria.log
@@ -331,15 +327,11 @@ el definitivo de un mes, ese mes se borra del semanal (y el archivo, si se queda
   casos) y **sin** el envoltorio `Reporte`. Ni Junio ni Diciembre se sobrescriben con el
   corte.
 - `CORTES.MESES` tiene, a lo más, `Junio` y `Diciembre`: el corte ya calculado.
-- `CRUCE` dice por mes si ya se cruzó con Egresos (`true`) o falta (`false`).
 
-### EXTRACTOR_CRUCE y EXTRACTOR_PARTES
+### EXTRACTOR_PARTES
 
-- `EXTRACTOR_CRUCE/{IND}.json`: `{Mes: {"via1": {unidad: n}, "candidatos": [{"unidad", "llave"}]}}`.
-  `llave` es el número de afiliación del paciente tal como viene en el SUI-13 (el comentario
-  del código dice "cifrada"; **por confirmar** si el archivo de origen ya la trae cifrada). Por
-  eso este archivo va aparte del reporte y no debe compartirse.
-- `EXTRACTOR_PARTES/{IND}.json`: `{Mes: {"numerador": {unidad: n}, "denominador": {unidad: n}}}`.
+- `EXTRACTOR_PARTES/{IND}.json`: `{Mes: {"numerador": {unidad: n}, "denominador": {unidad: n}}}`;
+  en EH 03, DM 04 y DM 05 el numerador va por mes de ingreso: `{Mes: {"numerador": {"AAAA-MM": {unidad: n}}}}`.
   Se conserva aunque el mes ya se haya generado, para poder corregir un solo archivo.
 
 ### Población
@@ -469,7 +461,7 @@ Excel y sube **un archivo a la vez**. **Servicio:** `services/extractor/subir_ar
 
 **Endpoint:** `POST /Indicadores/extractor/generar` (multipart): `anio`, `mes` (`"Enero"`..),
 `archivo` + `pesoArchivo`, `archivoBase` (clave del archivo: `SUI_13`, `EGRESOS_TOCO`,
-`EGRESOS_NACIMIENTO_TOCO`, `DEFUNCIONES`) y, opcional, `archivoCruce` (Egresos Pacientes).
+`EGRESOS_NACIMIENTO_TOCO`, `DEFUNCIONES`).
 
 1. **Validar** el mes, que sea `.xlsx`/`.xls` y el peso.
 2. **Qué indicadores alimenta** ese archivo: los que tienen ese `archivo` en el numerador o en
@@ -499,19 +491,18 @@ indicadores tienen `mensual` y `mensualAcumulado` en `peridocidadGenerada`.
 
 ### De corte: EH 03 y DM 04
 
-- Conteo (`contar_filtro_conteo_acumulado`): unidad = primeros 6 caracteres de
-  `undadAdscripcion` en `CLAVE_UNIDADES_F`; filas de unidades fuera del catálogo no cuentan.
-  - **Vía 1:** cumple edad, tipo de ingreso y diagnóstico principal → cuenta.
-  - **Vía 2:** cumple todo menos el diagnóstico y su diagnóstico principal está en
-    `codigosCandidatos` → candidato.
-- Si el indicador tiene `cruce` activo, guarda vía 1 + candidatos en `EXTRACTOR_CRUCE`. Si el
-  Egresos vino junto, cruza de una vez (`validar_candidatos_cruce`): un candidato cuenta si,
-  en el Egresos, alguna fila del mismo paciente (`numeroAfiliacion` = `AFILIACION`) trae un
-  código válido en las columnas de diagnóstico. Si no vino, el mes queda con `CRUCE: false`
-  (solo vía 1) hasta subir el Egresos con `POST /extractor/completar-cruce`.
-- `guardar_numerador_mes` → `MESES.<Mes>` (crudo, 46 unidades).
-- `intentar_generar_corte`: si el mes es Junio o Diciembre y están los 12 meses de su ventana,
-  suma los numeradores, trae el denominador de población, calcula, semaforiza y guarda en
+- Conteo (`contar_por_unidad_y_mes_de_fecha`, el mismo de DM 05): edad, tipo de ingreso y
+  diagnóstico principal (DM/HTA o de la Tabla de hospitalizaciones evitables, todo en la lista
+  de `filtroColumna`); unidad = primeros 6 caracteres de `undadAdscripcion` en `CLAVE_UNIDADES_F`.
+  Cada caso se guarda en el mes de su `fechaIngreso` (`columnaMesDeConteo`) en
+  `EXTRACTOR_PARTES.<Mes>.numerador`.
+- Antes había una vía 2 con cruce contra Egresos Pacientes; se quitó el 02/11/2026 porque el
+  oficial cuenta los códigos de la Tabla directo. Con esta regla el corte de junio 2026 da
+  DM 04 = 1,447 (igual al oficial) y EH 03 = 443 (oficial 446: 3 casos con adscripción fuera de las 46 UMF).
+- `guardar_numerador_mes` → `MESES.<Mes>` (todos los casos del archivo, 46 unidades): marca el mes como subido.
+- `intentar_generar_corte`: si el mes es Junio o Diciembre y están los 12 SUI-13 de su ventana,
+  suma de `EXTRACTOR_PARTES` solo los ingresos que caen dentro de la ventana (un egreso de julio
+  que ingresó en junio del año anterior queda fuera), trae el denominador de población, calcula, semaforiza y guarda en
   `CORTES.MESES.<Junio|Diciembre>`.
 
 | Corte | Ventana (12 meses) | Población usada |
@@ -647,7 +638,6 @@ está claro en el código y conviene revisarlo.
 | Unidades sin el servicio | CE 01, CE 02, CUPN 07 (`unidadesSinServicio`) | La etiqueta faltante se reporta como "No se encontró tal servicio" en vez de error; la unidad queda Gris |
 | "o" entre condiciones | MT 04 (`filtroAlternativas`) | Parto con método **o** aborto con método; además excluye régimen `ND` con `SUFIJO` |
 | Código en cualquier diagnóstico / exclusión | MT 03, Neonatal 06 (`filtroGrupoColumnas`) | `CUALQUIERA` para incluir, `NINGUNA` para excluir (códigos O00-O08 en MT 03; P36-P39 en Neonatal 06) |
-| Vía 2 con Egresos | EH 03, DM 04 (`cruce`) | Ver [8](#de-corte-eh-03-y-dm-04). El Egresos puede subirse después |
 | Número escrito como texto | Extractor e IAAS | Las columnas de un `RANGO` se convierten a número; si no traen ninguno, se rechaza el archivo |
 | Archivo de otro mes | Extractor | Se compara el mes/año más repetido de `columnasPeriodo` contra lo declarado |
 | Excel de otra unidad | IAAS | La columna E debe ser la unidad declarada (acepta `HGSZ` = `HGS`) |

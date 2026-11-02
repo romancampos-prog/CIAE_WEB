@@ -15,7 +15,7 @@ const TablaArchivosExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => (
     {ex.archivos.map(archivo => {
       const subidos = archivo.meses.filter(m => m.estado === 'completo').length;
       return (
-        <div key={archivo.archivo} className={`exa-fila exa-fila--${archivo.tipo}`}>
+        <div key={archivo.archivo} className="exa-fila">
           <div className="exa-col-archivo exa-archivo">
             <div className="exa-archivo-nombre">
               <strong>{archivo.archivo}</strong>
@@ -35,7 +35,6 @@ const TablaArchivosExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => (
 
           {archivo.meses.map(({ mes, estado, faltan }) => {
             const futuro = ex.esFuturo(mes);
-            const bloqueado = futuro || estado === 'sin_principal';
             const visual = futuro ? ESTADO_FUTURO : (ESTADO_MES[estado] ?? ESTADO_MES.pendiente);
             const activo = ex.panel?.archivo === archivo.archivo && ex.panel?.mes === mes;
             const detalle = estado === 'parcial' && faltan?.length ? ` (falta en ${faltan.join(', ')})` : '';
@@ -43,7 +42,7 @@ const TablaArchivosExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => (
               <button
                 key={mes}
                 type="button"
-                disabled={bloqueado}
+                disabled={futuro}
                 title={`${mes}: ${visual.texto}${detalle}`}
                 aria-label={`${archivo.archivo}, ${mes}: ${visual.texto}${detalle}`}
                 onClick={() => ex.abrir(archivo, mes)}
@@ -59,7 +58,7 @@ const TablaArchivosExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => (
     })}
 
     <ul className="exa-leyenda">
-      {[ESTADO_MES.completo, ESTADO_MES.parcial, ESTADO_MES.pendiente, ESTADO_MES.sin_principal, ESTADO_MES.sin_registro].map(e => (
+      {[ESTADO_MES.completo, ESTADO_MES.parcial, ESTADO_MES.pendiente].map(e => (
         <li key={e.clase}><span className={`exa-celda exa-celda--${e.clase} exa-celda--muestra`}><IconoEstadoMes clase={e.clase} /></span>{e.texto}</li>
       ))}
     </ul>

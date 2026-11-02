@@ -14,16 +14,13 @@ from shared.MESES import MESES_ESTANDAR
 from shared.UNIDADES import CATALOGOS_UNIDADES, CLAVE_UNIDADES_F
 
 # Sin catalogoUnidades se agrupa por la UMF de adscripcion: el SUI-13 trae la clave recortada
-# ("11011125"), y sus 6 primeras cifras identifican la unidad (igual que el cruce de EH 03/DM 04).
+# ("11011125"), y sus 6 primeras cifras identifican la unidad (EH 03, DM 04, DM 05).
 DIGITOS_CLAVE_UMF = 6
 
 
 def columnas_por_nombre(config: dict) -> list[str]:
-    """Columnas que el codigo usa por nombre (no por letra): la de unidad, la llave del cruce y las fechas de sobrevida."""
+    """Columnas que el codigo usa por nombre (no por letra): la de unidad y las fechas (sobrevida, mes de conteo)."""
     nombres = [config["agrupacion"]] if config.get("agrupacion") else []
-
-    if (config.get("cruce") or {}).get("activa"):
-        nombres.append(config.get("columnaLlaveCruce", "numeroAfiliacion"))
 
     regla = config.get("mesDelReporte") or {}
 

@@ -56,15 +56,4 @@ export const extractorApi = {
     const { data } = await api.post<ResultadoPorIndicador>('/Indicadores/extractor/generar', form);
     return data;
   },
-
-  /** Sube solo el archivo de cruce (Egresos) de un mes: completa la vía 2 con lo que dejó el SUI-13. */
-  async subirCruce(anio: number, mes: string, archivo: File): Promise<ResultadoPorIndicador> {
-    const form = new FormData();
-    form.append('anio', String(anio));
-    form.append('mes', mes);
-    form.append('archivo', archivo);
-    form.append('pesoArchivo', String(archivo.size));
-    const { data } = await api.post<ResultadoPorIndicador>('/Indicadores/extractor/completar-cruce', form);
-    return data;
-  },
 };

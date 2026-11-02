@@ -11,7 +11,6 @@ export interface IndicadorExtractor extends IndicadorGenerarExtractor {
 /** El archivo y mes elegidos en la tabla, para el panel de subida. */
 export interface PanelSubida {
   archivo: string;
-  tipo: 'principal' | 'cruce';
   prefijo: string;
   mes: string;
 }
@@ -26,4 +25,4 @@ export interface ResultadoSubida {
   mensaje: string;
 }
 
-export type ClaseEstado = 'ok' | 'parcial' | 'pendiente' | 'bloqueado' | 'previo' | 'futuro';
+export type ClaseEstado = 'ok' | 'parcial' | 'pendiente' | 'futuro';
