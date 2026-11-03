@@ -8,6 +8,14 @@
   display: flex; flex-direction: column; gap: 16px;
 }
 
+/* Modo oscuro: el tinto del tema se vuelve rosa (#e8919f) para leerse sobre negro; en Acciones se queda
+   guinda vino (barras, etiquetas, bordes) y el texto que iba en tinto pasa a casi blanco. El panel de
+   filtro de columna va en un portal fuera de .acc-main, por eso se nombra aparte. */
+html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
+  --tinto-rgb: 176, 64, 94;
+  --tinto-texto: #f0dfe3;
+}
+
 /* Ningún bloque de la página se encoge: la página hace scroll, no los aplasta */
 .acc-main > * { flex-shrink: 0; }
 
@@ -640,7 +648,7 @@
    Los bordes de color siempre van a la izquierda; nada punteado. El resto, superficies neutras. */
 .acc-main {
   --acc-guinda: #691c32;          /* fondo con texto blanco, igual en claro y oscuro */
-  --acc-acento: rgb(var(--tinto-rgb));           /* guinda que se aclara en oscuro */
+  --acc-acento: rgb(var(--tinto-rgb));           /* guinda; en oscuro, vino (ver arriba), no rosa */
   --acc-dorado: rgb(var(--oro-rgb));
   --acc-borde-calido: rgba(var(--tinto-rgb), 0.18);
 }
