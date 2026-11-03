@@ -35,6 +35,7 @@ epidemiologia/
 │       └── mapa_Services.py         — GeoJSON con casos por municipio para Leaflet
 │   ├── ftp/
 │   │   ├── ftpExtraer.py                     — baja el reporte de cada unidad, aplica el modo del mapeo y guarda
+│   │   ├── excel_extraccion_Services.py     — Excel de un rango de fechas (varios meses): lee los JSON mensuales, filtra por columnaFecha del mapeo y por unidad
 │   │   ├── consulta_extraccion_Services.py   — lee el definitivo del mes o, si no hay, su última semana; recorta a la unidad del usuario, errores solo admin, + estadísticas (404 si no hay nada)
 │   │   └── periodos_extraccion_Services.py   — meses del año con extracción (definitivo / última semana)
 │   └── mapeo/mapeo_Services.py      — lee y valida mapeo/ftp/{archivo}.json (schemas/model/accionesAchivo_Dto.py)
@@ -45,7 +46,8 @@ epidemiologia/
 │       ├── catalogos_geo_Datos.py  — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/dengue/)
 │       ├── resultados_pipeline_Datos.py — resultados/{clave}.json y fecha del último reporte
 │       └── modelo_duplicados_Datos.py   — el modelo entrenado de duplicados (hoy no existe)
-│   └── ftp/extracciones_ftp_Datos.py — guardar/leer FTP/{extraccion}/{año}/{extraccion}_{año}{mes}[_S{semana}].json
+│   └── ftp/extracciones_ftp_Datos.py — guardar/leer FTP/{extraccion}/{año}/{extraccion}_{año}{mes}.json (uno por mes; "semana" adentro: null = definitivo; un previo no reemplaza al definitivo)
+│       ftp/claves_up_Datos.py    — catálogo de claves UP (mapeo/ftp/catalogos/claves_up.json: descripción, grupo, RAIS/SIMF); en memoria, reiniciar tras editarlo
 ├── modulos/                        — algoritmos puros: reciben y regresan DataFrames, sin archivos
 │   └── dengue/
 │       ├── fechas.py               — semana epidemiológica SUIVE (semana_epidemiologica)
@@ -60,6 +62,7 @@ epidemiologia/
 │   └── ftp/filtro_seleccion.py     — modo FILTRO_SELECCION: filas que pasan filtroColumna, columnas de 'seleccionar'
 │       ftp/estadisticas_extraccion.py — conteos de las filas: total, por columna del filtroColumna (ej. Clave de la Acción) y por unidad
 │       ftp/errores_por_tipo.py     — errores guardados {tipo, unidad, reporte, detalle} agrupados por tipo con la misma forma que las restricciones de indicadores FTP (el front usa el mismo ModalRestricciones), nombre/descripción de compartido/ftp_imss/catalogo_errores_ftp.py (el mismo catálogo que indicadores FTP)
+│       ftp/libro_excel_extraccion.py  — el .xlsx (xlsxwriter), una hoja por tabla: encabezado guinda inmóvil, filtro por columna, fecha como fecha de Excel
 ├── entrenamiento/
 │   └── entrenar_duplicados.py      — se corre a mano: MLP vs Random Forest -> modelos/mlp_duplicados.pkl
 └── mapeo/
@@ -94,8 +97,9 @@ con indicadores y vive en BackEnd/compartido/ftp_imss/.
 | `GET /epidemiologia/reportes/duplicados` | Registros eliminados por duplicado | `resultado_guardado("duplicados")` |
 | `GET /epidemiologia/reportes/posibles-duplicados` | Pares parecidos no confirmados (revisión a mano) | `resultado_guardado("posibles_duplicados")` |
 | `POST /epidemiologia/ftp/extraer/OC30?ano=&mes=[&semana=]` | Acciones: bajar el OC30 de las unidades, extraer y guardar en `BD_CIAE/EPIDEMIOLOGIA/FTP/AccionesOC30/` | `ftp/ftpExtraer.ftp_Extraer_Epidemeologia` |
-| `GET /epidemiologia/ftp/extraccion/OC30?ano=&mes=` | Acciones (admin, unidad): el definitivo del mes o, mientras no hay, su última semana `{extraccion, ano, mes, semana, filas, errores, estadisticas}`; el rol `unidad` solo recibe sus filas y solo el admin recibe `errores` (`{tipo: {nombreError, descripcionError, unidades}}`, como las restricciones de FTP; `{}` si no es admin) (404 si no hay nada) | `ftp/consulta_extraccion_Services.consultar_extraccion` |
+| `GET /epidemiologia/ftp/extraccion/OC30?ano=&mes=` | Acciones (admin, unidad): el definitivo del mes o, mientras no hay, su última semana `{extraccion, ano, mes, semana, filas, errores, estadisticas, filtrosMapeo, descripcionClaves}` (`descripcionClaves` = `{UP87: {descripcion, subgrupo}}` del catálogo de claves UP); el rol `unidad` solo recibe sus filas y solo el admin recibe `errores` (`{tipo: {nombreError, descripcionError, unidades}}`, como las restricciones de FTP; `{}` si no es admin) (404 si no hay nada) | `ftp/consulta_extraccion_Services.consultar_extraccion` |
 | `GET /epidemiologia/ftp/extraccion/OC30/periodos?ano=` | Acciones (admin, unidad): `[{mes, definitivo, ultimaSemana}]` de los meses con extracción | `ftp/periodos_extraccion_Services.periodos_de_extraccion` |
+| `GET /epidemiologia/ftp/excel/OC30?desde=aaaa-mm-dd&hasta=aaaa-mm-dd` | Acciones (admin, unidad): Excel `{archivo_b64, nombre_archivo, totalRegistros}` de los registros cuya `columnaFecha` (mapeo) cae en el rango, aunque abarque varios meses (lee del mes de `desde` al siguiente de `hasta`); hoja 1 = registros (Unidad + `seleccionar` + Periodo), hoja 2 "Claves UP" = cada clave del filtro con descripción, tema, registros, RAIS/SIMF y clave anterior; el rol `unidad` solo recibe lo suyo (400 rango al revés, 404 sin registros) | `ftp/excel_extraccion_Services.excel_de_extraccion` |
 
 Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corrido. Los de `/ftp` responden `ApiResponse`.
 

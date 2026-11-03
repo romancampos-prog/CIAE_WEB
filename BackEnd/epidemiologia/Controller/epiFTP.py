@@ -1,9 +1,12 @@
 
+from datetime import date
+
 from fastapi import APIRouter, Depends
 
 from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from ..services.ftp.consulta_extraccion_Services import consultar_extraccion
+from ..services.ftp.excel_extraccion_Services import excel_de_extraccion
 from ..services.ftp.ftpExtraer import ftp_Extraer_Epidemeologia
 from ..services.ftp.periodos_extraccion_Services import periodos_de_extraccion
 
@@ -39,4 +42,15 @@ def ftpConsultar(ano: int, mes: int, payload: dict = Depends(solo_roles(*ROLES_C
 def ftpPeriodos(ano: int, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
     archivo: str = "AccionesOC30"
     mensaje, datos = periodos_de_extraccion(ano, archivo)
+    return ApiResponse(success=True, message=mensaje, data=datos)
+
+
+##--------------------------------------
+
+#Get epidemiologia/ftp/excel/OC30?desde=2026-08-01&hasta=2026-10-21  (el rango puede abarcar varios meses)
+@ftpApi.get("/excel/OC30")
+def ftpExcel(desde: date, hasta: date, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+    archivo: str = "AccionesOC30"
+    unidades_usuario = payload.get("unidades", []) if payload.get("rol") == "unidad" else None
+    mensaje, datos = excel_de_extraccion(desde, hasta, archivo, unidades_usuario)
     return ApiResponse(success=True, message=mensaje, data=datos)

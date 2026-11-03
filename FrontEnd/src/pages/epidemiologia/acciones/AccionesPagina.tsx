@@ -1,12 +1,11 @@
 // react
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // propios
 import {
-  ErroresExtraccion, EstadisticasAcciones, FiltrosAcciones, GenerarAcciones, MesesAcciones,
-  TablaExtraccion, useConsultaAcciones, useGenerarAcciones,
+  AvisoMesSinReporte, DescargarExcelAcciones, ErroresExtraccion, EstadisticasAcciones, GenerarAcciones, MesesAcciones,
+  ResumenPeriodo, TablaExtraccion, useConsultaAcciones, useGenerarAcciones,
 } from '@/features/acciones';
 import { useRol } from '@/features/auth';
-import { MESES_LARGOS_ARR } from '@/features/indicadores';
 import TopBar from '@/components/TopBar';
 import '@/styles/inicio.css';
 import '@/styles/epidemiologia.css';
@@ -16,14 +15,27 @@ import '@/styles/acciones.css';
  * Acciones (OC30 del FTP): el admin genera el previo o definitivo de un mes; todos navegan por
  * los meses guardados (el previo se muestra hasta que llega el definitivo). El usuario de unidad
  * solo recibe sus filas y nadie más que el admin ve los errores: eso lo decide el backend.
- * Web: panel lateral (generar + estadísticas) y la tabla a lo ancho; móvil: una columna.
+ * Arranca en el último mes con reporte, y el recuadro del periodo siempre dice qué mes se ve. Generar
+ * (solo admin) no tiene botón: se abre al elegir un mes sin reporte o desde el panel de meses.
+ * El botón Excel descarga un rango de fechas (varios meses si se quiere; el de unidad, solo lo suyo).
+ * El reporte (tabla) es lo principal; los conteos van en una columna a su lado (abajo en pantallas chicas) con el aviso de errores (admin) hasta arriba.
  */
 export default function AccionesPagina() {
-  const { esAdmin } = useRol();
+  const { esAdmin, esUnidad } = useRol();
   const consulta = useConsultaAcciones();
   const generacion = useGenerarAcciones();
   const { datos, filtros } = consulta;
   const estadisticas = datos?.estadisticas;
+  const ventanaGenerar = useRef<HTMLDialogElement>(null);
+  const ventanaAviso   = useRef<HTMLDialogElement>(null);
+  const [mesSinReporte, setMesSinReporte] = useState<number | null>(null);
+
+  const avisarMesSinReporte = (mes: number) => { setMesSinReporte(mes); ventanaAviso.current?.showModal(); };
+  // La ventana de generar siempre llega con el mes puesto: el sin reporte que se tocó o el que se está viendo
+  const abrirGenerar = (mes: number | null) => {
+    if (mes) generacion.prellenar(consulta.anio, mes);
+    ventanaGenerar.current?.showModal();
+  };
 
   useEffect(() => { document.title = 'Acciones — Epidemiología | CIAE'; }, []);
 
@@ -36,39 +48,28 @@ export default function AccionesPagina() {
       <TopBar backTo="/CIAE/Epidemiologia" />
 
       <main className="acc-main">
+        {/* Encabezado en una sola línea (para que la tabla suba): título, el mes (que también es el control para cambiarlo) y totales; las claves ya se ven en "Por Clave de la Acción" */}
         <header className="acc-encabezado">
-          <div>
-            <h1 className="acc-titulo">Acciones</h1>
-            <p className="acc-subtitulo">
-              Reporte OC30 del FTP
-              {datos?.filtrosMapeo.map(f => <span key={f.columna}> · {f.columna}: {f.valores.join(', ')}</span>)}
-            </p>
-          </div>
-          {datos && (
-            <span className={`acc-periodo${datos.semana !== null ? ' acc-periodo--previo' : ''}`}>
-              {MESES_LARGOS_ARR[Number(datos.mes) - 1]} {datos.ano} · {datos.semana === null ? 'Definitivo' : `Previo semana ${datos.semana}`}
-            </span>
-          )}
+          <h1 className="acc-titulo">Acciones <span>Reporte OC30 del FTP</span></h1>
+          <MesesAcciones
+            anios={consulta.anios} anio={consulta.anio} onAnio={consulta.cambiarAnio}
+            periodos={consulta.periodos} mes={consulta.mes} onMes={consulta.cambiarMes}
+            onMesSinReporte={esAdmin ? avisarMesSinReporte : undefined}
+            onGenerar={esAdmin ? () => abrirGenerar(consulta.mes) : undefined}
+          />
+          {estadisticas && <ResumenPeriodo estadisticas={estadisticas} />}
+          {consulta.periodos.length > 0 && <DescargarExcelAcciones fechas={consulta.fechas} anio={consulta.anio} soloMiUnidad={esUnidad} />}
         </header>
 
-        <MesesAcciones
-          anios={consulta.anios} anio={consulta.anio} onAnio={consulta.cambiarAnio}
-          periodos={consulta.periodos} mes={consulta.mes} onMes={consulta.cambiarMes}
-        />
+        {esAdmin && (
+          <>
+            <AvisoMesSinReporte ventana={ventanaAviso} anio={consulta.anio} mes={mesSinReporte} onGenerar={() => abrirGenerar(mesSinReporte)} />
+            <GenerarAcciones generacion={generacion} ventana={ventanaGenerar} />
+          </>
+        )}
 
+        {/* El reporte es lo principal: la tabla a lo ancho y, en pantalla grande, los conteos en una columna angosta a su lado (abajo en pantallas chicas) */}
         <div className="acc-cuerpo">
-          <aside className="acc-lateral">
-            {esAdmin && <GenerarAcciones generacion={generacion} />}
-            {estadisticas && (
-              <EstadisticasAcciones
-                estadisticas={estadisticas}
-                clavesActivas={filtros.claves} onClave={clave => consulta.alternarFiltro('claves', clave)}
-                unidadesActivas={filtros.unidades} onUnidad={unidad => consulta.alternarFiltro('unidades', unidad)}
-              />
-            )}
-            {esAdmin && datos && <ErroresExtraccion errores={datos.errores} />}
-          </aside>
-
           <section className="acc-tarjeta acc-detalle">
             {consulta.cargando && <p className="acc-vacio">Cargando…</p>}
 
@@ -80,27 +81,39 @@ export default function AccionesPagina() {
 
             {datos && estadisticas && (
               <>
-                <FiltrosAcciones
-                  filtros={filtros}
-                  columnaClave={consulta.columnaClave}
-                  columnaFecha={consulta.columnaFecha}
-                  fechas={consulta.fechas}
-                  claves={estadisticas.porColumna[0]?.conteos ?? []}
-                  unidades={estadisticas.porUnidad}
-                  total={datos.filas.length}
-                  visibles={consulta.filasVisibles.length}
-                  onCambiar={consulta.cambiarFiltro}
-                  onLimpiar={consulta.limpiarFiltros}
-                />
                 <TablaExtraccion
+                  columnas={consulta.columnas}
                   filas={consulta.filasVisibles}
                   columnaClave={consulta.columnaClave}
                   columnaFecha={consulta.columnaFecha}
+                  filtros={filtros}
+                  onCambiar={consulta.cambiarFiltro}
+                  claves={estadisticas.porColumna[0]?.conteos ?? []}
+                  descripciones={datos.descripcionClaves ?? {}}
+                  unidades={estadisticas.porUnidad}
+                  fechas={consulta.fechas}
                   onFiltrarClave={clave => consulta.alternarFiltro('claves', clave)}
+                  hayFiltros={consulta.hayFiltros}
+                  onLimpiar={consulta.limpiarFiltros}
                 />
               </>
             )}
           </section>
+
+          {/* En pantalla grande la columna mide lo mismo que la tabla: la lista de unidades llena lo que sobra y no se pasa de largo */}
+          <aside className="acc-resumenes" aria-label="Resumen del periodo">
+            <div className="acc-resumenes-columna">
+              {esAdmin && datos && <ErroresExtraccion errores={datos.errores} />}
+              {estadisticas && (
+                <EstadisticasAcciones
+                  estadisticas={estadisticas}
+                  descripciones={datos?.descripcionClaves ?? {}}
+                  clavesActivas={filtros.claves} onClave={clave => consulta.alternarFiltro('claves', clave)}
+                  unidadesActivas={filtros.unidades} onUnidad={unidad => consulta.alternarFiltro('unidades', unidad)}
+                />
+              )}
+            </div>
+          </aside>
         </div>
       </main>
     </div>

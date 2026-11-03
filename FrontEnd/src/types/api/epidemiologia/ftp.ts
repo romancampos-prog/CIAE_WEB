@@ -49,6 +49,14 @@ export interface ExtraccionFtp extends Omit<ExtraccionGuardada, 'errores'> {
   estadisticas: EstadisticasExtraccion;
   /** El filtroColumna del mapeo: qué columna y qué valores se extraen (ej. Clave de la Acción: UP87, UP407...). */
   filtrosMapeo: { columna: string; valores: string[] }[];
+  /** Qué significa cada clave UP del filtro (mapeo/ftp/catalogos/claves_up.json del backend). */
+  descripcionClaves: Record<string, DescripcionClave>;
+}
+
+export interface DescripcionClave {
+  descripcion: string;
+  /** Tema de la clave (ej. "Prevención de VIH/SIDA e ITS"). */
+  subgrupo: string | null;
 }
 
 /** GET /epidemiologia/ftp/extraccion/OC30/periodos: un mes con extracción guardada. */
@@ -57,4 +65,11 @@ export interface PeriodoExtraccion {
   definitivo: boolean;
   /** Última semana previa guardada; se muestra mientras no hay definitivo. */
   ultimaSemana: number | null;
+}
+
+/** GET /epidemiologia/ftp/excel/OC30 (dentro de ApiResponse): el Excel del rango de fechas en base64. */
+export interface ExcelExtraccion {
+  archivo_b64: string;
+  nombre_archivo: string;
+  totalRegistros: number;
 }

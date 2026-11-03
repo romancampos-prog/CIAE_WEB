@@ -7,7 +7,7 @@ import { IconoAlerta, IconoChevronDerecha } from '@/components/icons';
 import { ModalRestricciones } from '@/features/generar-ftp';
 
 /**
- * Solo admin: un aviso compacto con cuántas unidades fallaron en la extracción; al tocarlo abre
+ * Solo admin: un aviso destacado arriba de los conteos con cuántas unidades fallaron en la extracción; al tocarlo abre
  * el mismo modal de restricciones de indicadores FTP (el backend manda los errores con esa forma).
  */
 export default function ErroresExtraccion({ errores }: { errores: Restricciones }) {
@@ -18,8 +18,8 @@ export default function ErroresExtraccion({ errores }: { errores: Restricciones 
 
   return (
     <>
-      <button className="acc-aviso" onClick={() => setAbierto(true)}>
-        <IconoAlerta />
+      <button className="acc-aviso acc-aviso--destacado" onClick={() => setAbierto(true)}>
+        <span className="acc-aviso-destacado-icono" aria-hidden="true"><IconoAlerta /></span>
         <span className="acc-aviso-texto">{total} unidades sin extraer</span>
         <span className="acc-aviso-ver">Ver detalle <IconoChevronDerecha /></span>
       </button>

@@ -2,7 +2,7 @@
 
 // propios
 import api from '@/api/cliente/axiosClient';
-import type { ExtraccionFtp, ExtraccionGuardada, PeriodoExtraccion } from '@/types/api/epidemiologia/ftp';
+import type { ExcelExtraccion, ExtraccionFtp, ExtraccionGuardada, PeriodoExtraccion } from '@/types/api/epidemiologia/ftp';
 import type { RespuestaApi } from '@/types/api/respuestaApi';
 
 export const ftpEpidemiologiaApi = {
@@ -24,5 +24,14 @@ export const ftpEpidemiologiaApi = {
   async periodosOC30(ano: number): Promise<PeriodoExtraccion[]> {
     const { data } = await api.get<RespuestaApi<PeriodoExtraccion[]>>('/epidemiologia/ftp/extraccion/OC30/periodos', { params: { ano } });
     return data.data;
+  },
+
+  /**
+   * Excel de los registros entre dos fechas (aaaa-mm-dd), aunque abarquen varios meses. El usuario
+   * de unidad solo recibe los de su unidad (lo decide el backend). Con el mensaje del backend.
+   */
+  async excelOC30(desde: string, hasta: string): Promise<ExcelExtraccion & { mensaje: string }> {
+    const { data } = await api.get<RespuestaApi<ExcelExtraccion>>('/epidemiologia/ftp/excel/OC30', { params: { desde, hasta } });
+    return { ...data.data, mensaje: data.message };
   },
 };

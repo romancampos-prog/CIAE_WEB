@@ -15,3 +15,4 @@ RUTA_GTO_JSON     = _MAPEO / "gto_normalizado.json"
 RUTA_CATALOGO_EPI = _MAPEO / "cp_coordenadas.csv"
 
 RUTA_FTP_ACCIONES = _MAPEO_FTP
+RUTA_CLAVES_UP    = _MAPEO_FTP / "catalogos" / "claves_up.json"

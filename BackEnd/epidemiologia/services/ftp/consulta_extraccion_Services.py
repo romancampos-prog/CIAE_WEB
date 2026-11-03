@@ -1,12 +1,13 @@
 """
 Consultar lo que ya se extrajo del FTP (BD_CIAE/EPIDEMIOLOGIA/FTP/) para mostrarlo en pantalla,
-sin volver a conectarse al FTP. Como en indicadores: mientras el mes no tiene definitivo se
-muestra su ultima semana (previo), y el definitivo la reemplaza en cuanto se extrae.
+sin volver a conectarse al FTP. Hay un solo archivo por mes: el ultimo previo extraido o, en
+cuanto llega, el definitivo (su "semana" dice cual es).
 Usado en: Controller/epiFTP.py
 """
 from fastapi import HTTPException
 
-from epidemiologia.datos.ftp.extracciones_ftp_Datos import leer_extraccion, periodos_guardados
+from epidemiologia.datos.ftp.claves_up_Datos import claves_up
+from epidemiologia.datos.ftp.extracciones_ftp_Datos import leer_extraccion
 from epidemiologia.modulos.ftp.errores_por_tipo import errores_por_tipo
 from epidemiologia.modulos.ftp.estadisticas_extraccion import estadisticas_de_filas
 from ..mapeo.mapeo_Services import ExtraerMapeoFTP
@@ -18,13 +19,9 @@ def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: lis
     @param ver_errores      - solo el admin ve las unidades que fallaron en la extraccion
     """
 
-    #1- El definitivo del mes; si no hay, su ultima semana extraida
+    #1- Lo guardado del mes (previo o definitivo)
     mes_texto = f"{mes:02d}"
-    contenido = leer_extraccion(archivo, ano, mes_texto, None)
-
-    if contenido is None:
-        semanas = [semana for m, semana in periodos_guardados(archivo, ano) if m == mes_texto and semana is not None]
-        contenido = leer_extraccion(archivo, ano, mes_texto, max(semanas)) if semanas else None
+    contenido = leer_extraccion(archivo, ano, mes_texto)
 
     if contenido is None:
         raise HTTPException(404, f"{archivo}: no hay extraccion guardada de {ano}-{mes_texto}.")
@@ -49,6 +46,13 @@ def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: lis
 
     #5- Lo que filtra el mapeo (ej. Clave de la Accion: UP87, UP407...), para decirlo en pantalla
     contenido["filtrosMapeo"] = [{"columna": columna, "valores": valores} for columna, valores in columnas_conteo.items()]
+
+    #6- Que significa cada clave UP del filtro (del catalogo de claves UP), para mostrarlo junto al codigo
+    catalogo = claves_up()
+    contenido["descripcionClaves"] = {
+        valor: {"descripcion": catalogo[valor]["descripcion"], "subgrupo": catalogo[valor]["subgrupo"] or catalogo[valor]["grupo"]}
+        for valores in columnas_conteo.values() for valor in valores if valor in catalogo
+    }
 
     tipo = "definitivo" if contenido["semana"] is None else f"previo semana {contenido['semana']}"
     mensaje = f"{archivo} {ano}-{mes_texto} ({tipo}): {len(contenido['filas'])} filas."

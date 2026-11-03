@@ -6,8 +6,9 @@ import type { FiltrosAcciones } from '@/types/pantallas/acciones';
 import { ftpEpidemiologiaApi } from '@/api/epidemiologia/ftpApi';
 import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 import { FORMATO_FECHA, fechaComparable } from '@/features/acciones/utils/fechas';
+import { aniosConsultables } from '@/features/acciones/utils/meses';
 
-const SIN_FILTROS: FiltrosAcciones = { texto: '', claves: [], unidades: [], desde: '', hasta: '' };
+const SIN_FILTROS: FiltrosAcciones = { claves: [], unidades: [], desde: '', hasta: '', textos: {} };
 
 
 /**
@@ -40,7 +41,6 @@ export function useConsultaAcciones() {
   const datos        = consulta.data ?? null;
   const filas        = datos?.filas ?? [];
   const columnaClave = datos?.estadisticas?.porColumna[0]?.columna ?? null;
-  const texto        = filtros.texto.trim().toLowerCase();
 
   // La columna de fecha no se escribe aquí: es la que llega con puras fechas dd/mm/aaaa.
   const columnas     = filas[0] ? Object.keys(filas[0]) : [];
@@ -60,11 +60,11 @@ export function useConsultaAcciones() {
     (!desde || (!!columnaFecha && fechaComparable(fila[columnaFecha] ?? '') >= desde)) &&
     (!hasta || (!!columnaFecha && fechaComparable(fila[columnaFecha] ?? '') <= hasta)) &&
     (filtros.claves.length === 0 || !columnaClave || filtros.claves.includes(fila[columnaClave] ?? '')) &&
-    (!texto || Object.values(fila).some(valor => valor?.toLowerCase().includes(texto))),
+    Object.entries(filtros.textos).every(([columna, texto]) => !texto.trim() || (fila[columna] ?? '').toLowerCase().includes(texto.trim().toLowerCase())),
   );
 
   return {
-    anios: [anioActual - 1, anioActual],
+    anios: aniosConsultables(),
     anio,
     cambiarAnio: (nuevo: number) => { setAnio(nuevo); setMesElegido(null); setFiltros(SIN_FILTROS); },
     periodos,
@@ -72,8 +72,10 @@ export function useConsultaAcciones() {
     // Las fechas del rango son de ese mes: al cambiar de mes ya no existen.
     cambiarMes: (nuevo: number) => { setMesElegido(nuevo); setFiltros(previos => ({ ...previos, desde: '', hasta: '' })); },
     datos,
+    columnas,
     columnaClave,
     columnaFecha,
+    hayFiltros: !!(filtros.claves.length || filtros.unidades.length || filtros.desde || filtros.hasta || Object.values(filtros.textos).some(t => t.trim())),
     fechas,
     filtros,
     cambiarFiltro: (cambios: Partial<FiltrosAcciones>) => setFiltros(previos => ({ ...previos, ...cambios })),

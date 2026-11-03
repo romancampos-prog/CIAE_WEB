@@ -1,5 +1,6 @@
 {
     "fuente": "ftp",
+    "columnaFecha": "Fecha de Atención",
     "archivo": {
         "OC30": {
             "hoja": ["*"],

@@ -13,7 +13,7 @@ from compartido.ftp_imss.conexion_ftp_Datos import conectar_ftp, desconectar_ftp
 from compartido.ftp_imss.catalogo_reportes_ftp_Datos import RUTAS
 from compartido.ftp_imss.navegacion_ftp_Datos import descargar_archivo, navegar_alguna_ruta, navegar_ruta
 from compartido.ftp_imss.reportes_siais_ftp_Datos import listar_reportes, rutas_de_la_unidad
-from epidemiologia.datos.ftp.extracciones_ftp_Datos import guardar_extraccion
+from epidemiologia.datos.ftp.extracciones_ftp_Datos import guardar_extraccion, leer_extraccion
 from epidemiologia.modulos.ftp.filtro_seleccion import filtro_seleccion
 from epidemiologia.schemas.model.accionesAchivo_Dto import Archivo
 from indicadores.shared.UNIDADES import NOMBREUNIDADESARCHIVO, UNIDADES_FINALES, UNIDADES_PREVIOS
@@ -47,6 +47,11 @@ def ftp_Extraer_Epidemeologia(ano: int, mes: int, semana: int | None, archivo: s
     for reporte, config in mapeo.archivo.items():
         if config.modoExtraccion not in MODOS_EXTRACCION:
             raise HTTPException(400, f"{reporte}: modoExtraccion '{config.modoExtraccion}' sin implementacion.")
+
+    # Un solo archivo por mes: un previo nunca reemplaza al definitivo (el definitivo si reemplaza a todo)
+    guardado = leer_extraccion(archivo, ano, mes_texto)
+    if semana is not None and guardado is not None and guardado.get("semana") is None:
+        raise HTTPException(409, f"{archivo} {ano}-{mes_texto} ya tiene definitivo: un previo no lo reemplaza.")
 
     #3- Bajar cada reporte de cada unidad y extraer sus filas
     ftp = conectar_ftp()
@@ -87,7 +92,7 @@ def ftp_Extraer_Epidemeologia(ano: int, mes: int, semana: int | None, archivo: s
         "extraccion": archivo, "ano": ano, "mes": mes_texto, "semana": semana,
         "filas": filas, "errores": errores, "unidadesSinResultados": sin_resultados,
     }
-    guardar_extraccion(archivo, ano, mes_texto, semana, contenido)
+    guardar_extraccion(archivo, ano, mes_texto, contenido)
 
     duplicadas = {error["unidad"] for error in errores if error["tipo"] == "ARCHIVO_DUPLICADO_OMITIDO"}
     con_error  = {error["unidad"] for error in errores} - duplicadas

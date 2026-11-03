@@ -26,4 +26,6 @@ class Archivo(BaseModel):
 
 class Acciones(BaseModel):
     fuente: str | None
+    # La columna de "seleccionar" con la fecha de cada registro (dd/mm/aaaa): con ella se filtra el rango del Excel
+    columnaFecha: str
     archivo: Dict[str, Archivo]
