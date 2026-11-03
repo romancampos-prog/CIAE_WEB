@@ -18,7 +18,7 @@ from services.iaas.estado_mes_iaas_Services import leer_mes_guardado_iaas, pendi
 from services.iaas.numerador_denominador_iaas_Services import obtener_denominador_iaas01, obtener_numerador
 from services.semaforo.color_semaforo_Services import semaforizar_unidades
 from shared.MESES import nombre_del_mes
-from shared.UNIDADES import UNIDADES_SIN_OOAD_IAAS
+from shared.UNIDADES import UNIDADES_MENOS_20_CAMAS_IAAS
 
 
 def generar_iaas(
@@ -59,7 +59,7 @@ def generar_iaas(
         # 4. Cálculo del resultado: las de menos de 20 camas se calculan pero no suman al TOTAL_OOAD
         unidades = unidades_del_indicador(indicador, numerador, denominador_ind)
         resultados = calcular_unidades(numerador, denominador_ind, mapeo.reporte.operacion.resultado,
-                                       unidades=unidades, excluidas_del_total=UNIDADES_SIN_OOAD_IAAS)
+                                       unidades=unidades, excluidas_del_total=UNIDADES_MENOS_20_CAMAS_IAAS)
 
         # 5. Semaforización
         semaforizadas = semaforizar_unidades(resultados, mapeo.semaforo)

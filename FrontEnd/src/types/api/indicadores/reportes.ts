@@ -87,6 +87,13 @@ export interface Franja {
   nivel: Desempeno;
 }
 
+/** Unidades que se muestran pero no suman al TOTAL OOAD (IAAS: menos de 20 camas), con el texto para avisarlo. */
+export interface FueraDelTotal {
+  etiqueta: string;
+  motivo: string;
+  unidades: string[];
+}
+
 export interface PerfilIndicador {
   tipoMeta: TipoMeta;
   niveles: Desempeno[];
@@ -101,6 +108,7 @@ export interface PerfilIndicador {
   etiquetaDenominador: string | null;
   esCorte: boolean;
   serieCortes: SerieCortes | null;
+  fueraDelTotal: FueraDelTotal | null;
 }
 
 export interface GraficaIndicadorDTO {

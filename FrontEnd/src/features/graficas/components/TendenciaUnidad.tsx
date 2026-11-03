@@ -54,7 +54,7 @@ const TendenciaUnidad = ({
 
   return (
     <div className="gi-tendencia">
-      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} tipoMeta={perfil?.tipoMeta} grupoDeUnidad={grupoDeUnidad} onElegir={onElegirUnidad} />
+      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} tipoMeta={perfil?.tipoMeta} grupoDeUnidad={grupoDeUnidad} fueraDelTotal={perfil?.fueraDelTotal} onElegir={onElegirUnidad} />
 
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">

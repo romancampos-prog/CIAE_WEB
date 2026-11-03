@@ -128,7 +128,7 @@ Se leen en `shared/UNIDADES.py` **al arrancar el servidor** (si los cambias, rei
 |---|---|---|
 | `ftp.json` | `UNIDADES_FINALES` (carpeta de cada UMF en el FTP mensual), `UNIDADES_PREVIOS` (carpeta en el FTP semanal), `NOMBREUNIDADESARCHIVO` (nombre que se guarda), `CLAVE_UNIDADES_F` (`{clave de 6 dígitos: nombre}`), `nombreAgrupacion` | FTP, población, EH 03/DM 04 |
 | `hospitales.json` | `CLAVE_HOSPITALES` (`{clave presupuestal de 12 dígitos: nombre}`), `nombreAgrupacion` | Extractor con `"catalogoUnidades": "hospitales"` (MT 03-05, Neonatal) |
-| `iaas.json` | `ORDEN_IAAS01`, `ORDEN_DEMAS_IAAS`, unidades por tipo (`UNIDADES_HGS_IAAS01`, `_HGZ_`, `_HGR_`, `_HGO_`, `_HGP_`), `UNIDADES_SIN_OOAD_IAAS` | IAAS |
+| `iaas.json` | `ORDEN_IAAS01`, `ORDEN_DEMAS_IAAS`, unidades por tipo (`UNIDADES_HGS_IAAS01`, `_HGZ_`, `_HGR_`, `_HGO_`, `_HGP_`), `UNIDADES_MENOS_20_CAMAS` | IAAS |
 
 Las tres listas de `ftp.json` van **en el mismo orden**: la posición 5 de
 `UNIDADES_FINALES` es la carpeta de la unidad que está en la posición 5 de

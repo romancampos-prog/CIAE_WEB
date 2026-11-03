@@ -208,6 +208,12 @@ const GraficaIndicador = ({ indSel, onIndSelChange, iconSrc, indsHermanos = [], 
                 />
               )}
 
+              {perfil?.fueraDelTotal && (
+                <p className="gi-nota-fuera-total">
+                  <strong>{perfil.fueraDelTotal.motivo}:</strong> {perfil.fueraDelTotal.unidades.join(', ')}.
+                </p>
+              )}
+
               {ficha?.descripcionPeriodicidad && (
                 <div className="ig-periodicidad-pie">
                   <span className="ig-periodicidad-pildora" style={{ background: `${color}14`, color: textoAcento(color) }}>

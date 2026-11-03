@@ -19,7 +19,7 @@ from services.iaas.leer_excel_iaas_Services import validar_excel_unidad
 from services.iaas.numerador_denominador_iaas_Services import obtener_denominador_iaas01_unidad, obtener_numerador
 from services.semaforo.color_semaforo_Services import semaforizar_unidades
 from shared.MESES import nombre_del_mes
-from shared.UNIDADES import UNIDADES_SIN_OOAD_IAAS
+from shared.UNIDADES import UNIDADES_MENOS_20_CAMAS_IAAS
 
 
 def completar_unidad_tardia(
@@ -90,7 +90,7 @@ def completar_unidad_tardia(
 
         unidades = unidades_del_indicador(indicador, numerador_ind, denominador_ind)
         resultados = calcular_unidades(numerador_ind, denominador_ind, mapeo.reporte.operacion.resultado,
-                                       unidades=unidades, excluidas_del_total=UNIDADES_SIN_OOAD_IAAS)
+                                       unidades=unidades, excluidas_del_total=UNIDADES_MENOS_20_CAMAS_IAAS)
 
         # 5. Semaforización
         semaforizadas = semaforizar_unidades(resultados, mapeo.semaforo)

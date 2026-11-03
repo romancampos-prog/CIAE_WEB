@@ -55,7 +55,7 @@ UNIDADES_HGP_IAAS01 = _iaas.get("UNIDADES_HGP_IAAS01", [])
 
 # Unidades con menos de 20 camas censables: se siguen calculando y mostrando
 # individualmente en los 6 indicadores IAAS, pero no cuentan para el TOTAL_OOAD.
-UNIDADES_SIN_OOAD_IAAS = _iaas.get("UNIDADES_SIN_OOAD_IAAS", [])
+UNIDADES_MENOS_20_CAMAS_IAAS = _iaas.get("UNIDADES_MENOS_20_CAMAS", [])
 
 # Unidad -> tipo de semaforo de IAAS 01. Cualquier unidad que no aparezca aqui
 # (ej. "TOTAL_OOAD") se toma como "OOAD" en donde se use este mapa.

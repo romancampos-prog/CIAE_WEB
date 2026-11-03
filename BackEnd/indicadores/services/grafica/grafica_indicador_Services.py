@@ -14,7 +14,9 @@ from services.grafica.unidades_del_usuario_Services import reporte_solo_de_unida
 from services.informacion.ficha_indicador_Services import obtener_ficha_indicador
 from services.reporte_guardado.reporte_guardado_Services import cargar_reporte_indicador, cargar_semanal
 from shared.MESES import MESES_ESTANDAR
-from shared.UNIDADES import nombre_canonico_iaas
+from shared.UNIDADES import UNIDADES_MENOS_20_CAMAS_IAAS, nombre_canonico_iaas
+
+FUERA_DEL_TOTAL_IAAS = {"etiqueta": "< 20 camas", "motivo": "Menos de 20 camas censables (se muestran, pero no suman al total OOAD)"}
 
 
 def consultar_grafica_indicador(indicador: str, ano: str, unidades_usuario: list[str] | None = None) -> dict | None:
@@ -78,6 +80,9 @@ def consultar_grafica_indicador(indicador: str, ano: str, unidades_usuario: list
     if modulo == "extractor" and indicador in indicadores_extractor_de_corte():
         serie = serie_de_cortes(indicador, ano)
         perfil["serieCortes"] = serie_cortes_solo_de_unidades(serie, unidades_usuario) if unidades_usuario is not None else serie
+
+    # IAAS: las de menos de 20 camas se muestran, pero el front avisa que no suman al TOTAL_OOAD
+    perfil["fueraDelTotal"] = {**FUERA_DEL_TOTAL_IAAS, "unidades": UNIDADES_MENOS_20_CAMAS_IAAS} if modulo == "iaas" else None
 
     # 8. Juntar ficha, reporte, estadisticas y perfil
     return {

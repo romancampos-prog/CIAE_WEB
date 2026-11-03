@@ -56,7 +56,7 @@ const TendenciaCorte = ({ reporte, perfil, mesSel, anio, unidadSel, onElegirUnid
 
   return (
     <div className="gi-tendencia">
-      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} tipoMeta={perfil?.tipoMeta} onElegir={onElegirUnidad} />
+      <ListaUnidades filas={filas} estatal={estatal} unidadSel={unidadSel} tipoMeta={perfil?.tipoMeta} fueraDelTotal={perfil?.fueraDelTotal} onElegir={onElegirUnidad} />
 
       <div className="gi-tendencia-cuerpo">
         <p className="gi-vista-ayuda">

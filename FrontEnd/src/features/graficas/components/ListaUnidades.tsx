@@ -1,7 +1,7 @@
 // react
 import { useState } from 'react';
 // propios
-import type { Desempeno, TipoMeta } from '@/types/api/indicadores/reportes';
+import type { Desempeno, FueraDelTotal, TipoMeta } from '@/types/api/indicadores/reportes';
 import type { FilaUnidad } from '@/types/pantallas/graficas';
 import { IconoBuscar } from '@/components/icons';
 import { COLOR_SEMAFORO } from '@/features/graficas/constants/semaforo';
@@ -17,6 +17,8 @@ interface Props {
   grupoDeUnidad?: Record<string, string> | null;
   /** Con meta "mas" o "menos" la lista va por lugar (#1 = la mejor); en rangos no hay lugar. */
   tipoMeta?: TipoMeta;
+  /** Las que se muestran pero no suman al total (IAAS: menos de 20 camas): llevan una etiqueta. */
+  fueraDelTotal?: FueraDelTotal | null;
   onElegir: (unidad: string) => void;
 }
 
@@ -31,9 +33,10 @@ interface Props {
  *   unidadSel  — unidad activa
  *   grupoDeUnidad — { unidad: grupo } o null (IAAS 01)
  *   tipoMeta   — perfil.tipoMeta: ordena y numera por lugar
+ *   fueraDelTotal — perfil.fueraDelTotal: etiqueta a las que no suman al total
  *   onElegir   — fn(unidad)
  */
-const ListaUnidades = ({ filas, estatal, unidadSel, grupoDeUnidad, tipoMeta, onElegir }: Props) => {
+const ListaUnidades = ({ filas, estatal, unidadSel, grupoDeUnidad, tipoMeta, fueraDelTotal, onElegir }: Props) => {
   const [busqueda, setBusqueda] = useState('');
   const conLugar = tipoMeta === 'mas' || tipoMeta === 'menos';
   const ordenadas = conLugar ? ordenarPorResultado(filas, tipoMeta) : filas;
@@ -56,6 +59,9 @@ const ListaUnidades = ({ filas, estatal, unidadSel, grupoDeUnidad, tipoMeta, onE
         <span className="gi-lista-nombre">
           {conLugar && lugar.has(fila.unidad) && <small className="gi-lista-lugar">#{lugar.get(fila.unidad)}</small>}
           {fila.unidad === CLAVE_ESTATAL ? 'TOTAL OOAD' : fila.unidad}
+          {fueraDelTotal?.unidades.includes(fila.unidad) && (
+            <small className="gi-lista-fuera" title={fueraDelTotal.motivo}>{fueraDelTotal.etiqueta}</small>
+          )}
         </span>
         <span className="gi-lista-valor">
           {grupoDeUnidad?.[fila.unidad] && <small>{grupoDeUnidad[fila.unidad]}</small>}

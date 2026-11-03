@@ -292,6 +292,9 @@ html[data-theme="dark"] .gi-pestana:not(.gi-pestana--activa) { background: var(-
 }
 .gi-lista-item--activa .gi-lista-nombre { color: var(--acento); font-weight: 800; }
 .gi-lista-item--estatal .gi-lista-nombre { font-weight: 800; font-size: .66rem; letter-spacing: 0.01em; text-transform: uppercase; color: var(--texto-medio); }
+.gi-lista-fuera { margin-left: 6px; padding: 1px 5px; border-radius: 100px; font-size: .56rem; font-weight: 800; background: var(--superficie-alterna); color: var(--texto-tenue); }
+.gi-nota-fuera-total { margin: 10px 4px 0; font-size: .72rem; line-height: 1.45; color: var(--texto-tenue); text-align: center; }
+.gi-nota-fuera-total strong { color: var(--texto-secundario); font-weight: 700; }
 .gi-lista-separador { height: 1px; background: rgba(var(--contraste-rgb), 0.1); margin: 6px 4px; flex-shrink: 0; }
 .gi-lista-nombre { min-width: 0; font-size: .72rem; font-weight: 600; color: var(--texto-secundario); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gi-lista-valor { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: var(--texto-suave); font-variant-numeric: tabular-nums; flex-shrink: 0; }

@@ -431,7 +431,7 @@ juntos (`services/iaas/catalogo_iaas_Services.py`). **Servicio:** `services/iaas
    - Denominador IAAS 02-06: lo capturado. Vacío o 0 = "no capturado".
 4. **Cálculo:** `calcular_unidades` con la lista de unidades esperadas
    (`ORDEN_IAAS01` o `ORDEN_DEMAS_IAAS`) y sin sumar al total las de
-   `UNIDADES_SIN_OOAD_IAAS`.
+   `UNIDADES_MENOS_20_CAMAS`.
 5. **Semáforo:** sin mes (fijo, o por tipo de hospital en IAAS 01).
 6. **Guardado:** `guardar_mes_definitivo` (sin población).
 7. **Auditoría** (`SUBIDA_ARCHIVO`) y respuesta con `unidades_pendientes`: hospitales a los
@@ -615,7 +615,7 @@ está claro en el código y conviene revisarlo.
 | Tasas | IAAS 01/03-06, Neonatal 06 (x1,000); EH 03, DM 04 (x100,000) | Solo cambia la fórmula | mapeo |
 | Redondeo propio | FTP y población | Numerador y denominador suben de entero solo con decimal ≥ 0.60 | `formulas_Services.redondeo_personalizado` |
 | Denominador 0 = sin dato | Neonatal 04 y 06 (`ceroEsSinDato`) | Un hospital sin nacimientos sale **Gris**, no "0 = Esperado" (HGZMF 21) | `calcular_unidades(cero_es_sin_dato=...)` |
-| Fuera del TOTAL_OOAD | IAAS: HGSMF 7, HGSMF 15, HGSMF 20 (menos de 20 camas) | Se calculan y se muestran, pero no suman al total | `iaas.json → UNIDADES_SIN_OOAD_IAAS` |
+| Fuera del TOTAL_OOAD | IAAS: HGSMF 7, HGSMF 15, HGSMF 20 (menos de 20 camas) | Se calculan y se muestran, pero no suman al total; la gráfica las marca "< 20 camas" (`perfil.fueraDelTotal`) | `iaas.json → UNIDADES_MENOS_20_CAMAS` |
 | Unidades sin PAMF en el corte | EH 03, DM 04 | Una unidad sin denominador de población no aparece en el corte | `intentar_generar_corte` |
 
 ### Periodicidad y acumulados
