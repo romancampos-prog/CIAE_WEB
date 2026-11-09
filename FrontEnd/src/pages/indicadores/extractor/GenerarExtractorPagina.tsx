@@ -2,7 +2,7 @@
 import TopBar from '@/components/TopBar';
 import ModalLoading from '@/components/ui/modal/ModalCargando';
 import {
-  PanelSubidaExtractor, SeccionCensoDm, TablaArchivosExtractor, TarjetaIndicadorExtractor, useGenerarExtractor,
+  PanelSubidaExtractor, SeccionCensoDm, SelectorCategoriasExtractor, TablaArchivosExtractor, TarjetaIndicadorExtractor, useGenerarExtractor,
 } from '@/features/generar-extractor';
 import { FichaTecnicaBoton } from '@/features/indicadores';
 import './generarExtractor.css';
@@ -59,8 +59,9 @@ const GenerarExtractorPagina = () => {
         <SeccionCensoDm />
 
         <h2 className="exv-seccion-titulo">Indicadores</h2>
+        <SelectorCategoriasExtractor ex={ex} />
         <div className="exv-ind-grid">
-          {ex.indicadores.map(ind => <TarjetaIndicadorExtractor key={ind.indicador} ind={ind} ex={ex} />)}
+          {ex.indicadoresVisibles.map(ind => <TarjetaIndicadorExtractor key={ind.indicador} ind={ind} ex={ex} />)}
         </div>
       </main>
 

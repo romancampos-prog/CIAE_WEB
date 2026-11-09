@@ -209,6 +209,22 @@
 .exv-anillo-num { font-size: .7rem; font-weight: 800; fill: var(--texto); }
 
 /* ── Tarjeta de cada indicador ── */
+/* Qué indicadores ver: todas las categorías o solo una */
+.exv-categorias { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.exv-categoria {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 6px 14px; box-sizing: border-box;
+  background: var(--superficie); border: 2px solid var(--borde); border-radius: 12px;
+  font: inherit; font-size: .84rem; color: var(--texto-medio); cursor: pointer;
+  transition: border-color .15s, background-color .15s;
+}
+.exv-categoria img { width: 26px; height: 26px; object-fit: contain; }
+.exv-categoria strong { font-weight: 800; }
+.exv-categoria:hover { border-color: var(--borde-fuerte); }
+.exv-categoria:focus-visible { outline: 2px solid var(--marca-texto); outline-offset: 2px; }
+.exv-categoria--activa, .exv-categoria--activa:hover { background: var(--tinte-marca); border-color: var(--marca-texto); color: var(--marca-texto); }
+.exv-categoria-total { padding: 0 8px; border-radius: 99px; background: var(--superficie-alterna); font-size: .72rem; font-weight: 700; color: var(--texto-secundario); }
+.exv-categoria--activa .exv-categoria-total { background: var(--marca); color: #fff; }
+
 .exv-ind-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));

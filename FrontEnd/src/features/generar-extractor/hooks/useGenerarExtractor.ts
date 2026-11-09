@@ -30,6 +30,8 @@ export function useGenerarExtractor() {
   const [resultado, setResultado] = useState<ResultadoSubida | null>(null);
   // Clave del botón que muestra "Descargando…".
   const [descargando, setDescargando] = useState<string | null>(null);
+  // La categoría de la sección Indicadores; null = todas. Los archivos no se filtran.
+  const [categoriaElegida, setCategoriaElegida] = useState<string | null>(null);
 
   useEffect(() => { document.title = 'Extractor | CIAE'; }, []);
 
@@ -43,6 +45,19 @@ export function useGenerarExtractor() {
   });
   const indicadores = useMemo(() => indicadoresQ.data ?? [], [indicadoresQ.data]);
   const iconoDe = useMemo(() => Object.fromEntries(indicadores.map(i => [i.indicador, i.icono])), [indicadores]);
+  // Las categorías salen de los indicadores que manda el backend, en su orden
+  const categorias = useMemo(() => {
+    const porCategoria = new Map<string, { categoria: string; nombreCategoria: string; icono: string | null; total: number }>();
+    for (const { categoria, nombreCategoria, icono } of indicadores) {
+      const actual = porCategoria.get(categoria);
+      porCategoria.set(categoria, { categoria, nombreCategoria, icono, total: (actual?.total ?? 0) + 1 });
+    }
+    return [...porCategoria.values()];
+  }, [indicadores]);
+  const indicadoresVisibles = useMemo(
+    () => (categoriaElegida ? indicadores.filter(i => i.categoria === categoriaElegida) : indicadores),
+    [indicadores, categoriaElegida],
+  );
 
   const estadoQ = useQuery({
     queryKey: ['extractor', 'estado', anio, indicadores.map(i => i.indicador)],
@@ -142,6 +157,7 @@ export function useGenerarExtractor() {
   return {
     anio, aniosDisponibles, cambiarAnio,
     indicadores, iconoDe,
+    categorias, categoriaElegida, setCategoriaElegida, indicadoresVisibles,
     errorCarga: indicadoresQ.isError ? 'No se pudieron cargar los indicadores del Extractor.' : '',
     cargando: indicadoresQ.isLoading || estadoQ.isFetching,
     archivos, mesesGenerados, cortesDelAnio,
