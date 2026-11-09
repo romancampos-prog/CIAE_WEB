@@ -74,6 +74,8 @@
      pensados para fondo blanco; como texto se mezclan con --texto en
      esta proporción. En claro 100% = el color tal cual. */
   --acento-peso:          100%;
+  /* Letra sobre un relleno con el color de la familia */
+  --texto-sobre-familia:  #ffffff;
 }
 
 /* Sin preferencia guardada, el script de index.html resuelve
@@ -81,23 +83,24 @@
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  --fondo:                #0d1a19;
-  --superficie:           #142825;
-  --superficie-rgb:       20, 40, 37;
-  --superficie-elevada:   #18302c;
-  --superficie-suave:     #1a312e;
-  --superficie-alterna:   #1d3532;
-  --superficie-marcada:   #24403c;
-  --borde:                #24443e;
-  --borde-rgb:            36, 68, 62;
-  --borde-suave:          #1a302d;
-  --borde-fuerte:         #2c4e48;
-  --texto:                #e4eeec;
-  --texto-medio:          #cddbd8;
-  --texto-secundario:     #b0c4c0;
-  --texto-suave:          #9db3ae;
-  --texto-tenue:          #8aa29d;
-  --texto-deshabilitado:  #5b716c;
+  /* Grafito frío (pizarra): fondo gris visible y tarjetas un escalón más claras para que se note la profundidad */
+  --fondo:                #171a1f;
+  --superficie:           #22262d;
+  --superficie-rgb:       34, 38, 45;
+  --superficie-elevada:   #2a2f37;
+  --superficie-suave:     #262a32;
+  --superficie-alterna:   #2d323b;
+  --superficie-marcada:   #373d47;
+  --borde:                #343a45;
+  --borde-rgb:            52, 58, 69;
+  --borde-suave:          #2a2f37;
+  --borde-fuerte:         #414854;
+  --texto:                #eceff4;
+  --texto-medio:          #d5dae2;
+  --texto-secundario:     #b7bec9;
+  --texto-suave:          #9da5b1;
+  --texto-tenue:          #868e9a;
+  --texto-deshabilitado:  #565d68;
   --contraste-rgb:        255, 255, 255;
 
   --marca:                #17735e;
@@ -107,7 +110,7 @@ html[data-theme="dark"] {
   --dorado-texto:         #d6ad5e;
   --dorado-rgb:           214, 173, 94;
   --oro-texto:            #d6ad5e;
-  --guinda-texto:         #f08f8f;
+  --guinda-texto:         #f08fa4;
   --guinda-rgb:           240, 143, 143;
   --tinto-texto:          #e8919f;
   --primario-rgb:         108, 196, 168;
@@ -135,11 +138,12 @@ html[data-theme="dark"] {
 
   --semaforo-esperado:    #3a9e80;
   --semaforo-medio:       #c9a04a;
-  --semaforo-bajo:        #e07370;
+  --semaforo-bajo:        #e8768c;
   --semaforo-gris:        #8a94a0;
 
   /* 100%: cada indicador conserva su color exacto también en oscuro (decisión del usuario) */
   --acento-peso:          100%;
+  --texto-sobre-familia:  #14171c;
 }
 
 /* ── Fondos de página: en claro cada módulo usa su propio gris claro;
@@ -148,9 +152,9 @@ html[data-theme="dark"] :is(
   .home-root, .ftp-screen-container, .ind-root, .ia-root, .ex-root,
   .cfg-root, .pg-root, .pg-loading, .res-page, .epi-root
 ) {
-  /* Brillo verde suave arriba que se apaga hacia el fondo base */
+  /* Brillo gris tenue arriba que se apaga hacia el fondo base */
   background:
-    radial-gradient(120% 70% at 50% -15%, rgba(38, 92, 82, 0.35) 0%, transparent 60%),
+    radial-gradient(120% 70% at 50% -15%, rgba(150, 175, 210, 0.08) 0%, transparent 60%),
     var(--fondo);
   background-attachment: fixed;
 }
@@ -173,12 +177,10 @@ html[data-theme="dark"] .ia-hero-title-main {
 }
 
 /* ── Logo Gobierno/IMSS: guinda y verde sobre transparente; sobre fondo
-   oscuro se pierde, así que lleva una placa clara. ── */
+   oscuro se perdería, así que va todo en blanco, igual que en el login. ── */
 html[data-theme="dark"] .tb-logo,
 html[data-theme="dark"] .pg-logo {
-  background: #e9eef2;
-  border-radius: 8px;
-  padding: 3px 6px;
+  filter: brightness(0) invert(1);
 }
 
 /* Transición suave al alternar (solo colores, nada de layout) */
@@ -191,7 +193,7 @@ html.tema-transicion *::after {
 
 /* ── Scrollbars nativas en oscuro ── */
 html[data-theme="dark"] * {
-  scrollbar-color: #2c4e48 transparent;
+  scrollbar-color: #414854 transparent;
 }
 
 /* ── Formularios nativos: el navegador ya los pinta con color-scheme,
@@ -264,11 +266,11 @@ html[data-theme="dark"] .leaflet-control-attribution a { color: var(--marca-text
 html[data-theme="dark"] .js-plotly-plot .plotly .modebar { background: transparent !important; }
 html[data-theme="dark"] .js-plotly-plot .plotly .modebar-btn path { fill: var(--texto-tenue); }
 
-/* ── Capas (verde azulado profundo): barra superior la más oscura, fondo de página
+/* ── Capas (grafito): barra superior la más oscura, fondo de página
    intermedio y tarjetas/contenido lo más claro (ahí es donde se lee). La
    separación la da el cambio de tono, no los bordes. ── */
 html[data-theme="dark"] .tb-bar {
-  background: rgba(11, 23, 22, 0.92);
-  border-bottom-color: rgba(95, 191, 159, 0.12);
+  background: rgba(16, 18, 22, 0.94);
+  border-bottom-color: rgba(255, 255, 255, 0.07);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
 }

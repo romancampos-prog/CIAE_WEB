@@ -29,7 +29,7 @@ function lerp(a: string, b: string, t: number): string {
  * Sin casos → gris neutro.
  */
 function getColor(casos: number, maxCasos: number, esOscuro: boolean): string {
-  if (!casos || casos === 0) return esOscuro ? '#3b524e' : '#d4d4d4'
+  if (!casos || casos === 0) return esOscuro ? '#434a56' : '#d4d4d4'
   const r = casos / maxCasos
   if (r <= 0.25) return lerp('#2e8b57', '#ccaa00', r / 0.25)
   if (r <= 0.50) return lerp('#ccaa00', '#e07b00', (r - 0.25) / 0.25)
@@ -91,7 +91,7 @@ export default function MapaLeaflet({ geojson, etiqueta }: { geojson: DatosMapa[
       fillColor  : getColor(casos, maxReal, esOscuro),
       fillOpacity: casos > 0 ? 0.82 : 0.45,
       // Contorno del color del fondo: separa municipios sin rayas blancas en oscuro
-      color      : esOscuro ? '#0d1a19' : 'white',
+      color      : esOscuro ? '#171a1f' : 'white',
       weight     : 1.8,
       dashArray  : casos > 0 ? '' : '3',
     }
