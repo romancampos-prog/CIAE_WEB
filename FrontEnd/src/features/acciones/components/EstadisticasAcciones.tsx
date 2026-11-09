@@ -1,6 +1,6 @@
 // propios
 import type { ConteoValor, DescripcionClave, EstadisticasExtraccion } from '@/types/api/epidemiologia/ftp';
-import { IconoBarras, IconoGuion } from '@/components/icons';
+import { IconoBarras, IconoGuion, IconoPalomita } from '@/components/icons';
 
 interface Props {
   estadisticas: EstadisticasExtraccion;
@@ -8,8 +8,6 @@ interface Props {
   descripciones: Record<string, DescripcionClave>;
   clavesActivas: string[];
   onClave: (clave: string) => void;
-  unidadesActivas: string[];
-  onUnidad: (unidad: string) => void;
 }
 
 interface PropsBarras {
@@ -17,8 +15,8 @@ interface PropsBarras {
   conteos: ConteoValor[];
   activos: string[];
   onElegir?: (valor: string) => void;
-  /** Color de la tarjeta: guinda para las claves, verde para las unidades (los mismos que el encabezado). */
-  tono: 'guinda' | 'verde';
+  /** Color de la tarjeta (el mismo que el encabezado). */
+  tono: 'guinda';
   descripciones?: Record<string, DescripcionClave>;
 }
 
@@ -39,6 +37,8 @@ function BarrasConteo({ titulo, conteos, activos, onElegir, tono, descripciones 
           return (
             <button
               key={texto}
+              // Cada clave UP con su color (del backend); unidades y claves sin color, el del tema
+              style={{ '--clave': (valor && descripciones?.[valor]?.color) || undefined }}
               className={`acc-barra${elegido ? ' acc-barra--activa' : ''}${sinResultados ? ' acc-barra--sin' : ''}`}
               onClick={() => onElegir?.(texto)}
               disabled={!onElegir}
@@ -48,6 +48,7 @@ function BarrasConteo({ titulo, conteos, activos, onElegir, tono, descripciones 
               {descripcion && <span className="acc-barra-descripcion">{descripcion}</span>}
               <span className="acc-barra-pista"><span className="acc-barra-relleno" style={{ width: `${(cantidad / maximo) * 100}%` }} /></span>
               <span className="acc-barra-cantidad">
+                {elegido && <span className="acc-barra-elegida" aria-hidden="true"><IconoPalomita tamano={9} /></span>}
                 {sinResultados ? <IconoGuion tamano={14} aria-label="Sin resultados" /> : cantidad}
               </span>
             </button>
@@ -59,8 +60,11 @@ function BarrasConteo({ titulo, conteos, activos, onElegir, tono, descripciones 
 }
 
 
-/** Conteos que manda el backend (por la columna del filtro del mapeo y por unidad); los totales van en ResumenPeriodo. */
-export default function EstadisticasAcciones({ estadisticas, descripciones, clavesActivas, onClave, unidadesActivas, onUnidad }: Props) {
+/**
+ * Conteos que manda el backend por la columna del filtro del mapeo (claves UP), en la columna de al
+ * lado de la tabla; los de unidad van abajo de la tabla (GraficaUnidades) y los totales en ResumenPeriodo.
+ */
+export default function EstadisticasAcciones({ estadisticas, descripciones, clavesActivas, onClave }: Props) {
   return (
     <>
       {estadisticas.porColumna.map((c, i) => (
@@ -69,9 +73,6 @@ export default function EstadisticasAcciones({ estadisticas, descripciones, clav
           activos={i === 0 ? clavesActivas : []} onElegir={i === 0 ? onClave : undefined} tono="guinda" descripciones={descripciones} />
       ))}
 
-      {estadisticas.porUnidad.length > 1 && (
-        <BarrasConteo titulo="Por unidad" conteos={estadisticas.porUnidad} activos={unidadesActivas} onElegir={onUnidad} tono="verde" />
-      )}
     </>
   );
 }

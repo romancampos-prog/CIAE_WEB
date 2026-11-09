@@ -12,7 +12,7 @@
    guinda vino (barras, etiquetas, bordes) y el texto que iba en tinto pasa a casi blanco. El panel de
    filtro de columna va en un portal fuera de .acc-main, por eso se nombra aparte. */
 html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
-  --tinto-rgb: 176, 64, 94;
+  --tinto-rgb: 172, 62, 108;
   --tinto-texto: #f0dfe3;
 }
 
@@ -69,16 +69,16 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 .acc-kpi-valor { font-size: 18px; font-weight: 800; line-height: 1; color: var(--texto); font-variant-numeric: tabular-nums; }
 .acc-kpi-etiqueta { font-size: 11.5px; font-weight: 600; color: var(--texto-suave); }
 
-/* ── Excel: botón guinda al final del encabezado y su panel de fechas ── */
+/* ── Excel: botón verde institucional oscuro al final del encabezado y su panel de fechas ── */
 .acc-excel { position: relative; margin-left: auto; }
 .acc-kpis + .acc-excel { margin-left: 0; }
 .acc-excel-boton {
   display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 16px; border-radius: 10px; cursor: pointer;
-  font-family: inherit; font-size: 13px; font-weight: 700; color: #fff; border: none; background: var(--acc-guinda);
+  font-family: inherit; font-size: 13px; font-weight: 700; color: #fff; border: none; background: #0b5445;
   transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
-.acc-excel-boton:hover, .acc-excel-boton--abierto { background: #8a2a45; box-shadow: 0 6px 16px rgba(105, 28, 50, 0.3); }
-.acc-excel-boton:focus-visible { outline: 2px solid var(--acc-acento); outline-offset: 2px; }
+.acc-excel-boton:hover, .acc-excel-boton--abierto { background: #08443a; box-shadow: 0 6px 16px rgba(11, 84, 69, 0.3); }
+.acc-excel-boton:focus-visible { outline: 2px solid #0b5445; outline-offset: 2px; }
 .acc-excel-panel {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; transform-origin: top right; box-sizing: border-box;
   width: min(340px, calc(100vw - 32px)); padding: 14px 14px 14px 16px;
@@ -157,21 +157,18 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 .acc-excel-nota { margin: 0; font-size: 11.5px; line-height: 1.45; color: var(--texto-suave); }
 .acc-excel-panel .acc-mensaje { margin: 0; }
 /* Más específico que .acc-boton (que va después en el archivo y es verde) */
-.acc-excel-panel .acc-excel-descargar { background: var(--acc-guinda); }
-.acc-excel-panel .acc-excel-descargar:hover:not(:disabled) { background: #8a2a45; box-shadow: 0 6px 16px rgba(105, 28, 50, 0.3); }
+.acc-excel-panel .acc-excel-descargar { background: #0b5445; }
+.acc-excel-panel .acc-excel-descargar:hover:not(:disabled) { background: #08443a; box-shadow: 0 6px 16px rgba(11, 84, 69, 0.3); }
 .acc-kpi--guinda { border-left-color: var(--acc-acento); }
 .acc-kpi--guinda .acc-kpi-icono { background: rgba(var(--tinto-rgb), 0.1); color: var(--tinto-texto); }
 .acc-kpi--verde { border-left-color: var(--marca); }
 .acc-kpi--verde .acc-kpi-icono { background: var(--tinte-marca); color: var(--marca-texto); }
 
 /* Tarjetas de conteos (abajo): su color a la izquierda y en las barras */
-.acc-conteo { border-left-width: 3px; }
-.acc-conteo--guinda { border-left-color: var(--acc-acento); }
+/* Claves UP (columna de la derecha): su línea verde arriba y a la derecha, en una sola curva por la esquina */
+.acc-conteo { border-top: 4px solid var(--marca); border-right: 4px solid var(--marca); }
 .acc-conteo--guinda .acc-titulo-icono { background: rgba(var(--tinto-rgb), 0.1); color: var(--tinto-texto); }
 .acc-conteo--guinda .acc-barra-relleno { background: var(--acc-acento); }
-.acc-conteo--verde { border-left-color: var(--marca); }
-.acc-conteo--verde .acc-titulo-icono { background: var(--tinte-marca); color: var(--marca-texto); }
-.acc-conteo--verde .acc-barra-relleno { background: var(--marca); }
 
 /* Panel que se despliega: los meses en cuadrícula */
 .acc-mes-panel {
@@ -231,16 +228,11 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 .acc-control:focus { outline: none; border-color: var(--marca); }
 
 /* ── Cuerpo: la tabla a lo ancho y los conteos en una columna angosta a su lado ── */
-.acc-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) clamp(210px, 14vw, 270px); gap: 16px; align-items: stretch; }
-/* La columna no aporta alto (va en absoluto): mide lo que mide la tabla y la lista de unidades llena el resto */
-.acc-resumenes { position: relative; min-width: 0; }
-.acc-resumenes-columna { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 12px; }
-.acc-resumenes .acc-conteo { flex-shrink: 0; }
-/* Unidades siempre con espacio (unas 7 a la vista); si no alcanza, la que cede es la de claves, que hace scroll por dentro */
-.acc-resumenes .acc-conteo--verde { flex: 1 1 0; min-height: 250px; }
-.acc-resumenes .acc-conteo--claves { flex: 0 1 auto; min-height: 0; }
-.acc-resumenes .acc-conteo--claves .acc-barras { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
-.acc-resumenes .acc-conteo--verde .acc-barras { flex: 1 1 0; min-height: 0; max-height: none; }
+.acc-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) clamp(260px, 19vw, 340px); gap: 16px; align-items: start; }
+/* La columna de al lado: las claves UP completas, con su definición entera (sin scroll por dentro) */
+.acc-resumenes { min-width: 0; }
+.acc-resumenes-columna { display: flex; flex-direction: column; gap: 12px; }
+.acc-resumenes .acc-conteo--claves .acc-barras { max-height: none; overflow: visible; }
 .acc-resumenes .acc-tarjeta { padding: 12px; gap: 8px; }
 .acc-resumenes .acc-barra { padding: 3px 6px; font-size: 11.5px; gap: 3px 6px; }
 
@@ -438,25 +430,40 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 /* Lo que significa la clave UP: en chiquito, hasta dos renglones (completo al pasar el mouse) */
 
 /* Tarjeta de claves UP: el código como etiqueta guinda, la cantidad grande a la derecha y el significado abajo */
-.acc-conteo--claves .acc-barras { max-height: none; gap: 0; }
+/* Cada clave como su propia tarjetita, con aire entre ellas: elegidas seguidas no se juntan en un bloque */
+.acc-conteo--claves .acc-barras { max-height: none; gap: 6px; }
 .acc-conteo--claves .acc-barra {
   grid-template-areas: "texto cantidad" "descripcion descripcion" "pista pista";
-  gap: 4px 8px; padding: 8px 8px 9px; border-radius: 10px;
+  gap: 5px 8px; padding: 10px 10px 11px; border-radius: 12px;
 }
-.acc-conteo--claves .acc-barra + .acc-barra { border-top-color: var(--borde); border-top-left-radius: 0; border-top-right-radius: 0; }
+.acc-conteo--claves .acc-barra:not(.acc-barra--activa) { background: var(--superficie-alterna); }
 .acc-conteo--claves .acc-barra-texto {
   justify-self: start; padding: 2px 8px; border-radius: 6px;
   font-size: 11.5px; font-weight: 800; letter-spacing: 0.3px;
-  background: rgba(var(--tinto-rgb), 0.1); color: var(--tinto-texto);
+  /* El código con el fondo sólido de su color, como en la tabla */
+  background: var(--clave, var(--texto-suave)); color: #fff;
 }
+.acc-conteo--claves .acc-barra-relleno { background: var(--clave, var(--acc-acento)); }
 .acc-conteo--claves .acc-barra-cantidad { font-size: 15px; font-weight: 800; }
 .acc-barra-descripcion {
-  grid-area: descripcion; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  font-size: 11px; font-weight: 500; line-height: 1.35; color: var(--texto-suave); text-align: left;
+  grid-area: descripcion; display: block;
+  font-size: 11.5px; font-weight: 500; line-height: 1.4; color: var(--texto-suave); text-align: left;
 }
 .acc-conteo--claves .acc-barra-pista { height: 5px; }
-.acc-conteo--claves .acc-barra--activa { border-color: var(--acc-acento); background: rgba(var(--tinto-rgb), 0.06); }
-.acc-conteo--claves .acc-barra--activa .acc-barra-texto { background: var(--acc-acento); color: #fff; }
+/* Elegida para filtrar: marco y fondo tenue de su color */
+/* Clave elegida para filtrar: barra gruesa de su color a la izquierda, fondo tenue y palomita; sin marco alrededor */
+.acc-conteo--claves .acc-barra--activa {
+  border-color: transparent; background: color-mix(in srgb, var(--clave, var(--texto-suave)) 9%, var(--superficie));
+  box-shadow: inset 4px 0 0 var(--clave, var(--texto-suave));
+}
+.acc-barra-elegida {
+  display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 6px; border-radius: 50%;
+  background: var(--clave, var(--texto-suave)); color: #fff;
+}
+.acc-barra-cantidad { align-items: center; }
+/* Con alguna elegida, las demás se atenúan: se ve de un golpe qué está filtrando la tabla */
+.acc-conteo--claves .acc-barras:has(.acc-barra--activa) .acc-barra:not(.acc-barra--activa) { opacity: .5; }
+.acc-conteo--claves .acc-barras:has(.acc-barra--activa) .acc-barra:not(.acc-barra--activa):hover { opacity: .85; }
 .acc-conteo--claves .acc-barra--sin .acc-barra-texto { background: var(--superficie-alterna); color: var(--texto-tenue); }
 .acc-conteo--claves .acc-barra--sin .acc-barra-descripcion { color: var(--texto-tenue); }
 .acc-barra-pista { grid-area: pista; height: 5px; border-radius: 3px; background: var(--superficie-alterna); overflow: hidden; }
@@ -478,14 +485,18 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 /* Destacado arriba de los conteos (solo admin): guinda sólido para verlo a la primera */
 .acc-aviso.acc-aviso--destacado {
   flex-shrink: 0; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 12px; font-size: 12.5px;
-  background: var(--acc-guinda); color: #fff; border: none;
-  box-shadow: 0 8px 20px rgba(105, 28, 50, 0.28);
+  /* Gris pizarra oscuro con el ícono en dorado: se ve a la primera sin sumar más rojo a la página */
+  background: #2f3b4c; color: #fff; border: none;
+  box-shadow: 0 8px 20px rgba(30, 41, 59, 0.25);
 }
-.acc-aviso.acc-aviso--destacado:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(105, 28, 50, 0.38); }
+.acc-aviso.acc-aviso--destacado:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(30, 41, 59, 0.35); }
+.acc-aviso--destacado .acc-aviso-destacado-icono { color: #f2c35b; }
 .acc-aviso-destacado-icono { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: rgba(255, 255, 255, 0.16); flex-shrink: 0; }
 .acc-aviso--destacado .acc-aviso-ver { padding-left: 10px; border-left: 1px solid rgba(255, 255, 255, 0.3); opacity: 0.9; }
 /* ── Detalle: la tabla (los filtros van en los encabezados) ── */
-.acc-detalle { padding: 0; gap: 0; overflow: hidden; }
+/* La tarjeta de la tabla con su línea a la izquierda y arriba, del mismo grosor y color: así da la vuelta
+   a la esquina redondeada sin cortarse (una sola curva continua) */
+.acc-detalle { padding: 0; gap: 0; overflow: hidden; border-left: 4px solid var(--marca); border-top: 4px solid var(--marca); }
 /* Esquina de la tabla: quita todos los filtros de las columnas */
 .acc-quitar-filtros {
   display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: none; border-radius: 50%; cursor: pointer;
@@ -556,56 +567,62 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 .acc-tabla-caja { overflow: auto; height: calc(100vh - 250px); min-height: 420px; }
 .acc-tabla { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; font-variant-numeric: tabular-nums; }
 .acc-tabla th {
-  position: sticky; top: 0; z-index: 2; padding: 0; text-align: left; vertical-align: bottom;
-  /* Tono guinda suave sobre la superficie (opaco: el encabezado es fijo y las filas pasan por debajo) */
-  background: linear-gradient(rgba(var(--tinto-rgb), 0.07), rgba(var(--tinto-rgb), 0.07)), var(--superficie); border-bottom: 1px solid rgba(var(--tinto-rgb), 0.22);
+  position: sticky; top: 0; z-index: 2; padding: 0; text-align: left; vertical-align: middle;
+  /* Neutro (gris muy claro y opaco: el encabezado es fijo y las filas pasan por debajo); el color va en los datos */
+  background: var(--superficie-alterna); border-bottom: 1px solid var(--borde);
 }
 .acc-th-boton {
   display: inline-flex; align-items: center; gap: 5px; width: 100%; padding: 9px 10px;
   border: none; background: transparent; cursor: pointer; text-align: left;
-  font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase; color: var(--tinto-texto); line-height: 1.3;
+  font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase; color: var(--texto-secundario); line-height: 1.3;
 }
-.acc-th-boton:hover, .acc-th-boton--abierto { color: var(--tinto-texto); background: rgba(var(--tinto-rgb), 0.08); }
+.acc-th-boton:hover, .acc-th-boton--abierto { color: var(--texto); background: rgba(var(--contraste-rgb), 0.05); }
 .acc-th-nombre { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* El nombre de la columna respeta el salto de renglón de su etiqueta ("Fecha de\natención") */
+.acc-th-etiqueta { white-space: pre-line; }
 .acc-th-filtro {
   max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--tinto-texto);
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--texto-medio);
 }
 .acc-th-filtro--ayuda { font-weight: 500; font-style: italic; opacity: 0.6; }
 .acc-th-boton:hover .acc-th-filtro--ayuda { opacity: 0.9; }
-.acc-th-boton--filtrado { color: var(--tinto-texto); box-shadow: inset 0 -2px 0 var(--acc-acento); }
-.acc-th-boton--filtrado .acc-th-icono { background: var(--acc-acento); color: #fff; }
-.acc-th-icono { display: grid; place-items: center; flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; background: rgba(var(--tinto-rgb), 0.12); color: var(--tinto-texto); }
+/* Columna con filtro puesto: ahí sí el acento, para que se note que la tabla está filtrada */
+.acc-th-boton--filtrado { color: var(--texto); box-shadow: inset 0 -2px 0 var(--marca); }
+.acc-th-boton--filtrado .acc-th-icono { background: var(--marca); color: #fff; }
+.acc-th-icono { display: grid; place-items: center; flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; background: rgba(var(--contraste-rgb), 0.06); color: var(--texto-suave); }
 /* Flechita de "se despliega": tenue, más visible al pasar el mouse */
 .acc-th-flecha { display: inline-grid; margin-left: auto; opacity: 0.35; transition: opacity 0.15s, transform 0.15s; }
 .acc-th-boton:hover .acc-th-flecha { opacity: 0.8; }
 .acc-th-boton--abierto .acc-th-flecha { opacity: 1; transform: rotate(180deg); }
 /* Columna sin filtro (Unidad para el usuario de unidad): solo el nombre */
-.acc-th-boton--fijo, .acc-th-boton--fijo:hover { cursor: default; background: transparent; color: var(--tinto-texto); }
+.acc-th-boton--fijo, .acc-th-boton--fijo:hover { cursor: default; background: transparent; color: var(--texto-secundario); }
 
 .acc-tabla td {
   padding: 7px 10px; color: var(--texto-medio); background: var(--superficie); line-height: 1.35;
   border-bottom: 1px solid color-mix(in srgb, var(--borde) 60%, transparent);
 }
-.acc-tabla tbody tr:hover td { background: rgba(var(--tinto-rgb), 0.035); }
-.acc-tabla tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--acc-acento); }
+.acc-tabla tbody tr:hover td { background: var(--superficie-alterna); }
+.acc-tabla tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--texto-tenue); }
 .acc-tabla tbody tr:last-child td { border-bottom: none; }
 .acc-celda-corta { white-space: nowrap; }
 
 /* # y Unidad se quedan fijas al desplazar a la derecha */
 .acc-col-numero { box-sizing: border-box; width: 36px; min-width: 36px; max-width: 36px; text-align: right !important; color: var(--texto-tenue) !important; font-size: 10.5px; padding: 7px 6px 7px 2px !important; }
-.acc-tabla th.acc-col-numero { padding: 9px 6px 9px 2px !important; font-size: 11px; font-weight: 700; color: var(--tinto-texto); }
+.acc-tabla th.acc-col-numero { padding: 9px 6px 9px 2px !important; font-size: 11px; font-weight: 700; color: var(--texto-suave); }
 .acc-tabla .acc-col-numero { position: sticky; left: 0; z-index: 1; }
 .acc-tabla th.acc-col-numero { z-index: 3; }
 .acc-tabla td:nth-child(2) { position: sticky; left: 36px; z-index: 1; font-weight: 700; color: var(--texto); }
 .acc-tabla th:nth-child(2) { position: sticky; left: 36px; z-index: 3; }
 
 .acc-clave {
-  padding: 2px 8px; border-radius: 999px; cursor: pointer; border: none; white-space: nowrap;
-  font-family: inherit; font-size: 11px; font-weight: 700;
-  background: rgba(var(--tinto-rgb), 0.08); color: var(--tinto-texto);
+  /* Cada clave UP con su color (--clave, del backend); sin color, el gris del tema */
+  --clave-color: var(--clave, var(--texto-suave));
+  /* Fondo sólido del color de su clave, letra blanca */
+  padding: 2px 9px; border-radius: 999px; cursor: pointer; border: none; white-space: nowrap;
+  font-family: inherit; font-size: 11px; font-weight: 800; letter-spacing: .2px;
+  background: var(--clave-color); color: #fff;
 }
-.acc-clave:hover { background: var(--acc-acento); color: #fff; }
+.acc-clave:hover { filter: brightness(1.12); box-shadow: 0 2px 8px color-mix(in srgb, var(--clave-color) 40%, transparent); }
 
 .acc-vacio { font-size: 13px; color: var(--texto-tenue); margin: 0; padding: 24px; text-align: center; }
 
@@ -616,7 +633,6 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
   .acc-tabla td, .acc-th-boton { white-space: nowrap; }
   /* Abajo de la tabla, en dos columnas de la misma altura */
   .acc-resumenes-columna { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items: stretch; }
-  .acc-resumenes .acc-conteo--verde .acc-barras, .acc-resumenes .acc-barras { flex: none; max-height: 240px; }
   .acc-resumenes .acc-aviso { grid-column: 1 / -1; }
   /* El título arriba; el periodo y los totales debajo, uno junto al otro */
   .acc-tabla-caja { height: auto; max-height: 70vh; min-height: 240px; }
@@ -669,3 +685,147 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 @media (prefers-reduced-motion: reduce) {
   .acc-main *, .acc-ventana, .acc-ventana *, .acc-ventana::backdrop, .acc-columna-panel { animation: none !important; transition: none !important; }
 }
+
+/* ── Estatus de seguimiento de cada registro: No revisado (rojo), En proceso (dorado), Con estudio (verde) ── */
+.acc-col-estatus { white-space: nowrap; }
+.acc-estatus {
+  display: inline-block; padding: 4px 10px; border-radius: 999px; font-family: inherit;
+  font-size: 11.5px; font-weight: 700; border: 1px solid transparent; color: var(--texto-medio);
+}
+select.acc-estatus { cursor: pointer; appearance: auto; }
+select.acc-estatus:focus-visible { outline: 2px solid var(--marca); outline-offset: 1px; }
+/* "No revisado" es lo de casi todas las filas: solo contorno, para que la tabla no se tiña de rojo */
+.acc-estatus--Bajo     { color: var(--semaforo-bajo);     background: var(--superficie);                                                 border-color: color-mix(in srgb, var(--semaforo-bajo) 35%, transparent); }
+.acc-estatus--Medio    { color: var(--semaforo-medio);    background: color-mix(in srgb, var(--semaforo-medio) 14%, var(--superficie));    border-color: color-mix(in srgb, var(--semaforo-medio) 45%, transparent); }
+.acc-estatus--Esperado { color: var(--semaforo-esperado); background: color-mix(in srgb, var(--semaforo-esperado) 12%, var(--superficie)); border-color: color-mix(in srgb, var(--semaforo-esperado) 40%, transparent); }
+select.acc-estatus option { color: var(--texto); background: var(--superficie); }
+
+/* ── Estudio: indicador junto a "Con estudio" (falta = ámbar punteado, listo = verde con palomita) ── */
+.acc-fila-abrible { cursor: pointer; }
+.acc-indicador-estudio {
+  position: relative; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-left: 6px; vertical-align: middle;
+  border-radius: 8px; cursor: pointer; padding: 0;
+  color: var(--semaforo-medio); background: var(--superficie); border: 1.5px dashed color-mix(in srgb, var(--semaforo-medio) 60%, transparent);
+  transition: transform .15s, background-color .15s;
+}
+.acc-indicador-estudio:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--semaforo-medio) 10%, var(--superficie)); }
+.acc-indicador-estudio:focus-visible { outline: 2px solid var(--marca); outline-offset: 1px; }
+.acc-indicador-estudio--listo { color: #fff; background: var(--semaforo-esperado); border: 1.5px solid var(--semaforo-esperado); }
+.acc-indicador-estudio--listo:hover { background: color-mix(in srgb, var(--semaforo-esperado) 85%, #000); }
+.acc-indicador-estudio-palomita {
+  position: absolute; right: -5px; top: -5px; display: grid; place-items: center; width: 13px; height: 13px; border-radius: 50%;
+  background: var(--superficie); color: var(--semaforo-esperado); box-shadow: 0 0 0 1.5px var(--semaforo-esperado);
+}
+.acc-indicador-estudio--subiendo { opacity: .55; cursor: wait; }
+
+/* ── Tarjeta flotante del registro (admin): datos, estatus y estudio ── */
+.acc-detalle-fondo {
+  position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 16px;
+  /* Sin desenfoque: con la tabla grande detrás, el blur hacía lenta la aparición */
+  background: rgba(10, 20, 18, 0.5); animation: acc-aparecer-fondo .1s ease-out;
+}
+@keyframes acc-aparecer-fondo { from { opacity: 0; } }
+@keyframes acc-subir-tarjeta { from { opacity: 0; transform: translateY(6px); } }
+.acc-registro {
+  /* Más alta que ancha: más aire entre secciones y dentro de cada una */
+  width: min(640px, 100%); max-height: min(92vh, 900px); overflow-y: auto; display: flex; flex-direction: column; gap: 18px;
+  padding: 24px 24px 26px; border-radius: 18px; background: var(--superficie); box-shadow: 0 24px 60px rgba(0,0,0,.28);
+  border-top: 4px solid var(--marca); border-left: 4px solid var(--marca); animation: acc-subir-tarjeta .1s ease-out;
+}
+.acc-registro-encabezado { display: flex; align-items: center; gap: 12px; }
+.acc-registro-encabezado > div { flex: 1; min-width: 0; }
+.acc-registro-encabezado-icono { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--tinte-marca); color: var(--marca-texto); flex-shrink: 0; }
+.acc-registro-unidad { margin: 0; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--texto-tenue); }
+.acc-registro-titulo { margin: 2px 0 0; font-size: 17px; font-weight: 800; color: var(--texto); }
+.acc-registro-cerrar {
+  display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--borde); background: var(--superficie-alterna); color: var(--texto-medio);
+}
+/* La acción (clave UP y qué es): lo primero que se lee, con el color de su clave */
+.acc-registro-accion {
+  --clave-color: var(--clave, var(--texto-suave));
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px;
+  background: color-mix(in srgb, var(--clave-color) 9%, var(--superficie)); border-left: 4px solid var(--clave-color);
+}
+.acc-registro-accion .acc-clave { flex-shrink: 0; cursor: default; font-size: 12.5px; padding: 3px 10px; }
+.acc-registro-accion strong { display: block; font-size: 14px; line-height: 1.4; color: var(--texto); }
+.acc-registro-accion small { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 600; color: color-mix(in srgb, var(--clave-color) 80%, var(--texto)); }
+/* Los datos: cada uno con su ícono */
+.acc-registro-datos { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.acc-registro-datos div {
+  min-width: 0; display: grid; grid-template-columns: 30px 1fr; grid-template-areas: "icono titulo" "icono valor"; column-gap: 10px; align-items: center;
+  padding: 12px 12px; border-radius: 12px; background: var(--superficie-alterna);
+}
+.acc-registro-dato-icono { grid-area: icono; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--superficie); color: var(--texto-suave); }
+.acc-registro-datos dt { grid-area: titulo; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--texto-tenue); }
+.acc-registro-datos dd { grid-area: valor; margin: 0; font-size: 13px; font-weight: 700; color: var(--texto); word-break: break-word; font-variant-numeric: tabular-nums; }
+.acc-registro-estatus { display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid var(--borde); font-size: 12px; font-weight: 700; color: var(--texto-medio); }
+.acc-registro-estudio { display: flex; flex-direction: column; gap: 10px; }
+.acc-registro-archivo {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;
+  background: color-mix(in srgb, var(--semaforo-esperado) 8%, var(--superficie)); border: 1px solid color-mix(in srgb, var(--semaforo-esperado) 30%, transparent);
+}
+.acc-registro-archivo-icono { color: var(--semaforo-esperado); display: grid; }
+.acc-registro-archivo strong { display: block; font-size: 13px; color: var(--texto); word-break: break-word; }
+.acc-registro-archivo small { font-size: 11.5px; color: var(--texto-suave); }
+.acc-registro-boton {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 10px; cursor: pointer; border: none;
+  font-family: inherit; font-size: 12px; font-weight: 700; color: #fff; background: var(--marca);
+}
+.acc-registro-subir {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 30px 16px; border-radius: 14px; cursor: pointer; text-align: center;
+  color: var(--texto-medio); border: 2px dashed var(--borde); background: var(--superficie-alterna); transition: border-color .15s, background-color .15s;
+}
+.acc-registro-subir svg { color: var(--marca); }
+.acc-registro-subir strong { font-size: 13.5px; color: var(--texto); }
+.acc-registro-subir small { font-size: 11.5px; color: var(--texto-suave); }
+.acc-registro-subir:hover, .acc-registro-subir--encima { border-color: var(--marca); background: color-mix(in srgb, var(--marca) 6%, var(--superficie)); }
+.acc-registro-subir--subiendo { opacity: .6; cursor: wait; }
+.acc-registro-nota { margin: 0; font-size: 12px; color: var(--texto-suave); }
+.acc-registro-error { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--peligro-texto); background: var(--tinte-peligro); border: 1px solid var(--borde-peligro); }
+@media (max-width: 520px) { .acc-registro-datos { grid-template-columns: 1fr; } }
+
+/* Excel sueltos en la carpeta de estudios (solo admin): aviso discreto debajo de la tabla */
+.acc-estudios-sueltos {
+  margin: 10px 16px 14px; padding: 10px 14px; border-radius: 10px; font-size: 12px; color: var(--texto-medio);
+  background: color-mix(in srgb, var(--semaforo-medio) 10%, var(--superficie)); border: 1px solid color-mix(in srgb, var(--semaforo-medio) 35%, transparent);
+}
+.acc-estudios-sueltos ul { margin: 6px 0 0; padding-left: 18px; font-family: ui-monospace, monospace; font-size: 11px; }
+
+/* ── Registros por unidad: abajo de la tabla, a lo ancho, en columnas (de mayor a menor) ── */
+/* Esta va abajo de la tabla: su línea va a la derecha y abajo (la curva en la esquina de abajo a la derecha) */
+.acc-grafica-unidades { margin-top: 16px; border-right: 4px solid var(--marca); border-bottom: 4px solid var(--marca); }
+.acc-grafica-unidades .acc-titulo-icono { background: var(--tinte-marca); color: var(--marca-texto); }
+.acc-grafica-unidades-nota { margin-left: auto; font-size: 11.5px; font-weight: 500; color: var(--texto-suave); }
+.acc-grafica-unidades-lista {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px 28px;
+}
+.acc-grafica-unidad {
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: minmax(130px, 42%) 1fr 34px; align-items: center; gap: 10px;
+  padding: 6px 8px; border-radius: 8px; font-size: 12px; color: var(--texto-medio);
+  transition: background-color .15s;
+}
+.acc-grafica-unidad:hover { background: var(--superficie-alterna); }
+.acc-grafica-unidad:focus-visible { outline: 2px solid var(--marca); outline-offset: 1px; }
+.acc-grafica-unidad--activa { background: var(--tinte-marca); box-shadow: inset 3px 0 0 var(--marca); }
+.acc-grafica-unidad-nombre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.acc-grafica-unidad-pista { height: 12px; border-radius: 6px; background: var(--superficie-alterna); overflow: hidden; }
+.acc-grafica-unidad-barra { display: block; height: 100%; border-radius: 6px; background: var(--marca); }
+.acc-grafica-unidad-cantidad { display: flex; justify-content: flex-end; font-weight: 800; color: var(--texto); font-variant-numeric: tabular-nums; }
+.acc-grafica-unidad--sin { color: var(--texto-tenue); }
+
+/* ── Las líneas verdes de las tarjetas: aparecen suave al cargar y, al pasar el mouse, un brillo tenue ── */
+@keyframes acc-borde-entrar { from { border-color: transparent; } }
+.acc-detalle, .acc-conteo, .acc-grafica-unidades {
+  animation: acc-borde-entrar .8s ease-out both;
+  transition: box-shadow .25s ease;
+}
+.acc-detalle:hover, .acc-conteo:hover, .acc-grafica-unidades:hover {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--marca) 18%, transparent), 0 6px 18px color-mix(in srgb, var(--marca) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc-detalle, .acc-conteo, .acc-grafica-unidades { animation: none; transition: none; }
+}
+@media (prefers-reduced-motion: reduce) { .acc-detalle-fondo, .acc-registro { animation: none; } }

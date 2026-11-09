@@ -6,10 +6,14 @@ Usado en: Controller/epiFTP.py
 """
 from fastapi import HTTPException
 
-from epidemiologia.datos.ftp.claves_up_Datos import claves_up
+from epidemiologia.datos.ftp.claves_up_Datos import claves_up, colores_claves
+from epidemiologia.datos.ftp.estatus_acciones_Datos import catalogo_estatus, leer_estatus
+from epidemiologia.datos.ftp.estudios_acciones_Datos import leer_indice_estudios
+from .sincronizar_estudios_Services import sincronizar_estudios
 from epidemiologia.datos.ftp.extracciones_ftp_Datos import leer_extraccion
 from epidemiologia.modulos.ftp.errores_por_tipo import errores_por_tipo
 from epidemiologia.modulos.ftp.estadisticas_extraccion import estadisticas_de_filas
+from epidemiologia.modulos.ftp.id_registro import id_de_registro
 from ..mapeo.mapeo_Services import ExtraerMapeoFTP
 
 
@@ -45,14 +49,37 @@ def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: lis
     contenido["estadisticas"] = estadisticas_de_filas(contenido["filas"], columnas_conteo, contenido["unidadesSinResultados"])
 
     #5- Lo que filtra el mapeo (ej. Clave de la Accion: UP87, UP407...), para decirlo en pantalla
+    # Como se muestran las columnas en la tabla (del mapeo), ej. "Numero Seguridad Social" -> "NSS"
+    contenido["etiquetasColumna"] = mapeo.etiquetasColumna
+    contenido["iconosColumna"] = mapeo.iconosColumna
     contenido["filtrosMapeo"] = [{"columna": columna, "valores": valores} for columna, valores in columnas_conteo.items()]
 
-    #6- Que significa cada clave UP del filtro (del catalogo de claves UP), para mostrarlo junto al codigo
+    #6- Que significa cada clave UP del filtro (del catalogo de claves UP) y su color en pantalla
     catalogo = claves_up()
+    colores = colores_claves()
     contenido["descripcionClaves"] = {
-        valor: {"descripcion": catalogo[valor]["descripcion"], "subgrupo": catalogo[valor]["subgrupo"] or catalogo[valor]["grupo"]}
+        valor: {
+            "descripcion": catalogo[valor]["descripcion"],
+            "subgrupo": catalogo[valor]["subgrupo"] or catalogo[valor]["grupo"],
+            "color": colores.get(valor),
+        }
         for valores in columnas_conteo.values() for valor in valores if valor in catalogo
     }
+
+    #7- Estatus de seguimiento de cada registro: su "_id" y lo que ya se marco (si no, el inicial del catalogo)
+    catalogo = catalogo_estatus()
+    marcados = leer_estatus(archivo)
+    for fila in contenido["filas"]:
+        fila["_id"] = id_de_registro(fila)
+    contenido["estatus"] = {fila["_id"]: marcados.get(fila["_id"], catalogo["inicial"]) for fila in contenido["filas"]}
+    contenido["catalogoEstatus"] = catalogo["estatus"]
+
+    #8- Los registros que ya tienen estudio (solo el admin los ve y los baja). Antes, el indice se
+    #   pone al dia con la carpeta: alguien pudo poner o quitar Excel a mano.
+    sincronizacion = sincronizar_estudios(archivo) if ver_errores else {"sinRegistro": []}
+    contenido["estudiosSinRegistro"] = sincronizacion["sinRegistro"]
+    estudios = leer_indice_estudios(archivo) if ver_errores else {}
+    contenido["estudios"] = {fila["_id"]: estudios[fila["_id"]] for fila in contenido["filas"] if fila["_id"] in estudios}
 
     tipo = "definitivo" if contenido["semana"] is None else f"previo semana {contenido['semana']}"
     mensaje = f"{archivo} {ano}-{mes_texto} ({tipo}): {len(contenido['filas'])} filas."

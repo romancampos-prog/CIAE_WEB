@@ -2,7 +2,7 @@
 
 // propios
 import api from '@/api/cliente/axiosClient';
-import type { ExcelExtraccion, ExtraccionFtp, ExtraccionGuardada, PeriodoExtraccion } from '@/types/api/epidemiologia/ftp';
+import type { EstudioAccion, ExcelExtraccion, ExtraccionFtp, ExtraccionGuardada, PeriodoExtraccion } from '@/types/api/epidemiologia/ftp';
 import type { RespuestaApi } from '@/types/api/respuestaApi';
 
 export const ftpEpidemiologiaApi = {
@@ -17,6 +17,30 @@ export const ftpEpidemiologiaApi = {
   /** Lo guardado del mes: el definitivo o, si aún no hay, su última semana (404 si no hay nada). */
   async consultarOC30(ano: number, mes: number): Promise<ExtraccionFtp> {
     const { data } = await api.get<RespuestaApi<ExtraccionFtp>>('/epidemiologia/ftp/extraccion/OC30', { params: { ano, mes } });
+    return data.data;
+  },
+
+  /** Cambia el estatus de seguimiento de un registro (solo admin). */
+  async cambiarEstatusOC30(id: string, estatus: string): Promise<{ id: string; estatus: string }> {
+    const { data } = await api.post<RespuestaApi<{ id: string; estatus: string }>>('/epidemiologia/ftp/estatus/OC30', { id, estatus });
+    return data.data;
+  },
+
+  /** Sube el estudio (Excel) de un registro en "Con estudio" (solo admin); el backend lo guarda por año / unidad / mes. */
+  async subirEstudioOC30(ano: number, mes: number, id: string, archivo: File): Promise<EstudioAccion & { id: string }> {
+    const form = new FormData();
+    form.append('ano', String(ano));
+    form.append('mes', String(mes));
+    form.append('id', id);
+    form.append('archivo', archivo);
+    form.append('pesoArchivo', String(archivo.size));
+    const { data } = await api.post<RespuestaApi<EstudioAccion & { id: string }>>('/epidemiologia/ftp/estudio/OC30', form);
+    return data.data;
+  },
+
+  /** El estudio guardado de un registro, para descargarlo (solo admin). */
+  async descargarEstudioOC30(id: string): Promise<ExcelExtraccion> {
+    const { data } = await api.get<RespuestaApi<ExcelExtraccion>>('/epidemiologia/ftp/estudio/OC30', { params: { id } });
     return data.data;
   },
 

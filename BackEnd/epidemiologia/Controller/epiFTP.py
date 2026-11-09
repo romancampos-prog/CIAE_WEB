@@ -1,11 +1,14 @@
 
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from auth.services.jwt_Services import solo_roles
 from configs.response import ApiResponse
 from ..services.ftp.consulta_extraccion_Services import consultar_extraccion
+from ..schemas.DTO.estatus_accion_ViewModel import CambioEstatus
+from ..services.ftp.estatus_acciones_Services import cambiar_estatus
+from ..services.ftp.estudios_acciones_Services import descargar_estudio, subir_estudio
 from ..services.ftp.excel_extraccion_Services import excel_de_extraccion
 from ..services.ftp.ftpExtraer import ftp_Extraer_Epidemeologia
 from ..services.ftp.periodos_extraccion_Services import periodos_de_extraccion
@@ -53,4 +56,41 @@ def ftpExcel(desde: date, hasta: date, payload: dict = Depends(solo_roles(*ROLES
     archivo: str = "AccionesOC30"
     unidades_usuario = payload.get("unidades", []) if payload.get("rol") == "unidad" else None
     mensaje, datos = excel_de_extraccion(desde, hasta, archivo, unidades_usuario)
+    return ApiResponse(success=True, message=mensaje, data=datos)
+
+
+##--------------------------------------
+
+#Post epidemiologia/ftp/estatus/OC30  {id, estatus}  (solo admin: No revisado / En proceso / Con estudio)
+@ftpApi.post("/estatus/OC30")
+def ftpEstatus(cambio: CambioEstatus, payload: dict = Depends(solo_roles("admin"))):
+    archivo: str = "AccionesOC30"
+    mensaje, datos = cambiar_estatus(archivo, cambio.id, cambio.estatus, payload.get("sub", "-"))
+    return ApiResponse(success=True, message=mensaje, data=datos)
+
+
+##--------------------------------------
+
+#Post epidemiologia/ftp/estudio/OC30  (form: ano, mes, id, archivo, pesoArchivo; solo admin y solo "Con estudio")
+@ftpApi.post("/estudio/OC30")
+async def ftpSubirEstudio(
+    ano:         int        = Form(...),
+    mes:         int        = Form(...),
+    id:          str        = Form(..., min_length=1, max_length=64),
+    archivo:     UploadFile = File(...),
+    pesoArchivo: int        = Form(...),
+    payload:     dict       = Depends(solo_roles("admin")),
+):
+    extraccion: str = "AccionesOC30"
+    mensaje, datos = subir_estudio(extraccion, ano, mes, id, archivo.filename or "", await archivo.read(), pesoArchivo, payload.get("sub", "-"))
+    return ApiResponse(success=True, message=mensaje, data=datos)
+
+
+##--------------------------------------
+
+#Get epidemiologia/ftp/estudio/OC30?id=...  (el Excel del estudio de un registro, en base64; solo admin)
+@ftpApi.get("/estudio/OC30")
+def ftpDescargarEstudio(id: str, payload: dict = Depends(solo_roles("admin"))):
+    extraccion: str = "AccionesOC30"
+    mensaje, datos = descargar_estudio(extraccion, id)
     return ApiResponse(success=True, message=mensaje, data=datos)

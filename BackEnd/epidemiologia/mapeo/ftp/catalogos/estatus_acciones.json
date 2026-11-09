@@ -1,0 +1,8 @@
+{
+    "inicial": "NO_REVISADO",
+    "estatus": [
+        { "clave": "NO_REVISADO", "nombre": "No revisado", "nivel": "Bajo" },
+        { "clave": "EN_PROCESO",  "nombre": "En proceso",  "nivel": "Medio" },
+        { "clave": "CON_ESTUDIO", "nombre": "Con estudio", "nivel": "Esperado", "permiteEstudio": true }
+    ]
+}

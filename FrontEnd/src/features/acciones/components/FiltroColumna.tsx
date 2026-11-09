@@ -7,6 +7,8 @@ import { IconoChevronAbajo, IconoFlechaDerecha } from '@/components/icons';
 
 interface Props {
   columna: string;
+  /** Como se muestra en el encabezado (del mapeo, ej. "NSS"); sin ella, el nombre de la columna. */
+  etiqueta?: string;
   icono: ReactNode;
   /** Lo que se eligió en el filtro, en corto (va debajo del nombre); null = sin filtro. */
   resumen: string | null;
@@ -26,7 +28,7 @@ const ANCHO_PANEL = 280;
  * columna, y lo elegido queda en chiquito debajo del nombre. El panel va en un portal con
  * posición fija para que no lo recorte el scroll de la tabla.
  */
-export default function FiltroColumna({ columna, icono, resumen, children }: Props) {
+export default function FiltroColumna({ columna, etiqueta, icono, resumen, children }: Props) {
   const [posicion, setPosicion] = useState<Posicion | null>(null);
   const boton = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLFormElement>(null);
@@ -72,7 +74,7 @@ export default function FiltroColumna({ columna, icono, resumen, children }: Pro
       >
         {icono && <span className="acc-th-icono" aria-hidden="true">{icono}</span>}
         <span className="acc-th-nombre">
-          {columna}
+          <span className="acc-th-etiqueta">{etiqueta ?? columna}</span>
           {/* Sin filtro, una ayuda chiquita en el mismo lugar donde luego se ve lo elegido */}
           {resumen
             ? <span className="acc-th-filtro">{resumen}</span>

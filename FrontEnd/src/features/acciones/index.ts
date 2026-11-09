@@ -4,6 +4,7 @@ export { default as DescargarExcelAcciones } from './components/DescargarExcelAc
 export { default as ErroresExtraccion } from './components/ErroresExtraccion';
 export { default as EstadisticasAcciones } from './components/EstadisticasAcciones';
 export { default as GenerarAcciones } from './components/GenerarAcciones';
+export { default as GraficaUnidades } from './components/GraficaUnidades';
 export { default as MesesAcciones } from './components/MesesAcciones';
 export { default as ResumenPeriodo } from './components/ResumenPeriodo';
 export { default as TablaExtraccion } from './components/TablaExtraccion';

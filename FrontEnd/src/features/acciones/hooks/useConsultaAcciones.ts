@@ -1,12 +1,14 @@
 // react
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // propios
+import type { ExtraccionFtp } from '@/types/api/epidemiologia/ftp';
 import type { FiltrosAcciones } from '@/types/pantallas/acciones';
 import { ftpEpidemiologiaApi } from '@/api/epidemiologia/ftpApi';
 import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 import { FORMATO_FECHA, fechaComparable } from '@/features/acciones/utils/fechas';
 import { aniosConsultables } from '@/features/acciones/utils/meses';
+import { descargarB64 } from '@/features/indicadores';
 
 const SIN_FILTROS: FiltrosAcciones = { claves: [], unidades: [], desde: '', hasta: '', textos: {} };
 
@@ -20,6 +22,8 @@ export function useConsultaAcciones() {
   const [anio, setAnio]             = useState(anioActual);
   const [mesElegido, setMesElegido] = useState<number | null>(null);
   const [filtros, setFiltros]       = useState<FiltrosAcciones>(SIN_FILTROS);
+
+  const queryClient = useQueryClient();
 
   const consultaPeriodos = useQuery({
     queryKey: ['acciones', 'OC30', 'periodos', anio],
@@ -43,7 +47,8 @@ export function useConsultaAcciones() {
   const columnaClave = datos?.estadisticas?.porColumna[0]?.columna ?? null;
 
   // La columna de fecha no se escribe aquí: es la que llega con puras fechas dd/mm/aaaa.
-  const columnas     = filas[0] ? Object.keys(filas[0]) : [];
+  // "_id" es interno (para guardar el estatus): no es columna de la tabla
+  const columnas     = filas[0] ? Object.keys(filas[0]).filter(c => !c.startsWith('_')) : [];
   const columnaFecha = columnas.find(c =>
     filas.some(fila => fila[c]) && filas.every(fila => !fila[c] || FORMATO_FECHA.test(fila[c] as string)),
   ) ?? null;
@@ -62,6 +67,24 @@ export function useConsultaAcciones() {
     (filtros.claves.length === 0 || !columnaClave || filtros.claves.includes(fila[columnaClave] ?? '')) &&
     Object.entries(filtros.textos).every(([columna, texto]) => !texto.trim() || (fila[columna] ?? '').toLowerCase().includes(texto.trim().toLowerCase())),
   );
+
+  // El estatus elegido se guarda en el backend y se pinta en lo ya consultado (sin volver a pedir el mes)
+  const cambioEstatus = useMutation({
+    mutationFn: ({ id, estatus }: { id: string; estatus: string }) => ftpEpidemiologiaApi.cambiarEstatusOC30(id, estatus),
+    onSuccess: ({ id, estatus }) => queryClient.setQueryData<ExtraccionFtp>(['acciones', 'OC30', anio, mes], previo =>
+      previo && { ...previo, estatus: { ...previo.estatus, [id]: estatus } }),
+  });
+
+  // El estudio (Excel) de un registro: al subirlo se anota en lo ya consultado; bajarlo descarga el archivo
+  const subidaEstudio = useMutation({
+    mutationFn: ({ id, archivo }: { id: string; archivo: File }) => ftpEpidemiologiaApi.subirEstudioOC30(anio, mes as number, id, archivo),
+    onSuccess: ({ id, ...estudio }) => queryClient.setQueryData<ExtraccionFtp>(['acciones', 'OC30', anio, mes], previo =>
+      previo && { ...previo, estudios: { ...previo.estudios, [id]: estudio } }),
+  });
+  const descargaEstudio = useMutation({
+    mutationFn: (id: string) => ftpEpidemiologiaApi.descargarEstudioOC30(id),
+    onSuccess: estudio => descargarB64(estudio.archivo_b64, estudio.nombre_archivo),
+  });
 
   return {
     anios: aniosConsultables(),
@@ -88,5 +111,14 @@ export function useConsultaAcciones() {
     filasVisibles,
     cargando: consultaPeriodos.isLoading || consulta.isLoading,
     error: consulta.isError ? mensajeDeError(consulta.error, 'Error al consultar las acciones') : null,
+    cambiarEstatus: (id: string, estatus: string) => cambioEstatus.mutate({ id, estatus }),
+    errorEstatus: cambioEstatus.isError ? mensajeDeError(cambioEstatus.error, 'No se pudo guardar el estatus') : null,
+    subirEstudio: (id: string, archivo: File) => subidaEstudio.mutate({ id, archivo }),
+    descargarEstudio: (id: string) => descargaEstudio.mutate(id),
+    // El registro cuyo estudio se está subiendo (para mostrar "Subiendo…")
+    subiendoEstudio: subidaEstudio.isPending ? subidaEstudio.variables?.id ?? null : null,
+    // Con el registro al que pertenece: se muestra en su tarjeta, no en la de otro
+    errorEstudio: subidaEstudio.isError ? { id: subidaEstudio.variables?.id, mensaje: mensajeDeError(subidaEstudio.error, 'No se pudo subir el estudio') }
+      : descargaEstudio.isError ? { id: descargaEstudio.variables, mensaje: mensajeDeError(descargaEstudio.error, 'No se pudo descargar el estudio') } : null,
   };
 }

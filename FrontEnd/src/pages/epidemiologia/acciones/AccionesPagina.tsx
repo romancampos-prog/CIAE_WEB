@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 // propios
 import {
-  AvisoMesSinReporte, DescargarExcelAcciones, ErroresExtraccion, EstadisticasAcciones, GenerarAcciones, MesesAcciones,
+  AvisoMesSinReporte, DescargarExcelAcciones, ErroresExtraccion, EstadisticasAcciones, GenerarAcciones, GraficaUnidades, MesesAcciones,
   ResumenPeriodo, TablaExtraccion, useConsultaAcciones, useGenerarAcciones,
 } from '@/features/acciones';
 import { useRol } from '@/features/auth';
@@ -88,14 +88,32 @@ export default function AccionesPagina() {
                   columnaFecha={consulta.columnaFecha}
                   filtros={filtros}
                   onCambiar={consulta.cambiarFiltro}
-                  claves={estadisticas.porColumna[0]?.conteos ?? []}
                   descripciones={datos.descripcionClaves ?? {}}
                   unidades={estadisticas.porUnidad}
                   fechas={consulta.fechas}
                   onFiltrarClave={clave => consulta.alternarFiltro('claves', clave)}
                   hayFiltros={consulta.hayFiltros}
                   onLimpiar={consulta.limpiarFiltros}
+                  estatus={datos.estatus ?? {}}
+                  catalogoEstatus={datos.catalogoEstatus ?? []}
+                  onCambiarEstatus={esAdmin ? consulta.cambiarEstatus : undefined}
+                  estudios={datos.estudios ?? {}}
+                  onSubirEstudio={esAdmin ? consulta.subirEstudio : undefined}
+                  onDescargarEstudio={esAdmin ? consulta.descargarEstudio : undefined}
+                  subiendoEstudio={consulta.subiendoEstudio}
+                  errorEstudio={consulta.errorEstudio}
+                  etiquetas={datos.etiquetasColumna ?? {}}
+                  iconos={datos.iconosColumna ?? {}}
                 />
+                {consulta.errorEstatus && <p className="acc-vacio">{consulta.errorEstatus}</p>}
+                {/* El backend pone el índice al día con la carpeta; lo que no reconoce se avisa aquí (solo admin) */}
+                {esAdmin && !!datos.estudiosSinRegistro?.length && (
+                  <div className="acc-estudios-sueltos">
+                    <strong>{datos.estudiosSinRegistro.length} Excel en la carpeta de estudios no corresponden a ningún registro.</strong>
+                    {' '}Deben ir en año/unidad/mes con el nombre fecha_clave_NSS:
+                    <ul>{datos.estudiosSinRegistro.map(ruta => <li key={ruta}>{ruta}</li>)}</ul>
+                  </div>
+                )}
               </>
             )}
           </section>
@@ -109,12 +127,20 @@ export default function AccionesPagina() {
                   estadisticas={estadisticas}
                   descripciones={datos?.descripcionClaves ?? {}}
                   clavesActivas={filtros.claves} onClave={clave => consulta.alternarFiltro('claves', clave)}
-                  unidadesActivas={filtros.unidades} onUnidad={unidad => consulta.alternarFiltro('unidades', unidad)}
                 />
               )}
             </div>
           </aside>
         </div>
+
+        {/* Registros por unidad: abajo de la tabla, a lo ancho, como gráfica (cada barra filtra la tabla) */}
+        {estadisticas && estadisticas.porUnidad.length > 1 && (
+          <GraficaUnidades
+            conteos={estadisticas.porUnidad}
+            activas={filtros.unidades}
+            onElegir={unidad => consulta.alternarFiltro('unidades', unidad)}
+          />
+        )}
       </main>
     </div>
   );

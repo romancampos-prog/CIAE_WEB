@@ -27,7 +27,7 @@ def validar_archivo_subido(contenido: bytes, peso_declarado: int | None, nombre_
     nombre la unidad, no el del archivo) y que pese lo que el front dijo.
     """
 
-    if nombre_archivo is not None and not nombre_archivo.endswith(_EXTENSIONES_EXCEL):
+    if nombre_archivo is not None and not nombre_archivo.lower().endswith(_EXTENSIONES_EXCEL):
         raise HTTPException(400, f"{etiqueta}: solo se aceptan archivos Excel (.xlsx, .xls)" if etiqueta
                             else "Solo se aceptan archivos Excel (.xlsx, .xls)")
 

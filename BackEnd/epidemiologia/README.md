@@ -38,6 +38,9 @@ epidemiologia/
 │   │   ├── excel_extraccion_Services.py     — Excel de un rango de fechas (varios meses): lee los JSON mensuales, filtra por columnaFecha del mapeo y por unidad
 │   │   ├── consulta_extraccion_Services.py   — lee el definitivo del mes o, si no hay, su última semana; recorta a la unidad del usuario, errores solo admin, + estadísticas (404 si no hay nada)
 │   │   └── periodos_extraccion_Services.py   — meses del año con extracción (definitivo / última semana)
+│   │   └── estatus_acciones_Services.py      — cambiar el estatus de seguimiento de un registro (solo admin), validado contra el catálogo
+│   │   └── estudios_acciones_Services.py     — subir (solo admin, solo en "Con estudio") y descargar el estudio (Excel) de un registro
+│   │   └── sincronizar_estudios_Services.py  — al consultar (admin) pone estudios.json al día con la carpeta: quita los que ya no están, agrega los puestos a mano con nombre de registro y avisa los que no son de ninguno
 │   └── mapeo/mapeo_Services.py      — lee y valida mapeo/ftp/{archivo}.json (schemas/model/accionesAchivo_Dto.py)
 ├── datos/                          — lo ÚNICO que lee y escribe archivos
 │   └── dengue/
@@ -47,6 +50,8 @@ epidemiologia/
 │       ├── resultados_pipeline_Datos.py — resultados/{clave}.json y fecha del último reporte
 │       └── modelo_duplicados_Datos.py   — el modelo entrenado de duplicados (hoy no existe)
 │   └── ftp/extracciones_ftp_Datos.py — guardar/leer FTP/{extraccion}/{año}/{extraccion}_{año}{mes}.json (uno por mes; "semana" adentro: null = definitivo; un previo no reemplaza al definitivo)
+│   └── ftp/estatus_acciones_Datos.py — catálogo de estatus (mapeo/ftp/catalogos/estatus_acciones.json) y lo marcado en ACCIONES/{extraccion}/estatus.json ({id del registro: estatus}; fuera de FTP/: es captura, no se regenera)
+│   └── ftp/estudios_acciones_Datos.py — los estudios tal cual en ACCIONES/{extraccion}/ESTUDIOS/{año}/{unidad}/{mes}/ con el nombre con que llegó (si ya hay uno igual, " (2)") + índice ESTUDIOS/estudios.json; si se reemplaza, el anterior queda como _respaldo_{fecha}
 │       ftp/claves_up_Datos.py    — catálogo de claves UP (mapeo/ftp/catalogos/claves_up.json: descripción, grupo, RAIS/SIMF); en memoria, reiniciar tras editarlo
 ├── modulos/                        — algoritmos puros: reciben y regresan DataFrames, sin archivos
 │   └── dengue/
@@ -62,6 +67,8 @@ epidemiologia/
 │   └── ftp/filtro_seleccion.py     — modo FILTRO_SELECCION: filas que pasan filtroColumna, columnas de 'seleccionar'
 │       ftp/estadisticas_extraccion.py — conteos de las filas: total, por columna del filtroColumna (ej. Clave de la Acción) y por unidad
 │       ftp/errores_por_tipo.py     — errores guardados {tipo, unidad, reporte, detalle} agrupados por tipo con la misma forma que las restricciones de indicadores FTP (el front usa el mismo ModalRestricciones), nombre/descripción de compartido/ftp_imss/catalogo_errores_ftp.py (el mismo catálogo que indicadores FTP)
+│       ftp/id_registro.py          — id de cada fila (huella de sus valores): el mismo en el previo y en el definitivo
+│       ftp/ruta_estudio.py         — carpeta {año}/{unidad}/{mes} de un registro y el nombre {fecha}_{clave}_{NSS} (`nombreEstudio` del mapeo) con que se reconocen los Excel puestos a mano
 │       ftp/libro_excel_extraccion.py  — el .xlsx (xlsxwriter), una hoja por tabla: encabezado guinda inmóvil, filtro por columna, fecha como fecha de Excel
 ├── entrenamiento/
 │   └── entrenar_duplicados.py      — se corre a mano: MLP vs Random Forest -> modelos/mlp_duplicados.pkl
@@ -71,6 +78,7 @@ epidemiologia/
     │   └── cp_coordenadas.csv      — código postal -> LAT, LON (fuera de git: *.csv en .gitignore)
     └── ftp/
         └── AccionesOC30.json       — un archivo por extracción: del OC30, las claves de acción del filtro + columnas a guardar
+        └── catalogos/          — claves_up.json (qué es cada clave UP), colores_claves.json (color de cada clave en pantalla), estatus_acciones.json (No revisado / En proceso / Con estudio)
 
 Cada tema tiene su carpeta en services/, modulos/, datos/ y mapeo/ (hoy dengue/; lo nuevo, ej.
 ftp/, va en su propia carpeta). El FTP en sí (conectar, navegar, catálogo SIAIS) es compartido
@@ -99,6 +107,8 @@ con indicadores y vive en BackEnd/compartido/ftp_imss/.
 | `POST /epidemiologia/ftp/extraer/OC30?ano=&mes=[&semana=]` | Acciones: bajar el OC30 de las unidades, extraer y guardar en `BD_CIAE/EPIDEMIOLOGIA/FTP/AccionesOC30/` | `ftp/ftpExtraer.ftp_Extraer_Epidemeologia` |
 | `GET /epidemiologia/ftp/extraccion/OC30?ano=&mes=` | Acciones (admin, unidad): el definitivo del mes o, mientras no hay, su última semana `{extraccion, ano, mes, semana, filas, errores, estadisticas, filtrosMapeo, descripcionClaves}` (`descripcionClaves` = `{UP87: {descripcion, subgrupo}}` del catálogo de claves UP); el rol `unidad` solo recibe sus filas y solo el admin recibe `errores` (`{tipo: {nombreError, descripcionError, unidades}}`, como las restricciones de FTP; `{}` si no es admin) (404 si no hay nada) | `ftp/consulta_extraccion_Services.consultar_extraccion` |
 | `GET /epidemiologia/ftp/extraccion/OC30/periodos?ano=` | Acciones (admin, unidad): `[{mes, definitivo, ultimaSemana}]` de los meses con extracción | `ftp/periodos_extraccion_Services.periodos_de_extraccion` |
+| `POST /epidemiologia/ftp/estatus/OC30` `{id, estatus}` | Acciones (solo admin): estatus de seguimiento de un registro (No revisado / En proceso / Con estudio). La consulta manda `_id` por fila, `estatus` y `catalogoEstatus` | `ftp/estatus_acciones_Services.cambiar_estatus` |
+| `POST /epidemiologia/ftp/estudio/OC30` (form `ano, mes, id, archivo, pesoArchivo`) · `GET /epidemiologia/ftp/estudio/OC30?id=` | Acciones (solo admin): subir el estudio (Excel) de un registro en "Con estudio" (año/unidad/mes de su fecha de atención; con el nombre con que llegó) y bajarlo en base64. La consulta manda `estudios` (solo admin) | `ftp/estudios_acciones_Services.subir_estudio` / `descargar_estudio` |
 | `GET /epidemiologia/ftp/excel/OC30?desde=aaaa-mm-dd&hasta=aaaa-mm-dd` | Acciones (admin, unidad): Excel `{archivo_b64, nombre_archivo, totalRegistros}` de los registros cuya `columnaFecha` (mapeo) cae en el rango, aunque abarque varios meses (lee del mes de `desde` al siguiente de `hasta`); hoja 1 = registros (Unidad + `seleccionar` + Periodo), hoja 2 "Claves UP" = cada clave del filtro con descripción, tema, registros, RAIS/SIMF y clave anterior; el rol `unidad` solo recibe lo suyo (400 rango al revés, 404 sin registros) | `ftp/excel_extraccion_Services.excel_de_extraccion` |
 
 Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corrido. Los de `/ftp` responden `ApiResponse`.

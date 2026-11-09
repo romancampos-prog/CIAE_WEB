@@ -51,12 +51,43 @@ export interface ExtraccionFtp extends Omit<ExtraccionGuardada, 'errores'> {
   filtrosMapeo: { columna: string; valores: string[] }[];
   /** Qué significa cada clave UP del filtro (mapeo/ftp/catalogos/claves_up.json del backend). */
   descripcionClaves: Record<string, DescripcionClave>;
+  /** Estatus de seguimiento de cada registro: { "_id" de la fila: clave del catálogo }. */
+  estatus: Record<string, string>;
+  /** Los estatus posibles (mapeo/ftp/catalogos/estatus_acciones.json), en orden. */
+  catalogoEstatus: EstatusAccion[];
+  /** Solo admin: los registros que ya tienen su estudio (Excel) guardado, { "_id": estudio }. */
+  estudios: Record<string, EstudioAccion>;
+  /** Solo admin: Excel que alguien puso en la carpeta de estudios y no son de ningún registro (rutas). */
+  estudiosSinRegistro?: string[];
+  /** Como se muestra cada columna en el encabezado (del mapeo); "\n" = salto de renglón. Sin etiqueta, su nombre. */
+  etiquetasColumna?: Record<string, string>;
+  /** Qué ícono lleva cada columna en la tarjeta del registro (del mapeo): unidad, calendario, credencial, etiqueta, persona, clave. */
+  iconosColumna?: Record<string, string>;
+}
+
+/** El estudio guardado de un registro (BD_CIAE/.../ESTUDIOS/{año}/{unidad}/{mes}/). */
+export interface EstudioAccion {
+  ruta: string;
+  nombreOriginal: string;
+  fecha: string;
+  usuario: string;
+}
+
+/** Un estatus de seguimiento; `nivel` = su color del semáforo (Bajo rojo, Medio dorado, Esperado verde). */
+export interface EstatusAccion {
+  clave: string;
+  nombre: string;
+  nivel: 'Esperado' | 'Medio' | 'Bajo';
+  /** true en el estatus en que se sube el estudio (Con estudio). */
+  permiteEstudio?: boolean;
 }
 
 export interface DescripcionClave {
   descripcion: string;
   /** Tema de la clave (ej. "Prevención de VIH/SIDA e ITS"). */
   subgrupo: string | null;
+  /** Color de la clave en pantalla (mapeo/ftp/catalogos/colores_claves.json); null = gris. */
+  color: string | null;
 }
 
 /** GET /epidemiologia/ftp/extraccion/OC30/periodos: un mes con extracción guardada. */
