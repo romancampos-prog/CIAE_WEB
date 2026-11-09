@@ -8,9 +8,10 @@ import { excelApi } from '@/api/indicadores/excelApi';
 import { ftpApi } from '@/api/indicadores/ftpApi';
 import { informacionApi } from '@/api/indicadores/informacionApi';
 import { mensajeDeError } from '@/api/cliente/mensajeDeError';
+import useTema from '@/hooks/useTema';
 import { useRol } from '@/features/auth';
 import { descargarB64, MESES_LARGOS } from '@/features/indicadores';
-import { calcularMesesDisponibles, calcularSemDataFTP } from '@/features/generar-ftp/utils/calculos';
+import { avisoDeApertura, calcularEstadoMeses, calcularMesesDisponibles, calcularSemDataFTP } from '@/features/generar-ftp/utils/calculos';
 
 const CLAVE_CATEGORIA_GUARDADA = 'categoria_actual';
 
@@ -18,7 +19,7 @@ const CLAVE_CATEGORIA_GUARDADA = 'categoria_actual';
 const agruparPorFamilia = (lista: IndicadorGenerarFtp[]): FamiliaFtp[] => Object.values(lista.reduce<Record<string, FamiliaFtp>>((familias, ind) => {
   familias[ind.categoria] ??= {
     categoriaIndicador: ind.categoria, nombreCategoria: ind.nombreCategoria,
-    imagen: ind.imagen, color: ind.color, indicadores: [],
+    imagen: ind.imagen, color: ind.color, colorOscuro: ind.colorOscuro, indicadores: [],
   };
   familias[ind.categoria].indicadores.push(ind.indicador);
   return familias;
@@ -40,6 +41,7 @@ const leerCategoriaGuardada = (): string => {
 export function useGenerarFtp() {
   const clienteConsultas = useQueryClient();
   const { puedeGenFTP } = useRol();
+  const { esOscuro } = useTema();
   const esVisor = !puedeGenFTP;
 
   const fechaHoy     = new Date();
@@ -57,6 +59,8 @@ export function useGenerarFtp() {
   const [cargandoBatch, setCargandoBatch]   = useState(false);
   const [restriccionesData, setRestriccionesData] = useState<Restricciones | null>(null);
   const [mostrarRestricciones, setMostrarRestricciones] = useState(false);
+  // Qué se generó cuando salieron esas restricciones: el periodo elegido puede cambiar después
+  const [origenRestricciones, setOrigenRestricciones] = useState('');
   const [resultadoBatch, setResultadoBatch] = useState<{ completados: string[]; errores: Record<string, unknown> } | null>(null);
   const [mostrarConfirmarRegenerar, setMostrarConfirmarRegenerar] = useState(false);
   const [regenerarModo, setRegenerarModo]   = useState<'individual' | 'batch'>('individual');
@@ -71,7 +75,11 @@ export function useGenerarFtp() {
     queryFn: ftpApi.listarIndicadores,
     select: agruparPorFamilia,
   });
-  const categorias = useMemo(() => lista.data ?? [], [lista.data]);
+  // En oscuro cada familia usa su tono apagado: el fuerte casi no se ve sobre fondo oscuro
+  const categorias = useMemo(
+    () => (lista.data ?? []).map(f => ({ ...f, color: esOscuro && f.colorOscuro ? f.colorOscuro : f.color })),
+    [lista.data, esOscuro],
+  );
 
   // Si la categoría guardada ya no existe, la primera de la lista.
   const categoria = categorias.length && !categorias.some(c => c.categoriaIndicador === categoriaElegida)
@@ -140,13 +148,23 @@ export function useGenerarFtp() {
    * se excluyen los meses ya cerrados: con un indicador elegido, los suyos; en batch, solo los
    * que TODOS los indicadores de la categoría ya cerraron.
    */
-  const mesesDisponibles = useMemo(() => {
+  const { meses, avisoMeses } = useMemo(() => {
     const todos       = Object.entries(MESES_LARGOS);
-    const disponibles = calcularMesesDisponibles(todos, datos.ano, { anioActual, esVisor, diaActual, mesActualNum, tipo });
-    if (tipo !== 'previo') return disponibles;
-    const cerrados = indicadorSel ? mesesGeneradosList : mesesCerradosCategoria;
-    return disponibles.filter(([k]) => !cerrados.includes(k));
+    const contexto    = { anioActual, esVisor, diaActual, mesActualNum, tipo };
+    const generados   = indicadorSel ? mesesGeneradosList : mesesCerradosCategoria;
+    const disponibles = calcularMesesDisponibles(todos, datos.ano, contexto);
+    const abiertos    = tipo === 'previo' ? disponibles.filter(([k]) => !generados.includes(k)) : disponibles;
+    return {
+      meses: calcularEstadoMeses(todos, abiertos, datos.ano, contexto, generados),
+      avisoMeses: avisoDeApertura(datos.ano, contexto, MESES_LARGOS),
+    };
   }, [datos.ano, anioActual, mesActualNum, diaActual, esVisor, tipo, indicadorSel, mesesGeneradosList, mesesCerradosCategoria]);
+
+  // Un mes elegido en Previo puede no existir en Final: si ya no se puede, cuenta como no elegido
+  const mesElegido = meses.find(m => m.clave === datos.mes && m.disponible);
+  const textoPeriodo = mesElegido
+    ? `${mesElegido.nombre} ${datos.ano} · ${tipo === 'final' ? 'Final' : `Previo, semana ${datos.semana}`}`
+    : null;
 
   /** Textos de semáforo del indicador seleccionado para el mes activo. */
   const semData = useMemo(
@@ -155,8 +173,10 @@ export function useGenerarFtp() {
   );
 
   const catColor    = catData?.color ?? '#0b5445';
-  const canGenerar  = !!indicadorSel && !!datos.mes && !cargando && !cargandoBatch;
-  const canBatch    = !!datos.mes && !cargando && !cargandoBatch && indicadores.length > 0;
+  // El color fuerte, para lo que siempre lleva letra blanca aunque el tema sea oscuro (modal de contraseña)
+  const catColorFuerte = lista.data?.find(c => c.categoriaIndicador === categoria)?.color ?? '#0b5445';
+  const canGenerar  = !!indicadorSel && !!mesElegido && !cargando && !cargandoBatch;
+  const canBatch    = !!mesElegido && !cargando && !cargandoBatch && indicadores.length > 0;
 
   // ── Acciones ───────────────────────────────────────────────────────────────
 
@@ -173,6 +193,7 @@ export function useGenerarFtp() {
   const mostrarSiHayRestricciones = (restricciones: Restricciones | undefined) => {
     if (restricciones && Object.keys(restricciones).length > 0) {
       setRestriccionesData(restricciones);
+      setOrigenRestricciones(`${indicadorSel ?? categoria} · ${textoPeriodo}`);
       setMostrarRestricciones(true);
     }
   };
@@ -284,10 +305,10 @@ export function useGenerarFtp() {
     infoIndicador,
     mesesFaltantes, confirmandoFaltantes,
     cargando, cargandoBatch,
-    restriccionesData, mostrarRestricciones, setMostrarRestricciones,
+    restriccionesData, mostrarRestricciones, setMostrarRestricciones, origenRestricciones,
     resultadoBatch,
-    mesesDisponibles, semData,
-    indicadores, catColor,
+    meses, avisoMeses, textoPeriodo, semData,
+    indicadores, catColor, catColorFuerte,
     canGenerar, canBatch,
     esVisor, puedeGenFTP,
     generarReporte, generarTodos,

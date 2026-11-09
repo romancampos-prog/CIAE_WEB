@@ -1,25 +1,34 @@
 // react
-import type { CSSProperties, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 // propios
 import type { PeriodoFtp } from '@/types/api/indicadores/ftp';
-import type { TipoReporte } from '@/types/pantallas/generarFtp';
-import { IconoActividad, IconoCalendarioAnio, IconoCalendarioMes, IconoPalomita, IconoReloj } from '@/components/icons';
+import type { EstadoMes, TipoReporte } from '@/types/pantallas/generarFtp';
+import { IconoActividad, IconoCalendarioAnio, IconoCalendarioMes, IconoCandadoChico, IconoGenerarTodos, IconoGuion, IconoInfo, IconoPalomita, IconoReloj } from '@/components/icons';
 import { aniosHastaHoy } from '@/utils/anios';
 
 interface Props {
   tipo: TipoReporte;
   datos: PeriodoFtp;
-  mesesDisponibles: [string, string][];
+  meses: EstadoMes[];
+  /** Cuándo se abre el mes en curso, si todavía no se puede elegir. */
+  avisoMeses: string | null;
   catColor: string;
   esVisor: boolean;
-  style?: CSSProperties;
   onTipoChange: (tipo: TipoReporte) => void;
   onDatosChange: Dispatch<SetStateAction<PeriodoFtp>>;
 }
 
+const ICONO_ESTADO: Record<EstadoMes['tipo'], ReactNode> = {
+  disponible: <IconoGenerarTodos tamano={11} />,
+  generado:   <IconoPalomita tamano={11} strokeWidth="3" />,
+  cerrado:    <IconoCandadoChico tamano={11} />,
+  espera:     <IconoReloj tamano={11} strokeWidth="2.5" />,
+  futuro:     <IconoGuion tamano={11} />,
+};
+
 /** Tipo (previo/final), año, mes y semana del reporte a generar. */
-const PeriodoReporte = ({ tipo, datos, mesesDisponibles, catColor, esVisor, style, onTipoChange, onDatosChange }: Props) => (
-  <div className="ind-period-block" style={style}>
+const PeriodoReporte = ({ tipo, datos, meses, avisoMeses, catColor, esVisor, onTipoChange, onDatosChange }: Props) => (
+  <div className="ind-period-block">
     <p className="ind-period-label">
       <IconoReloj strokeWidth="2.5" />
       Período del reporte
@@ -58,22 +67,8 @@ const PeriodoReporte = ({ tipo, datos, mesesDisponibles, catColor, esVisor, styl
         </div>
       </div>
 
-      <div className="cfg-field">
-        <label className="cfg-label">Mes</label>
-        <div className="cfg-select-wrap">
-          <IconoCalendarioMes className="cfg-select-icon" />
-          <select className="cfg-select" value={datos.mes}
-            onChange={e => onDatosChange({ ...datos, mes: e.target.value })}>
-            <option value="">Seleccionar mes…</option>
-            {mesesDisponibles.map(([val, name]) => (
-              <option key={val} value={val}>{name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       {tipo === 'previo' && !esVisor && (
-        <div className="cfg-field cfg-field-full">
+        <div className="cfg-field">
           <label className="cfg-label">Semana Epidemiológica</label>
           <div className="cfg-select-wrap">
             <IconoActividad tamano={13} className="cfg-select-icon" strokeWidth="2" />
@@ -86,6 +81,29 @@ const PeriodoReporte = ({ tipo, datos, mesesDisponibles, catColor, esVisor, styl
           </div>
         </div>
       )}
+    </div>
+
+    <div className="cfg-field">
+      <span className="cfg-label ind-meses-titulo" id="ind-meses-titulo"><IconoCalendarioMes /> Mes</span>
+      <div className="ind-meses" role="group" aria-labelledby="ind-meses-titulo" style={{ '--cat': catColor }}>
+        {meses.map(m => {
+          const elegido = m.disponible && datos.mes === m.clave;
+          return (
+            <button
+              key={m.clave}
+              type="button"
+              className={`ind-mes ind-mes--${m.tipo}${elegido ? ' ind-mes--elegido' : ''}${m.disponible ? '' : ' ind-mes--bloqueado'}`}
+              disabled={!m.disponible}
+              aria-pressed={elegido}
+              onClick={() => onDatosChange({ ...datos, mes: m.clave })}
+            >
+              <strong>{m.nombre}</strong>
+              <small>{elegido ? <IconoPalomita tamano={11} strokeWidth="3" /> : ICONO_ESTADO[m.tipo]}{elegido ? 'Elegido' : m.estado}</small>
+            </button>
+          );
+        })}
+      </div>
+      {avisoMeses && <p className="ind-meses-aviso"><IconoInfo tamano={14} /> {avisoMeses}</p>}
     </div>
   </div>
 )

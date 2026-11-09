@@ -6,7 +6,7 @@ Usado en: indicadores/services/ftp/extraer_indicador_ftp_Services.py, epidemiolo
 
 CATALOGO_ERRORES_FTP: dict[str, tuple[str, str]] = {
     "RUTA_INVALIDA":          ("Ruta de acceso incorrecta",      "La carpeta en el FTP no existe o está mal nombrada."),
-    "ARCHIVO_NO_ENCONTRADO":  ("Archivo no encontrado",          "El archivo no se encontró en la ubicación esperada."),
+    "ARCHIVO_NO_ENCONTRADO":  ("Archivo no encontrado",          "Las carpetas sí existen, pero adentro no está el archivo."),
     "ARCHIVO_DUPLICADO":      ("Archivo duplicado",              "Se encontró más de un archivo con el mismo prefijo. Se usó el del periodo del mes (ej. ...052026062026 para junio); si ninguno lo trae, el primero."),
     "ARCHIVO_DUPLICADO_OMITIDO": ("Archivo duplicado",          "Hay más de un archivo con el mismo prefijo en la carpeta de la unidad. No se extrajo: hay que dejar uno solo en el FTP y volver a extraer."),
     "HOJA_NO_ENCONTRADA":    ("Pestaña faltante",               "El archivo existe pero no contiene la hoja especificada."),

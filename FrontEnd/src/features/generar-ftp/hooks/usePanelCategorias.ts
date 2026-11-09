@@ -2,8 +2,8 @@
 import { useState } from 'react';
 
 /**
- * Estado del panel lateral de categorías: qué acordeones están abiertos y si está colapsado.
- * Abrir otra categoría la vuelve la activa (y quita el indicador elegido).
+ * Estado del panel lateral de categorías: cuál está abierta y si está colapsado. Solo hay una abierta
+ * y es siempre la elegida, para que no se vean dos familias marcadas a la vez.
  */
 export function usePanelCategorias(
   categoria: string,
@@ -12,24 +12,21 @@ export function usePanelCategorias(
 ) {
   // Colapsado por defecto en pantallas angostas para no robarle ancho al contenido.
   const [colapsado, setColapsado] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
-  const [abiertas, setAbiertas]   = useState(() => new Set([categoria]));
+  const [abierta, setAbierta]     = useState<string | null>(categoria);
 
+  // Otra familia: se elige y se abre. La que ya está elegida: solo abre o cierra su lista.
   const alternarCategoria = (cat: string) => {
-    const seAbre = !abiertas.has(cat);
-    setAbiertas(previas => {
-      const siguientes = new Set(previas);
-      if (seAbre) siguientes.add(cat);
-      else siguientes.delete(cat);
-      return siguientes;
-    });
-    if (seAbre && cat !== categoria) {
+    if (cat !== categoria) {
       setCategoria(cat);
       setIndicadorSel(null);
+      setAbierta(cat);
+      return;
     }
+    setAbierta(actual => (actual === cat ? null : cat));
   };
 
   return {
-    abiertas,
+    abierta,
     alternarCategoria,
     colapsado,
     alternarColapsado: () => setColapsado(c => !c),

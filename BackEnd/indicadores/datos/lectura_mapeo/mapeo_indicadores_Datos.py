@@ -41,7 +41,7 @@ def _bloques_leidos(firma: tuple) -> dict[str, dict]:
     for modulo, ruta in _archivos_de_indicadores():
         for indicador, bloque in json.loads(ruta.read_text(encoding="utf-8")).items():
             familia = familias.get(indicador.split()[0], {})
-            bloques[indicador] = {**bloque, "modulo": modulo, "imagen": familia.get("imagen", ""), "color": familia.get("color", "")}
+            bloques[indicador] = {**bloque, "modulo": modulo, "imagen": familia.get("imagen", ""), "color": familia.get("color", ""), "colorOscuro": familia.get("colorOscuro", "")}
 
     return bloques
 

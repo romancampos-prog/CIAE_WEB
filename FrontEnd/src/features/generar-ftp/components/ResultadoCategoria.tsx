@@ -1,5 +1,6 @@
 // propios
-import { IconoAlerta, IconoPalomita } from '@/components/icons';
+import { IconoAlerta, IconoError, IconoListaBarras, IconoPalomita, IconoTendencia } from '@/components/icons';
+import { textoAcento } from '@/utils/colorAcento';
 
 interface Props {
   indicadores: string[];
@@ -12,17 +13,29 @@ interface Props {
 /** Los indicadores de la categoría con ✓/✗ después de "Generar todos" y el resumen. */
 const ResultadoCategoria = ({ indicadores, color, resultado, onVerRestricciones }: Props) => {
   const conErrores = Object.keys(resultado?.errores ?? {}).length;
+
+  const estadoDe = (indicador: string) => {
+    const generado = resultado?.completados.includes(indicador);
+    const fallo = resultado?.errores[indicador] != null;
+    if (generado && fallo) return { texto: 'Generado con errores', tono: 'aviso', icono: <IconoAlerta tamano={12} /> };
+    if (generado) return { texto: 'Generado', tono: 'ok', icono: <IconoPalomita tamano={11} strokeWidth="3" /> };
+    return fallo ? { texto: 'Con errores', tono: 'error', icono: <IconoError tamano={12} /> } : null;
+  };
+
   return (
     <>
+      <p className="ind-gen-titulo"><IconoListaBarras tamano={13} /> Indicadores de la categoría</p>
       <div className="ind-batch-ind-list">
-        {indicadores.map(ind => (
-          <div key={ind} className="ind-batch-ind-row">
-            <span className="ind-batch-ind-dot" style={{ background: color }} />
-            <span className="ind-batch-ind-name">{ind}</span>
-            {resultado?.completados.includes(ind) && <span className="ind-batch-ind-ok">✓</span>}
-            {resultado?.errores[ind] != null && <span className="ind-batch-ind-err">✗</span>}
-          </div>
-        ))}
+        {indicadores.map(ind => {
+          const estado = estadoDe(ind);
+          return (
+            <div key={ind} className="ind-batch-ind-row">
+              <span className="ind-batch-ind-icono" style={{ color: textoAcento(color) }} aria-hidden="true"><IconoTendencia tamano={16} /></span>
+              <span className="ind-batch-ind-name">{ind}</span>
+              {estado && <span className={`ind-batch-estado ind-batch-estado--${estado.tono}`}>{estado.icono} {estado.texto}</span>}
+            </div>
+          );
+        })}
       </div>
 
       {resultado && (
@@ -33,8 +46,8 @@ const ResultadoCategoria = ({ indicadores, color, resultado, onVerRestricciones 
           </span>
           {conErrores > 0 && onVerRestricciones && (
             <button className="ind-batch-err ind-batch-err--btn" onClick={onVerRestricciones}>
-              <IconoAlerta tamano={10} />
-              {conErrores} con errores · ver detalle
+              <IconoAlerta tamano={14} />
+              Ver lo que no se pudo generar
             </button>
           )}
         </div>

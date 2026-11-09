@@ -260,7 +260,7 @@
 .res-ruta-partes {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   padding: 10px 12px;
   background: var(--tinte-peligro);
   border: 1px solid var(--borde-peligro);
@@ -268,39 +268,42 @@
   border-radius: 0 8px 8px 0;
 }
 
+.res-ruta-bloque { display: flex; flex-direction: column; gap: 4px; }
+
+.res-ruta-titulo { font-size: 11px; font-weight: 700; }
+.res-ruta-titulo--mal      { color: var(--peligro-texto); }
+.res-ruta-titulo--bien     { color: var(--exito-texto); }
+.res-ruta-titulo--parecida { color: var(--aviso-texto); }
+
 .res-ruta-camino {
-  font-size: 10px;
-  color: var(--texto-tenue);
+  font-size: 11px;
+  color: var(--texto-secundario);
   word-break: break-all;
-  line-height: 1.5;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--borde-peligro);
+  line-height: 1.7;
 }
 
-.res-ruta-fallo {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--peligro-texto);
-}
-.res-ruta-fallo-ico { flex-shrink: 0; }
-.res-ruta-fallo code {
-  font-weight: 700;
-  background: rgba(220,38,38,0.1);
-  padding: 2px 6px;
+/* pre-wrap: un espacio de más o de menos es justo lo que hay que alcanzar a ver */
+.res-ruta-carpeta {
+  font-weight: 800;
+  padding: 1px 4px;
   border-radius: 4px;
-  word-break: break-all;
+  white-space: pre-wrap;
 }
+.res-ruta-carpeta--mal      { color: var(--peligro-texto); background: rgba(220, 38, 38, 0.14); }
+.res-ruta-carpeta--bien     { color: var(--exito-texto); background: color-mix(in srgb, var(--exito-texto) 16%, transparent); }
+.res-ruta-carpeta--parecida { color: var(--aviso-texto); background: color-mix(in srgb, var(--aviso-texto) 16%, transparent); }
+.res-ruta-resto { color: var(--texto-tenue); }
 
 .res-ruta-diag {
   margin: 0;
-  font-size: 11px;
+  padding-top: 8px;
+  border-top: 1px solid var(--borde-peligro);
+  font-size: 12px;
+  font-weight: 600;
   color: var(--texto-secundario);
   line-height: 1.6;
 }
+.res-ruta-diag::first-letter { text-transform: uppercase; }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {

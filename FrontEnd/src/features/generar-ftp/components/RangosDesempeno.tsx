@@ -1,10 +1,11 @@
 // propios
 import type { TextosSemaforo } from '@/types/pantallas/generarFtp';
+import { IconoBarras } from '@/components/icons';
 
 /** Rangos del semáforo del indicador en el mes elegido. */
 const RangosDesempeno = ({ mes, textos }: { mes: string; textos: TextosSemaforo }) => (
   <div className="cfg-sem-section ind-sem-block">
-    <p className="cfg-sem-label">Rangos de desempeño – {mes}</p>
+    <p className="cfg-sem-label ind-gen-titulo"><IconoBarras tamano={14} /> Rangos de desempeño – {mes}</p>
     <div className="cfg-sem-grid">
       <div className="cfg-sem-block cfg-sem-verde">
         <span className="cfg-sem-dot" /><div><small>Esperado</small><strong>{textos.txtVerde}</strong></div>

@@ -10,6 +10,8 @@ export interface IndicadorGenerarFtp {
   descripcionPeriodicidad?: string | null;
   imagen: string;
   color: string;
+  /** Tono apagado para modo oscuro (el fuerte no se lee sobre fondo oscuro). */
+  colorOscuro: string;
   /** Códigos SIAIS que lee, ej. ["CP02", "CP03"]. */
   reportes: string[];
 }

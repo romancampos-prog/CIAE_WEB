@@ -1,0 +1,193 @@
+/* Ventana de errores de Generar FTP (Indicadores). Acciones sigue con ModalRestricciones. */
+
+.vef-fondo {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.55);
+}
+.vef-ventana {
+  width: min(1140px, 100%); max-height: min(92vh, 900px);
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--superficie); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 18px;
+  /* Línea con el color de la familia: arriba y a los dos lados */
+  --vef-borde: color-mix(in srgb, var(--familia, var(--marca)) var(--acento-peso), var(--texto));
+  border-top: 4px solid var(--vef-borde); border-left: 4px solid var(--vef-borde); border-right: 4px solid var(--vef-borde);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  font-size: 0.8rem;
+}
+/* Fuera del estilo global de <code> (fondo y relleno por renglón) */
+.vef-ventana code { background: none; padding: 0; border-radius: 0; }
+
+/* Capas: el panel de la derecha va un tono abajo y las tarjetas sobresalen encima */
+.vef-ventana { --vef-sombra: 0 1px 2px rgba(15, 23, 42, 0.07), 0 4px 12px rgba(15, 23, 42, 0.08); --vef-sombra-alta: 0 3px 6px rgba(15, 23, 42, 0.08), 0 10px 22px rgba(15, 23, 42, 0.13); }
+html[data-theme="dark"] .vef-ventana { --vef-sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3); --vef-sombra-alta: 0 3px 6px rgba(0, 0, 0, 0.35), 0 10px 22px rgba(0, 0, 0, 0.42); }
+
+/* El color dice qué tan grave es */
+.vef-ventana .vef--critico { --tono: var(--peligro-texto); --tono-borde: var(--borde-peligro); }
+.vef-ventana .vef--aviso   { --tono: var(--aviso-texto-fuerte); --tono-borde: var(--borde-aviso); }
+
+/* ── Encabezado ── */
+.vef-encabezado { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 20px 30px; border-bottom: 1px solid var(--borde); }
+.vef-icono { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, var(--tono) 10%, transparent); color: var(--tono); }
+.vef-encabezado-texto { flex: 1 1 220px; min-width: 0; }
+.vef-encabezado-texto h3 { margin: 0; font-size: 1.02rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; }
+.vef-encabezado-texto p { margin: 2px 0 0; font-size: 0.76rem; color: var(--texto-suave); }
+.vef-totales { display: flex; margin: 0; font-size: 0.74rem; color: var(--texto-suave); }
+.vef-totales span + span { margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--borde); }
+.vef-totales strong { font-size: 0.86rem; font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
+.vef-cerrar {
+  display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; margin-left: 4px;
+  background: transparent; border: 0; border-radius: 50%;
+  color: var(--texto-suave); cursor: pointer; transition: background-color 0.15s, color 0.15s;
+}
+.vef-cerrar:hover { color: var(--texto); background: var(--superficie-alterna); }
+
+/* ── Cuerpo: panel de tipos + casos del elegido (cada lado hace su propio scroll) ── */
+.vef-cuerpo { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(250px, 290px) minmax(0, 1fr); }
+
+/* Panel para elegir el tipo de problema: el elegido se distingue por su barra y su ícono, sin rellenarse */
+.vef-menu { display: flex; flex-direction: column; gap: 30px; padding: 26px 16px; overflow-y: auto; background: var(--superficie); border-right: 1px solid var(--borde); }
+.vef-grupo { display: flex; flex-direction: column; gap: 8px; }
+.vef-grupo-titulo { display: flex; align-items: center; gap: 7px; margin: 0 0 4px; padding: 0 12px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--texto-suave); }
+.vef-punto { width: 6px; height: 6px; border-radius: 50%; background: var(--tono); }
+.vef-tipo {
+  position: relative; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 9px 12px;
+  background: transparent; border: 0; border-radius: 11px;
+  font: inherit; text-align: left; color: var(--texto-secundario); cursor: pointer;
+  transition: background-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+.vef-tipo:hover { background: rgba(var(--contraste-rgb), 0.04); color: var(--texto); }
+.vef-tipo--activo, .vef-tipo--activo:hover { background: var(--superficie-elevada); color: var(--texto); box-shadow: var(--vef-sombra), 0 0 0 1px rgba(var(--borde-rgb), 0.9); }
+.vef-tipo--activo::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tono); }
+.vef-tipo-icono { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 9px; background: rgba(var(--contraste-rgb), 0.05); color: var(--texto-suave); transition: background-color 0.15s, color 0.15s; }
+.vef-tipo--activo .vef-tipo-icono { background: color-mix(in srgb, var(--tono) 11%, transparent); color: var(--tono); }
+.vef-tipo-nombre { flex: 1; min-width: 0; font-size: 0.8rem; font-weight: 600; line-height: 1.3; }
+.vef-tipo--activo .vef-tipo-nombre { font-weight: 700; }
+.vef-tipo-cuenta { flex-shrink: 0; font-size: 0.82rem; font-weight: 700; color: var(--tono); font-variant-numeric: tabular-nums; }
+.vef-tipo:focus-visible, .vef-copiar:focus-visible, .vef-entendido:focus-visible, .vef-cerrar:focus-visible, .vef-buscar:focus-within { outline: 2px solid var(--marca-texto); outline-offset: 1px; }
+
+.vef-detalle { display: flex; flex-direction: column; gap: 36px; padding: 28px 32px; overflow-y: auto; min-width: 0; background: var(--superficie-suave); }
+.vef-detalle-encabezado { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.vef-detalle-texto { flex: 1 1 220px; min-width: 0; }
+.vef-detalle-titulo { margin: 0; font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
+.vef-detalle-desc { margin: 2px 0 0; font-size: 0.78rem; color: var(--texto-suave); }
+.vef-buscar { display: flex; align-items: center; gap: 6px; flex: 0 1 210px; min-height: 36px; padding: 0 10px; box-sizing: border-box; background: var(--superficie-elevada); border: 1px solid var(--borde); border-radius: 9px; color: var(--texto-suave); }
+.vef-buscar svg { flex-shrink: 0; }
+.vef-buscar input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; font: inherit; font-size: 0.76rem; color: var(--texto); }
+.vef-sin-resultados { margin: 8px 0; text-align: center; color: var(--texto-suave); }
+
+/* ── Bloque: unidades del mismo reporte e indicadores. Todo neutro; el color solo en el dato ── */
+.vef-bloque { display: flex; flex-direction: column; gap: 18px; }
+.vef-bloque-encabezado { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding-bottom: 12px; border-bottom: 1px solid var(--borde); }
+.vef-chips { display: flex; flex-wrap: wrap; align-items: center; row-gap: 6px; }
+.vef-reporte { display: inline-flex; align-items: center; gap: 7px; font-size: 0.76rem; font-weight: 500; color: var(--texto-suave); }
+.vef-reporte strong, .vef-falta strong { padding: 2px 9px; border-radius: 6px; background: var(--texto); font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-weight: 700; letter-spacing: 0.03em; color: var(--superficie); }
+.vef-reporte strong { font-size: 0.84rem; }
+.vef-falta strong { font-size: 0.72rem; }
+.vef-chip { font-size: 0.78rem; font-weight: 600; color: var(--texto-medio); }
+.vef-reporte + .vef-chip::before { content: '·'; margin: 0 9px; color: var(--texto-tenue); }
+.vef-bloque-total { font-size: 0.74rem; font-weight: 600; color: var(--texto-suave); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.vef-comun { position: relative; display: flex; gap: 14px; align-items: center; padding: 16px 20px; overflow: hidden; background: var(--superficie-elevada); border: 1px solid var(--borde); border-radius: 12px; box-shadow: var(--vef-sombra); }
+.vef-comun::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--tono); }
+.vef-comun-icono { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; background: color-mix(in srgb, var(--tono) 12%, transparent); color: var(--tono); }
+.vef-comun-titulo { margin: 0 0 1px; font-size: 0.7rem; font-weight: 700; color: var(--texto-suave); }
+.vef-comun-texto { margin: 0; font-size: 0.92rem; font-weight: 500; line-height: 1.4; color: var(--texto); }
+.vef-dato { background: none; font-weight: 700; color: var(--tono); }
+
+/* Una tarjeta por unidad, en mosaico */
+.vef-tarjetas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr)); gap: 16px; }
+.vef-tarjeta {
+  display: flex; flex-direction: column; gap: 14px; padding: 18px 20px;
+  background: var(--superficie-elevada); border: 1px solid var(--borde); border-radius: 12px;
+  box-shadow: var(--vef-sombra);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.vef-tarjeta:hover { transform: translateY(-2px); box-shadow: var(--vef-sombra-alta); }
+.vef-tarjeta-titulo { display: flex; align-items: center; gap: 10px; }
+.vef-tarjeta-icono { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; background: var(--superficie-alterna); color: var(--texto-suave); }
+.vef-tarjeta-titulo strong { flex: 1; min-width: 0; font-size: 0.82rem; font-weight: 700; line-height: 1.25; }
+.vef-falta { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; font-size: 0.72rem; font-weight: 600; color: var(--tono); white-space: nowrap; }
+.vef-tarjeta-ruta { display: flex; gap: 8px; align-items: flex-start; }
+.vef-tarjeta-ruta > svg { flex-shrink: 0; margin-top: 3px; color: var(--texto-tenue); }
+.vef-tarjeta-detalle { margin: 0; font-size: 0.78rem; color: var(--texto-secundario); }
+.vef-tarjeta .vef-copiar { align-self: flex-end; margin-top: -2px; }
+.vef-ruta-propio { font-weight: 700; color: var(--tono); white-space: nowrap; }
+
+.vef-unidades { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 12px; }
+.vef-unidades li {
+  display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 7px 14px 7px 9px; box-sizing: border-box;
+  background: var(--superficie-elevada); border: 1px solid var(--borde); border-radius: 11px; box-shadow: var(--vef-sombra);
+  font-size: 0.78rem; font-weight: 600; color: var(--texto);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.vef-unidades li:hover { transform: translateY(-2px); box-shadow: var(--vef-sombra-alta); }
+.vef-unidad-icono { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; background: var(--superficie-alterna); color: var(--texto-suave); }
+
+/* ── Carpeta mal nombrada ── */
+.vef-caso { display: flex; flex-direction: column; gap: 16px; padding: 20px 22px; background: var(--superficie-elevada); border: 1px solid var(--borde); border-radius: 12px; box-shadow: var(--vef-sombra); }
+.vef-caso-encabezado { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.vef-caso-titulo { flex: 1 1 200px; min-width: 0; }
+.vef-caso-titulo h4 { margin: 0; font-size: 0.86rem; font-weight: 700; }
+.vef-caso-titulo .vef-chips { margin-top: 4px; }
+.vef-copiar {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 30px; padding: 0 9px;
+  background: transparent; border: 0; border-radius: 7px;
+  font: inherit; font-size: 0.73rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.vef-copiar:hover { background: var(--superficie-alterna); color: var(--texto); }
+
+.vef-explicacion { margin: 0; font-size: 0.84rem; font-weight: 600; }
+.vef-explicacion::first-letter { text-transform: uppercase; }
+
+.vef-comparacion { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr); gap: 8px 12px; align-items: center; padding: 12px 14px; background: var(--superficie-suave); border-radius: 10px; }
+.vef-rotulo { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 700; }
+.vef-rotulo--bien     { color: var(--exito-texto); }
+.vef-rotulo--mal      { color: var(--peligro-texto); }
+.vef-rotulo--parecida { color: var(--aviso-texto); }
+.vef-nombre { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 0.94rem; font-weight: 700; white-space: pre-wrap; overflow-wrap: anywhere; }
+.vef-distinto { border-radius: 3px; }
+.vef-distinto--bien     { color: var(--exito-texto); background: color-mix(in srgb, var(--exito-texto) 30%, transparent); box-shadow: inset 0 -2px 0 var(--exito-texto); }
+.vef-distinto--mal      { color: var(--peligro-texto); background: color-mix(in srgb, var(--peligro-texto) 22%, transparent); box-shadow: inset 0 -2px 0 var(--peligro-texto); }
+.vef-distinto--parecida { color: var(--aviso-texto); background: color-mix(in srgb, var(--aviso-texto) 22%, transparent); box-shadow: inset 0 -2px 0 var(--aviso-texto); }
+.vef-hueco { display: inline-block; width: 0.7em; height: 1em; vertical-align: -0.12em; box-sizing: border-box; border: 1.5px dashed currentColor; border-radius: 3px; }
+.vef-hueco--bien     { color: var(--exito-texto); }
+.vef-hueco--mal      { color: var(--peligro-texto); }
+.vef-hueco--parecida { color: var(--aviso-texto); }
+
+.vef-etiqueta { margin: 0 0 2px; font-size: 0.7rem; font-weight: 700; color: var(--texto-suave); }
+.vef-ruta { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 0.72rem; line-height: 1.8; color: var(--texto-secundario); overflow-wrap: break-word; min-width: 0; }
+.vef-ruta-carpeta { font-weight: 700; color: var(--exito-texto); white-space: pre-wrap; }
+.vef-ruta-resto { color: var(--texto-suave); }
+
+/* ── Pie ── */
+.vef-pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; padding: 15px 30px; border-top: 1px solid var(--borde); }
+.vef-pie p { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 0.76rem; color: var(--texto-suave); }
+.vef-pie p svg { flex-shrink: 0; }
+.vef-entendido { min-height: 38px; padding: 0 22px; background: var(--marca); border: 0; border-radius: 9px; font: inherit; font-size: 0.8rem; font-weight: 700; color: #fff; cursor: pointer; }
+.vef-entendido:hover { filter: brightness(1.1); }
+
+/* ── Tablet y teléfono: el panel arriba y toda la ventana hace un solo scroll ── */
+@media (max-width: 760px) {
+  .vef-fondo { padding: 8px; }
+  .vef-ventana { max-height: 96vh; overflow-y: auto; }
+  .vef-cuerpo { display: block; flex: none; }
+  .vef-menu { overflow: visible; border-right: 0; border-bottom: 1px solid var(--borde); padding: 18px 12px; gap: 20px; }
+  .vef-detalle { overflow: visible; padding: 20px 14px; gap: 28px; }
+  .vef-encabezado { padding: 14px 16px; }
+  .vef-pie { padding: 12px 16px; }
+  .vef-cerrar { width: 44px; height: 44px; }
+  .vef-copiar { min-height: 44px; }
+  .vef-totales { order: 3; width: 100%; }
+  .vef-entendido { width: 100%; min-height: 44px; }
+  .vef-buscar { flex: 1 1 100%; min-height: 44px; }
+}
+@media (max-width: 560px) {
+  .vef-comparacion { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .vef-comparacion > .vef-rotulo:not(:first-child) { margin-top: 8px; }
+  .vef-tarjeta-titulo { flex-wrap: wrap; }
+  .vef-tarjeta .vef-copiar, .vef-caso-encabezado .vef-copiar { width: 100%; justify-content: center; }
+}

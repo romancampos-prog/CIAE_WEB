@@ -3,44 +3,32 @@ import { useState } from 'react';
 // propios
 import type { Restricciones } from '@/types/api/indicadores/ftp';
 import { IconoAlerta, IconoCerrar, IconoChevronAbajo, IconoError } from '@/components/icons';
+import { LABEL_RUTA, SEVERIDAD, partirRutaError } from '@/features/generar-ftp/utils/restricciones';
 import './restricciones.css';
 import './modalRestricciones.css';
 
-type Severidad = 'critico' | 'advertencia';
+interface PropsCaminoRuta {
+  ruta: string;
+  segmento: string;
+  /** Lo que se pinta resaltado en el lugar del segmento. */
+  carpeta: string;
+  tono: 'mal' | 'bien' | 'parecida';
+}
 
-const SEVERIDAD: Record<string, Severidad> = {
-  RUTA_INVALIDA:          'critico',
-  ARCHIVO_NO_ENCONTRADO:  'critico',
-  HOJA_NO_ENCONTRADA:     'critico',
-  ETIQUETA_NO_ENCONTRADA: 'critico',
-  ARCHIVO_VACIO:          'critico',
-  CALCULO_FALLIDO:        'critico',
-  ARCHIVO_DUPLICADO:      'advertencia',
-  VALOR_NULO:             'advertencia',
-  DESCARGA_FALLIDA:       'advertencia',
-  PB_JSON_ERROR:          'advertencia',
-  SERVICIO_NO_APLICA:     'advertencia',
-};
-
-const LABEL_RUTA: Record<string, string> = {
-  ETIQUETA_NO_ENCONTRADA: 'Detalle',
-  CALCULO_FALLIDO:        'Detalle del error',
-  PB_JSON_ERROR:          'Detalle del error',
-  ARCHIVO_VACIO:          'Detalle',
-  HOJA_NO_ENCONTRADA:     'Detalle',
-  DESCARGA_FALLIDA:       'Detalle',
-  SERVICIO_NO_APLICA:     'Detalle',
-};
-
-// Separa "{ruta}  ✗ fallo en: '{segmento}' — {diagnostico}" en sus 3 partes
-// para poder darles su propia línea/estilo en vez de un solo párrafo pegado.
-// Si el texto no trae ese formato (otros tipos de error), regresa null y se
-// muestra el texto tal cual, sin partir nada.
-const partirRutaError = (texto: string | null | undefined) => {
-  const m = /^(.*?)\s*✗\s*fallo en:\s*'([^']*)'\s*—\s*(.*)$/s.exec(texto ?? '');
-  if (!m) return null;
-  const [, ruta, segmento, diagnostico] = m;
-  return { ruta: ruta.trim(), segmento, diagnostico };
+/** Una ruta con la carpeta que importa resaltada; lo que sigue va tenue (no se llegó a revisar). */
+const CaminoRuta = ({ ruta, segmento, carpeta, tono }: PropsCaminoRuta) => {
+  const trozos = ruta.split('/');
+  const posicion = trozos.indexOf(segmento);
+  if (posicion < 0) return <code className="res-ruta-camino">{ruta}</code>;
+  const antes = trozos.slice(0, posicion).join('/');
+  const despues = trozos.slice(posicion + 1).join('/');
+  return (
+    <code className="res-ruta-camino">
+      {antes && `${antes}/`}
+      <mark className={`res-ruta-carpeta res-ruta-carpeta--${tono}`}>{carpeta}</mark>
+      {despues && <span className="res-ruta-resto">/{despues}</span>}
+    </code>
+  );
 };
 
 interface Props {
@@ -183,11 +171,19 @@ const ModalRestricciones = ({
                                   }
                                   return (
                                     <div className="res-ruta-partes" title={bloque.ruta}>
-                                      <code className="res-ruta-camino">{partes.ruta}</code>
-                                      <div className="res-ruta-fallo">
-                                        <span className="res-ruta-fallo-ico">✗</span>
-                                        <span>falló en <code>'{partes.segmento}'</code></span>
+                                      {/* La ruta que se busca es la buena: si en el FTP está distinta, lo mal nombrado es lo del FTP */}
+                                      <div className="res-ruta-bloque">
+                                        <span className="res-ruta-titulo res-ruta-titulo--bien">✓ Ruta correcta (la que se busca)</span>
+                                        <CaminoRuta ruta={partes.ruta} segmento={partes.segmento} carpeta={partes.segmento} tono="bien" />
                                       </div>
+                                      {partes.carpetaEncontrada !== null && (
+                                        <div className="res-ruta-bloque">
+                                          <span className={`res-ruta-titulo res-ruta-titulo--${partes.esLaMisma ? 'mal' : 'parecida'}`}>
+                                            {partes.esLaMisma ? '✗ Como está en el FTP (incorrecta)' : '? Lo más parecido en el FTP (revisar)'}
+                                          </span>
+                                          <CaminoRuta ruta={partes.ruta} segmento={partes.segmento} carpeta={partes.carpetaEncontrada} tono={partes.esLaMisma ? 'mal' : 'parecida'} />
+                                        </div>
+                                      )}
                                       <p className="res-ruta-diag">{partes.diagnostico}</p>
                                     </div>
                                   );

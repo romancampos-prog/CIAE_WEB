@@ -1,15 +1,19 @@
 // propios
 import type { FamiliaFtp } from '@/types/pantallas/generarFtp';
-import { IconoChevronAbajo, IconoChevronDerecha, IconoChevronIzquierda, IconoPalomita } from '@/components/icons';
+import { IconoCapas, IconoChevronAbajo, IconoChevronDerecha, IconoChevronIzquierda, IconoGenerarTodos, IconoListaBarras, IconoPalomita, IconoTendencia } from '@/components/icons';
+import { urlIcono } from '@/features/indicadores';
+import './sidebarCategorias.css';
 
 interface Props {
   categorias: FamiliaFtp[];
   cargandoLista: boolean;
   categoria: string;
   indicadorSel: string | null;
-  abiertas: Set<string>;
+  abierta: string | null;
   onToggle: (categoria: string) => void;
   onSelectIndicador: (categoria: string, indicador: string) => void;
+  /** Volver a generar toda la categoría, sin indicador elegido. */
+  onSelectTodos: (categoria: string) => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -23,14 +27,13 @@ interface Props {
  *   al tocarlo, el panel se desliza como overlay sobre el contenido.
  */
 const SidebarCategorias = ({
-  categorias, cargandoLista, categoria, indicadorSel, abiertas,
-  onToggle, onSelectIndicador, collapsed, onToggleCollapse,
+  categorias, cargandoLista, categoria, indicadorSel, abierta,
+  onToggle, onSelectIndicador, onSelectTodos, collapsed, onToggleCollapse,
 }: Props) => {
   const colorActiva = categorias.find(c => c.categoriaIndicador === categoria)?.color
 
-  const seleccionar = (cat: string, ind: string) => {
-    onSelectIndicador(cat, ind)
-    // En mobile el panel es un overlay: se cierra solo al elegir un indicador
+  // En mobile el panel es un overlay: se cierra solo al elegir
+  const cerrarEnMovil = () => {
     if (!collapsed && typeof window !== 'undefined' && window.innerWidth <= 768) {
       onToggleCollapse()
     }
@@ -59,7 +62,7 @@ const SidebarCategorias = ({
         aria-hidden="true"
       />
 
-      <aside className={`ind-sidebar${collapsed ? ' ind-sidebar--collapsed' : ''}`}>
+      <aside className={`ind-sidebar gf-sidebar${collapsed ? ' ind-sidebar--collapsed' : ''}`}>
 
         <button
           type="button"
@@ -70,47 +73,64 @@ const SidebarCategorias = ({
           <IconoChevronIzquierda style={{ transition: 'transform 0.3s', transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)' }} />
         </button>
 
-        {!collapsed && <p className="ind-sidebar-label">Categorías</p>}
+        {!collapsed && <p className="ind-sidebar-label gf-etiqueta"><IconoListaBarras tamano={12} /> Categorías</p>}
 
         <div className="ind-cat-list">
           {cargandoLista
             ? [1,2,3,4,5].map(i => <div key={i} className="ind-cat-shimmer" />)
-            : categorias.map(({ categoriaIndicador: cat, color: cc, indicadores: catInds }) => {
-                const abierto  = abiertas.has(cat)
+            : categorias.map(({ categoriaIndicador: cat, nombreCategoria, imagen, color: cc, indicadores: catInds }) => {
+                const abierto  = abierta === cat
                 const esActiva = categoria === cat
+                const icono    = urlIcono(imagen)
                 return (
-                  <div key={cat} className="ind-cat-group">
+                  <div key={cat} className="gf-cat-grupo" style={{ '--cc': cc }}>
                     <button
-                      className={`ind-cat-btn ${esActiva ? 'ind-cat-btn--active' : ''} ${abierto ? 'ind-cat-btn--open' : ''}`}
-                      style={esActiva ? { '--cc': cc } : {}}
-                      title={collapsed ? cat : ''}
+                      type="button"
+                      className={`gf-cat${esActiva ? ' gf-cat--activa' : ''}`}
+                      title={collapsed ? `${cat} · ${nombreCategoria}` : nombreCategoria}
+                      aria-expanded={abierto}
                       onClick={() => {
                         if (collapsed) onToggleCollapse()
-                        onToggle(cat)
+                        if (!collapsed || !esActiva) onToggle(cat)
                       }}
                     >
-                      <span>{cat}</span>
+                      <span className="gf-cat-icono" aria-hidden="true">
+                        {icono ? <img src={icono} alt="" /> : <IconoCapas tamano={16} />}
+                      </span>
                       {!collapsed && (
-                        <div className="ind-cat-btn-meta">
-                          <span className="ind-cat-count">{catInds.length}</span>
-                          <IconoChevronAbajo tamano={10} className={`ind-cat-chevron ${abierto ? 'ind-cat-chevron--open' : ''}`} />
-                        </div>
+                        <>
+                          <span className="gf-cat-texto">
+                            <strong>{cat}</strong>
+                            <small>{nombreCategoria}</small>
+                          </span>
+                          <span className="gf-cat-cuenta">{catInds.length}</span>
+                          <IconoChevronAbajo tamano={10} className={`gf-cat-flecha${abierto ? ' gf-cat-flecha--abierta' : ''}`} />
+                        </>
                       )}
                     </button>
 
                     {abierto && !collapsed && (
-                      <div className="ind-ind-list ind-ind-list--accordion" style={{ '--acc-color': cc }}>
+                      <div className="gf-inds">
+                        <button
+                          type="button"
+                          className={`gf-ind${esActiva && !indicadorSel ? ' gf-ind--activo' : ''}`}
+                          aria-pressed={esActiva && !indicadorSel}
+                          onClick={() => { onSelectTodos(cat); cerrarEnMovil() }}
+                        >
+                          <IconoGenerarTodos tamano={14} />
+                          <span>Todos</span>
+                        </button>
                         {catInds.map(ind => (
                           <button
                             key={ind}
-                            className={`ind-ind-btn ${indicadorSel === ind ? 'ind-ind-btn--active' : ''}`}
-                            style={indicadorSel === ind ? { '--cc': cc } : {}}
-                            onClick={() => seleccionar(cat, ind)}
+                            type="button"
+                            className={`gf-ind${indicadorSel === ind ? ' gf-ind--activo' : ''}`}
+                            aria-pressed={indicadorSel === ind}
+                            onClick={() => { onSelectIndicador(cat, ind); cerrarEnMovil() }}
                           >
-                            <span className="ind-ind-name">{ind}</span>
-                            {indicadorSel === ind && (
-                              <IconoPalomita tamano={11} strokeWidth="3" />
-                            )}
+                            <IconoTendencia tamano={14} />
+                            <span>{ind}</span>
+                            {indicadorSel === ind && <IconoPalomita tamano={11} strokeWidth="3" />}
                           </button>
                         ))}
                       </div>

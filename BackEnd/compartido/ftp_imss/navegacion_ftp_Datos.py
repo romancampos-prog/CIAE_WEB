@@ -63,7 +63,11 @@ def descargar_archivo(ftp: FTP, nombre_archivo: str) -> io.BytesIO:
 ##--------------------------------------
 
 def diagnosticar_segmento(ftp: FTP, buscado: str) -> str:
-    """Explica por que una carpeta no se pudo abrir: espacios, mayusculas, carpeta parecida o que hay en ese nivel."""
+    """
+    Explica por que una carpeta no se pudo abrir. Si en ese nivel hay una carpeta casi igual, el texto
+    termina en "— real: '...'" (solo cambian espacios o mayusculas) o "— parecida: '...'" (se le
+    parece, hay que revisarla); la pantalla lo pone junto a la ruta buscada, que es la correcta.
+    """
 
     try:
         disponibles = ftp.nlst()
@@ -73,48 +77,21 @@ def diagnosticar_segmento(ftp: FTP, buscado: str) -> str:
     if not disponibles:
         return "el directorio padre está vacío"
 
-    b_strip = buscado.strip()
     b_lower = buscado.lower()
-    b_snorm = b_strip.lower()
+    b_snorm = buscado.strip().lower()
 
     for d in disponibles:
-        d_strip = d.strip()
-        d_lower = d.lower()
-        d_snorm = d_strip.lower()
-
         if d == buscado:
             return "la carpeta existe pero no se pudo acceder (¿permisos?)"
 
-        if d == b_strip and buscado != b_strip:
-            lados = []
+        if d.replace(" ", "") == buscado.replace(" ", ""):
+            return f"{_explicar_espacio(buscado, d)} — real: '{d}'"
 
-            if buscado.startswith(' '): lados.append(f"{len(buscado) - len(buscado.lstrip())} al inicio")
-            if buscado.endswith(' '):   lados.append(f"{len(buscado) - len(buscado.rstrip())} al final")
+        if d.lower() == b_lower:
+            return f"la carpeta del FTP está escrita con otras mayúsculas — real: '{d}'"
 
-            return f"espacio(s) extra en la ruta buscada ({', '.join(lados)}) — real: '{d}'"
-
-        if d_strip == buscado and d != d_strip:
-            lados = []
-
-            if d.startswith(' '): lados.append(f"{len(d) - len(d.lstrip())} al inicio")
-            if d.endswith(' '):   lados.append(f"{len(d) - len(d.rstrip())} al final")
-
-            return f"la carpeta en el FTP tiene espacio(s) extra ({', '.join(lados)}) — real: '{d}'"
-
-        if d_strip == b_strip and (d != d_strip or buscado != b_strip):
-            return f"espacios extra en ambos lados — real en FTP: '{d}', buscado: '{buscado}'"
-
-        # Mismas letras pero con un espacio de mas/menos a media palabra
-        # (ej. 'SIAIS_Reportes' vs 'SIAIS_ Reportes') -- no lo cubre strip().
-        if d.replace(" ", "") == buscado.replace(" ", "") and d != buscado:
-            return f"hay un espacio de más — buscado: '{buscado}', real: '{d}'"
-
-        if d_lower == b_lower and d != buscado:
-            difs = [f"pos {i}: '{x}'→'{y}'" for i, (x, y) in enumerate(zip(d, buscado)) if x != y]
-            return f"mayúsculas distintas — real: '{d}' · diferencias: {', '.join(difs)}"
-
-        if d_snorm == b_snorm and d != buscado:
-            return f"mayúsculas/espacios distintos — real: '{d}', buscado: '{buscado}'"
+        if d.strip().lower() == b_snorm:
+            return f"la carpeta del FTP tiene otras mayúsculas y espacios — real: '{d}'"
 
     # Un solo caracter insertado corre todas las posiciones siguientes, asi que en vez
     # de comparar letra por letra se muestran las dos carpetas completas.
@@ -123,9 +100,23 @@ def diagnosticar_segmento(ftp: FTP, buscado: str) -> str:
     if candidatos:
         parecida = candidatos[0]
         porcentaje = int(difflib.SequenceMatcher(None, buscado.lower(), parecida.lower()).ratio() * 100)
-        return f"carpeta más parecida: '{parecida}' ({porcentaje}% similar) — buscado: '{buscado}'"
+        return f"no existe esa carpeta; hay una {porcentaje}% similar, revisa si es la misma — parecida: '{parecida}'"
 
     muestra = ", ".join(f"'{d}'" for d in disponibles[:6])
     sufijo  = f" … ({len(disponibles)} en total)" if len(disponibles) > 6 else ""
 
     return f"no existe en este nivel — carpetas disponibles: {muestra}{sufijo}"
+
+
+##--------------------------------------
+
+def _explicar_espacio(buscado: str, real: str) -> str:
+    """Dice de que lado esta el espacio distinto y en que parte (buscado y real solo difieren en espacios)."""
+
+    for i, (letra_buscada, letra_real) in enumerate(zip(buscado, real)):
+        if letra_buscada != letra_real:
+            antes = buscado[:i].strip()
+            lugar = f"después de «{antes}»" if antes else "al inicio"
+            return f"a la carpeta del FTP le falta un espacio {lugar}" if letra_buscada == " " else f"la carpeta del FTP trae un espacio de más {lugar}"
+
+    return "a la carpeta del FTP le falta un espacio al final" if len(buscado) > len(real) else "la carpeta del FTP trae un espacio de más al final"

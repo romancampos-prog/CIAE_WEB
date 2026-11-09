@@ -91,3 +91,16 @@ export const IconoSubirNube = ({ tamano = 22, ...props }: PropsIcono) => (
     <line x1="12" y1="13" x2="12" y2="22"/>
   </svg>
 );
+
+export const IconoCopiar = ({ tamano = 13, ...props }: PropsIcono) => (
+  <svg width={tamano} height={tamano} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} {...props}>
+    <rect x="9" y="9" width="12" height="12" rx="2"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </svg>
+);
+
+export const IconoCarpeta = ({ tamano = 14, ...props }: PropsIcono) => (
+  <svg width={tamano} height={tamano} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} {...props}>
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </svg>
+);

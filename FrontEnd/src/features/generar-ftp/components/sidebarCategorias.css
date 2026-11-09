@@ -1,0 +1,63 @@
+/* Barra de categorías de Generar FTP: cada familia con su imagen y su nombre; adentro, sus indicadores. */
+
+.ind-sidebar.gf-sidebar {
+  width: 276px; padding: 12px; align-self: flex-start; max-height: 100%; box-sizing: border-box;
+  background: var(--superficie-suave);
+  border: 1px solid rgba(var(--borde-rgb), 0.95); border-radius: 14px;
+  border-top: 3px solid var(--borde-familia); border-left: 3px solid var(--borde-familia);
+  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+}
+.ind-sidebar--collapsed.gf-sidebar { width: 4.5rem; padding: 10px 8px; }
+
+.gf-etiqueta { display: flex; align-items: center; gap: 6px; }
+
+.gf-cat-grupo { display: flex; flex-direction: column; }
+.gf-cat {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 50px; padding: 6px 8px;
+  background: transparent; border: 1px solid transparent; border-radius: 12px;
+  font: inherit; text-align: left; color: var(--texto-secundario); cursor: pointer;
+  transition: background-color 0.14s, border-color 0.14s;
+}
+.gf-cat:hover { background: rgba(var(--contraste-rgb), 0.05); }
+.gf-cat:focus-visible, .gf-ind:focus-visible { outline: 2px solid var(--marca-texto); outline-offset: 1px; }
+.gf-cat--activa {
+  background: color-mix(in srgb, var(--cc) 12%, transparent);
+  border-color: color-mix(in srgb, var(--cc) 35%, transparent);
+  color: var(--texto);
+}
+.gf-cat--activa:hover { background: color-mix(in srgb, var(--cc) 16%, transparent); }
+.ind-sidebar--collapsed .gf-cat { justify-content: center; padding: 6px 0; }
+
+.gf-cat-icono {
+  flex-shrink: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px;
+  background: color-mix(in srgb, var(--cc) 14%, var(--superficie));
+  color: color-mix(in srgb, var(--cc) var(--acento-peso), var(--texto));
+}
+.gf-cat-icono img { width: 26px; height: 26px; object-fit: contain; }
+.gf-cat-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.gf-cat-texto strong { font-size: 0.86rem; font-weight: 800; line-height: 1.2; }
+.gf-cat-texto small { font-size: 0.7rem; font-weight: 500; color: var(--texto-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gf-cat-cuenta { flex-shrink: 0; min-width: 22px; padding: 1px 6px; box-sizing: border-box; border-radius: 99px; text-align: center; font-size: 0.68rem; font-weight: 700; background: rgba(var(--contraste-rgb), 0.07); color: var(--texto-suave); }
+.gf-cat-flecha { flex-shrink: 0; opacity: 0.55; transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+.gf-cat-flecha--abierta { transform: rotate(180deg); }
+
+.gf-inds { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 6px 25px; padding-left: 10px; border-left: 2px solid color-mix(in srgb, var(--cc) 30%, transparent); animation: ind-accordion-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.gf-ind {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 6px 10px; box-sizing: border-box;
+  background: transparent; border: 0; border-radius: 9px;
+  font: inherit; font-size: 0.8rem; font-weight: 600; text-align: left; color: var(--texto-secundario); cursor: pointer;
+  transition: background-color 0.13s;
+}
+.gf-ind > span { flex: 1; min-width: 0; }
+.gf-ind svg { flex-shrink: 0; }
+.gf-ind:hover { background: rgba(var(--contraste-rgb), 0.05); }
+.gf-ind--activo, .gf-ind--activo:hover { background: var(--cc); color: var(--texto-sobre-familia); font-weight: 800; }
+
+@media (max-width: 48rem) {
+  .ind-sidebar.gf-sidebar, .ind-sidebar--collapsed.gf-sidebar {
+    width: 17.5rem; max-width: 82vw; max-height: none; padding: 0.875rem 1rem; align-self: auto;
+    background: var(--superficie); border: 0; border-radius: 0;
+  }
+  .gf-cat { min-height: 52px; }
+  .gf-ind { min-height: 44px; }
+}

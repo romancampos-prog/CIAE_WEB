@@ -18,6 +18,7 @@ class IndicadorGenerar(BaseModel):
     descripcionPeriodicidad: str | None = None
     imagen:                  str               # icono de la familia, ej. "icono_mt.png"
     color:                   str               # color de la familia
+    colorOscuro:             str = ""          # su tono apagado para modo oscuro (el fuerte no se lee ahi)
 
 
 ##--------------------------------------

@@ -100,7 +100,7 @@
   position: relative; z-index: 5; flex: 1;
   display: flex; gap: 0;
   overflow: hidden;
-  max-width: 1200px; width: 100%; margin: 0 auto;
+  max-width: 1400px; width: 100%; margin: 0 auto;
   padding: 20px 28px 20px;
 }
 
@@ -148,27 +148,6 @@
 
 /* Categorías */
 .ind-cat-list { display: flex; flex-direction: column; gap: 3px; }
-.ind-cat-btn {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 10px; border-radius: 10px;
-  border: none; background: transparent;
-  font-size: 0.8rem; font-weight: 600; color: var(--texto-secundario);
-  cursor: pointer; text-align: left; transition: background 0.14s, color 0.14s;
-  font-family: inherit;
-}
-.ind-sidebar--collapsed .ind-cat-btn { justify-content: center; padding: 8px 4px; }
-.ind-cat-btn-meta { display: flex; align-items: center; gap: 5px; }
-.ind-cat-btn:hover { background: rgba(var(--contraste-rgb), 0.04); }
-.ind-cat-btn--active {
-  background: color-mix(in srgb, var(--cc) 10%, transparent);
-  color: color-mix(in srgb, var(--cc) var(--acento-peso), var(--texto));
-}
-.ind-cat-count {
-  font-size: 0.62rem; font-weight: 700;
-  background: rgba(var(--contraste-rgb), 0.06); color: var(--texto-tenue);
-  border-radius: 100px; padding: 1px 7px; min-width: 20px; text-align: center;
-  transition: background 0.14s, color 0.14s;
-}
 .ind-cat-shimmer {
   height: 34px; border-radius: 10px;
   background: linear-gradient(90deg, var(--superficie-alterna) 25%, var(--superficie-marcada) 50%, var(--superficie-alterna) 75%);
@@ -180,56 +159,22 @@
   100% { background-position: -200% 0; }
 }
 
-/* Categorías — grupo acordeón */
-.ind-cat-group { display: flex; flex-direction: column; }
-.ind-cat-btn--open { background: rgba(var(--contraste-rgb), 0.03); }
-.ind-cat-chevron {
-  opacity: 0.4; flex-shrink: 0;
-  transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), opacity 0.15s;
-}
-.ind-cat-chevron--open { transform: rotate(180deg); opacity: 0.65; }
-
-/* Indicadores */
-.ind-ind-list { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-.ind-ind-list--accordion {
-  flex: unset;
-  margin: 2px 0 4px 12px;
-  padding-left: 10px;
-  border-left: 2px solid color-mix(in srgb, var(--acc-color, var(--texto-tenue)) 25%, transparent);
-  animation: ind-accordion-in 0.18s cubic-bezier(0.16,1,0.3,1) both;
-}
 @keyframes ind-accordion-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.ind-ind-btn {
-  display: flex; align-items: center; justify-content: space-between; gap: 6px;
-  padding: 6px 10px; border-radius: 8px;
-  border: none; border-left: 3px solid transparent;
-  background: transparent;
-  font-size: 0.74rem; font-weight: 600; color: var(--texto-secundario);
-  cursor: pointer; text-align: left; transition: background 0.13s, border-color 0.13s;
-  font-family: inherit;
-}
-.ind-ind-btn:hover { background: rgba(var(--contraste-rgb), 0.04); }
-.ind-ind-btn--active {
-  background: color-mix(in srgb, var(--cc) 8%, transparent);
-  border-left-color: color-mix(in srgb, var(--cc) var(--acento-peso), var(--texto));
-  color: color-mix(in srgb, var(--cc) var(--acento-peso), var(--texto));
-}
-.ind-ind-name { flex: 1; line-height: 1.3; }
-
 /* Botón batch */
 
 .ind-batch-ok  { color: var(--marca-texto); }
 .ind-batch-err { color: var(--dorado-texto); }
 .ind-batch-err--btn {
-  background: none; border: none; padding: 0; font: inherit;
-  cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-  text-decoration: underline; text-underline-offset: 2px;
-  transition: color 0.15s, opacity 0.15s;
+  min-height: 46px; padding: 0 12px; font: inherit; font-weight: 800;
+  background: var(--tinte-peligro); border: 1px solid var(--borde-peligro); border-radius: 10px;
+  color: var(--peligro-texto); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: border-color 0.15s;
 }
-.ind-batch-err--btn:hover { color: var(--aviso-texto-fuerte); opacity: 0.85; }
+.ind-batch-err--btn:hover { border-color: var(--peligro-texto); }
 
 /* ── Panel config ── */
 .ind-config-panel {
@@ -242,87 +187,106 @@
 .ind-config-panel::-webkit-scrollbar { width: 3px; }
 .ind-config-panel::-webkit-scrollbar-thumb { background: var(--superficie-marcada); border-radius: 4px; }
 
-.ind-config-layout {
-  display: flex; flex-direction: row;
-  align-items: stretch; gap: 0;
-  width: 100%; flex: 1;
-}
-
 .ind-config-inner {
   display: flex; flex-direction: column; gap: 0;
-  max-width: 540px; flex: 0 0 auto; width: 100%;
+  width: 100%;
 }
 
-/* Ícono lateral — solo en vista ancha */
-.ind-icon-side {
-  display: none;
-  flex: 1; align-items: center; justify-content: center;
-  padding: 20px 16px 20px 40px;
-  border-left: 1px solid rgba(var(--borde-rgb), 0.7);
+/* Bordes con el color de la familia, cada tarjeta en lados distintos: juntas enmarcan el contenido */
+.ind-hub-main { --borde-familia: color-mix(in srgb, var(--familia, var(--marca)) var(--acento-peso), var(--texto)); }
+.ind-hub-main .ind-sel-card { border-top: 3px solid var(--borde-familia); border-left-width: 3px; }
+.ind-gen-columnas > .ind-period-block { border-left: 3px solid var(--borde-familia); border-bottom: 3px solid var(--borde-familia); }
+.ind-gen-lateral.ind-batch-panel, .ind-gen-lateral .ind-sem-block { border-top: 3px solid var(--borde-familia); border-right: 3px solid var(--borde-familia); }
+.ind-hub-main .ind-barra-generar { border-right: 3px solid var(--borde-familia); border-bottom: 3px solid var(--borde-familia); }
+
+/* Periodo + lateral: se apilan solos cuando no caben lado a lado */
+.ind-gen-columnas { display: flex; flex-wrap: wrap; align-items: stretch; gap: 16px; margin-bottom: 16px; }
+.ind-gen-columnas > .ind-period-block { flex: 3 1 440px; min-width: 0; margin: 0; }
+.ind-gen-lateral { flex: 2 1 280px; min-width: 0; display: flex; flex-direction: column; }
+.ind-gen-lateral .ind-sem-block { flex: 1; margin: 0; }
+
+/* Los 12 meses a la vista: cada uno dice si se puede elegir */
+.ind-meses { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.ind-mes {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  min-height: 56px; padding: 6px 4px;
+  background: var(--superficie); border: 1px solid var(--borde-fuerte); border-radius: 10px;
+  font: inherit; color: var(--texto); cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
 }
-.ind-icon-side-inner {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  width: clamp(120px, 82%, 220px);
-  aspect-ratio: 1;
+.ind-mes strong { font-size: 0.8rem; font-weight: 800; }
+.ind-mes small { display: inline-flex; align-items: center; gap: 3px; font-size: 0.68rem; font-weight: 600; color: var(--texto-suave); }
+.ind-mes small svg { flex-shrink: 0; }
+.ind-mes:hover:not(:disabled) { border-color: var(--cat, var(--marca)); transform: translateY(-1px); }
+.ind-mes:focus-visible { outline: 2px solid var(--marca-texto); outline-offset: 1px; }
+/* Ya generado: teñido con el color de la familia; lo que falta se queda en blanco y avisa que está pendiente */
+.ind-mes--disponible small { font-weight: 700; color: var(--aviso-texto-fuerte); }
+.ind-mes--generado { background: color-mix(in srgb, var(--cat, var(--marca)) 18%, var(--superficie)); border-color: color-mix(in srgb, var(--cat, var(--marca)) 50%, var(--superficie)); }
+.ind-mes--generado small { color: var(--texto-medio); }
+/* El elegido: relleno y con un anillo alrededor, para que no se confunda con los generados */
+.ind-mes--elegido, .ind-mes--elegido:hover:not(:disabled) {
+  background: var(--cat, var(--marca)); border-color: var(--cat, var(--marca)); color: var(--texto-sobre-familia);
+  box-shadow: 0 0 0 2px var(--superficie-suave), 0 0 0 4px var(--cat, var(--marca));
 }
-.ind-icon-side-inner::before {
-  content: '';
-  position: absolute; inset: -28px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--ic, var(--marca)) 14%, transparent) 0%,
-    transparent 68%
-  );
-  border-radius: 50%;
-  pointer-events: none;
+.ind-mes--elegido small { color: var(--texto-sobre-familia); }
+.ind-mes--bloqueado { background: transparent; border-style: dashed; border-color: var(--borde); color: var(--texto-suave); cursor: not-allowed; }
+/* Cerrado (en Previo) también ya se generó: teñido, aunque no se pueda elegir */
+.ind-mes--bloqueado.ind-mes--cerrado { background: color-mix(in srgb, var(--cat, var(--marca)) 18%, var(--superficie)); border-style: solid; border-color: color-mix(in srgb, var(--cat, var(--marca)) 35%, var(--superficie)); color: var(--texto-secundario); }
+.ind-meses-titulo { display: inline-flex; align-items: center; gap: 6px; }
+.ind-meses-aviso { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 0.78rem; color: var(--texto-suave); }
+.ind-meses-aviso svg { flex-shrink: 0; }
+
+/* Títulos de los bloques con su ícono */
+.ind-gen-titulo { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 0.82rem; font-weight: 800; color: var(--texto-medio); }
+.ind-sem-block .ind-gen-titulo { margin-bottom: 12px; }
+
+/* Abajo: qué se va a generar y el botón */
+.ind-barra-generar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px;
+  padding: 14px 18px;
+  background: var(--superficie-elevada); border: 1px solid var(--borde-fuerte); border-radius: 14px;
 }
-.ind-icon-side-img {
-  width: 100%; height: auto; object-fit: contain;
-  opacity: 0.52;
-  position: relative; z-index: 1;
-  filter: drop-shadow(0 8px 20px color-mix(in srgb, var(--ic, #0b5445) 22%, transparent));
-}
-@media (min-width: 1050px) {
-  .ind-icon-side     { display: flex; }
-  .ind-sel-card-icon { display: none; }
-}
+.ind-barra-icono { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: var(--superficie-alterna); }
+.ind-barra-texto { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; }
+.ind-barra-texto small { font-size: 0.72rem; font-weight: 700; color: var(--texto-suave); }
+.ind-barra-texto strong { font-size: 1rem; font-weight: 800; color: var(--texto); }
+.ind-barra-generar .ind-gen-btn { width: auto !important; flex: 0 1 auto; margin: 0 !important; padding: 14px 28px !important; }
 
 /* ── Panel batch ── */
 .ind-batch-panel {
-  display: flex; flex-direction: column; gap: 14px;
+  gap: 12px;
+  background: var(--superficie-suave);
+  border: 1px solid rgba(var(--borde-rgb), 0.95);
+  border-radius: 14px;
+  padding: 16px 18px;
 }
 
 .ind-batch-ind-list {
-  display: flex; flex-direction: column; gap: 4px;
-  background: var(--superficie-suave);
-  border: 1px solid rgba(var(--borde-rgb), 0.9);
-  border-radius: 12px; padding: 10px 14px;
-  max-height: 200px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 6px;
 }
-.ind-batch-ind-list::-webkit-scrollbar { width: 3px; }
-.ind-batch-ind-list::-webkit-scrollbar-thumb { background: var(--superficie-marcada); border-radius: 4px; }
 .ind-batch-ind-row {
   display: flex; align-items: center; gap: 8px;
-  font-size: 0.76rem; font-weight: 600; color: var(--texto-secundario);
-  padding: 3px 0;
+  font-size: 0.85rem; font-weight: 700; color: var(--texto);
+  padding: 10px 12px;
+  background: var(--superficie); border-radius: 10px;
 }
-.ind-batch-ind-dot {
-  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-}
+.ind-batch-ind-icono { display: inline-grid; flex-shrink: 0; }
 .ind-batch-ind-name { flex: 1; }
-.ind-batch-ind-ok  { font-size: 0.7rem; font-weight: 700; color: var(--marca-texto); }
-.ind-batch-ind-err { font-size: 0.7rem; font-weight: 700; color: var(--guinda-texto); }
+.ind-batch-estado { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.ind-batch-estado--ok    { background: var(--tinte-exito); color: var(--exito-texto); }
+.ind-batch-estado--aviso { background: var(--tinte-aviso); color: var(--aviso-texto); }
+.ind-batch-estado--error { background: var(--tinte-peligro); color: var(--peligro-texto); }
 .ind-batch-summary {
-  display: flex; gap: 12px; flex-wrap: wrap;
-  font-size: 0.74rem; font-weight: 600;
-  padding: 8px 12px;
-  background: var(--superficie-suave);
-  border-radius: 8px;
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: auto;
+  font-size: 0.8rem; font-weight: 600;
 }
+.ind-batch-ok { display: inline-flex; align-items: center; gap: 6px; }
 .ind-batch-tip {
-  font-size: 0.68rem; color: var(--texto-tenue); text-align: center; margin: 0;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 0.72rem; color: var(--texto-suave); text-align: center; margin: 0;
 }
+.ind-batch-tip svg { flex-shrink: 0; }
 
 /* ── Leyenda de solo-lectura (ícono en el header, texto en tooltip nativo) ── */
 .ind-legal-note {
@@ -336,24 +300,26 @@
 
 /* ── Card del indicador seleccionado ── */
 .ind-sel-card {
-  position: relative;
+  display: flex; align-items: center; gap: 16px;
   background: color-mix(in srgb, var(--fc, var(--marca)) 4%, var(--superficie));
   border: 1px solid color-mix(in srgb, var(--fc, var(--marca-texto)) 18%, transparent);
   border-left: 4px solid color-mix(in srgb, var(--fc, var(--marca-texto)) var(--acento-peso), var(--texto));
   border-radius: 14px;
-  padding: 20px 22px 22px;
+  padding: 16px 22px;
   margin-bottom: 16px;
   animation: ind-accordion-in 0.22s cubic-bezier(0.16,1,0.3,1) both;
 }
-.ind-sel-card-icon {
-  position: absolute; bottom: -4px; right: 14px;
-  width: 88px; height: 88px;
-  opacity: 0.28;
-  object-fit: contain; pointer-events: none;
+.ind-sel-card-texto { flex: 1; min-width: 0; }
+/* La imagen de la familia, a la derecha del título, con un halo de su color */
+.ind-sel-card-imagen {
+  flex-shrink: 0; display: grid; place-items: center;
+  width: clamp(76px, 11vw, 132px); aspect-ratio: 1;
+  background: radial-gradient(circle, color-mix(in srgb, var(--fc, var(--marca)) 20%, transparent) 0%, transparent 70%);
 }
+.ind-sel-card-imagen img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .ind-sel-eyebrow {
   font-size: 0.58rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1.1px;
+  letter-spacing: 1.1px; display: flex; align-items: center; gap: 6px;
   color: color-mix(in srgb, var(--fc, var(--marca-texto)) calc(var(--acento-peso) * 0.6), var(--texto-tenue));
   margin: 0 0 6px;
 }
@@ -399,7 +365,10 @@
 .ind-sem-block .cfg-sem-label { margin-bottom: 12px; }
 
 /* ── Botón generar (sobreescribe config.css) ── */
+.ind-period-block .cfg-tab--active { color: var(--texto-sobre-familia); }
+
 .ind-gen-btn {
+  color: var(--texto-sobre-familia) !important;
   margin: 4px 0 0 !important;
   padding: 16px !important;
   font-size: 0.95rem !important;
@@ -425,6 +394,9 @@
 @media (max-width: 48rem) {
   .ind-hub-main { flex-direction: column; padding: 0.875rem; gap: 0.75rem; }
   .ind-config-panel { padding-left: 0; }
+  .ind-barra-generar .ind-gen-btn { width: 100% !important; flex: 1 1 100%; }
+  .ind-meses { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+  .ind-sel-name { font-size: 1.7rem; }
 
   .ind-sidebar {
     position: fixed; left: 0; top: 4rem; bottom: 0; z-index: 200;
