@@ -77,7 +77,7 @@ export function useConsultaAcciones() {
 
   // El estudio (Excel) de un registro: al subirlo se anota en lo ya consultado; bajarlo descarga el archivo
   const subidaEstudio = useMutation({
-    mutationFn: ({ id, archivo }: { id: string; archivo: File }) => ftpEpidemiologiaApi.subirEstudioOC30(anio, mes as number, id, archivo),
+    mutationFn: ({ id, archivo, password }: { id: string; archivo: File; password?: string }) => ftpEpidemiologiaApi.subirEstudioOC30(anio, mes as number, id, archivo, password),
     onSuccess: ({ id, ...estudio }) => queryClient.setQueryData<ExtraccionFtp>(['acciones', 'OC30', anio, mes], previo =>
       previo && { ...previo, estudios: { ...previo.estudios, [id]: estudio } }),
   });
@@ -113,7 +113,9 @@ export function useConsultaAcciones() {
     error: consulta.isError ? mensajeDeError(consulta.error, 'Error al consultar las acciones') : null,
     cambiarEstatus: (id: string, estatus: string) => cambioEstatus.mutate({ id, estatus }),
     errorEstatus: cambioEstatus.isError ? mensajeDeError(cambioEstatus.error, 'No se pudo guardar el estatus') : null,
-    subirEstudio: (id: string, archivo: File) => subidaEstudio.mutate({ id, archivo }),
+    subirEstudio: (id: string, archivo: File, password?: string, alTerminar?: () => void) =>
+      subidaEstudio.mutate({ id, archivo, password }, { onSuccess: () => alTerminar?.() }),
+    limpiarErrorEstudio: () => subidaEstudio.reset(),
     descargarEstudio: (id: string) => descargaEstudio.mutate(id),
     // El registro cuyo estudio se está subiendo (para mostrar "Subiendo…")
     subiendoEstudio: subidaEstudio.isPending ? subidaEstudio.variables?.id ?? null : null,

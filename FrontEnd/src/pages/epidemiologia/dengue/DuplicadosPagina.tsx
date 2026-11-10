@@ -1,6 +1,6 @@
 // propios
 import { COLOR_DUPLICADOS as COLOR, COLOR_POSIBLES as COLOR_POSIBLE, SeccionDuplicados, SeccionPosiblesDuplicados, Spinner as DengueSpinner, agruparPorMetodo, useDuplicados, usePosiblesDuplicados } from '@/features/dengue';
-import { textoAcento } from '@/utils/colorAcento';
+import { conAlfa, textoAcento } from '@/utils/colorAcento';
 
 /**
  * Página de duplicados detectados en la base de dengue.
@@ -32,7 +32,7 @@ export default function DuplicadosPagina() {
         <div className="epi-canal-titleblock">
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
-            background: `${COLOR}10`, border: `1px solid ${COLOR}30`,
+            background: `${conAlfa(COLOR, '10')}`, border: `1px solid ${conAlfa(COLOR, '30')}`,
             borderRadius: 100, padding: '0.1875rem 0.75rem',
             fontSize: '0.6rem', fontWeight: 700, color: textoAcento(COLOR),
             textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.625rem',
@@ -45,7 +45,7 @@ export default function DuplicadosPagina() {
           }}>
             Duplicados{' '}
             <span style={{
-              backgroundImage: `linear-gradient(90deg, ${COLOR}, #7c3aed)`,
+              backgroundImage: `linear-gradient(90deg, ${COLOR}, var(--epi-morado))`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>detectados</span>
@@ -58,9 +58,9 @@ export default function DuplicadosPagina() {
         {/* KPIs */}
         <div className="epi-canal-kpis" style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap' }}>
           {[
-            { valor: confirmados.length, label: 'Confirmados eliminados', color: COLOR,         borde: `${COLOR}25`           },
-            { valor: Object.keys(metodos).length, label: 'Métodos usados', color: '#7c3aed',    borde: 'rgba(124,58,237,0.2)' },
-            { valor: posibles.length,    label: 'Para revisión manual',   color: COLOR_POSIBLE, borde: `${COLOR_POSIBLE}30`   },
+            { valor: confirmados.length, label: 'Confirmados eliminados', color: COLOR,         borde: `${conAlfa(COLOR, '25')}`           },
+            { valor: Object.keys(metodos).length, label: 'Métodos usados', color: 'var(--epi-morado)',    borde: 'rgba(124,58,237,0.2)' },
+            { valor: posibles.length,    label: 'Para revisión manual',   color: COLOR_POSIBLE, borde: `${conAlfa(COLOR_POSIBLE, '30')}`   },
           ].map(({ valor, label, color, borde }) => (
             <div key={label} style={{
               background: 'var(--superficie)', borderRadius: '0.875rem', padding: '0.625rem 1rem',

@@ -43,7 +43,7 @@ export default function AlertasSiscepPagina() {
           }}>
             Seguimiento de muestras{' '}
             <span style={{
-              backgroundImage: 'linear-gradient(90deg, #691c32, #a7802d)',
+              backgroundImage: 'linear-gradient(90deg, var(--epi-guinda), var(--epi-dorado))',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>{datos.año}</span>

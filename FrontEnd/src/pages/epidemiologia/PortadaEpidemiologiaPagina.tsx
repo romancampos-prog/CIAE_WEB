@@ -1,16 +1,13 @@
 // react
 import { useNavigate } from 'react-router-dom'
 // propios
-import { IconoDocumento, IconoEpidemiologia } from '@/components/icons';
+import { IconoModuloAcciones, IconoModuloDengue } from '@/components/icons';
 import { useRol } from '@/features/auth';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
 import '@/styles/inicio.css';
 import '@/styles/epidemiologia.css';
 
-const IconMosquito = () => (
-  <IconoEpidemiologia />
-)
 
 
 export default function PortadaEpidemiologiaPagina() {
@@ -41,7 +38,7 @@ export default function PortadaEpidemiologiaPagina() {
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
           <h1 style={{
             fontSize: 34, fontWeight: 800, margin: '0 0 10px',
-            background: 'linear-gradient(135deg, #245c4f 0%, #a7802d 50%, #691c32 100%)',
+            background: 'linear-gradient(135deg, var(--epi-verde) 0%, var(--epi-dorado) 50%, var(--epi-guinda) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -64,19 +61,19 @@ export default function PortadaEpidemiologiaPagina() {
               color="tinto"
               onClick={() => navigate('/CIAE/Epidemiologia/dengue')}
             >
-              <IconMosquito />
+              <IconoModuloDengue />
             </NavCard>
           )}
 
           <NavCard
             titulo="Acciones"
             eyebrow="Reporte OC30 · FTP"
-            desc="Acciones registradas por unidad en el reporte OC30 del FTP: estadísticas por clave y unidad, y el detalle por mes."
-            chips={['OC30', 'Por unidad']}
+            desc="Registros del reporte OC30 por unidad y clave, con su estatus de seguimiento y su estudio."
+            chips={['OC30', 'Estatus', 'Estudios']}
             color="green"
             onClick={() => navigate('/CIAE/Epidemiologia/acciones')}
           >
-            <IconoDocumento />
+            <IconoModuloAcciones />
           </NavCard>
 
         </div>

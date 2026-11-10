@@ -9,8 +9,11 @@ from datetime import date, datetime
 
 from fastapi import HTTPException
 
+from compartido.aviso_excel_Services import texto_aviso_excel
 from epidemiologia.datos.ftp.claves_up_Datos import claves_up
+from epidemiologia.datos.ftp.estatus_acciones_Datos import catalogo_estatus, leer_estatus
 from epidemiologia.datos.ftp.extracciones_ftp_Datos import leer_extraccion
+from epidemiologia.modulos.ftp.id_registro import id_de_registro
 from epidemiologia.modulos.ftp.libro_excel_extraccion import libro_excel_extraccion
 from ..mapeo.mapeo_Services import ExtraerMapeoFTP
 
@@ -18,10 +21,12 @@ MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
          "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
 COLUMNA_PERIODO = "Periodo"
+COLUMNA_ESTATUS = "Estatus"
 HOJA_CLAVES = "Claves UP"
+COLUMNAS_IZQUIERDA_CLAVES = ["Descripción", "Tema"]
 
 
-def excel_de_extraccion(desde: date, hasta: date, archivo: str, unidades_usuario: list[str] | None) -> tuple[str, dict]:
+def excel_de_extraccion(desde: date, hasta: date, archivo: str, unidades_usuario: list[str] | None, usuario: str) -> tuple[str, dict]:
     """
     @param unidades_usuario - nombres de la unidad de un usuario de unidad (del token); None = todas
     @returns (mensaje, {archivo_b64, nombre_archivo, totalRegistros})
@@ -33,7 +38,12 @@ def excel_de_extraccion(desde: date, hasta: date, archivo: str, unidades_usuario
     mapeo = ExtraerMapeoFTP(archivo)
     columna_fecha = mapeo.columnaFecha
 
-    # 1- Los meses que pueden traer fechas del rango (el mes estadistico empieza a fines del mes anterior)
+    # 1- El estatus marcado de cada registro (si no tiene, el inicial del catalogo), por su nombre en pantalla
+    catalogo = catalogo_estatus()
+    marcados = leer_estatus(archivo)
+    nombre_estatus = {estatus["clave"]: estatus["nombre"] for estatus in catalogo["estatus"]}
+
+    # 2- Los meses que pueden traer fechas del rango (el mes estadistico empieza a fines del mes anterior)
     filas = []
     for ano, mes in _meses_del_rango(desde, hasta):
         contenido = leer_extraccion(archivo, ano, f"{mes:02d}")
@@ -41,14 +51,16 @@ def excel_de_extraccion(desde: date, hasta: date, archivo: str, unidades_usuario
             continue
         periodo = f"{MESES[mes - 1]} {ano}"
 
-        # 2- Solo las filas del rango (y de la unidad del usuario, si es de unidad)
+        # 3- Solo las filas del rango (y de la unidad del usuario, si es de unidad)
         for fila in contenido["filas"]:
             if unidades_usuario is not None and fila.get("Unidad") not in unidades_usuario:
                 continue
             fecha = _fecha_de(fila.get(columna_fecha))
             if fecha is None or not desde <= fecha <= hasta:
                 continue
-            filas.append({**fila, columna_fecha: fecha, COLUMNA_PERIODO: periodo})
+            # El id se saca de la fila tal como se guardo, antes de convertir su fecha
+            clave_estatus = marcados.get(id_de_registro(fila), catalogo["inicial"])
+            filas.append({**fila, columna_fecha: fecha, COLUMNA_PERIODO: periodo, COLUMNA_ESTATUS: nombre_estatus.get(clave_estatus, clave_estatus)})
 
     rango = f"{desde:%d/%m/%Y} al {hasta:%d/%m/%Y}"
     if not filas:
@@ -57,13 +69,19 @@ def excel_de_extraccion(desde: date, hasta: date, archivo: str, unidades_usuario
     # Los meses que si aportaron registros, para el mensaje
     meses_con_registros = list(dict.fromkeys(fila[COLUMNA_PERIODO] for fila in filas))
 
-    # 3- Ordenados por fecha y unidad, con las columnas en el orden del mapeo
+    # 4- Ordenados por fecha y unidad: primero el estatus y luego las columnas en el orden del mapeo
     filas.sort(key=lambda fila: (fila[columna_fecha], fila.get("Unidad") or ""))
-    columnas = ["Unidad", *_columnas_del_mapeo(mapeo), COLUMNA_PERIODO]
+    columnas = [COLUMNA_ESTATUS, "Unidad", *_columnas_del_mapeo(mapeo), COLUMNA_PERIODO]
 
-    # 4- El libro: los registros y, siempre en la segunda hoja, lo que significa cada clave del filtro
+    # 5- El libro: los registros y, siempre en la segunda hoja, lo que significa cada clave del filtro
     columnas_claves, filas_claves = _hoja_de_claves(mapeo, filas)
-    contenido_excel = libro_excel_extraccion([(archivo, columnas, filas), (HOJA_CLAVES, columnas_claves, filas_claves)])
+    niveles_estatus = {estatus["nombre"]: estatus["nivel"] for estatus in catalogo["estatus"]}
+    contenido_excel = libro_excel_extraccion(
+        [(archivo, columnas, filas), (HOJA_CLAVES, columnas_claves, filas_claves)],
+        {COLUMNA_ESTATUS: niveles_estatus},
+        [*mapeo.columnasExcelIzquierda, *COLUMNAS_IZQUIERDA_CLAVES],
+        texto_aviso_excel(usuario, con_datos_personales=True),
+    )
 
     datos = {
         "archivo_b64": base64.b64encode(contenido_excel).decode("ascii"),

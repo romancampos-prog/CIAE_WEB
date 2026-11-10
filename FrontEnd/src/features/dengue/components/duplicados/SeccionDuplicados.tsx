@@ -3,7 +3,7 @@ import { Fragment, useState } from 'react'
 // propios
 import type { RegistroCaso } from '@/types/api/dengue/reportes';
 import { IconoChevronAbajo, IconoChevronDerecha, IconoPalomita } from '@/components/icons';
-import { textoAcento } from '@/utils/colorAcento';
+import { conAlfa, textoAcento } from '@/utils/colorAcento';
 import { COLOR_DUPLICADOS, estiloClasificacion } from '@/features/dengue/constants/clasificacion';
 
 const COLOR = COLOR_DUPLICADOS
@@ -36,9 +36,9 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
   return (
     <div style={{
       background: 'var(--superficie)', borderRadius: 16,
-      border: `1px solid ${vacio ? 'rgba(var(--contraste-rgb), 0.05)' : `${COLOR}30`}`,
+      border: `1px solid ${vacio ? 'rgba(var(--contraste-rgb), 0.05)' : `${conAlfa(COLOR, '30')}`}`,
       borderLeft: `4px solid ${vacio ? 'var(--borde)' : COLOR}`,
-      boxShadow: vacio ? '0 2px 10px rgba(0,0,0,0.04)' : `0 4px 20px ${COLOR}10`,
+      boxShadow: vacio ? '0 2px 10px rgba(0,0,0,0.04)' : `0 4px 20px ${conAlfa(COLOR, '10')}`,
       overflow: 'hidden',
     }}>
 
@@ -55,8 +55,8 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
         {/* Ícono */}
         <div style={{
           width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-          background: vacio ? 'var(--superficie-alterna)' : `${COLOR}15`,
-          border: `1.5px solid ${vacio ? 'var(--borde)' : `${COLOR}35`}`,
+          background: vacio ? 'var(--superficie-alterna)' : `${conAlfa(COLOR, '15')}`,
+          border: `1.5px solid ${vacio ? 'var(--borde)' : `${conAlfa(COLOR, '35')}`}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 15,
         }}>⧉</div>
@@ -76,13 +76,13 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
           {!vacio && Object.entries(metodos).map(([met, n]) => (
             <div key={met} style={{
               padding: '3px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700,
-              background: `${COLOR}10`, border: `1px solid ${COLOR}25`, color: textoAcento(COLOR),
+              background: `${conAlfa(COLOR, '10')}`, border: `1px solid ${conAlfa(COLOR, '25')}`, color: textoAcento(COLOR),
             }}>{met}: {n}</div>
           ))}
           <div style={{
             padding: '4px 12px', borderRadius: 100,
-            background: vacio ? 'var(--superficie-alterna)' : `${COLOR}12`,
-            border: `1px solid ${vacio ? 'var(--borde)' : `${COLOR}30`}`,
+            background: vacio ? 'var(--superficie-alterna)' : `${conAlfa(COLOR, '12')}`,
+            border: `1px solid ${vacio ? 'var(--borde)' : `${conAlfa(COLOR, '30')}`}`,
             fontSize: 13, fontWeight: 800,
             color: vacio ? 'var(--texto-tenue)' : textoAcento(COLOR),
           }}>{registros.length}</div>
@@ -98,7 +98,7 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
 
       {/* Tabla expandible */}
       {abierto && !vacio && (
-        <div style={{ borderTop: `1px solid ${COLOR}20`, overflowX: 'auto', padding: '0 28px 16px' }}>
+        <div style={{ borderTop: `1px solid ${conAlfa(COLOR, '20')}`, overflowX: 'auto', padding: '0 28px 16px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <colgroup>
               <col style={{ width: 20  }} />{/* expand toggle */}
@@ -114,14 +114,14 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
             </colgroup>
             <thead>
               <tr>
-                <th style={{ padding: '10px 6px', background: `${COLOR}08`, borderBottom: `2px solid ${COLOR}20` }}></th>
+                <th style={{ padding: '10px 6px', background: `${conAlfa(COLOR, '08')}`, borderBottom: `2px solid ${conAlfa(COLOR, '20')}` }}></th>
                 {CABECERAS_RECHAZADO.map(c => (
                   <th key={c} style={{
                     padding: '10px 14px', textAlign: 'left',
                     fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
                     letterSpacing: '0.7px', color: textoAcento(COLOR),
-                    background: `${COLOR}08`,
-                    borderBottom: `2px solid ${COLOR}20`,
+                    background: `${conAlfa(COLOR, '08')}`,
+                    borderBottom: `2px solid ${conAlfa(COLOR, '20')}`,
                     whiteSpace: 'nowrap',
                   }}>{c}</th>
                 ))}
@@ -135,18 +135,18 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
                   <Fragment key={String(row.VEC_ID)}>
                     <tr
                       key={row.VEC_ID}
-                      style={{ background: i % 2 === 0 ? 'var(--superficie)' : `${COLOR}04`, cursor: 'pointer' }}
+                      style={{ background: i % 2 === 0 ? 'var(--superficie)' : `${conAlfa(COLOR, '04')}`, cursor: 'pointer' }}
                       onClick={() => setExpandido(estaExpandido ? null : row.VEC_ID)}
                     >
                       {/* Toggle sub-fila */}
-                      <td style={{ padding: '9px 6px', borderBottom: `1px solid ${COLOR}10`, textAlign: 'center' }}>
+                      <td style={{ padding: '9px 6px', borderBottom: `1px solid ${conAlfa(COLOR, '10')}`, textAlign: 'center' }}>
                         <IconoChevronDerecha stroke={COLOR} style={{ transition: 'transform 0.15s', transform: estaExpandido ? 'rotate(90deg)' : 'rotate(0deg)' }} />
                       </td>
 
                       {CAMPOS_RECHAZADO.map((campo, j) => {
                         if (campo === 'CLASIFICACION_FINAL') {
                           return (
-                            <td key={campo} style={{ padding: '9px 14px', borderBottom: `1px solid ${COLOR}10` }}>
+                            <td key={campo} style={{ padding: '9px 14px', borderBottom: `1px solid ${conAlfa(COLOR, '10')}` }}>
                               <span style={{
                                 padding: '2px 8px', borderRadius: 6,
                                 fontSize: 10, fontWeight: 700,
@@ -158,7 +158,7 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
                         return (
                           <td key={campo} style={{
                             padding: '9px 14px',
-                            borderBottom: `1px solid ${COLOR}10`,
+                            borderBottom: `1px solid ${conAlfa(COLOR, '10')}`,
                             color: j === 0 ? textoAcento(COLOR) : 'var(--texto-medio)',
                             fontWeight: j === 0 ? 700 : 400,
                             whiteSpace: 'nowrap',
@@ -173,7 +173,7 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
                         <td></td>
                         <td colSpan={CABECERAS_RECHAZADO.length} style={{
                           padding: '10px 14px 12px',
-                          borderBottom: `1px solid ${COLOR}10`,
+                          borderBottom: `1px solid ${conAlfa(COLOR, '10')}`,
                           background: 'rgba(79,70,229,0.03)',
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -181,7 +181,7 @@ export default function SeccionDuplicados({ registros }: { registros: RegistroCa
                             <span style={{ fontSize: 11, color: 'var(--texto-suave)' }}>Folio conservado:</span>
                             <span style={{
                               fontSize: 12, fontWeight: 800, color: textoAcento(COLOR),
-                              background: `${COLOR}10`, border: `1px solid ${COLOR}25`,
+                              background: `${conAlfa(COLOR, '10')}`, border: `1px solid ${conAlfa(COLOR, '25')}`,
                               padding: '2px 10px', borderRadius: 6,
                             }}>{row.VEC_ID_CONSERVADO}</span>
                           </div>

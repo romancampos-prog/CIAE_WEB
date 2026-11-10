@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 // propios
 import type { TipoMapa } from '@/types/api/dengue/reportes';
 import { BrotesPanel, MapaLeaflet, SEMAFORO_MAPA, Spinner as DengueSpinner, TablaUnidades, getTemaMapa, useMapaDengue } from '@/features/dengue';
-import { textoAcento } from '@/utils/colorAcento';
+import { conAlfa, textoAcento } from '@/utils/colorAcento';
 
 
 /**
@@ -51,7 +51,7 @@ export default function MapaPagina() {
           }}>
             {etiqueta}{' '}
             <span style={{
-              backgroundImage: `linear-gradient(90deg, ${colorTema}, #a7802d)`,
+              backgroundImage: `linear-gradient(90deg, ${colorTema}, var(--epi-dorado))`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>{datos.año}</span>
@@ -107,8 +107,8 @@ export default function MapaPagina() {
               fontSize: 12, fontWeight: 700, cursor: 'pointer',
               fontFamily: 'inherit', transition: 'all 0.18s',
               background: tabActiva === id ? colorTema : 'transparent',
-              color: tabActiva === id ? 'white' : 'var(--texto-suave)',
-              boxShadow: tabActiva === id ? `0 3px 10px ${colorTema}44` : 'none',
+              color: tabActiva === id ? 'var(--texto-sobre-familia)' : 'var(--texto-suave)',
+              boxShadow: tabActiva === id ? `0 3px 10px ${conAlfa(colorTema, '44')}` : 'none',
             }}>{label}</button>
           ))}
         </div>
@@ -118,7 +118,7 @@ export default function MapaPagina() {
           {[
             { valor: datos.total,         label: 'Total casos',          color: colorTema, borde: bordeTema                },
             { valor: datos.mun_con_casos, label: 'Municipios con casos', color: 'var(--oro-texto)', borde: 'rgba(167,128,45,0.18)' },
-            { valor: datos.max_casos,     label: 'Máx. por municipio',  color: '#c0392b', borde: 'rgba(192,57,43,0.18)'  },
+            { valor: datos.max_casos,     label: 'Máx. por municipio',  color: 'var(--epi-critico)', borde: 'rgba(192,57,43,0.18)'  },
           ].map(({ valor, label, color, borde }) => (
             <div key={label} style={{
               flex: '1 1 8rem', background: 'var(--superficie)', borderRadius: 12,

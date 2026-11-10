@@ -21,14 +21,14 @@ export default function TablaUnidades({ unidades }: { unidades: { unidad: string
       <tbody>
         {unidades.map((u, i) => {
           const pct = (u.n / max * 100).toFixed(1)
-          const color = u.n === max ? '#691c32' : i < 3 ? '#a7802d' : '#245c4f'
+          const color = u.n === max ? 'var(--epi-guinda)' : i < 3 ? 'var(--epi-dorado)' : 'var(--epi-verde)'
           return (
             <tr key={i}>
               <td style={{ textAlign: 'center' }}>
                 <div style={{
                   width: 22, height: 22, borderRadius: '50%', margin: '0 auto',
                   background: i < 3 ? color : 'var(--superficie-alterna)',
-                  color: i < 3 ? 'white' : 'var(--texto-tenue)',
+                  color: i < 3 ? 'var(--texto-sobre-familia)' : 'var(--texto-tenue)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 10, fontWeight: 800,
                 }}>{i + 1}</div>
@@ -42,7 +42,7 @@ export default function TablaUnidades({ unidades }: { unidades: { unidad: string
                   <div style={{ flex: 1, background: 'var(--superficie-alterna)', borderRadius: 100, height: 6, overflow: 'hidden' }}>
                     <div style={{
                       height: '100%', width: `${pct}%`, borderRadius: 100,
-                      background: `linear-gradient(to right, #245c4f, ${color})`,
+                      background: `linear-gradient(to right, var(--epi-verde), ${color})`,
                       transition: 'width 0.4s ease',
                     }} />
                   </div>

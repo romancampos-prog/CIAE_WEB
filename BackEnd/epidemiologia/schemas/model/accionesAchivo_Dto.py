@@ -29,6 +29,7 @@ class Acciones(BaseModel):
     # La columna de "seleccionar" con la fecha de cada registro (dd/mm/aaaa): con ella se filtra el rango del Excel
     columnaFecha: str
     # Columnas de "seleccionar" con que se nombra el estudio (Excel) que se sube a un registro, en orden
+    columnasExcelIzquierda: list[str] = []
     nombreEstudio: list[str] = []
     # Como se muestra una columna en la tabla ("NSS"); el nombre real no cambia: es la llave de los datos y del id
     etiquetasColumna: Dict[str, str] = {}

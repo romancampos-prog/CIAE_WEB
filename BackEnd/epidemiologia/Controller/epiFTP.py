@@ -55,7 +55,7 @@ def ftpPeriodos(ano: int, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
 def ftpExcel(desde: date, hasta: date, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
     archivo: str = "AccionesOC30"
     unidades_usuario = payload.get("unidades", []) if payload.get("rol") == "unidad" else None
-    mensaje, datos = excel_de_extraccion(desde, hasta, archivo, unidades_usuario)
+    mensaje, datos = excel_de_extraccion(desde, hasta, archivo, unidades_usuario, payload.get("sub", "-"))
     return ApiResponse(success=True, message=mensaje, data=datos)
 
 
@@ -71,7 +71,7 @@ def ftpEstatus(cambio: CambioEstatus, payload: dict = Depends(solo_roles("admin"
 
 ##--------------------------------------
 
-#Post epidemiologia/ftp/estudio/OC30  (form: ano, mes, id, archivo, pesoArchivo; solo admin y solo "Con estudio")
+#Post epidemiologia/ftp/estudio/OC30  (form: ano, mes, id, archivo, pesoArchivo y password si reemplaza; solo admin y solo "Con estudio")
 @ftpApi.post("/estudio/OC30")
 async def ftpSubirEstudio(
     ano:         int        = Form(...),
@@ -79,10 +79,11 @@ async def ftpSubirEstudio(
     id:          str        = Form(..., min_length=1, max_length=64),
     archivo:     UploadFile = File(...),
     pesoArchivo: int        = Form(...),
+    password:    str | None = Form(None),
     payload:     dict       = Depends(solo_roles("admin")),
 ):
     extraccion: str = "AccionesOC30"
-    mensaje, datos = subir_estudio(extraccion, ano, mes, id, archivo.filename or "", await archivo.read(), pesoArchivo, payload.get("sub", "-"))
+    mensaje, datos = subir_estudio(extraccion, ano, mes, id, archivo.filename or "", await archivo.read(), pesoArchivo, payload.get("sub", "-"), password)
     return ApiResponse(success=True, message=mensaje, data=datos)
 
 

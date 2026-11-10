@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import type { BroteEspacial, BroteTemporal } from '@/types/api/dengue/reportes';
 import PanelDeslizante from '@/features/dengue/components/comun/PanelDeslizante';
 
-const estiloSeccion: CSSProperties = { borderBottom: '1px solid #f0ece4', padding: '16px 20px' }
+const estiloSeccion: CSSProperties = { borderBottom: '1px solid var(--epi-linea)', padding: '16px 20px' }
 const estiloTitulo: CSSProperties  = {
   fontSize: 11, fontWeight: 700, color: 'var(--primario-texto)',
   textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 12,
@@ -35,7 +35,7 @@ export default function BrotesPanel({ brotes_espacial = [], brotes_temporal = []
       onToggle={onToggle}
     >
       {total === 0 ? (
-        <div style={{ padding: 24, textAlign: 'center', color: '#2e8b57' }}>
+        <div style={{ padding: 24, textAlign: 'center', color: 'var(--epi-exito)' }}>
           ✓ Sin brotes detectados en el período actual
         </div>
       ) : (
@@ -76,7 +76,7 @@ export default function BrotesPanel({ brotes_espacial = [], brotes_temporal = []
                       <td>{b.municipio}</td>
                       <td style={{ fontWeight: 700 }}>{b.casos_actual}</td>
                       <td>{b.umbral}</td>
-                      <td style={{ color: '#cc0000' }}>+{b.incremento}%</td>
+                      <td style={{ color: 'var(--epi-rojo)' }}>+{b.incremento}%</td>
                     </tr>
                   ))}
                 </tbody>

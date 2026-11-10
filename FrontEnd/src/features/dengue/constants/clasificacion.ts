@@ -10,5 +10,5 @@ export const estiloClasificacion = (valor: string | number | null | undefined) =
   COLOR_CLASIF[String(valor)] || COLOR_CLASIF['SIN CLASIFICAR'];
 
 // Duplicados confirmados (índigo) y posibles (ámbar): distintos de los colores de las alertas.
-export const COLOR_DUPLICADOS = '#4f46e5';
-export const COLOR_POSIBLES   = '#b45309';
+export const COLOR_DUPLICADOS = 'var(--epi-indigo)';
+export const COLOR_POSIBLES   = 'var(--epi-ambar)';

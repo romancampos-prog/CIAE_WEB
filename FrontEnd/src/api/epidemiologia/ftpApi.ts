@@ -27,13 +27,14 @@ export const ftpEpidemiologiaApi = {
   },
 
   /** Sube el estudio (Excel) de un registro en "Con estudio" (solo admin); el backend lo guarda por año / unidad / mes. */
-  async subirEstudioOC30(ano: number, mes: number, id: string, archivo: File): Promise<EstudioAccion & { id: string }> {
+  async subirEstudioOC30(ano: number, mes: number, id: string, archivo: File, password?: string): Promise<EstudioAccion & { id: string }> {
     const form = new FormData();
     form.append('ano', String(ano));
     form.append('mes', String(mes));
     form.append('id', id);
     form.append('archivo', archivo);
     form.append('pesoArchivo', String(archivo.size));
+    if (password !== undefined) form.append('password', password);
     const { data } = await api.post<RespuestaApi<EstudioAccion & { id: string }>>('/epidemiologia/ftp/estudio/OC30', form);
     return data.data;
   },

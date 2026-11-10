@@ -99,6 +99,7 @@ export default function AccionesPagina() {
                   onCambiarEstatus={esAdmin ? consulta.cambiarEstatus : undefined}
                   estudios={datos.estudios ?? {}}
                   onSubirEstudio={esAdmin ? consulta.subirEstudio : undefined}
+                  onLimpiarErrorEstudio={consulta.limpiarErrorEstudio}
                   onDescargarEstudio={esAdmin ? consulta.descargarEstudio : undefined}
                   subiendoEstudio={consulta.subiendoEstudio}
                   errorEstudio={consulta.errorEstudio}

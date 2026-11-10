@@ -8,6 +8,7 @@ import {
   IconoCalendario, IconoCapas, IconoCerrar, IconoDescargar, IconoDocumento, IconoExcel, IconoFichaTecnica,
   IconoListaBarras, IconoSubirNube, IconoUsuario,
 } from '@/components/icons';
+import ModalConfirmarPassword from '@/components/ui/modal/ModalConfirmarPassword';
 
 interface Props {
   fila: FilaExtraccion;
@@ -25,7 +26,9 @@ interface Props {
   subiendo: boolean;
   /** Por qué no se pudo subir o bajar el estudio. */
   error: string | null;
-  onSubir: (archivo: File) => void;
+  /** Con password cuando reemplaza uno existente; alTerminar corre solo si se guardó. */
+  onSubir: (archivo: File, password?: string, alTerminar?: () => void) => void;
+  onLimpiarError: () => void;
   onDescargar: () => void;
   onCerrar: () => void;
 }
@@ -43,21 +46,34 @@ const ICONOS: Record<string, ReactNode> = {
 /**
  * Tarjeta flotante de un registro de Acciones (solo admin, al tocar su fila). Arriba, destacada, la
  * acción (clave UP y qué es), porque dice de qué trata el registro; luego los datos con su ícono, el
- * estatus y, en "Con estudio", el estudio (Excel) que mandó el doctor: subirlo, bajarlo o reemplazarlo.
+ * estatus y, en "Con estudio", el estudio (Excel) del doctor: si no hay, subirlo; si ya hay, bajarlo o
+ * reemplazarlo (reemplazar pide otra vez la contraseña).
  */
 export default function DetalleRegistro({
   fila, columnas, etiquetas, iconos, columnaClave, descripcion, estatus, catalogo, onCambiarEstatus,
-  estudio, subiendo, error, onSubir, onDescargar, onCerrar,
+  estudio, subiendo, error, onSubir, onLimpiarError, onDescargar, onCerrar,
 }: Props) {
   const [arrastrando, setArrastrando] = useState(false);
+  // El Excel elegido para reemplazar: mientras haya uno se pide la contraseña
+  const [reemplazo, setReemplazo] = useState<File | null>(null);
 
   useEffect(() => {
-    const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
+    const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape' && !reemplazo) onCerrar(); };
     document.addEventListener('keydown', alTeclear);
     return () => document.removeEventListener('keydown', alTeclear);
-  }, [onCerrar]);
+  }, [onCerrar, reemplazo]);
 
   const elegir = (archivo: File | undefined) => { if (archivo) onSubir(archivo); };
+  const elegirReemplazo = (archivo: File | undefined) => {
+    if (!archivo) return;
+    onLimpiarError();
+    setReemplazo(archivo);
+  };
+  const cancelarReemplazo = () => {
+    if (subiendo) return;
+    onLimpiarError();
+    setReemplazo(null);
+  };
   const clave = columnaClave ? fila[columnaClave] : null;
   const datos = columnas.filter(c => c !== 'Unidad' && c !== columnaClave);
   const icono = (columna: string) => ICONOS[iconos[columna] ?? ''] ?? <IconoDocumento tamano={15} />;
@@ -110,34 +126,63 @@ export default function DetalleRegistro({
         {/* El estudio: solo con un estatus que lo permite (Con estudio) */}
         {estatus?.permiteEstudio ? (
           <div className="acc-registro-estudio">
-            {error && <p className="acc-registro-error" role="alert">{error}</p>}
-            {estudio && (
+            {error && !reemplazo && <p className="acc-registro-error" role="alert">{error}</p>}
+            {estudio ? (
               <div className="acc-registro-archivo">
                 <span className="acc-registro-archivo-icono"><IconoExcel tamano={22} /></span>
                 <div>
                   <strong>{estudio.ruta.split('/').pop()}</strong>
                   <small>Subido {estudio.fecha.replace('T', ' ')} · {estudio.usuario}</small>
                 </div>
-                <button type="button" className="acc-registro-boton" onClick={onDescargar}><IconoDescargar tamano={14} /> Descargar</button>
+                <div className="acc-registro-archivo-acciones">
+                  <button type="button" className="acc-registro-boton" onClick={onDescargar}><IconoDescargar tamano={14} /> Descargar</button>
+                  <label className="acc-registro-boton acc-registro-boton--secundario">
+                    <IconoSubirNube tamano={15} /> Reemplazar existente
+                    <input type="file" accept=".xlsx,.xls" hidden disabled={subiendo}
+                      onChange={e => { elegirReemplazo(e.target.files?.[0]); e.target.value = ''; }} />
+                  </label>
+                </div>
               </div>
+            ) : (
+              <label
+                className={`acc-registro-subir${arrastrando ? ' acc-registro-subir--encima' : ''}${subiendo ? ' acc-registro-subir--subiendo' : ''}`}
+                onDragOver={e => { e.preventDefault(); setArrastrando(true); }}
+                onDragLeave={() => setArrastrando(false)}
+                onDrop={e => { e.preventDefault(); setArrastrando(false); elegir(e.dataTransfer.files[0]); }}
+              >
+                <IconoSubirNube tamano={26} />
+                <strong>{subiendo ? 'Subiendo…' : 'Subir el estudio'}</strong>
+                <small>Arrastra el Excel aquí o haz clic para elegirlo (.xlsx, .xls)</small>
+                <input type="file" accept=".xlsx,.xls" hidden disabled={subiendo}
+                  onChange={e => { elegir(e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
             )}
-            <label
-              className={`acc-registro-subir${arrastrando ? ' acc-registro-subir--encima' : ''}${subiendo ? ' acc-registro-subir--subiendo' : ''}`}
-              onDragOver={e => { e.preventDefault(); setArrastrando(true); }}
-              onDragLeave={() => setArrastrando(false)}
-              onDrop={e => { e.preventDefault(); setArrastrando(false); elegir(e.dataTransfer.files[0]); }}
-            >
-              <IconoSubirNube tamano={26} />
-              <strong>{subiendo ? 'Subiendo…' : estudio ? 'Reemplazar el estudio' : 'Subir el estudio'}</strong>
-              <small>{estudio ? 'El anterior se guarda como respaldo. ' : ''}Arrastra el Excel aquí o haz clic para elegirlo (.xlsx, .xls)</small>
-              <input type="file" accept=".xlsx,.xls" hidden disabled={subiendo}
-                onChange={e => { elegir(e.target.files?.[0]); e.target.value = ''; }} />
-            </label>
           </div>
         ) : (
           <p className="acc-registro-nota">El estudio se sube cuando el registro está en «Con estudio».</p>
         )}
       </section>
+
+      {/* Hermano de la tarjeta (ella se anima con transform) y sin dejar pasar el clic al fondo, que la cerraría */}
+      {reemplazo && estudio && (
+        <div onClick={e => e.stopPropagation()}>
+          <ModalConfirmarPassword
+            isOpen
+            onClose={cancelarReemplazo}
+            onConfirm={password => onSubir(reemplazo, password, () => setReemplazo(null))}
+            enviando={subiendo}
+            error={error ?? ''}
+            color="var(--marca)"
+            titulo="Reemplazar estudio"
+            subtitulo="El estudio actual se guardará como respaldo. Ingresa tu contraseña para reemplazarlo."
+            confirmLabel="Reemplazar"
+            infoRows={[
+              { label: 'Actual', value: estudio.ruta.split('/').pop() ?? '' },
+              { label: 'Nuevo', value: reemplazo.name },
+            ]}
+          />
+        </div>
+      )}
     </div>,
     document.body,
   );

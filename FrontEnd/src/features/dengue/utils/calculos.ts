@@ -43,14 +43,14 @@ export function getTemaMapa(tipo: TipoMapa) {
   if (tipo === 'situacion') {
     return {
       etiqueta:  'Casos Notificados',
-      colorTema: '#245c4f',
+      colorTema: 'var(--epi-verde)',
       bgTema:    'rgba(36,92,79,0.07)',
       bordeTema: 'rgba(36,92,79,0.18)',
     };
   }
   return {
     etiqueta:  'Casos Confirmados',
-    colorTema: '#691c32',
+    colorTema: 'var(--epi-guinda)',
     bgTema:    'rgba(105,28,50,0.07)',
     bordeTema: 'rgba(105,28,50,0.18)',
   };

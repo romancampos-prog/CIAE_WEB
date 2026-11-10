@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 // propios
 import type { ConteoValor, DescripcionClave, EstatusAccion, EstudioAccion, FilaExtraccion } from '@/types/api/epidemiologia/ftp';
 import type { FiltrosAcciones } from '@/types/pantallas/acciones';
-import { IconoBuscar, IconoCalendario, IconoCapas, IconoCerrar, IconoExcel, IconoListaBarras, IconoPalomita } from '@/components/icons';
+import { IconoBuscar, IconoCalendario, IconoCapas, IconoCerrar, IconoHojaExcel, IconoListaBarras, IconoPalomita } from '@/components/icons';
 import DetalleRegistro from './DetalleRegistro';
 import { fechaComparable } from '@/features/acciones/utils/fechas';
 import FiltroColumna from './FiltroColumna';
@@ -33,7 +33,9 @@ interface Props {
   onCambiarEstatus?: (id: string, estatus: string) => void;
   /** Solo admin: estudios ya guardados y cómo subir / bajar uno (con estatus "Con estudio"). */
   estudios?: Record<string, EstudioAccion>;
-  onSubirEstudio?: (id: string, archivo: File) => void;
+  /** Con password cuando reemplaza uno existente; alTerminar corre solo si se guardó. */
+  onSubirEstudio?: (id: string, archivo: File, password?: string, alTerminar?: () => void) => void;
+  onLimpiarErrorEstudio?: () => void;
   onDescargarEstudio?: (id: string) => void;
   subiendoEstudio?: string | null;
   /** Por qué no se pudo subir o bajar un estudio, y de qué registro. */
@@ -52,7 +54,7 @@ const enCorto = (elegidos: string[]) =>
  * del mapeo), ordenadas por fecha. Cada encabezado filtra: Unidad con lista, la fecha con rango y las
  * demás con buscador (la clave se filtra desde su tarjeta); lo elegido se ve en chiquito bajo el nombre.
  */
-export default function TablaExtraccion({ columnas, filas, columnaClave, columnaFecha, filtros, onCambiar, descripciones, unidades, fechas, onFiltrarClave, hayFiltros, onLimpiar, estatus, catalogoEstatus, onCambiarEstatus, estudios = {}, onSubirEstudio, onDescargarEstudio, subiendoEstudio, errorEstudio, etiquetas = {}, iconos = {} }: Props) {
+export default function TablaExtraccion({ columnas, filas, columnaClave, columnaFecha, filtros, onCambiar, descripciones, unidades, fechas, onFiltrarClave, hayFiltros, onLimpiar, estatus, catalogoEstatus, onCambiarEstatus, estudios = {}, onSubirEstudio, onLimpiarErrorEstudio, onDescargarEstudio, subiendoEstudio, errorEstudio, etiquetas = {}, iconos = {} }: Props) {
   const filasOrdenadas = useMemo(() => (columnaFecha ? ordenarPorFecha(filas, columnaFecha) : filas), [filas, columnaFecha]);
   // Admin: al tocar una fila se abre su tarjeta (datos, estatus y estudio)
   const [abierta, setAbierta] = useState<string | null>(null);
@@ -173,7 +175,8 @@ export default function TablaExtraccion({ columnas, filas, columnaClave, columna
           estudio={estudios[filaAbierta._id]}
           subiendo={subiendoEstudio === filaAbierta._id}
           error={errorEstudio?.id === filaAbierta._id ? errorEstudio.mensaje : null}
-          onSubir={archivo => onSubirEstudio(filaAbierta._id as string, archivo)}
+          onSubir={(archivo, password, alTerminar) => onSubirEstudio(filaAbierta._id as string, archivo, password, alTerminar)}
+          onLimpiarError={() => onLimpiarErrorEstudio?.()}
           onDescargar={() => onDescargarEstudio(filaAbierta._id as string)}
           onCerrar={() => setAbierta(null)}
         />
@@ -208,13 +211,15 @@ function IndicadorEstudio({ estudio, subiendo, onAbrir }: { estudio: EstudioAcci
   return (
     <button
       type="button"
-      className={`acc-indicador-estudio${estudio ? ' acc-indicador-estudio--listo' : ''}${subiendo ? ' acc-indicador-estudio--subiendo' : ''}`}
+      className={`acc-indicador-estudio acc-indicador-estudio--${estudio ? 'listo' : 'falta'}${subiendo ? ' acc-indicador-estudio--subiendo' : ''}`}
       onClick={e => { e.stopPropagation(); onAbrir(); }}
       title={subiendo ? 'Subiendo el estudio…' : estudio ? `Estudio: ${estudio.ruta.split('/').pop()}` : 'Falta subir el estudio'}
       aria-label={estudio ? 'Ver el estudio' : 'Subir el estudio'}
     >
-      <IconoExcel tamano={15} />
-      {estudio && <span className="acc-indicador-estudio-palomita" aria-hidden="true"><IconoPalomita tamano={8} /></span>}
+      <IconoHojaExcel tamano={16} />
+      <span className="acc-indicador-estudio-marca" aria-hidden="true">
+        {estudio ? <IconoPalomita tamano={8} strokeWidth="4" /> : <IconoCerrar tamano={7} strokeWidth="4" />}
+      </span>
     </button>
   );
 }

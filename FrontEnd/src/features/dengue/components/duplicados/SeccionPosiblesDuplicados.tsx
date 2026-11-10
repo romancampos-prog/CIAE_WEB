@@ -3,7 +3,7 @@ import { Fragment, useState, type CSSProperties } from 'react'
 // propios
 import type { PosibleDuplicado } from '@/types/api/dengue/reportes';
 import { IconoChevronAbajo, IconoChevronDerecha, IconoPalomita } from '@/components/icons';
-import { textoAcento } from '@/utils/colorAcento';
+import { conAlfa, textoAcento } from '@/utils/colorAcento';
 import { COLOR_POSIBLES, estiloClasificacion } from '@/features/dengue/constants/clasificacion';
 
 const COLOR = COLOR_POSIBLES
@@ -26,7 +26,7 @@ function BadgeClasif({ valor }: { valor: string }) {
  */
 function Pct({ valor }: { valor: number }) {
   const pct   = Math.round(valor * 100)
-  const color = pct >= 95 ? '#691c32' : pct >= 85 ? COLOR : '#64748b'
+  const color = pct >= 95 ? 'var(--epi-guinda)' : pct >= 85 ? COLOR : '#64748b'
   return (
     <span style={{ fontWeight: 700, color: textoAcento(color), fontSize: 12 }}>{pct}%</span>
   )
@@ -50,9 +50,9 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
   return (
     <div style={{
       background: 'var(--superficie)', borderRadius: 16,
-      border: `1px solid ${vacio ? 'rgba(var(--contraste-rgb), 0.05)' : `${COLOR}30`}`,
+      border: `1px solid ${vacio ? 'rgba(var(--contraste-rgb), 0.05)' : `${conAlfa(COLOR, '30')}`}`,
       borderLeft: `4px solid ${vacio ? 'var(--borde)' : COLOR}`,
-      boxShadow: vacio ? '0 2px 10px rgba(0,0,0,0.04)' : `0 4px 20px ${COLOR}10`,
+      boxShadow: vacio ? '0 2px 10px rgba(0,0,0,0.04)' : `0 4px 20px ${conAlfa(COLOR, '10')}`,
       overflow: 'hidden',
     }}>
 
@@ -68,8 +68,8 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
       >
         <div style={{
           width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-          background: vacio ? 'var(--superficie-alterna)' : `${COLOR}15`,
-          border: `1.5px solid ${vacio ? 'var(--borde)' : `${COLOR}35`}`,
+          background: vacio ? 'var(--superficie-alterna)' : `${conAlfa(COLOR, '15')}`,
+          border: `1.5px solid ${vacio ? 'var(--borde)' : `${conAlfa(COLOR, '35')}`}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 15,
         }}>🔎</div>
@@ -87,14 +87,14 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
           {!vacio && Object.entries(porRazon).map(([razon, n]) => (
             <div key={razon} style={{
               padding: '3px 9px', borderRadius: 100, fontSize: 10, fontWeight: 700,
-              background: `${COLOR}10`, border: `1px solid ${COLOR}25`, color: textoAcento(COLOR),
+              background: `${conAlfa(COLOR, '10')}`, border: `1px solid ${conAlfa(COLOR, '25')}`, color: textoAcento(COLOR),
               maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }} title={razon}>{razon}: {n}</div>
           ))}
           <div style={{
             padding: '4px 12px', borderRadius: 100,
-            background: vacio ? 'var(--superficie-alterna)' : `${COLOR}12`,
-            border: `1px solid ${vacio ? 'var(--borde)' : `${COLOR}30`}`,
+            background: vacio ? 'var(--superficie-alterna)' : `${conAlfa(COLOR, '12')}`,
+            border: `1px solid ${vacio ? 'var(--borde)' : `${conAlfa(COLOR, '30')}`}`,
             fontSize: 13, fontWeight: 800,
             color: vacio ? 'var(--texto-tenue)' : textoAcento(COLOR),
           }}>{registros.length}</div>
@@ -110,7 +110,7 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
 
       {/* Contenido */}
       {abierto && !vacio && (
-        <div style={{ borderTop: `1px solid ${COLOR}20`, padding: '0 28px 16px', overflowX: 'auto' }}>
+        <div style={{ borderTop: `1px solid ${conAlfa(COLOR, '20')}`, padding: '0 28px 16px', overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr>
@@ -125,11 +125,11 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
                 <th style={{ ...th, textAlign: 'center' }}>Sim. Ape. Pat</th>
                 <th style={{ ...th, textAlign: 'center' }}>Sim. Nombre</th>
                 {/* Registro B */}
-                <th style={{ ...th, color: '#7c3aed' }}>Folio B</th>
-                <th style={{ ...th, color: '#7c3aed' }}>Nombre B</th>
-                <th style={{ ...th, color: '#7c3aed' }}>Ap. Pat B</th>
-                <th style={{ ...th, color: '#7c3aed' }}>Dx Final B</th>
-                <th style={{ ...th, color: '#7c3aed' }}>Clasif. B</th>
+                <th style={{ ...th, color: 'var(--epi-morado)' }}>Folio B</th>
+                <th style={{ ...th, color: 'var(--epi-morado)' }}>Nombre B</th>
+                <th style={{ ...th, color: 'var(--epi-morado)' }}>Ap. Pat B</th>
+                <th style={{ ...th, color: 'var(--epi-morado)' }}>Dx Final B</th>
+                <th style={{ ...th, color: 'var(--epi-morado)' }}>Clasif. B</th>
                 {/* Razón */}
                 <th style={{ ...th }}>Razón no confirmado</th>
               </tr>
@@ -142,10 +142,10 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
                   <Fragment key={expandirIdx}>
                     <tr
                       key={expandirIdx}
-                      style={{ background: i % 2 === 0 ? 'var(--superficie)' : `${COLOR}04`, cursor: 'pointer' }}
+                      style={{ background: i % 2 === 0 ? 'var(--superficie)' : `${conAlfa(COLOR, '04')}`, cursor: 'pointer' }}
                       onClick={() => setExpandido(estaExp ? null : expandirIdx)}
                     >
-                      <td style={{ padding: '9px 6px', borderBottom: `1px solid ${COLOR}10`, textAlign: 'center' }}>
+                      <td style={{ padding: '9px 6px', borderBottom: `1px solid ${conAlfa(COLOR, '10')}`, textAlign: 'center' }}>
                         <IconoChevronDerecha stroke={COLOR} style={{ transition: 'transform 0.15s', transform: estaExp ? 'rotate(90deg)' : 'rotate(0deg)' }} />
                       </td>
                       <td style={{ ...td, color: textoAcento(COLOR), fontWeight: 700 }}>{r.VEC_ID_A}</td>
@@ -155,7 +155,7 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
                       <td style={td}><BadgeClasif valor={r.CLASIF_A} /></td>
                       <td style={{ ...td, textAlign: 'center' }}><Pct valor={r.SIM_APE_PAT} /></td>
                       <td style={{ ...td, textAlign: 'center' }}><Pct valor={r.SIM_NOMBRE} /></td>
-                      <td style={{ ...td, color: '#7c3aed', fontWeight: 700 }}>{r.VEC_ID_B}</td>
+                      <td style={{ ...td, color: 'var(--epi-morado)', fontWeight: 700 }}>{r.VEC_ID_B}</td>
                       <td style={td}>{r.IDE_NOM_B}</td>
                       <td style={td}>{r.IDE_APE_PAT_B}</td>
                       <td style={td}>{r.DES_DIAG_FINAL_B || '—'}</td>
@@ -169,13 +169,13 @@ export default function SeccionPosiblesDuplicados({ registros }: { registros: Po
                         <td></td>
                         <td colSpan={13} style={{
                           padding: '10px 14px 12px',
-                          borderBottom: `1px solid ${COLOR}10`,
+                          borderBottom: `1px solid ${conAlfa(COLOR, '10')}`,
                           background: `rgba(180,83,9,0.03)`,
                         }}>
                           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
                             {[
                               { label: 'Registro A', folio: r.VEC_ID_A, nom: r.IDE_NOM_A, pat: r.IDE_APE_PAT_A, mat: r.IDE_APE_MAT_A, fec: r.FEC_NOTIF_A, clasif: r.CLASIF_A, color: textoAcento(COLOR) },
-                              { label: 'Registro B', folio: r.VEC_ID_B, nom: r.IDE_NOM_B, pat: r.IDE_APE_PAT_B, mat: r.IDE_APE_MAT_B, fec: r.FEC_NOTIF_B, clasif: r.CLASIF_B, color: textoAcento('#7c3aed') },
+                              { label: 'Registro B', folio: r.VEC_ID_B, nom: r.IDE_NOM_B, pat: r.IDE_APE_PAT_B, mat: r.IDE_APE_MAT_B, fec: r.FEC_NOTIF_B, clasif: r.CLASIF_B, color: textoAcento('var(--epi-morado)') },
                             ].map(({ label, folio, nom, pat, mat, fec, clasif, color: c }) => (
                               <div key={label} style={{ minWidth: 220 }}>
                                 <div style={{ fontSize: 10, fontWeight: 700, color: c, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>{label}</div>

@@ -41,4 +41,4 @@ def validar_archivo_subido(contenido: bytes, peso_declarado: int | None, nombre_
 def exigir_contrasena(usuario: str | None, password: str) -> None:
     """Sobrescribir datos ya guardados (regenerar, completar una unidad) pide otra vez la contraseña del usuario."""
     if not verificar_credenciales(usuario, password):
-        raise HTTPException(401, "Contraseña incorrecta")
+        raise HTTPException(403, "Contraseña incorrecta")

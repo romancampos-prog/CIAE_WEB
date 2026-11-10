@@ -76,6 +76,18 @@
   --acento-peso:          100%;
   /* Letra sobre un relleno con el color de la familia */
   --texto-sobre-familia:  #ffffff;
+
+  /* Epidemiología: lo que va como texto, línea o barra directo sobre el fondo */
+  --epi-guinda:           #691c32;
+  --epi-verde:            #245c4f;
+  --epi-dorado:           #a7802d;
+  --epi-morado:           #7c3aed;
+  --epi-indigo:           #4f46e5;
+  --epi-ambar:            #b45309;
+  --epi-critico:          #c0392b;
+  --epi-rojo:             #cc0000;
+  --epi-exito:            #2e8b57;
+  --epi-linea:            #f0ece4;
 }
 
 /* Sin preferencia guardada, el script de index.html resuelve
@@ -144,6 +156,18 @@ html[data-theme="dark"] {
   /* 100%: cada indicador conserva su color exacto también en oscuro (decisión del usuario) */
   --acento-peso:          100%;
   --texto-sobre-familia:  #14171c;
+
+  /* Epidemiología: tonos apagados, los fuertes no se leen sobre fondo oscuro */
+  --epi-guinda:           #cc8a98;
+  --epi-verde:            #80b888;
+  --epi-dorado:           #c4a76f;
+  --epi-morado:           #a89ccb;
+  --epi-indigo:           #8fa9cf;
+  --epi-ambar:            #d0a47c;
+  --epi-critico:          #d98a80;
+  --epi-rojo:             #d98a80;
+  --epi-exito:            #80b888;
+  --epi-linea:            var(--borde-suave);
 }
 
 /* ── Fondos de página: en claro cada módulo usa su propio gris claro;

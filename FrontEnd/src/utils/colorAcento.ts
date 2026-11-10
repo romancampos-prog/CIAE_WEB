@@ -6,3 +6,7 @@
  */
 export const textoAcento = (color: string): string =>
   `color-mix(in srgb, ${color} var(--acento-peso), var(--texto))`;
+
+/** El color con transparencia; alfaHex es la de #rrggbbAA ("30"). A diferencia de pegar el alfa, sirve con var(--x). */
+export const conAlfa = (color: string, alfaHex: string): string =>
+  `color-mix(in srgb, ${color} ${Math.round(parseInt(alfaHex, 16) / 2.55)}%, transparent)`;

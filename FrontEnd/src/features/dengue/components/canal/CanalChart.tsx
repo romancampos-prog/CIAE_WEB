@@ -24,7 +24,7 @@ const COLORES_TEMA = {
   dark: {
     ejes: '#b0c4c0', tituloEjes: '#8aa29d',
     rejilla: 'rgba(255,255,255,0.07)', lineaEje: 'rgba(255,255,255,0.12)',
-    lineaCasos: '#e8919f', bordeMarcador: '#22262d',
+    lineaCasos: '#cc8a98', bordeMarcador: '#22262d',
     fondoEtiqueta: 'rgba(34,38,45,0.96)', bordeEtiqueta: '#414854',
   },
 }

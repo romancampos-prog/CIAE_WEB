@@ -432,6 +432,9 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 /* Tarjeta de claves UP: el código como etiqueta guinda, la cantidad grande a la derecha y el significado abajo */
 /* Cada clave como su propia tarjetita, con aire entre ellas: elegidas seguidas no se juntan en un bloque */
 .acc-conteo--claves .acc-barras { max-height: none; gap: 6px; }
+/* Barras, bordes y textos de la clave: su color en claro; en oscuro apagado, porque el fuerte se pierde sobre el fondo */
+.acc-conteo--claves .acc-barra, .acc-registro-accion { --clave-tono: var(--clave); }
+html[data-theme="dark"] :is(.acc-conteo--claves .acc-barra, .acc-registro-accion) { --clave-tono: color-mix(in srgb, var(--clave) 55%, #d5dae2); }
 .acc-conteo--claves .acc-barra {
   grid-template-areas: "texto cantidad" "descripcion descripcion" "pista pista";
   gap: 5px 8px; padding: 10px 10px 11px; border-radius: 12px;
@@ -443,7 +446,7 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
   /* El código con el fondo sólido de su color, como en la tabla */
   background: var(--clave, var(--texto-suave)); color: #fff;
 }
-.acc-conteo--claves .acc-barra-relleno { background: var(--clave, var(--acc-acento)); }
+.acc-conteo--claves .acc-barra-relleno { background: var(--clave-tono, var(--acc-acento)); }
 .acc-conteo--claves .acc-barra-cantidad { font-size: 15px; font-weight: 800; }
 .acc-barra-descripcion {
   grid-area: descripcion; display: block;
@@ -454,7 +457,7 @@ html[data-theme="dark"] :is(.acc-main, .acc-columna-panel) {
 /* Clave elegida para filtrar: barra gruesa de su color a la izquierda, fondo tenue y palomita; sin marco alrededor */
 .acc-conteo--claves .acc-barra--activa {
   border-color: transparent; background: color-mix(in srgb, var(--clave, var(--texto-suave)) 9%, var(--superficie));
-  box-shadow: inset 4px 0 0 var(--clave, var(--texto-suave));
+  box-shadow: inset 4px 0 0 var(--clave-tono, var(--texto-suave));
 }
 .acc-barra-elegida {
   display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 6px; border-radius: 50%;
@@ -702,20 +705,22 @@ select.acc-estatus option { color: var(--texto); background: var(--superficie); 
 
 /* ── Estudio: indicador junto a "Con estudio" (falta = ámbar punteado, listo = verde con palomita) ── */
 .acc-fila-abrible { cursor: pointer; }
+/* El borde dice si ya hay Excel: verde sí, rojo falta */
 .acc-indicador-estudio {
-  position: relative; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-left: 6px; vertical-align: middle;
-  border-radius: 8px; cursor: pointer; padding: 0;
-  color: var(--semaforo-medio); background: var(--superficie); border: 1.5px dashed color-mix(in srgb, var(--semaforo-medio) 60%, transparent);
+  position: relative; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; margin-left: 6px; vertical-align: middle;
+  background: transparent; border: 1.5px solid; border-radius: 8px; color: var(--texto-secundario); cursor: pointer;
   transition: transform .15s, background-color .15s;
 }
-.acc-indicador-estudio:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--semaforo-medio) 10%, var(--superficie)); }
+.acc-indicador-estudio:hover { transform: translateY(-1px); background: var(--superficie-alterna); }
 .acc-indicador-estudio:focus-visible { outline: 2px solid var(--marca); outline-offset: 1px; }
-.acc-indicador-estudio--listo { color: #fff; background: var(--semaforo-esperado); border: 1.5px solid var(--semaforo-esperado); }
-.acc-indicador-estudio--listo:hover { background: color-mix(in srgb, var(--semaforo-esperado) 85%, #000); }
-.acc-indicador-estudio-palomita {
-  position: absolute; right: -5px; top: -5px; display: grid; place-items: center; width: 13px; height: 13px; border-radius: 50%;
-  background: var(--superficie); color: var(--semaforo-esperado); box-shadow: 0 0 0 1.5px var(--semaforo-esperado);
+.acc-indicador-estudio--listo { border-color: var(--semaforo-esperado); }
+.acc-indicador-estudio--falta { border-color: var(--semaforo-bajo); }
+.acc-indicador-estudio-marca {
+  position: absolute; top: -6px; right: -6px; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%;
+  color: var(--superficie); box-shadow: 0 0 0 1.5px var(--superficie);
 }
+.acc-indicador-estudio--listo .acc-indicador-estudio-marca { background: var(--semaforo-esperado); }
+.acc-indicador-estudio--falta .acc-indicador-estudio-marca { background: var(--semaforo-bajo); }
 .acc-indicador-estudio--subiendo { opacity: .55; cursor: wait; }
 
 /* ── Tarjeta flotante del registro (admin): datos, estatus y estudio ── */
@@ -745,11 +750,11 @@ select.acc-estatus option { color: var(--texto); background: var(--superficie); 
 .acc-registro-accion {
   --clave-color: var(--clave, var(--texto-suave));
   display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px;
-  background: color-mix(in srgb, var(--clave-color) 9%, var(--superficie)); border-left: 4px solid var(--clave-color);
+  background: color-mix(in srgb, var(--clave-color) 9%, var(--superficie)); border-left: 4px solid var(--clave-tono);
 }
 .acc-registro-accion .acc-clave { flex-shrink: 0; cursor: default; font-size: 12.5px; padding: 3px 10px; }
 .acc-registro-accion strong { display: block; font-size: 14px; line-height: 1.4; color: var(--texto); }
-.acc-registro-accion small { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 600; color: color-mix(in srgb, var(--clave-color) 80%, var(--texto)); }
+.acc-registro-accion small { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 600; color: var(--clave-tono); }
 /* Los datos: cada uno con su ícono */
 .acc-registro-datos { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .acc-registro-datos div {
@@ -772,6 +777,9 @@ select.acc-estatus option { color: var(--texto); background: var(--superficie); 
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 10px; cursor: pointer; border: none;
   font-family: inherit; font-size: 12px; font-weight: 700; color: #fff; background: var(--marca);
 }
+.acc-registro-boton--secundario { background: transparent; color: var(--texto-medio); box-shadow: inset 0 0 0 1px var(--borde-fuerte); }
+.acc-registro-boton--secundario:hover { background: var(--superficie-alterna); color: var(--texto); }
+.acc-registro-archivo-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
 .acc-registro-subir {
   display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 30px 16px; border-radius: 14px; cursor: pointer; text-align: center;
   color: var(--texto-medio); border: 2px dashed var(--borde); background: var(--superficie-alterna); transition: border-color .15s, background-color .15s;

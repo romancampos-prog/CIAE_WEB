@@ -47,7 +47,7 @@ export default function CanalPagina() {
           }}>
             Canal Endémico{' '}
             <span style={{
-              backgroundImage: 'linear-gradient(90deg, #245c4f, #a7802d)',
+              backgroundImage: 'linear-gradient(90deg, var(--epi-verde), var(--epi-dorado))',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>{datos.año}</span>
@@ -149,7 +149,7 @@ export default function CanalPagina() {
               background: 'rgba(105,28,50,0.07)', border: '1px solid rgba(105,28,50,0.18)',
               fontSize: '0.625rem', fontWeight: 700, color: 'var(--tinto-texto)',
             }}>
-              <div style={{ width: '1.125rem', height: '0.125rem', background: '#691c32', borderRadius: '0.0625rem', flexShrink: 0 }} />
+              <div style={{ width: '1.125rem', height: '0.125rem', background: 'var(--epi-guinda)', borderRadius: '0.0625rem', flexShrink: 0 }} />
               Casos {datos.año}
             </div>
           </div>

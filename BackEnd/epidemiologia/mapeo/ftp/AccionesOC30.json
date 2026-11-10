@@ -1,6 +1,7 @@
 {
     "fuente": "ftp",
     "columnaFecha": "Fecha de Atención",
+    "columnasExcelIzquierda": ["Unidad", "Nombre Completo del Paciente"],
     "nombreEstudio": ["Fecha de Atención", "Clave de la Acción", "Número Seguridad Social"],
     "etiquetasColumna": { "Número Seguridad Social": "NSS", "Fecha de Atención": "Fecha de\natención" },
     "iconosColumna": { "Unidad": "unidad", "Fecha de Atención": "calendario", "Número Seguridad Social": "credencial", "Agregado": "etiqueta", "Nombre Completo del Paciente": "persona", "Clave de la Acción": "clave" },
