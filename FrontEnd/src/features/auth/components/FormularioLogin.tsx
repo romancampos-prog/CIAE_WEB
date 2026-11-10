@@ -2,7 +2,7 @@
 import type { ChangeEvent, FormEvent } from 'react';
 // propios
 import type { CredencialesLogin } from '@/types/api/auth';
-import { IconoCandado, IconoInfo, IconoOjo, IconoOjoTachado, IconoUsuario } from '@/components/icons';
+import { IconoCandado, IconoFlechaDerecha, IconoInfo, IconoOjo, IconoOjoTachado, IconoUsuario } from '@/components/icons';
 
 const IconEye = ({ open }: { open: boolean }) => open ? (
   <IconoOjoTachado tamano={17} />
@@ -25,17 +25,20 @@ const FormularioLogin = ({ credenciales, cambiarCampo, enviar, verContrasena, al
   <div className="cl-form-wrap">
 
     <div className="cl-form-header">
+      <p className="cl-form-eyebrow">Acceso al sistema</p>
       <h2 className="cl-form-title">Iniciar sesión</h2>
+      <span className="cl-form-linea" aria-hidden="true" />
       <p className="cl-form-hint">Ingrese sus credenciales para continuar</p>
     </div>
 
     <form onSubmit={enviar} className="cl-form" noValidate>
 
       <div className="cl-field">
-        <label className="cl-label">Usuario</label>
+        <label className="cl-label" htmlFor="cl-usuario">Usuario</label>
         <div className="cl-input-wrap">
           <span className="cl-icon cl-icon-left"><IconoUsuario /></span>
           <input
+            id="cl-usuario"
             type="text"
             name="usuario"
             className="cl-input"
@@ -49,14 +52,15 @@ const FormularioLogin = ({ credenciales, cambiarCampo, enviar, verContrasena, al
       </div>
 
       <div className="cl-field">
-        <label className="cl-label">Contraseña</label>
+        <label className="cl-label" htmlFor="cl-contrasena">Contraseña</label>
         <div className="cl-input-wrap">
           <span className="cl-icon cl-icon-left"><IconoCandado tamano={17} /></span>
           <input
+            id="cl-contrasena"
             type={verContrasena ? 'text' : 'password'}
             name="contrasena"
             className="cl-input"
-            placeholder="••••••••••"
+            placeholder="Contraseña"
             value={credenciales.contrasena}
             onChange={cambiarCampo}
             required
@@ -85,7 +89,7 @@ const FormularioLogin = ({ credenciales, cambiarCampo, enviar, verContrasena, al
         <span className="cl-btn-label">
           {entrando
             ? <span className="cl-spinner" />
-            : <><span>Ingresar al sistema</span><span className="cl-arrow">→</span></>
+            : <><span>Ingresar al sistema</span><span className="cl-arrow" aria-hidden="true"><IconoFlechaDerecha tamano={16} /></span></>
           }
         </span>
       </button>

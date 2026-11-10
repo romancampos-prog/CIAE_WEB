@@ -192,12 +192,11 @@
   width: 100%;
 }
 
-/* Bordes con el color de la familia, cada tarjeta en lados distintos: juntas enmarcan el contenido */
+/* Bordes con el color de la familia, solo en un lado de algunas tarjetas: barra de categorías y periodo a la
+   izquierda, la tarjeta de la familia a la derecha. Las demás sin borde de color, para no recargar */
 .ind-hub-main { --borde-familia: color-mix(in srgb, var(--familia, var(--marca)) var(--acento-peso), var(--texto)); }
-.ind-hub-main .ind-sel-card { border-top: 3px solid var(--borde-familia); border-left-width: 3px; }
-.ind-gen-columnas > .ind-period-block { border-left: 3px solid var(--borde-familia); border-bottom: 3px solid var(--borde-familia); }
-.ind-gen-lateral.ind-batch-panel, .ind-gen-lateral .ind-sem-block { border-top: 3px solid var(--borde-familia); border-right: 3px solid var(--borde-familia); }
-.ind-hub-main .ind-barra-generar { border-right: 3px solid var(--borde-familia); border-bottom: 3px solid var(--borde-familia); }
+.ind-hub-main .ind-sel-card { border-left: 1px solid color-mix(in srgb, var(--fc, var(--marca-texto)) 18%, transparent); border-right: 3px solid var(--borde-familia); }
+.ind-gen-columnas > .ind-period-block { border-left: 3px solid var(--borde-familia); }
 
 /* Periodo + lateral: se apilan solos cuando no caben lado a lado */
 .ind-gen-columnas { display: flex; flex-wrap: wrap; align-items: stretch; gap: 16px; margin-bottom: 16px; }

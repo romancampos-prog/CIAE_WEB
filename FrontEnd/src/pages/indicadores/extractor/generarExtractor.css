@@ -238,6 +238,8 @@
   transition: box-shadow .18s, border-color .18s;
 }
 .exv-ind:hover { border-color: var(--borde-marca); box-shadow: 0 10px 26px -14px rgba(20, 40, 35, .25); }
+/* Borde izquierdo con el color de la familia (viene del backend, --familia en la tarjeta) */
+.exv-ind, .exv-ind:hover { border-left: 4px solid var(--familia, var(--borde)); }
 
 .exv-ind-header { display: flex; align-items: center; gap: 12px; }
 .exv-ind-icono {

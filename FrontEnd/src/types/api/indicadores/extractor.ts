@@ -17,6 +17,8 @@ export interface IndicadorGenerarExtractor {
   descripcionPeriodicidad?: string | null;
   imagen: string;
   color: string;
+  /** Tono apagado para modo oscuro (el fuerte no se lee sobre fondo oscuro). */
+  colorOscuro: string;
   tipo: 'corte' | 'mensual';
   agrupacion: string;
   denominador: string;

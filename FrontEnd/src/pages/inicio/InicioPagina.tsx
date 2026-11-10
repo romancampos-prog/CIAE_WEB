@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // propios
-import { IconoEpidemiologia, IconoIndicadores, IconoPeriodoDelDia } from '@/components/icons';
+import { IconoModuloIndicadores, IconoModuloVigilancia, IconoPeriodoDelDia } from '@/components/icons';
 import { useAuth, useRol } from '@/features/auth';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
@@ -67,30 +67,34 @@ const InicioPagina = () => {
           <NavCard
             titulo="Indicadores Médicos"
             eyebrow="Módulo activo"
-            desc="Indicadores de desempeño y calidad de la atención médica en las unidades del OOAD Guanajuato, conforme al MMIM."
+            desc="Desempeño y calidad de la atención en las unidades del OOAD Guanajuato, conforme al MMIM."
             chips={['Generación', 'Consulta']}
             color="green"
             onClick={() => navigate('/CIAE/IndicadoresMedicos')}
           >
-            <IconoIndicadores />
+            <IconoModuloIndicadores />
           </NavCard>
 
           {(puedeGenFTP || puedeGenIAAS || esUnidad) && (
             <NavCard
               titulo="Epidemiología"
               eyebrow="Módulo activo"
-              desc="Vigilancia Epidemiológica: Análisis y seguimiento de enfermedades prioritarias en el OOAD Guanajuato."
+              desc="Vigilancia de enfermedades prioritarias y seguimiento de acciones en el OOAD Guanajuato."
               chips={esUnidad ? ['Acciones'] : ['Dengue', 'Acciones']}
               color="tinto"
               disabled={!puedeVerEpi}
               onClick={() => navigate('/CIAE/Epidemiologia')}
             >
-              <IconoEpidemiologia />
+              <IconoModuloVigilancia />
             </NavCard>
           )}
 
         </div>
       </main>
+
+      <p className="home-aviso">
+        <strong>Aviso de uso y responsabilidad.</strong> La información de esta plataforma se proporciona únicamente para consulta y análisis interno, en el ejercicio de las funciones institucionales de cada persona usuaria. Los resultados se obtienen de reportes y archivos fuente, por lo que pueden modificarse si dichas fuentes se actualizan o corrigen, y no sustituyen a los reportes oficiales. Parte de la información contiene datos personales y de salud de carácter confidencial, cuya consulta se limita a las funciones autorizadas. Las credenciales de acceso son personales e intransferibles, y cada persona responde por las acciones realizadas con su cuenta. Una vez descargado un archivo, su uso, resguardo, tratamiento y eliminación son responsabilidad exclusiva de quien lo descargó.
+      </p>
     </div>
   );
 };

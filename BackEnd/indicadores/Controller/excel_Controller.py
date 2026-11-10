@@ -20,7 +20,7 @@ ROLES_EXCEL = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
 @excelApi.get("")
 async def excel_de_indicadores(ano: int, indicadores: list[str] = Query(...), mes: str | None = None, usuario: dict = Depends(solo_roles(*ROLES_EXCEL))):
     try:
-        mensaje, datos = generar_excel(indicadores, ano, mes)
+        mensaje, datos = generar_excel(indicadores, ano, mes, usuario.get("sub", "-"))
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except ExcelSinDatosError as error:

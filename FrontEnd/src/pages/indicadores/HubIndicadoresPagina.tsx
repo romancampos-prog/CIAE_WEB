@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // propios
-import { IconoActividad, IconoPeriodoDelDia, IconoSubir } from '@/components/icons';
+import { IconoModuloGenerar, IconoModuloSeguimiento, IconoPeriodoDelDia } from '@/components/icons';
 import { useAuth, useRol } from '@/features/auth';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
@@ -64,24 +64,24 @@ const HubIndicadoresPagina = () => {
           <NavCard
             titulo="Seguimiento de Indicadores"
             eyebrow="Consulta"
-            desc="Identifica tendencias de cumplimiento y resultados por unidad médica conforme al MMIM."
+            desc="Consulta la tendencia, el semáforo y el resultado de cada unidad, conforme al MMIM."
             chips={['Tendencias', 'Cumplimiento']}
             color="green"
             onClick={() => navigate('/CIAE/IndicadoresMedicos/Graficas')}
           >
-            <IconoActividad />
+            <IconoModuloSeguimiento />
           </NavCard>
 
           {puedeGenerar && (
             <NavCard
               titulo="Generar indicadores"
               eyebrow="Generación"
-              desc="Produce los reportes de indicadores médicos para evaluación del desempeño por unidad conforme al MMIM."
+              desc="Genera y descarga en Excel los indicadores de cada periodo, por módulo: FTP, IAAS o Extractor."
               chips={['Reportes', 'Excel']}
               color="gold"
               onClick={() => navigate(navDestGenerar)}
             >
-              <IconoSubir />
+              <IconoModuloGenerar />
             </NavCard>
           )}
 

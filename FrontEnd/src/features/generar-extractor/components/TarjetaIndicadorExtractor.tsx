@@ -1,6 +1,7 @@
 // propios
 import type { IndicadorExtractor } from '@/types/pantallas/generarExtractor';
 import { IconoDescargar } from '@/components/icons';
+import useTema from '@/hooks/useTema';
 import { MESES_LARGOS_ARR } from '@/features/indicadores';
 import { explicacionPeriodo, numeroMes, tituloSinClave } from '@/features/generar-extractor/utils/textosExtractor';
 import AnilloProgreso from './AnilloProgreso';
@@ -14,13 +15,14 @@ interface Props {
 /** Un indicador del Extractor: qué usa, y sus cortes (o sus meses) del año con la descarga de cada uno. */
 const TarjetaIndicadorExtractor = ({ ind, ex }: Props) => {
   const { anio, descargando, descargar } = ex;
+  const { esOscuro } = useTema();
   const generados = MESES_LARGOS_ARR.filter(m => (ex.mesesGenerados[ind.indicador] ?? []).includes(numeroMes(m)));
   const ultimo = generados[generados.length - 1];
   // El denominador solo se muestra si no sale del mismo archivo (ej. EH 03: población PAMF).
   const denominadorAparte = !ind.archivos.some(a => a.archivo === ind.denominador);
 
   return (
-    <article className="exv-ind">
+    <article className="exv-ind" style={{ '--familia': esOscuro && ind.colorOscuro ? ind.colorOscuro : ind.color }}>
       <header className="exv-ind-header">
         <div className="exv-ind-icono">{ind.icono && <img src={ind.icono} alt="" />}</div>
         <div className="exv-ind-id">

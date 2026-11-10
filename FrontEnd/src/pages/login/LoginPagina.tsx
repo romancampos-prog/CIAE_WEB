@@ -4,6 +4,8 @@ import BotonTema from '@/components/ui/BotonTema';
 import logo_imss from '@/assets/logo_imms.png';
 import "./login.css";
 
+const AVISO_LEGAL = 'Sitio desarrollado internamente para apoyar el trabajo del área CIAE (Coordinación de Información y Análisis Estratégico). Acceso exclusivo para personal autorizado; al ingresar, aceptas usar la información solo con fines institucionales y resguardar la confidencialidad de los datos personales y de salud. Su interpretación y uso posterior son responsabilidad de quien la consulta, y las acciones en el sistema quedan registradas.';
+
 const LoginPagina = () => {
   const formulario = useLogin();
 
@@ -65,9 +67,7 @@ const LoginPagina = () => {
 
         <div className="cl-left-footer">
           <span className="cl-status-dot" />
-          <p className="cl-legal-footer">
-            Este sitio web fue desarrollado de forma interna para apoyar el trabajo del área CIAE (Coordinación de Información y Análisis Estratégico), de acuerdo con sus necesidades operativas. La información aquí generada se utiliza como apoyo para la elaboración de reportes; su interpretación y uso posterior quedan a criterio de quien la consulta.
-          </p>
+          <p className="cl-legal-footer">{AVISO_LEGAL}</p>
         </div>
       </div>
 
@@ -89,9 +89,7 @@ const LoginPagina = () => {
         {/* Pie legal — visible solo en mobile, anclado al fondo (ver .cl-legal-mobile en auth.css) */}
         <div className="cl-legal-mobile">
           <span className="cl-status-dot" />
-          <p>
-            Este sitio web fue desarrollado de forma interna para apoyar el trabajo del área CIAE (Coordinación de Información y Análisis Estratégico), de acuerdo con sus necesidades operativas. La información aquí generada se utiliza como apoyo para la elaboración de reportes; su interpretación y uso posterior quedan a criterio de quien la consulta.
-          </p>
+          <p>{AVISO_LEGAL}</p>
         </div>
 
       </div>

@@ -4,7 +4,7 @@
   width: 276px; padding: 12px; align-self: flex-start; max-height: 100%; box-sizing: border-box;
   background: var(--superficie-suave);
   border: 1px solid rgba(var(--borde-rgb), 0.95); border-radius: 14px;
-  border-top: 3px solid var(--borde-familia); border-left: 3px solid var(--borde-familia);
+  border-left: 3px solid var(--borde-familia);
   transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
 }
 .ind-sidebar--collapsed.gf-sidebar { width: 4.5rem; padding: 10px 8px; }

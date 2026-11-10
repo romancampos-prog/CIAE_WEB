@@ -14,14 +14,6 @@
 
 /* Aviso legal, fuera de la tarjeta de la gráfica -- deslinde formal sobre el uso
    posterior del archivo descargado, no una advertencia visual llamativa. */
-.ig-legal-footer {
-  margin: 18px 2px 0;
-  padding-top: 14px;
-  border-top: 1px solid rgba(var(--contraste-rgb), 0.08);
-  font-size: 0.72rem; line-height: 1.55; color: var(--texto-tenue);
-  text-align: left;
-}
-
 /* ── Header (título + controls) ── */
 .ig-title {
   font-size: clamp(3rem, 6vw, 4.8rem); font-weight: 900;

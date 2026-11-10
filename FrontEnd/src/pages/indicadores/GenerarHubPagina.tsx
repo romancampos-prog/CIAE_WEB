@@ -5,7 +5,7 @@ import { useRol } from '@/features/auth';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
 // propios
-import { IconoSubir } from '@/components/icons';
+import { IconoModuloExtractor, IconoModuloFtp, IconoModuloIaas } from '@/components/icons';
 
 /**
  * Hub de selección de módulo de generación.
@@ -41,37 +41,37 @@ const GenerarHubPagina = () => {
           <NavCard
             titulo="FTP"
             eyebrow="Servidor FTP"
-            desc="Descarga datos del servidor FTP y genera reportes Excel por indicador, mes o semana."
+            desc="Lee los reportes SIAIS del servidor FTP y genera los indicadores en Excel, por mes o por semana."
             chips={['CACU', 'CAMA', 'EH', 'DM', 'etc.']}
             color="green"
             disabled={!puedeGenFTP}
             onClick={() => navigate('/CIAE/IndicadoresMedicos/FTP/Generar')}
           >
-            <IconoSubir />
+            <IconoModuloFtp />
           </NavCard>
 
           <NavCard
             titulo="IAAS"
-            eyebrow="Generador"
-            desc="Sube archivos por unidad y genera los 6 reportes de atención a la salud en un solo paso."
+            eyebrow="Infecciones asociadas"
+            desc="Sube el Excel de cada unidad y genera los 6 indicadores de infecciones asociadas a la atención."
             chips={['IAAS 01–06']}
             color="gold"
             disabled={!puedeGenIAAS}
             onClick={() => navigate('/CIAE/IndicadoresMedicos/IAAS/Reporte')}
           >
-            <IconoSubir />
+            <IconoModuloIaas />
           </NavCard>
 
           <NavCard
             titulo="Extractor"
-            eyebrow="SUI-13"
-            desc="Sube el SUI-13 mes a mes y sigue el avance hacia el corte semestral de EH 03 y DM 04."
-            chips={['EH 03', 'DM 04']}
+            eyebrow="Archivos mensuales"
+            desc="Sube SUI-13, Egresos y Defunciones mes a mes y sigue el avance de cada indicador."
+            chips={['DM', 'EH', 'MT', 'Neonatal']}
             color="tinto"
             disabled={!puedeGenExtractor}
             onClick={() => navigate('/CIAE/IndicadoresMedicos/Extractor/Generar')}
           >
-            <IconoSubir />
+            <IconoModuloExtractor />
           </NavCard>
 
         </div>

@@ -3,60 +3,60 @@
         "nombre": "Cáncer cérvico uterino",
         "imagen": "icono_cacu.png",
         "color": "#0f766e",
-        "colorOscuro": "#6db5ac"
+        "colorOscuro": "#62a39a"
     },
     "CAMA": {
         "nombre": "Cáncer de mama",
         "imagen": "icono_cama.png",
         "color": "#8d3456",
-        "colorOscuro": "#cf93b4"
+        "colorOscuro": "#ba8aa4"
     },
     "CE": {
         "nombre": "Enfermería",
         "imagen": "icono_ce.png",
         "color": "#2e7d32",
-        "colorOscuro": "#80b888"
+        "colorOscuro": "#68a671"
     },
     "CUPN": {
         "nombre": "Unidades de Primer Nivel",
         "imagen": "icono_cupn.png",
         "color": "#336699",
-        "colorOscuro": "#8fa9cf"
+        "colorOscuro": "#8599b7"
     },
     "DM": {
         "nombre": "Diabetes",
         "imagen": "icono_dm.png",
         "color": "#5c35a0",
-        "colorOscuro": "#a89ccb"
+        "colorOscuro": "#9d92bf"
     },
     "EH": {
         "nombre": "Hipertensión arterial",
         "imagen": "icono_eh.png",
         "color": "#4e1224",
-        "colorOscuro": "#cc8a98"
+        "colorOscuro": "#bb8b95"
     },
     "IAAS": {
         "nombre": "Infecciones asociadas a la atención de la salud",
         "imagen": "icono_iaas.png",
         "color": "#1a5276",
-        "colorOscuro": "#7aaaca"
+        "colorOscuro": "#7b9cb2"
     },
     "MT": {
         "nombre": "Atención materna",
         "imagen": "icono_mt.png",
         "color": "#7E0808",
-        "colorOscuro": "#d09a84"
+        "colorOscuro": "#b59182"
     },
     "Neonatal": {
         "nombre": "Atención neonatal",
         "imagen": "icono_mt.png",
         "color": "#2E6F95",
-        "colorOscuro": "#76b2ba"
+        "colorOscuro": "#6aa0a7"
     },
     "S_Ob": {
         "nombre": "Sobrepeso y obesidad",
         "imagen": "icono_S_Ob.png",
         "color": "#9a7026",
-        "colorOscuro": "#c4a76f"
+        "colorOscuro": "#a9956d"
     }
 }

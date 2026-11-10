@@ -7,6 +7,8 @@ import io
 
 import xlsxwriter
 
+from compartido.aviso_excel_Services import agregar_hoja_aviso
+
 from schemas.model.excel_Model import HojaIndicador
 from schemas.model.reporte_guardado_Model import UnidadDatos
 from services.calculo.mensual_acumulado_Services import acumula_sumando_meses, calcular_mensual_acumulado
@@ -74,7 +76,7 @@ def _dibujar_estandar(libro: xlsxwriter.Workbook, estilos: dict, hoja: HojaIndic
 
 ##--------------------------------------
 
-def armar_excel_estandar(hojas: list[HojaIndicador]) -> bytes:
+def armar_excel_estandar(hojas: list[HojaIndicador], aviso: str) -> bytes:
     salida = io.BytesIO()
     libro = xlsxwriter.Workbook(salida)
     libro.set_properties({"author": "Web CIAE"})
@@ -83,6 +85,7 @@ def armar_excel_estandar(hojas: list[HojaIndicador]) -> bytes:
     for hoja in hojas:
         _dibujar_estandar(libro, estilos, hoja)
 
+    agregar_hoja_aviso(libro, aviso)
     libro.close()
 
     return salida.getvalue()

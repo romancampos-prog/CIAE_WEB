@@ -252,7 +252,7 @@
   border-top: 1px solid rgba(255,255,255,0.07);
 }
 .cl-legal-footer {
-  font-size: 0.64rem; line-height: 1.5;
+  font-size: 0.7rem; line-height: 1.55;
   color: rgba(255,255,255,0.42);
 }
 .cl-left-footer span:last-child {
@@ -351,7 +351,15 @@
 }
 
 /* Encabezado */
-.cl-form-header { margin-bottom: 36px; }
+.cl-form-header { margin-bottom: 30px; }
+.cl-form-eyebrow {
+  margin-bottom: 8px !important; font-size: 0.68rem; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--dorado-texto); animation: cl-fadeUp 0.7s 0.56s both;
+}
+.cl-form-linea {
+  display: block; width: 52px; height: 3px; margin: 12px 0 10px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--marca-texto), var(--dorado-texto)); animation: cl-fadeUp 0.7s 0.66s both;
+}
 
 @keyframes cl-badgeIn {
   from { opacity: 0; transform: scale(0.88); }
@@ -369,7 +377,6 @@
 .cl-form-hint {
   font-size: 0.82rem;
   color: var(--texto-suave);
-  margin-top: 6px;
   animation: cl-fadeUp 0.7s 0.7s both;
 }
 
@@ -393,7 +400,7 @@
 .cl-label {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--texto-medio);
+  color: var(--texto-secundario);
   text-transform: uppercase;
   letter-spacing: 0.7px;
 }
@@ -412,13 +419,18 @@
   transition: color 0.2s;
   color: var(--texto-tenue);
 }
-.cl-icon-left { left: 14px; }
+/* El ícono va en su propio cuadro, pegado a la orilla del campo */
+.cl-icon-left {
+  left: 1.5px; top: 1.5px; bottom: 1.5px; width: 46px; justify-content: center;
+  border-radius: 9.5px 0 0 9.5px; background: rgba(var(--marca-rgb), 0.08); color: var(--marca-texto);
+  transition: color 0.2s, background-color 0.2s;
+}
 
 .cl-input {
   width: 100%;
-  padding: 13px 42px;
-  background: var(--superficie-suave);
-  border: 1.5px solid var(--borde);
+  padding: 14px 42px 14px 60px;
+  background: var(--superficie);
+  border: 1.5px solid var(--borde-fuerte);
   border-radius: 11px;
   font-size: 0.95rem;
   font-family: inherit;
@@ -426,13 +438,13 @@
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
-.cl-input::placeholder { color: var(--texto-deshabilitado); }
+.cl-input::placeholder { color: var(--texto-suave); }
 .cl-input:focus {
   border-color: var(--marca-texto);
   background: var(--superficie);
   box-shadow: 0 0 0 3.5px rgba(11,84,69,0.09);
 }
-.cl-input-wrap:focus-within .cl-icon { color: var(--marca-texto); }
+.cl-input-wrap:focus-within .cl-icon-left { background: rgba(var(--marca-rgb), 0.16); }
 
 .cl-eye-btn {
   position: absolute;
@@ -474,7 +486,7 @@
 .cl-btn {
   position: relative;
   width: 100%;
-  height: 52px;
+  height: 56px;
   background: var(--marca);
   color: #fff;
   border: none;
@@ -515,10 +527,16 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 10px;
+  padding: 0 10px 0 22px;
 }
-.cl-arrow { font-size: 1.1rem; }
+.cl-btn-label:has(.cl-spinner) { justify-content: center; }
+.cl-btn:hover:not(:disabled) .cl-arrow { transform: translateX(3px); }
+.cl-arrow {
+  display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(255,255,255,0.16); color: #f4d58d; transition: transform 0.2s;
+}
 
 .cl-spinner {
   width: 20px; height: 20px;
@@ -588,27 +606,23 @@
   .cl-left-footer { display: none; }
 
   .cl-right     { flex: 1; flex-direction: column; align-items: stretch; background: transparent; }
-  .cl-form-wrap { max-width: 100%; padding: 2rem 1.75rem 1rem; }
+  /* El formulario en una tarjeta blanca sobre el verde: mismo diseño que en computadora */
+  .cl-form-wrap {
+    max-width: 30rem; width: auto; margin: 0.5rem 1rem 1.25rem; align-self: stretch;
+    padding: 1.75rem 1.5rem 1.5rem; background: var(--superficie); border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+  }
+  @media (min-width: 32rem) { .cl-form-wrap { margin-left: auto; margin-right: auto; width: 100%; } }
 
   /* barra tricolor: baja al final de la pantalla en vez de ir arriba */
   .cl-topbar    { top: auto; bottom: 0; }
-
-  /* textos del formulario en claro, para leerse sobre el verde */
-  .cl-form-title { color: #ffffff; }
-  .cl-form-hint  { color: rgba(255,255,255,0.72); }
-  .cl-label      { color: rgba(255,255,255,0.85); }
 
   /* evita el zoom automático de iOS Safari al enfocar un input con fuente < 16px (1rem) */
   .cl-input     { font-size: 1rem; }
 
   /* más aire entre Usuario/Contraseña y antes del botón, para que no se vea apretado */
-  .cl-field     { margin-bottom: 1.5rem; }
-  .cl-btn       { margin-top: 1rem; }
-
-  /* botón: invertido (claro sobre verde) para que no se pierda contra el fondo */
-  .cl-btn { background: var(--superficie); color: var(--marca-texto); }
-  .cl-btn:hover:not(:disabled) { background: var(--tinte-marca); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-  .cl-spinner { border-color: rgba(var(--marca-rgb), 0.25); border-top-color: var(--marca-texto); }
+  .cl-field     { margin-bottom: 1.25rem; }
+  .cl-btn       { margin-top: 0.5rem; }
 
   .cl-legal-mobile {
     display: flex;
@@ -622,7 +636,7 @@
 @media (max-width: 30rem) {
   .cl-left-body { padding: 1.5rem 1.25rem; }
   .cl-logo      { width: 3.25rem; }
-  .cl-form-wrap { padding: 1.75rem 1.25rem 1rem; }
+  .cl-form-wrap { padding: 1.5rem 1.25rem 1.25rem; }
   .cl-legal-mobile { padding: 1.125rem 1.25rem 1.25rem; }
   .cl-form-title { font-size: 1.6rem; }
   .cl-form-hint  { font-size: 0.78rem; }

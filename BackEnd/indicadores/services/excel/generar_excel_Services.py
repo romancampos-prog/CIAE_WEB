@@ -8,6 +8,7 @@ Usado en: Controller/excel_Controller.py
 """
 import base64
 
+from compartido.aviso_excel_Services import texto_aviso_excel
 from schemas.model.excel_Model import ExcelGenerado, HojaIndicador, SolicitudExcel
 from services.excel.excel_iaas_Services import excel_iaas
 from services.excel.hoja_estandar_excel_Services import armar_excel_estandar
@@ -25,7 +26,7 @@ class ExcelSinDatosError(Exception):
 
 ##--------------------------------------
 
-def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]:
+def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int, aviso: str) -> tuple[bytes, str]:
     # IAAS dibuja su propio libro (matriz por mes + acumulado/anual) y relee la BD
     # por su cuenta; uno solo -> su Excel, varios -> el libro completo de los 6.
     # El Excel de IAAS siempre trae el año completo (matriz por mes + acumulado),
@@ -38,9 +39,9 @@ def _armar_excel_iaas(hojas: list[HojaIndicador], ano: int) -> tuple[bytes, str]
 
     if len(hojas) == 1:
         indicador = hojas[0].indicador
-        return excel_iaas(str(ano), [indicador]), f"IAAS_{indicador.replace('IAAS ', '').zfill(2)}{sufijo_mes}_{ano}.xlsx"
+        return excel_iaas(str(ano), [indicador], aviso), f"IAAS_{indicador.replace('IAAS ', '').zfill(2)}{sufijo_mes}_{ano}.xlsx"
 
-    return excel_iaas(str(ano), []), f"IAAS{sufijo_mes}_{ano}.xlsx"
+    return excel_iaas(str(ano), [], aviso), f"IAAS{sufijo_mes}_{ano}.xlsx"
 
 
 ##--------------------------------------
@@ -77,7 +78,7 @@ def _nombre_archivo(hojas: list[HojaIndicador], ano: int) -> str:
 
 ##--------------------------------------
 
-def generar_excel(indicadores: list[str], ano: int, mes: str | None) -> tuple[str, dict]:
+def generar_excel(indicadores: list[str], ano: int, mes: str | None, usuario: str) -> tuple[str, dict]:
     """Endpoint del Excel: (mensaje, ExcelGenerado). ValueError (400) o ExcelSinDatosError (404) si no se puede."""
 
     # 1. Leer de la BD cada indicador pedido (los que no tienen datos van a errores)
@@ -100,10 +101,12 @@ def generar_excel(indicadores: list[str], ano: int, mes: str | None) -> tuple[st
     if "IAAS" in modulos and modulos != {"IAAS"}:
         raise ValueError("IAAS todavia no se puede combinar con FTP o Extractor en un mismo Excel.")
 
+    aviso = texto_aviso_excel(usuario, con_datos_personales=False)
+
     if modulos == {"IAAS"}:
-        contenido, nombre = _armar_excel_iaas(hojas, solicitud.ano)
+        contenido, nombre = _armar_excel_iaas(hojas, solicitud.ano, aviso)
     else:
-        contenido, nombre = armar_excel_estandar(hojas), _nombre_archivo(hojas, solicitud.ano)
+        contenido, nombre = armar_excel_estandar(hojas, aviso), _nombre_archivo(hojas, solicitud.ano)
 
     # 3. Armar la respuesta
     excel = ExcelGenerado(

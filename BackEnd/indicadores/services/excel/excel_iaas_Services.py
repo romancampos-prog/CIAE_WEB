@@ -7,6 +7,8 @@ import io
 
 import xlsxwriter
 
+from compartido.aviso_excel_Services import agregar_hoja_aviso
+
 from services.excel.excel_iaas_calculo_Services import fila_acumulada, fila_mensual, leer_meses_guardados
 from services.excel.excel_iaas_dibujo_Services import (
     dibujar_hoja_iaas01, dibujar_hoja_iaas_uci, escribir_valores_iaas, estilos_excel_iaas,
@@ -14,7 +16,7 @@ from services.excel.excel_iaas_dibujo_Services import (
 from services.iaas.catalogo_iaas_Services import INDICADORES_IAAS
 
 
-def excel_iaas(anio: str, indicadores: list[str]) -> bytes:
+def excel_iaas(anio: str, indicadores: list[str], aviso: str) -> bytes:
     """Un solo indicador -> su hoja; varios -> el libro completo de los 6."""
 
     salida = io.BytesIO()
@@ -44,6 +46,7 @@ def excel_iaas(anio: str, indicadores: list[str]) -> bytes:
         if meses:
             escribir_valores_iaas(hoja, estilos, fila_acumulada(meses, indicador, max(meses)), filas[indicador]["anual"], primera_col)
 
+    agregar_hoja_aviso(libro, aviso)
     libro.close()
 
     return salida.getvalue()
