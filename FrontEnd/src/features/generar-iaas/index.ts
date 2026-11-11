@@ -6,6 +6,7 @@ export { default as PanelValidacionIaas } from './components/PanelValidacionIaas
 export { default as ResumenGenerarIaas } from './components/ResumenGenerarIaas';
 export { default as SelectorPeriodoIaas } from './components/SelectorPeriodoIaas';
 export { default as TablaCapturaIaas } from './components/TablaCapturaIaas';
+export { default as TarjetaGlobalIaas } from './components/TarjetaGlobalIaas';
 export { default as TarjetasCapturaIaas } from './components/TarjetasCapturaIaas';
 export { useGenerarIaas } from './hooks/useGenerarIaas';
 export { useMesesGuardadosIaas } from './hooks/useMesesGuardadosIaas';

@@ -50,7 +50,7 @@
   font-size: 0.62rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.6px;
   background: var(--ic, var(--marca));
-  color: white;
+  color: var(--texto-sobre-familia);
   padding: 2px 7px; border-radius: 4px;
   flex-shrink: 0;
 }
@@ -236,12 +236,11 @@ html[data-theme="dark"] .ig-btn-dl--activo {
   background: var(--superficie-marcada);
 }
 
-/* En oscuro el color del indicador como texto se pierde (son tonos oscuros):
-   el activo va relleno con su color exacto y texto blanco para que resalte. */
+/* En oscuro el activo va relleno con el tono apagado de su familia y letra oscura para que resalte. */
 html[data-theme="dark"] .ig-hermano-btn--active {
   background: var(--ic, var(--marca));
   border-color: color-mix(in srgb, var(--ic, var(--marca)) 70%, white);
-  color: #fff;
+  color: var(--texto-sobre-familia);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ic, var(--marca)) 30%, transparent),
               0 2px 10px color-mix(in srgb, var(--ic, var(--marca)) 45%, transparent);
 }

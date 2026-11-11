@@ -158,15 +158,15 @@ html[data-theme="dark"] {
   --texto-sobre-familia:  #14171c;
 
   /* Epidemiología: tonos apagados, los fuertes no se leen sobre fondo oscuro */
-  --epi-guinda:           #cc8a98;
-  --epi-verde:            #80b888;
-  --epi-dorado:           #c4a76f;
-  --epi-morado:           #a89ccb;
-  --epi-indigo:           #8fa9cf;
-  --epi-ambar:            #d0a47c;
-  --epi-critico:          #d98a80;
-  --epi-rojo:             #d98a80;
-  --epi-exito:            #80b888;
+  --epi-guinda:           #bb8b95;
+  --epi-verde:            #68a671;
+  --epi-dorado:           #a9956d;
+  --epi-morado:           #9d92bf;
+  --epi-indigo:           #8599b7;
+  --epi-ambar:            #b09378;
+  --epi-critico:          #b98e88;
+  --epi-rojo:             #b98e88;
+  --epi-exito:            #68a671;
   --epi-linea:            var(--borde-suave);
 }
 

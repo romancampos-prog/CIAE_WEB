@@ -2,7 +2,7 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
 // propios
 import type { IndicadorGenerarIaas, SesionIaas } from '@/types/api/indicadores/iaas';
-import { IconoAlerta, IconoArchivo, IconoCandado, IconoCerrar, IconoFlechaDerecha, IconoReloj, IconoSubirNube } from '@/components/icons';
+import { IconoAlerta, IconoArchivo, IconoCandado, IconoCerrar, IconoChevronAbajo, IconoFlechaDerecha, IconoPalomita, IconoSubirNube } from '@/components/icons';
 import ModalConfirmarPassword from '@/components/ui/modal/ModalConfirmarPassword';
 import { MESES_LARGOS } from '@/features/indicadores';
 import { useUnidadTardia } from '@/features/generar-iaas/hooks/useUnidadTardia';
@@ -35,12 +35,15 @@ const ZonaExcel = ({ etiqueta, opcional, archivo, onElegir, onQuitar }: PropsZon
   const entrada = useRef<HTMLInputElement>(null);
   return (
     <div className="mut-field">
-      <label className="mut-label">
+      <p className="mut-label">
         {etiqueta}
         {opcional && <span className="mut-label-opt"> — opcional</span>}
-      </label>
+      </p>
       <div
         className={`mut-drop ${encima ? 'mut-drop--over' : ''} ${archivo ? 'mut-drop--done' : ''}`}
+        role={archivo ? undefined : 'button'}
+        tabIndex={archivo ? undefined : 0}
+        onKeyDown={e => { if (!archivo && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); entrada.current?.click(); } }}
         onDragOver={e => { e.preventDefault(); setEncima(true); }}
         onDragLeave={() => setEncima(false)}
         onDrop={e => { e.preventDefault(); setEncima(false); onElegir(e.dataTransfer.files[0]); }}
@@ -51,7 +54,7 @@ const ZonaExcel = ({ etiqueta, opcional, archivo, onElegir, onQuitar }: PropsZon
           <div className="mut-file-chip">
             <IconoArchivo />
             <span>{archivo.name.replace('.xlsx', '')}</span>
-            <button className="mut-chip-x" onClick={e => { e.stopPropagation(); onQuitar(); }}><IconoCerrar strokeLinejoin="round" /></button>
+            <button type="button" className="mut-chip-x" aria-label="Quitar archivo" onClick={e => { e.stopPropagation(); onQuitar(); }}><IconoCerrar strokeLinejoin="round" /></button>
           </div>
         ) : (
           <span className="mut-drop-label"><IconoSubirNube /> Subir o arrastrar .xlsx</span>
@@ -81,167 +84,187 @@ export default function ModalUnidadTardia({ onClose, anio, mes, unidades, todosI
   const otrasUnidades = tardia.otrasUnidades(unidades);
   const indsAMostrar = unidad ? tardia.indicadoresDeUnidad(unidad) : todosIndicadores;
 
+  // Sin unidad elegida, la lista arranca abierta; con unidad, cerrada (se abre al tocarla)
+  const [listaAbierta, setListaAbierta] = useState(!unidad);
+  const esPendiente = tardia.unidadesPendientes.includes(unidad);
+  const numerosDe = (u: string) => tardia.indicadoresDeUnidad(u).map(ind => ind.replace('IAAS ', ''));
+
   const filaUnidad = (u: string, conChips: boolean) => (
-    <label key={u} className={`mut-unidad-row ${unidad === u ? 'mut-unidad-row--sel' : ''}`}>
-      <input type="radio" hidden value={u} checked={unidad === u} onChange={() => tardia.elegirUnidad(u)} />
+    <button
+      key={u}
+      type="button"
+      role="option"
+      aria-selected={unidad === u}
+      className={`mut-unidad-row${unidad === u ? ' mut-unidad-row--sel' : ''}`}
+      onClick={() => { tardia.elegirUnidad(u); setListaAbierta(false); }}
+    >
       <span className="mut-unidad-name">{u}</span>
       {conChips && (
-        <div className="mut-unidad-chips">
-          {tardia.indicadoresDeUnidad(u).map(ind => (
-            <span key={ind} className="mut-unidad-chip">{ind.replace('IAAS ', '')}</span>
-          ))}
-        </div>
+        <span className="mut-unidad-chips">
+          {numerosDe(u).map(n => <span key={n} className="mut-unidad-chip">{n}</span>)}
+        </span>
       )}
-    </label>
+    </button>
   );
 
   return (
     <div className="mut-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="mut-modal">
+      <div className="mut-modal" role="dialog" aria-modal="true" aria-label="Completar unidad tardía">
 
-        {/* Header */}
+        {/* Encabezado: la unidad elegida al frente */}
         <div className="mut-header">
-          <div className="mut-header-left">
-            <div className="mut-icon-wrap">
-              <IconoReloj tamano={16} />
-            </div>
-            <div>
-              <p className="mut-title">Completar unidad tardía</p>
-              <p className="mut-sub">IAAS — {mesLabel} {anio}</p>
-            </div>
+          <button type="button" className="mut-close" onClick={onClose} aria-label="Cerrar"><IconoCerrar strokeLinejoin="round" /></button>
+          <p className="mut-sub">IAAS — {mesLabel} {anio}</p>
+          <p className="mut-title">Completar unidad tardía</p>
+
+          <p className="mut-label">Unidad</p>
+          <div className={`mut-selector${listaAbierta ? ' mut-selector--abierto' : ''}`}>
+            <button type="button" className="mut-selector-boton" aria-expanded={listaAbierta} onClick={() => setListaAbierta(a => !a)}>
+              <strong>{unidad || '—'}</strong>
+              {unidad && esPendiente && (
+                <span className="mut-unidad-chips">
+                  {numerosDe(unidad).map(n => (
+                    <span key={n} className={`mut-unidad-chip${seleccionados.has(`IAAS ${n}`) ? ' mut-unidad-chip--elegido' : ''}`}>{n}</span>
+                  ))}
+                </span>
+              )}
+              <IconoChevronAbajo className="mut-selector-flecha" />
+            </button>
+            {listaAbierta && (
+              <div className="mut-unidad-lista" role="listbox" aria-label="Unidad">
+                {tardia.unidadesPendientes.length > 0 && (
+                  <div className="mut-unidad-grupo">
+                    <div className="mut-unidad-sep">Pendientes</div>
+                    {tardia.unidadesPendientes.map(u => filaUnidad(u, true))}
+                  </div>
+                )}
+                {otrasUnidades.length > 0 && (
+                  <div className="mut-unidad-grupo">
+                    <div className="mut-unidad-sep">Todas las unidades</div>
+                    {otrasUnidades.map(u => filaUnidad(u, false))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          <button className="mut-close" onClick={onClose}><IconoCerrar strokeLinejoin="round" /></button>
         </div>
 
         <div className="mut-body">
 
-          {/* Selector de unidad unificado */}
+          {/* Indicadores */}
           <div className="mut-field">
-            <label className="mut-label">Unidad</label>
-            <div className="mut-unidad-list">
-              {tardia.unidadesPendientes.length > 0 && (
-                <div className="mut-unidad-sep">Pendientes</div>
-              )}
-              {tardia.unidadesPendientes.map(u => filaUnidad(u, true))}
-              {otrasUnidades.length > 0 && (
-                <>
-                  <div className="mut-unidad-sep">Todas las unidades</div>
-                  {otrasUnidades.map(u => filaUnidad(u, false))}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Paso 1: selección de indicadores con chips */}
-          <div className="mut-field">
-            <label className="mut-label">¿Qué indicadores vas a editar?</label>
+            <p className="mut-label">¿Qué indicadores vas a editar?</p>
             <div className="mut-ind-chips">
               {indsAMostrar.map(ind => (
-                <label key={ind} className={`mut-ind-chip ${seleccionados.has(ind) ? 'mut-ind-chip--on' : ''}`}>
-                  <input type="checkbox" hidden checked={seleccionados.has(ind)} onChange={() => tardia.alternarIndicador(ind)} />
-                  {ind}
+                <label key={ind} className={`mut-ind-chip${seleccionados.has(ind) ? ' mut-ind-chip--on' : ''}`}>
+                  <input type="checkbox" className="mut-oculto" checked={seleccionados.has(ind)} onChange={() => tardia.alternarIndicador(ind)} />
+                  {esPendiente && <span className="mut-ind-pendiente" aria-hidden="true" />}
+                  <span className="mut-ind-marca" aria-hidden="true"><IconoPalomita tamano={12} strokeWidth="3.4" /></span>
+                  <strong>{ind}</strong>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Paso 2: detalles de los indicadores seleccionados */}
-          {seleccionados.size > 0 && (
-            <div className="mut-field">
-              <label className="mut-label">Datos actuales</label>
-              <div className="mut-det-table">
-                <div className="mut-det-row mut-det-row--head">
-                  <span className="mut-det-ind">Indicador</span>
-                  <span className="mut-ind-num">Numerador (Excel)</span>
-                  <span className="mut-den-head">Denominador</span>
-                </div>
-                {[...seleccionados].map(ind => {
-                  const numGuardado = tardia.numeradorGuardado(ind);
-                  const tieneNum    = numGuardado != null;
-                  const esIAAS01    = ind === 'IAAS 01';
-                  const info        = indicadoresInfo.find(i => i.indicador === ind);
-                  const denGuardado = esIAAS01 ? tardia.denominadorGuardado(ind) : undefined;
-                  const tieneDen    = denGuardado != null;
-                  return (
-                    <div key={ind} className="mut-det-row">
-                      <span className="mut-det-ind">{ind}</span>
-                      <span className={`mut-ind-num ${tieneNum ? '' : 'mut-ind-num--miss'}`}>
-                        {tieneNum ? numGuardado : 'falta'}
-                      </span>
-                      {!esIAAS01 ? (
-                        <span className="mut-den-wrap">
-                          <input
-                            type="number" min="0" className="mut-den-input"
-                            placeholder={info?.columnaDenominador ? info.columnaDenominador.slice(0, 16) : 'Denominador'}
-                            value={tardia.denoms[ind] ?? ''}
-                            disabled={tardia.sinDato.has(ind)}
-                            onChange={e => tardia.capturarDenominador(ind, e.target.value)}
-                            onKeyDown={moverEntreDenominadores}
-                          />
-                          <label className="mut-sindato" title="Marca si esta unidad no tiene dato para este indicador (queda en Gris)">
-                            <input type="checkbox" checked={tardia.sinDato.has(ind)} onChange={() => tardia.alternarSinDato(ind)} />
-                            Sin dato
-                          </label>
+          {/* Datos actuales y Excel, lado a lado en computadora */}
+          <div className="mut-fila-datos">
+            {seleccionados.size > 0 && (
+              <div className="mut-field mut-field--datos">
+                <p className="mut-label">Datos actuales</p>
+                <div className="mut-det-table">
+                  <div className="mut-det-row mut-det-row--head">
+                    <span className="mut-det-ind">Indicador</span>
+                    <span>Numerador (Excel)</span>
+                    <span>Denominador</span>
+                  </div>
+                  {[...seleccionados].map(ind => {
+                    const numGuardado = tardia.numeradorGuardado(ind);
+                    const tieneNum    = numGuardado != null;
+                    const esIAAS01    = ind === 'IAAS 01';
+                    const info        = indicadoresInfo.find(i => i.indicador === ind);
+                    const denGuardado = esIAAS01 ? tardia.denominadorGuardado(ind) : undefined;
+                    const tieneDen    = denGuardado != null;
+                    return (
+                      <div key={ind} className={`mut-det-row${tieneNum ? '' : ' mut-det-row--falta'}`}>
+                        <span className="mut-det-ind">{ind}</span>
+                        <span className={`mut-ind-num${tieneNum ? '' : ' mut-ind-num--miss'}`} data-titulo="Numerador (Excel)">
+                          {tieneNum ? numGuardado : 'falta'}
                         </span>
-                      ) : tardia.excelDenIaas01 ? (
-                        <span className="mut-ind-den-auto" title="Se recalculará con el Excel de denominador que subiste abajo.">
-                          se recalcula ({tardia.excelDenIaas01.name.replace('.xlsx', '')})
-                        </span>
-                      ) : (
-                        <span className="mut-ind-den-auto-wrap" title="Se autocalcula con el Excel del denominador, no se edita a mano.">
-                          <span className="mut-ind-den-box">
-                            {tieneDen ? denGuardado : '—'}
+                        {!esIAAS01 ? (
+                          <span className="mut-den-wrap">
+                            <input
+                              type="number" min="0" className="mut-den-input"
+                              aria-label={`Denominador de ${ind}`}
+                              placeholder={info?.columnaDenominador ? info.columnaDenominador.slice(0, 16) : 'Denominador'}
+                              value={tardia.denoms[ind] ?? ''}
+                              disabled={tardia.sinDato.has(ind)}
+                              onChange={e => tardia.capturarDenominador(ind, e.target.value)}
+                              onKeyDown={moverEntreDenominadores}
+                            />
+                            <label className="mut-sindato" title="Marca si esta unidad no tiene dato para este indicador (queda en Gris)">
+                              <input type="checkbox" role="switch" className="mut-switch" checked={tardia.sinDato.has(ind)} onChange={() => tardia.alternarSinDato(ind)} />
+                              Sin dato
+                            </label>
                           </span>
-                          <IconoCandado tamano={11} strokeWidth="2.2" />
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+                        ) : tardia.excelDenIaas01 ? (
+                          <span className="mut-ind-den-auto" title="Se recalculará con el Excel de denominador que subiste abajo.">
+                            se recalcula ({tardia.excelDenIaas01.name.replace('.xlsx', '')})
+                          </span>
+                        ) : (
+                          <span className="mut-ind-den-auto-wrap" title="Se autocalcula con el Excel del denominador, no se edita a mano.">
+                            <span className="mut-ind-den-box">
+                              {tieneDen ? denGuardado : '—'}
+                            </span>
+                            <IconoCandado tamano={11} strokeWidth="2.2" />
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Excel */}
-          <div className="mut-excel-row">
-            <ZonaExcel
-              etiqueta="Excel Numerador"
-              opcional={!!unidad && !tardia.excelRequerido}
-              archivo={tardia.excelUnidad}
-              onElegir={tardia.elegirExcelUnidad}
-              onQuitar={tardia.quitarExcelUnidad}
-            />
-
-            {/* Excel del denominador — solo para IAAS 01 */}
-            {tardia.iaas01Elegido && (
-              <ZonaExcel
-                etiqueta="Excel Denominador (IAAS 01)"
-                opcional={!tardia.excelDenRequerido}
-                archivo={tardia.excelDenIaas01}
-                onElegir={tardia.elegirExcelDenIaas01}
-                onQuitar={tardia.quitarExcelDenIaas01}
-              />
             )}
-          </div>
 
-          {/* Warning */}
-          {unidad && (
-            <div className="mut-warning">
-              <IconoAlerta tamano={13} />
-              Sobreescribirá los datos de <strong>&nbsp;{unidad}&nbsp;</strong> para {mesLabel} {anio}
+            <div className="mut-excel-columna">
+              <ZonaExcel
+                etiqueta="Excel Numerador"
+                opcional={!!unidad && !tardia.excelRequerido}
+                archivo={tardia.excelUnidad}
+                onElegir={tardia.elegirExcelUnidad}
+                onQuitar={tardia.quitarExcelUnidad}
+              />
+
+              {/* Excel del denominador — solo para IAAS 01 */}
+              {tardia.iaas01Elegido && (
+                <ZonaExcel
+                  etiqueta="Excel Denominador (IAAS 01)"
+                  opcional={!tardia.excelDenRequerido}
+                  archivo={tardia.excelDenIaas01}
+                  onElegir={tardia.elegirExcelDenIaas01}
+                  onQuitar={tardia.quitarExcelDenIaas01}
+                />
+              )}
             </div>
-          )}
+          </div>
 
           {tardia.error && <p className="mut-error">{tardia.error}</p>}
         </div>
 
-        {/* Footer */}
+        {/* Pie: siempre visible */}
         <div className="mut-footer">
-          <button className="mut-btn-cancel" onClick={onClose}>Cancelar</button>
-          <button className="mut-btn-confirm" onClick={tardia.confirmar}>
-            Confirmar
-            <IconoFlechaDerecha tamano={13} />
-          </button>
+          {unidad && (
+            <p className="mut-warning">
+              <IconoAlerta tamano={14} />
+              <span>Sobreescribirá los datos de <strong>{unidad}</strong> para {mesLabel} {anio}</span>
+            </p>
+          )}
+          <div className="mut-footer-botones">
+            <button type="button" className="mut-btn-cancel" onClick={onClose}>Cancelar</button>
+            <button type="button" className="mut-btn-confirm" onClick={tardia.confirmar}>
+              Confirmar
+              <IconoFlechaDerecha tamano={13} />
+            </button>
+          </div>
         </div>
       </div>
 

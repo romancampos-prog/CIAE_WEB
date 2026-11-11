@@ -108,7 +108,15 @@
 .ex-cargando { color: var(--texto-tenue); }
 
 /* ════════ Vista general (archivos subidos + indicadores) ════════ */
-.exv-main { max-width: 1040px; }
+/* El ancho sigue a la pantalla sin saltos (las tarjetas se acomodan solas: 1, 2 o 3 por fila) y los
+   laterales siempre dejan aire: 16px en celular hasta 72px en pantallas anchas. */
+.ex-page-main.exv-main {
+  width: 100%;
+  max-width: 1480px;
+  padding-left: clamp(16px, 4.5vw, 72px);
+  padding-right: clamp(16px, 4.5vw, 72px);
+  box-sizing: border-box;
+}
 
 .exv-panel {
   background: var(--superficie);
@@ -227,8 +235,9 @@
 
 .exv-ind-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
-  gap: 18px;
+  /* 400px mínimo por tarjeta: así nunca quedan 4 apretadas; el hueco crece con la pantalla */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+  gap: clamp(16px, 1.6vw, 26px);
   align-items: stretch;
 }
 .exv-ind {
@@ -294,7 +303,7 @@
 .exv-nota-mes { margin: 0; font-size: .72rem; color: var(--texto-tenue); }
 
 /* ════════ Tabla del año: filas = archivos, columnas = meses ════════ */
-.exa-tabla { padding: 18px 22px 20px; }
+.exa-tabla { padding: 0 22px 20px; }
 
 .exa-fila {
   display: grid;
@@ -353,13 +362,46 @@
 .exa-celda--muestra svg { width: 13px; height: 13px; }
 
 @media (max-width: 760px) {
-  .exa-tabla { padding: 14px 16px 16px; }
+  .exa-tabla { padding: 0 16px 16px; }
   .exa-fila--encabezado { display: none; }
   .exa-fila { grid-template-columns: repeat(6, 1fr); padding: 14px 0; }
   .exa-fila--encabezado + .exa-fila { border-top: none; padding-top: 0; }
   .exa-col-archivo { grid-column: 1 / -1; margin-bottom: 4px; }
   .exa-celda { flex-direction: column; height: 48px; gap: 2px; }
   .exa-celda-mes { display: block; }
+}
+
+/* Archivos del año: la tarjeta se pliega desde su propio encabezado */
+.exp-panel { padding: 0; overflow: hidden; }
+.exp-encabezado {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 16px 22px; border: none; background: transparent;
+  font: inherit; text-align: left; cursor: pointer; color: var(--texto-tenue);
+  transition: background .15s ease;
+}
+.exp-encabezado:hover { background: var(--superficie-suave); }
+.exp-encabezado:focus-visible { outline: 2px solid var(--primario-texto); outline-offset: -2px; }
+.exp-titulo { margin: 0; color: var(--texto); }
+.exp-flecha { flex-shrink: 0; transform: rotate(-90deg); transition: transform .22s ease; }
+.exp-panel--abierta .exp-flecha { transform: rotate(0deg); }
+.exp-resumen { flex: 1; min-width: 0; font-size: .8rem; font-weight: 600; color: var(--texto-suave); }
+.exp-accion {
+  flex-shrink: 0; padding: 4px 12px; border-radius: 999px;
+  border: 1px solid var(--borde); font-size: .76rem; font-weight: 700; color: var(--texto-suave);
+}
+.exp-encabezado:hover .exp-accion { color: var(--texto); border-color: var(--borde-fuerte); }
+
+.exp-contenido { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .28s ease; }
+.exp-panel--abierta .exp-contenido { grid-template-rows: 1fr; }
+.exp-contenido-interior { overflow: hidden; min-height: 0; }
+.exp-contenido-interior > .exa-tabla { border-top: 1px solid var(--borde-suave); padding-top: 8px; }
+
+@media (max-width: 760px) {
+  .exp-encabezado { flex-wrap: wrap; row-gap: 4px; padding: 14px 16px; }
+  .exp-resumen { order: 3; flex-basis: 100%; padding-left: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exp-flecha, .exp-contenido, .exp-encabezado { transition: none; }
 }
 
 /* ════════ Panel lateral para subir ════════ */
@@ -437,7 +479,10 @@
 }
 
 /* Censo de pacientes con DM: años subidos + botón para subir */
-.exc-censo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.exc-censo-bloque { padding: 16px 22px 20px; border-top: 1px solid var(--borde-suave); background: var(--superficie-suave); }
+.exc-censo-titulo { margin: 0 0 10px; }
+.exc-censo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+@media (max-width: 760px) { .exc-censo-bloque { padding: 14px 16px 16px; } }
 .exc-censo-lista { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .exc-censo-fila { display: flex; align-items: center; gap: 10px; margin: 0; font-size: .86rem; color: var(--texto-secundario); min-width: 0; }
 .exc-censo-fila svg { color: var(--marca-texto); flex-shrink: 0; }

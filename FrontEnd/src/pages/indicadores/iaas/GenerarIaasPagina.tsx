@@ -4,7 +4,7 @@ import TopBar from '@/components/TopBar';
 import ModalLoading from '@/components/ui/modal/ModalCargando';
 import {
   AvisoErroresIaas, AvisoPendientesIaas, ModalUnidadTardia, PanelValidacionIaas, ResumenGenerarIaas,
-  SelectorPeriodoIaas, TablaCapturaIaas, TarjetasCapturaIaas, useGenerarIaas,
+  SelectorPeriodoIaas, TablaCapturaIaas, TarjetaGlobalIaas, TarjetasCapturaIaas, useGenerarIaas,
 } from '@/features/generar-iaas';
 import { FichaTecnicaBoton } from '@/features/indicadores';
 import iconoIaas from '@/assets/icono_iaas.png';
@@ -59,6 +59,8 @@ const GenerarIaasPagina = () => {
                   <SelectorPeriodoIaas periodo={periodo} />
                 </div>
               </div>
+
+              {!iaas.cargando && <TarjetaGlobalIaas iaas={iaas} />}
 
               <div className="ia-table-wrap">
                 {iaas.cargando ? (

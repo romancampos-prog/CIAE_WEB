@@ -3,7 +3,6 @@ import { useState, type KeyboardEvent } from 'react';
 // propios
 import { IconoPalomita } from '@/components/icons';
 import ArchivoUnidadIaas from './ArchivoUnidadIaas';
-import ExcelGlobalIaas from './ExcelGlobalIaas';
 import type { EstadoGenerarIaas } from '@/features/generar-iaas/hooks/useGenerarIaas';
 
 /**
@@ -27,11 +26,10 @@ const moverEnCuadricula = (e: KeyboardEvent<HTMLInputElement>, fila: number, col
   inputs[next]?.focus();
 };
 
-/** Captura en escritorio: unidades × (Excel numerador | Excel global de IAAS 01 | denominadores IAAS 02–06). */
+/** Captura en escritorio: unidades × (Excel numerador | denominadores IAAS 02–06). El Excel global de IAAS 01 va arriba (TarjetaGlobalIaas). */
 const TablaCapturaIaas = ({ iaas }: { iaas: EstadoGenerarIaas }) => {
-  const [sobreGlobal, setSobreGlobal]   = useState(false);
   const [sobreUnidad, setSobreUnidad]   = useState<string | null>(null);
-  const { unidades, indicadores, infoIaas01, archivosUnidad, excelGlobal } = iaas;
+  const { unidades, indicadores, archivosUnidad } = iaas;
 
   return (
     <table className="ia-table">
@@ -42,13 +40,9 @@ const TablaCapturaIaas = ({ iaas }: { iaas: EstadoGenerarIaas }) => {
             Excel numerador
             <small>IAAS 01 – 06</small>
           </th>
-          <th colSpan={indicadores.length + 1} className="ia-col-grupo">Denominadores</th>
+          <th colSpan={indicadores.length} className="ia-col-grupo">Denominadores</th>
         </tr>
         <tr>
-          <th className="ia-col-denom ia-col-denom--global">
-            <span className="ia-th-ind">IAAS 01</span>
-            <small>{infoIaas01?.columnaDenominador}</small>
-          </th>
           {indicadores.map((d) => (
             <th key={d.indicador} className="ia-col-denom">
               <span className="ia-th-ind">{d.indicador}</span>
@@ -84,24 +78,6 @@ const TablaCapturaIaas = ({ iaas }: { iaas: EstadoGenerarIaas }) => {
                   onQuitar={() => iaas.quitarArchivoUnidad(u)}
                 />
               </td>
-
-              {i === 0 && (
-                <td
-                  rowSpan={unidades.length}
-                  className={`ia-td-global ${sobreGlobal ? 'ia-td-global--over' : ''} ${excelGlobal ? 'ia-td-global--done' : ''}`}
-                  onDragOver={e => { e.preventDefault(); setSobreGlobal(true); }}
-                  onDragLeave={() => setSobreGlobal(false)}
-                  onDrop={e => { e.preventDefault(); setSobreGlobal(false); iaas.elegirExcelGlobal(e.dataTransfer.files[0]); }}
-                >
-                  <div className="ia-td-global-inner">
-                    <ExcelGlobalIaas
-                      archivo={excelGlobal}
-                      nota={`Un solo archivo para las ${unidades.length} unidades`}
-                      onElegir={iaas.elegirExcelGlobal}
-                    />
-                  </div>
-                </td>
-              )}
 
               {indicadores.map((d, j) => {
                 const valor = iaas.denominadorDe(u, d.indicador);

@@ -74,6 +74,7 @@ class IndicesIndicadores(BaseModel):
     indicadores: list[str]
     imagen: str
     color: str
+    colorOscuro: str = ""
 
 
 ##--------------------------------------

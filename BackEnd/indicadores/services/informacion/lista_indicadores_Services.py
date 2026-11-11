@@ -30,6 +30,7 @@ def todos_los_indicadores(campo: str = "mostrarGrafica", modulo: str | None = No
             indicadores=por_familia[familia],
             imagen=familias.get(familia, {}).get("imagen", ""),
             color=familias.get(familia, {}).get("color", ""),
+            colorOscuro=familias.get(familia, {}).get("colorOscuro", ""),
         )
         for familia in sorted(por_familia, key=str.lower)
     ]

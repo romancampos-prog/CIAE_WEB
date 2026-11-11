@@ -3,13 +3,15 @@ import { IconoCerrar, IconoDocumento, IconoPalomitaAncha, IconoSubir } from '@/c
 import ZonaArchivo from './ZonaArchivo';
 import { useCensoDm } from '@/features/generar-extractor/hooks/useCensoDm';
 
-/** Censo de pacientes con DM (denominador que pide el mapeo): los años subidos y el panel para subir uno. */
+/** Bloque dentro de la tarjeta de archivos. Censo de pacientes con DM (denominador que pide el mapeo): los años subidos y el panel para subir uno. */
 const SeccionCensoDm = () => {
   const censo = useCensoDm();
 
   return (
     <>
-      <section className="exv-panel exc-censo">
+      <section className="exc-censo-bloque" aria-labelledby="exc-censo-titulo">
+        <h2 id="exc-censo-titulo" className="exv-seccion-titulo exc-censo-titulo">Censo de pacientes con DM</h2>
+        <div className="exc-censo">
         <div className="exc-censo-lista">
           {censo.censos.length === 0 && <p className="exc-censo-vacio">Todavía no se ha subido ningún censo.</p>}
           {censo.censos.map(c => (
@@ -24,6 +26,7 @@ const SeccionCensoDm = () => {
         <button type="button" className="ex-boton-confirmar exc-censo-boton" onClick={censo.abrirPanel}>
           <IconoSubir tamano={14} strokeWidth="2.2" /> Subir censo
         </button>
+        </div>
       </section>
 
       {censo.panelAbierto && (

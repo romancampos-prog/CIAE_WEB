@@ -41,6 +41,8 @@ export interface FamiliaIndicadores {
   indicadores: string[];
   imagen: string;
   color: string;
+  /** Tono apagado para modo oscuro. */
+  colorOscuro: string;
 }
 
 export type ModoExtraccion =

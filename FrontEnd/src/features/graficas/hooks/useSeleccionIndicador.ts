@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 // propios
+import useTema from '@/hooks/useTema';
 import type { GrupoIndicadores } from '@/types/pantallas/graficas';
 import { informacionApi } from '@/api/indicadores/informacionApi';
 import { urlIcono } from '@/features/indicadores';
@@ -17,6 +18,7 @@ export function useSeleccionIndicador() {
   const [elegido, setElegido] = useState<string | null>(null);
   const [drawerAbierto, setDrawerAbierto] = useState(false);
 
+  const { esOscuro } = useTema();
   const lista = useQuery({
     queryKey: ['graficas', 'indicadores'],
     queryFn: () => informacionApi.listarFamilias(),
@@ -29,9 +31,9 @@ export function useSeleccionIndicador() {
   useEffect(() => { document.title = 'Gráficas | CIAE'; }, []);
 
   // El índice ya viene unificado del backend (FTP, IAAS y Extractor, cada familia con su color).
-  const grupos = useMemo<GrupoIndicadores[]>(() => (lista.data ?? []).map(({ categoriaIndicador, indicadores, color, imagen }) => ({
-    cat: categoriaIndicador, color: color || COLOR_POR_DEFECTO, icono: urlIcono(imagen), inds: indicadores ?? [],
-  })), [lista.data]);
+  const grupos = useMemo<GrupoIndicadores[]>(() => (lista.data ?? []).map(({ categoriaIndicador, indicadores, color, colorOscuro, imagen }) => ({
+    cat: categoriaIndicador, color: (esOscuro && colorOscuro) || color || COLOR_POR_DEFECTO, icono: urlIcono(imagen), inds: indicadores ?? [],
+  })), [lista.data, esOscuro]);
 
   // Mientras el usuario no elija, se muestra el primero de la lista.
   const indicador = elegido ?? grupos[0]?.inds[0] ?? '';

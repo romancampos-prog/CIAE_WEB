@@ -6,7 +6,7 @@ import type { EstadoGenerarExtractor } from '@/features/generar-extractor/hooks/
 
 /** Todo el año en una tabla: filas = archivos, columnas = meses. Clic en un mes abre el panel de subida. */
 const TablaArchivosExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => (
-  <section className="exv-panel exa-tabla" aria-label={`Archivos subidos en ${ex.anio}`}>
+  <div className="exa-tabla">
     <div className="exa-fila exa-fila--encabezado" aria-hidden>
       <span className="exa-col-archivo">Archivo</span>
       {MESES_LARGOS_ARR.map(m => <span key={m} className="exa-col-mes">{m.slice(0, 3)}</span>)}
@@ -63,7 +63,7 @@ const TablaArchivosExtractor = ({ ex }: { ex: EstadoGenerarExtractor }) => (
       ))}
     </ul>
     <p className="exv-nota-mes">Da clic en un mes para subir o reemplazar su archivo.</p>
-  </section>
+  </div>
 );
 
 export default TablaArchivosExtractor;
