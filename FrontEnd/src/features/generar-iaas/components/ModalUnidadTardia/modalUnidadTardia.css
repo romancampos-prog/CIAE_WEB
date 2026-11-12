@@ -1,0 +1,222 @@
+/* Completar unidad tardía (IAAS): ancha en computadora, pantalla completa en teléfono. */
+
+.mut-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.55);
+}
+.mut-modal {
+  --mut-acento: #8a2a45; --mut-acento-texto: #8a2a45; --mut-sobre: #ffffff;
+  --mut-acento-suave: color-mix(in srgb, var(--mut-acento) 9%, transparent);
+  width: min(960px, 100%); max-height: 92vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--superficie); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  font-size: 0.82rem;
+}
+html[data-theme="dark"] .mut-modal { --mut-acento: #bb8b95; --mut-acento-texto: #e49aa9; --mut-sobre: #14171c; --mut-acento-suave: rgba(187, 139, 149, 0.14); }
+
+/* Para lectores de pantalla y teclado, sin ocupar lugar */
+.mut-oculto { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.mut-label {
+  display: block; margin: 0 0 7px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-secundario);
+}
+.mut-label-opt { text-transform: none; letter-spacing: 0; color: var(--mut-acento-texto); }
+
+/* ── Encabezado con la unidad al frente ── */
+.mut-header {
+  position: relative; flex-shrink: 0; padding: 22px 28px 20px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--mut-acento) 18%, transparent), color-mix(in srgb, var(--mut-acento) 3%, transparent));
+  border-bottom: 1px solid var(--borde);
+}
+.mut-close {
+  position: absolute; top: 14px; right: 14px; width: 38px; height: 38px;
+  display: grid; place-items: center; background: transparent; border: 0; border-radius: 50%;
+  color: var(--texto-suave); cursor: pointer;
+}
+.mut-close:hover { background: rgba(var(--contraste-rgb), 0.06); color: var(--texto); }
+.mut-sub { margin: 0; font-weight: 700; color: var(--mut-acento-texto); }
+.mut-title { margin: 2px 0 14px; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; }
+
+.mut-selector { background: var(--superficie-suave); border: 1.5px solid var(--mut-acento); border-radius: 14px; overflow: hidden; }
+.mut-selector-boton {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 0 18px; box-sizing: border-box;
+  background: transparent; border: 0; font: inherit; color: var(--texto); cursor: pointer; text-align: left;
+}
+.mut-selector-boton strong { flex: 1; min-width: 0; font-size: 1rem; font-weight: 800; }
+.mut-selector-flecha { flex-shrink: 0; color: var(--texto-suave); transition: transform 0.2s; }
+.mut-selector--abierto .mut-selector-boton { border-bottom: 1px solid var(--borde); }
+.mut-selector--abierto .mut-selector-flecha { transform: rotate(180deg); }
+
+/* La lista: en computadora los dos grupos lado a lado */
+.mut-unidad-lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); max-height: 260px; overflow-y: auto; }
+.mut-unidad-grupo { padding: 6px 0; }
+.mut-unidad-grupo + .mut-unidad-grupo { border-left: 1px solid var(--borde); }
+.mut-unidad-sep { padding: 4px 18px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); }
+.mut-unidad-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 18px; box-sizing: border-box;
+  background: transparent; border: 0; font: inherit; color: var(--texto-medio); text-align: left; cursor: pointer;
+}
+.mut-unidad-row:hover { background: rgba(var(--contraste-rgb), 0.04); }
+.mut-unidad-row--sel { background: var(--mut-acento-suave); box-shadow: inset 3px 0 0 var(--mut-acento); color: var(--texto); font-weight: 800; }
+.mut-unidad-name { flex: 1; min-width: 0; }
+.mut-unidad-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.mut-unidad-chip { padding: 1px 6px; border-radius: 5px; background: var(--tinte-aviso); color: var(--aviso-texto-fuerte); font-size: 0.66rem; font-weight: 800; }
+/* El pendiente que vas a cubrir con lo elegido toma el color de la ventana */
+.mut-unidad-chip--elegido { background: var(--mut-acento); color: var(--mut-sobre); }
+.mut-selector-boton:focus-visible, .mut-unidad-row:focus-visible, .mut-close:focus-visible,
+.mut-btn-cancel:focus-visible, .mut-btn-confirm:focus-visible, .mut-ind-chip:has(:focus-visible), .mut-drop:focus-visible {
+  outline: 2px solid var(--marca-texto); outline-offset: 2px;
+}
+
+/* ── Cuerpo ── */
+.mut-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 22px 28px; }
+.mut-field { display: flex; flex-direction: column; min-width: 0; }
+
+.mut-ind-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.mut-ind-chip {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 0 10px;
+  background: var(--superficie-suave); border: 1.5px solid var(--borde); border-radius: 12px;
+  cursor: pointer; transition: border-color 0.15s, background-color 0.15s;
+}
+.mut-ind-chip:hover { border-color: var(--borde-fuerte); }
+.mut-ind-chip strong { font-size: 0.82rem; font-weight: 800; }
+.mut-ind-marca {
+  display: grid; place-items: center; flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px;
+  box-shadow: inset 0 0 0 1.5px var(--borde-fuerte); color: transparent;
+}
+.mut-ind-chip--on { background: var(--mut-acento-suave); border-color: var(--mut-acento); }
+.mut-ind-chip--on .mut-ind-marca { background: var(--mut-acento); box-shadow: none; color: var(--mut-sobre); }
+/* Le falta a esta unidad */
+.mut-ind-pendiente { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--aviso-texto); }
+
+/* Datos actuales y Excel lado a lado; en angosto se apilan */
+.mut-fila-datos { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.mut-fila-datos > .mut-field--datos { flex: 1.7 1 440px; }
+.mut-excel-columna { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+.mut-det-table { border: 1px solid var(--borde); border-radius: 12px; overflow: hidden; animation: mut-entrar 0.22s ease-out; }
+@keyframes mut-entrar { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.mut-det-row { display: grid; grid-template-columns: 84px 124px minmax(0, 1fr); gap: 12px; align-items: center; min-height: 56px; padding: 6px 14px; border-top: 1px solid var(--borde); }
+.mut-det-row--head { min-height: 0; padding: 9px 14px; border-top: 0; background: var(--superficie-suave); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--texto-suave); }
+.mut-det-row--falta { background: var(--tinte-peligro); box-shadow: inset 3px 0 0 var(--peligro-texto); }
+.mut-det-ind { font-weight: 800; }
+.mut-ind-num { font-size: 0.95rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mut-ind-num--miss {
+  justify-self: start; padding: 2px 10px; border-radius: 99px;
+  background: color-mix(in srgb, var(--peligro-texto) 14%, transparent); color: var(--peligro-texto); font-size: 0.78rem; font-weight: 700;
+}
+.mut-den-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mut-den-input {
+  flex: 1; min-width: 0; box-sizing: border-box; min-height: 40px; padding: 0 12px;
+  background: var(--superficie); border: 1.5px solid var(--borde-fuerte); border-radius: 10px;
+  font: inherit; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--texto); outline: none;
+}
+.mut-den-input::placeholder { color: var(--texto-suave); font-weight: 500; }
+.mut-den-input:focus { border-color: var(--mut-acento); box-shadow: 0 0 0 3px var(--mut-acento-suave); }
+.mut-den-input:disabled { opacity: 0.45; }
+.mut-den-input::-webkit-inner-spin-button, .mut-den-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* "Sin dato" como interruptor (sigue siendo una casilla, para el teclado y lectores) */
+.mut-sindato { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 0.76rem; font-weight: 600; color: var(--texto-secundario); white-space: nowrap; cursor: pointer; }
+.mut-switch {
+  appearance: none; -webkit-appearance: none; position: relative; flex-shrink: 0; width: 34px; height: 20px; margin: 0;
+  border-radius: 99px; background: var(--borde-fuerte); cursor: pointer; transition: background-color 0.15s;
+}
+.mut-switch::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%;
+  background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); transition: transform 0.15s;
+}
+.mut-switch:checked { background: var(--mut-acento); }
+.mut-switch:checked::after { transform: translateX(14px); }
+.mut-switch:focus-visible { outline: 2px solid var(--marca-texto); outline-offset: 2px; }
+
+.mut-ind-den-auto { font-size: 0.78rem; font-weight: 600; color: var(--exito-texto); }
+.mut-ind-den-auto-wrap { display: inline-flex; align-items: center; gap: 8px; color: var(--texto-suave); }
+.mut-ind-den-box {
+  min-width: 70px; padding: 8px 12px; border-radius: 10px; background: var(--superficie-suave); border: 1px solid var(--borde);
+  font-weight: 700; font-variant-numeric: tabular-nums; color: var(--texto-medio); text-align: center;
+}
+
+/* Zona del Excel: se ilumina al arrastrar; con archivo, verde */
+.mut-drop {
+  display: flex; align-items: center; justify-content: center; min-height: 56px; padding: 10px 14px; box-sizing: border-box;
+  border: 1.5px dashed var(--borde-fuerte); border-radius: 12px; color: var(--texto-secundario);
+  cursor: pointer; transition: border-color 0.15s, background-color 0.15s;
+}
+.mut-drop:hover, .mut-drop--over { border-color: var(--mut-acento); background: var(--mut-acento-suave); }
+.mut-drop--done { border-style: solid; border-color: color-mix(in srgb, var(--exito-texto) 40%, transparent); background: var(--tinte-exito); cursor: default; }
+.mut-drop-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.mut-file-chip { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; color: var(--texto); font-weight: 700; }
+.mut-file-chip > svg { flex-shrink: 0; color: var(--exito-texto); }
+.mut-file-chip > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.mut-chip-x {
+  display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px;
+  background: transparent; border: 0; border-radius: 50%; color: var(--texto-suave); cursor: pointer;
+}
+.mut-chip-x:hover { background: rgba(var(--contraste-rgb), 0.06); color: var(--peligro-texto); }
+
+.mut-error { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--tinte-peligro); color: var(--peligro-texto); font-weight: 600; }
+
+/* ── Pie: siempre visible; solo el cuerpo hace scroll ── */
+.mut-footer {
+  flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; padding: 16px 28px;
+  background: var(--superficie-suave); border-top: 1px solid var(--borde); box-shadow: 0 -10px 18px -14px rgba(0, 0, 0, 0.35);
+}
+.mut-warning { flex: 1 1 280px; display: flex; align-items: center; gap: 8px; margin: 0; color: var(--aviso-texto-fuerte); }
+.mut-warning svg { flex-shrink: 0; }
+.mut-warning strong { color: var(--texto); }
+.mut-footer-botones { display: flex; gap: 10px; margin-left: auto; }
+.mut-btn-cancel {
+  min-height: 44px; padding: 0 18px; background: transparent; border: 1px solid var(--borde-fuerte); border-radius: 10px;
+  font: inherit; font-weight: 700; color: var(--texto-secundario); cursor: pointer;
+}
+.mut-btn-cancel:hover { background: rgba(var(--contraste-rgb), 0.05); color: var(--texto); }
+.mut-btn-confirm {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 24px;
+  background: #17735e; border: 0; border-radius: 10px; font: inherit; font-weight: 800; color: #ffffff; cursor: pointer;
+}
+.mut-btn-confirm:hover { filter: brightness(1.1); }
+
+/* ── Teléfono: pantalla completa, selector cerrado y datos en tarjetas ── */
+@media (max-width: 640px) {
+  .mut-overlay { padding: 0; }
+  .mut-modal { width: 100%; height: 100%; max-height: none; border: 0; border-radius: 0; }
+  .mut-header { padding: 18px 16px 14px; }
+  .mut-close { width: 44px; height: 44px; top: 10px; right: 8px; }
+  .mut-title { font-size: 1.15rem; margin-bottom: 12px; }
+  .mut-selector-boton { flex-wrap: wrap; padding: 10px 14px; }
+  .mut-selector-boton strong { flex-basis: calc(100% - 30px); }
+  .mut-selector-boton .mut-unidad-chips { order: 3; flex-basis: 100%; }
+  .mut-unidad-lista { grid-template-columns: 1fr; }
+  .mut-unidad-grupo + .mut-unidad-grupo { border-left: 0; border-top: 1px solid var(--borde); }
+  .mut-unidad-row { min-height: 44px; }
+  .mut-body { padding: 16px; gap: 18px; }
+  .mut-ind-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .mut-ind-chip { flex-direction: column; gap: 6px; min-height: 66px; padding: 10px 4px; }
+  .mut-ind-chip strong { font-size: 0.74rem; }
+
+  .mut-det-table { border: 0; border-radius: 0; display: flex; flex-direction: column; gap: 8px; overflow: visible; }
+  .mut-det-row--head { display: none; }
+  .mut-det-row {
+    grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ind num" "den den";
+    gap: 10px; padding: 12px 14px; border: 1px solid var(--borde); border-radius: 12px;
+  }
+  .mut-det-ind { grid-area: ind; }
+  .mut-det-row > .mut-ind-num { grid-area: num; justify-self: end; }
+  .mut-det-row > .mut-ind-num::before { content: attr(data-titulo) "  "; font-size: 0.68rem; font-weight: 500; color: var(--texto-suave); }
+  .mut-det-row > :last-child { grid-area: den; }
+  .mut-den-input { min-height: 44px; font-size: 16px; }
+  .mut-sindato { min-height: 44px; }
+
+  .mut-footer { flex-direction: column; align-items: stretch; padding: 12px 16px 16px; }
+  .mut-warning { flex: none; align-items: flex-start; font-size: 0.76rem; }
+  .mut-footer-botones { display: grid; grid-template-columns: 1fr 1.4fr; margin-left: 0; }
+  .mut-btn-cancel, .mut-btn-confirm { min-height: 48px; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) { .mut-det-table { animation: none; } }

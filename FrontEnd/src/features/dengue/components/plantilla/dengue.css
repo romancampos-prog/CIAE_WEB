@@ -1,0 +1,46 @@
+/* ════════════════════════════════════════════════
+   EPIDEMIOLOGÍA — Contenido Dengue (dengue-*)
+   Los estilos de layout (epi-*) están en:
+   src/epidemiologia/epi.css
+   ════════════════════════════════════════════════ */
+
+/* ── Cards ── */
+
+/* ── Sección título ── */
+
+/* ── Tablas ── */
+.dengue-tabla {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.82rem;
+}
+@media (max-width: 48rem) {
+  /* Varias tablas de Dengue se usan directo, sin un div contenedor con
+     scroll — se vuelven scrolleables horizontalmente ellas mismas (truco
+     estándar: display:block en la tabla, las filas/celdas mantienen su
+     layout de tabla por default) en vez de cortarse o apachurrar columnas. */
+  .dengue-tabla { display: block; overflow-x: auto; white-space: nowrap; }
+}
+.dengue-tabla thead th {
+  background: var(--tinte-aviso);
+  color: var(--aviso-texto-fuerte);
+  font-weight: 700; font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid rgba(var(--dorado-rgb), 0.2);
+}
+.dengue-tabla tbody tr {
+  border-bottom: 1px solid var(--borde-suave);
+  transition: background 0.12s;
+}
+.dengue-tabla tbody tr:hover { background: var(--tinte-aviso); }
+.dengue-tabla td { padding: 9px 14px; color: var(--texto-medio); }
+
+/* ── Botón principal ── */
+
+/* ── Estado vacío ── */
+.dengue-estado-vacio {
+  text-align: center; padding: 60px 24px;
+  color: var(--texto-tenue);
+}
+.dengue-icono { font-size: 48px; margin-bottom: 16px; }
+.dengue-estado-vacio p { font-size: 0.9rem; }

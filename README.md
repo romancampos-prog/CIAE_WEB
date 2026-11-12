@@ -17,6 +17,9 @@ Este sistema fue creado por un par de ingenieros expertos en el analisis de dato
 | Arreglar el venv tras mover/renombrar la carpeta | [Seccion 6.1](#seccion-61--arreglar-el-venv-tras-mover-o-renombrar-la-carpeta) |
 | Modulo Epidemiologia | [Seccion 7](#seccion-7--modulo-epidemiologia-dengue) |
 | Entender la estructura de carpetas | [Estructura del proyecto](#estructura-del-proyecto) |
+| Arquitectura del backend | [Seccion 9](#seccion-9--arquitectura-del-backend) |
+| Procesos de indicadores (FTP, IAAS, Extractor) | [BackEnd/indicadores/README.md](BackEnd/indicadores/README.md) |
+| Configurar o agregar un indicador (mapeo) | [BackEnd/indicadores/mapeo/README.md](BackEnd/indicadores/mapeo/README.md) |
 
 ---
 
@@ -72,7 +75,7 @@ No hay un proceso separado para el frontend en produccion.
 
 ```
 Navegador → https://OCC00486WSIAIS5:8005
-               ├── /auth, /ftp, /in-ass...  → API (FastAPI)
+               ├── /auth, /Indicadores/..., /epidemiologia/...  → API (FastAPI)
                └── cualquier otra ruta      → dist/index.html (React)
 ```
 
@@ -443,14 +446,14 @@ Procesa dos bases de datos Excel (SINAVE operativa + SisCep laboratorio) y gener
 
 | Reporte | Ruta frontend |
 |---|---|
-| Canal endemico semanal | `/CIAE/Epidemiologia/canal` |
-| Mapa de situacion / confirmados | `/CIAE/Epidemiologia/mapa/situacion` |
-| Alertas SisCep | `/CIAE/Epidemiologia/alertas` |
-| Duplicados detectados | `/CIAE/Epidemiologia/duplicados` |
+| Canal endemico semanal | `/CIAE/Epidemiologia/dengue/canal` |
+| Mapa de situacion / confirmados | `/CIAE/Epidemiologia/dengue/mapa/situacion` (o `/confirmados`) |
+| Alertas SisCep | `/CIAE/Epidemiologia/dengue/alertas` |
+| Duplicados detectados | `/CIAE/Epidemiologia/dengue/duplicados` |
 
 ### Como se ejecuta el pipeline
 
-1. Ir a `/CIAE/Epidemiologia`
+1. Ir a `/CIAE/Epidemiologia/dengue` (Carga de datos)
 2. Subir la **Base Operativa (SINAVE)** `.xlsx`
 3. Subir la **Base SisCep** `.xlsx`
 4. Hacer clic en **Ejecutar pipeline completo**
@@ -459,7 +462,7 @@ El proceso corre en segundo plano. Los iconos del menu lateral se deshabilitan m
 
 ### Persistencia de resultados
 
-Los resultados se guardan en `BD_CIAE/EPIDEMIOLOGIA/resultados/` como archivos JSON.
+Los resultados se guardan en `BD_CIAE/EPIDEMIOLOGIA/Dengue/resultados/` como archivos JSON.
 Al reiniciar el servidor, los datos del ultimo pipeline se recuperan automaticamente sin necesidad de volver a ejecutarlo.
 
 > Estos archivos viven en `BD_CIAE`, fuera del repositorio — no se suben a git (ver [Estructura del proyecto](#estructura-del-proyecto)).
@@ -468,9 +471,9 @@ Al reiniciar el servidor, los datos del ultimo pipeline se recuperan automaticam
 
 | Carpeta | Contenido |
 |---|---|
-| `BD_CIAE/EPIDEMIOLOGIA/bases/` | Excel cargados por el usuario |
-| `BD_CIAE/EPIDEMIOLOGIA/resultados/` | JSON del ultimo pipeline ejecutado |
-| `BD_CIAE/EPIDEMIOLOGIA/fecha_ultimo_repo/` | Fecha del ultimo reporte generado |
+| `BD_CIAE/EPIDEMIOLOGIA/Dengue/bases/` | Excel cargados por el usuario |
+| `BD_CIAE/EPIDEMIOLOGIA/Dengue/resultados/` | JSON del ultimo pipeline ejecutado |
+| `BD_CIAE/EPIDEMIOLOGIA/Dengue/fecha_ultimo_repo/` | Fecha del ultimo reporte generado |
 
 ### Roles con acceso al pipeline
 
@@ -481,440 +484,249 @@ Los roles se configuran en `BackEnd/.env` (ver tabla de archivos no versionados 
 
 ## SECCION 8 — ARQUITECTURA DEL FRONTEND
 
+React 19 + Vite + **TypeScript estricto** (`.ts` / `.tsx`). Los datos del backend se piden con **TanStack Query** y las rutas son de React Router 7. Gráficas con Recharts/Plotly y mapas con Leaflet.
+
 ### Mapa de carpetas
 
 ```
 FrontEnd/src/
-│
-├── assets/               imagenes, iconos, logos
-├── auth/                 login, contexto de sesion, guards de ruta
-├── shared/               componentes globales (Footer, NavCard)
-├── paginas/              paginas que no pertenecen a ningun modulo (Inicio, Restriciones)
-├── routes/               Routes.jsx — el unico router que conoce todos los modulos
-│
-├── indicadores/          MODULO: Indicadores Medicos
-│   ├── routes/           IndicadoresRoutes.jsx
-│   ├── ftp/              sub-modulo FTP
-│   │   ├── api/          llamadas axios al backend
-│   │   ├── componentes/  piezas visuales (graficas, modales)
-│   │   ├── constantes/   colores.js
-│   │   ├── hooks/        logica reutilizable con estado
-│   │   ├── paginas/      vistas completas registradas como rutas
-│   │   ├── routes/       FTPRoutes.jsx
-│   │   └── utils/        funciones puras sin estado
-│   ├── iaas/             sub-modulo IAAS  (misma estructura que ftp/)
-│   ├── reportes_grafica/ sub-modulo Reportes/Graficas  (misma estructura)
-│   └── shared/           compartido solo entre sub-modulos de indicadores
-│
-└── epidemiologia/        MODULO: Epidemiologia
-    ├── routes/           EpiRoutes.jsx
-    ├── paginas/          EpiLandingPage, EpidemiologiaApp
-    └── dengue/           todo lo especifico de dengue (api, componentes, paginas, hooks)
+├── main.tsx              solo monta <AppProvider><AppRoutes/></AppProvider>
+├── config/env.ts         variables de entorno validadas con Zod (URL del API)
+├── api/                  TODAS las llamadas al backend: un archivo por controller, igual que el backend
+│   ├── cliente/          axiosClient.ts (cookie de sesión + 401), mensajeDeError.ts
+│   ├── auth/             authApi.ts                       /auth
+│   ├── indicadores/      informacionApi, reportesApi, excelApi, ftpApi, poblacionApi, iaasApi, extractorApi
+│   ├── dengue/           archivosApi, pipelineApi, reportesApi         /epidemiologia/*
+│   └── epidemiologia/    ftpApi (ftpEpidemiologiaApi)                  /epidemiologia/ftp/*
+├── app/
+│   ├── providers/        AppProvider (TanStack Query, tema, sesión, router) y ThemeProvider
+│   ├── layouts/          MainLayout (con Footer) y AuthLayout (login)
+│   └── routes/           AppRoutes.tsx (TODAS las rutas) y ProtectedRoute.tsx (sesión y roles)
+├── pages/                una página por ruta: solo acomoda piezas, sin lógica
+│   ├── login/  inicio/
+│   ├── indicadores/      Hub, GenerarHub, Graficas, ftp/, iaas/, extractor/
+│   └── epidemiologia/    Portada, dengue/ (Carga, Canal, Mapa, Alertas, Duplicados) y acciones/ (OC30)
+├── features/             cada funcionalidad encapsulada
+│   ├── auth/  indicadores/  graficas/  generar-ftp/  generar-iaas/  generar-extractor/  dengue/  acciones/
+│   │   ├── components/   piezas visuales de la feature
+│   │   ├── hooks/        estado y llamadas (useQuery / useMutation)
+│   │   ├── constants/  utils/  context/   (donde haga falta)
+│   │   └── index.ts      API pública: lo ÚNICO que se importa desde fuera de la feature
+├── components/           TopBar, Footer, ui/ (NavCard, BotonTema, modales) e icons/ (TODOS los íconos SVG): sin lógica de negocio
+├── hooks/  utils/        globales y técnicos (useTema, tema.ts, horario.ts, colorAcento.ts)
+├── styles/               tema.css (variables claro/oscuro), inicio.css, epidemiologia.css
+└── types/                TODOS los tipos que no son props de un componente
+    ├── api/              lo que responde el backend, espejo de api/ (respuestaApi, auth, indicadores/ftp.ts, dengue/reportes.ts...)
+    ├── pantallas/        tipos propios de cada pantalla (graficas, generarFtp, generarExtractor, dengue, fichaTecnica, tema, auth)
+    └── globales/         declaraciones .d.ts (variables CSS en style, react-plotly.js)
 ```
 
----
+Qué va en cada lugar:
+- **Es una pantalla con ruta** → `pages/`. La página llama a los hooks de la feature y pasa datos a sus componentes.
+- **Es lógica, estado o una llamada al backend de algo concreto** → `features/<esa cosa>/hooks` y `services`.
+- **Lo usa toda la app** → `components/`, `hooks/`, `utils/`, `styles/`.
 
 ### Arbol de rutas completo
 
-```
-/CIAE/LOGIN
-/CIAE/Inicio
-/CIAE/IndicadoresMedicos/              → FTPPage          (hub de acceso)
-/CIAE/IndicadoresMedicos/Graficas      → GraficasUnificadasPage
-/CIAE/IndicadoresMedicos/Generar       → GenerarHub
-/CIAE/IndicadoresMedicos/FTP/          → FTPLanding
-/CIAE/IndicadoresMedicos/FTP/Generar   → IndicadoresPage
-/CIAE/IndicadoresMedicos/IASS/         → IASSLanding
-/CIAE/IndicadoresMedicos/IASS/Reporte  → IASSPage
-/CIAE/IndicadoresMedicos/Grafica/Config          → ConfigPage
-/CIAE/IndicadoresMedicos/Grafica/GraficaReporte  → pageGraficas
-/CIAE/IndicadoresMedicos/Grafica/Restricciones   → Restriciones
-/CIAE/Epidemiologia/                   → EpiLandingPage
-/CIAE/Epidemiologia/dengue/            → CargaPage
-/CIAE/Epidemiologia/dengue/canal       → CanalPage
-/CIAE/Epidemiologia/dengue/mapa/:tipo  → MapaPage
-/CIAE/Epidemiologia/dengue/alertas     → AlertasSiscepPage
-/CIAE/Epidemiologia/dengue/duplicados  → DuplicadosPage
-```
+Todas viven en `app/routes/AppRoutes.tsx`:
 
-El router raiz solo delega — no conoce las rutas hijas:
-
-```jsx
-// routes/Routes.jsx
-<Route path="CIAE/IndicadoresMedicos/*" element={<IndicadoresRoutes />} />
-<Route path="CIAE/Epidemiologia/*"      element={<EpiRoutes />} />
+```
+/CIAE/LOGIN                                  LoginPagina           (AuthLayout)
+/CIAE/Inicio                                 InicioPagina          (con sesión)
+/CIAE/IndicadoresMedicos                     HubIndicadoresPagina
+/CIAE/IndicadoresMedicos/Graficas            GraficasPagina
+/CIAE/IndicadoresMedicos/Generar             GenerarHubPagina      ┐
+/CIAE/IndicadoresMedicos/FTP                 MenuFtpPagina         │
+/CIAE/IndicadoresMedicos/FTP/Generar         GenerarFtpPagina      │ roles: admin,
+/CIAE/IndicadoresMedicos/IAAS                MenuIaasPagina        │ edita_indicadores,
+/CIAE/IndicadoresMedicos/IAAS/Reporte        GenerarIaasPagina     │ edita_iaas
+/CIAE/IndicadoresMedicos/Extractor           GenerarExtractorPagina┘ (también /Extractor/Generar)
+/CIAE/Epidemiologia                          PortadaEpidemiologiaPagina  ┐ todos
+/CIAE/Epidemiologia/acciones                 AccionesPagina              ┘ (editan: admin, edita_epidemiologia)
+/CIAE/Epidemiologia/dengue                   CargaPagina                 ┐ internos (no unidad);
+/CIAE/Epidemiologia/dengue/canal             CanalPagina                 │ Carga solo quien edita
+/CIAE/Epidemiologia/dengue/mapa/:tipo        MapaPagina                  │
+/CIAE/Epidemiologia/dengue/alertas           AlertasSiscepPagina         │
+/CIAE/Epidemiologia/dengue/duplicados        DuplicadosPagina            ┘
 ```
 
-Cada modulo resuelve sus propias rutas internas:
-
-```jsx
-// indicadores/routes/IndicadoresRoutes.jsx
-<Routes>
-  <Route index           element={<FTPPage />} />
-  <Route path="Graficas" element={<GraficasUnificadasPage />} />
-  <Route path="FTP/*"    element={<FTPRoutes />} />   {/* delega a FTPRoutes */}
-  <Route path="IASS/*"   element={<IASSRoutes />} />  {/* delega a IASSRoutes */}
-  <Route path="Grafica/*" element={<GraficaRoutes />} />
-</Routes>
-```
-
----
+Los roles se revisan en la ruta (`<ProtectedRoute roles={...} />`), no solo ocultando la tarjeta: tampoco se entra escribiendo la URL. Qué puede hacer cada rol en pantalla sale de `useRol()` (`@/features/auth`); el backend lo vuelve a revisar con los grupos de `auth/services/roles_Services.py`.
 
 ### Como crear una nueva pagina
 
-Ejemplo: agregar una pagina `ResumenPage` al sub-modulo FTP.
+Ejemplo: una página de resumen de FTP.
 
-**1. Crear el archivo de la pagina**
+**1. La llamada al backend en `api/`, en el archivo de su controller, y el hook en la feature:**
 
-```jsx
-// indicadores/ftp/paginas/ResumenPage.jsx
+```ts
+// api/indicadores/ftpApi.ts — dentro de `export const ftpApi = { ... }`: solo HTTP, sin estado
+async resumen(ano: string): Promise<ResumenFtp> {
+  const { data } = await api.get<RespuestaApi<ResumenFtp>>('/Indicadores/ftp/resumen', { params: { ano } });
+  return data.data;
+},
 
-// react
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-// propios
-import logo from '../../../assets/logo_imms.png'
-import './ftp.css'
-
-export default function ResumenPage() {
-  const navigate = useNavigate()
-
-  useEffect(() => { document.title = 'Resumen | CIAE' }, [])
-
-  return (
-    <div className="ftp-root">
-      <header className="ftp-nav">
-        <img src={logo} alt="IMSS" className="ftp-logo" />
-        <button className="ftp-btn-back" onClick={() => navigate('/CIAE/IndicadoresMedicos/FTP')}>
-          Volver
-        </button>
-      </header>
-
-      <main>
-        {/* contenido */}
-      </main>
-    </div>
-  )
+// features/generar-ftp/hooks/useResumenFtp.ts — el estado lo maneja TanStack Query
+export function useResumenFtp(ano: string) {
+  return useQuery({ queryKey: ['ftp', 'resumen', ano], queryFn: () => ftpApi.resumen(ano) });
 }
 ```
 
-**2. Registrar la ruta en FTPRoutes**
+Y se exporta en `features/generar-ftp/index.ts`: `export { useResumenFtp } from './hooks/useResumenFtp';`
 
-```jsx
-// indicadores/ftp/routes/FTPRoutes.jsx
+**2. La página** (`pages/indicadores/ftp/ResumenFtpPagina.tsx`):
 
-// react
-import { Routes, Route } from 'react-router-dom'
+```tsx
 // propios
-import FTPMenu     from '../paginas/FTPLanding'
-import FTPGenerar  from '../paginas/IndicadoresPage'
-import ResumenPage from '../paginas/ResumenPage'   // nueva pagina
+import TopBar from '@/components/TopBar';
+import { useResumenFtp } from '@/features/generar-ftp';
 
-export default function FTPRoutes() {
+const ResumenFtpPagina = () => {
+  const { data, isLoading } = useResumenFtp('2026');
   return (
-    <Routes>
-      <Route index          element={<FTPMenu />} />
-      <Route path="Generar" element={<FTPGenerar />} />
-      <Route path="Resumen" element={<ResumenPage />} />  {/* nueva ruta */}
-    </Routes>
-  )
-}
+    <>
+      <TopBar backTo="/CIAE/IndicadoresMedicos/FTP" />
+      {/* componentes de la feature con data */}
+    </>
+  );
+};
+
+export default ResumenFtpPagina;
 ```
 
-**3. Navegar hacia ella desde cualquier componente**
+**3. La ruta** en `app/routes/AppRoutes.tsx`, dentro del grupo que le toque por rol:
 
-```jsx
-navigate('/CIAE/IndicadoresMedicos/FTP/Resumen')
+```tsx
+<Route path="FTP/Resumen" element={<ResumenFtpPagina />} />
 ```
 
----
+### Agregar un indicador o una familia
+
+Los indicadores llegan del backend (mapeo). Agregar un indicador **no requiere tocar el front**:
+1. Su bloque en `BackEnd/indicadores/mapeo/<modulo>/{FAMILIA}.json` (`mostrarGenerar` / `mostrarGrafica`).
+2. Si es familia nueva: nombre, `imagen` y `color` en `mapeo/catalogos/familias.json` y su ícono en `src/assets/icono_*.png`.
 
 ### Reglas de codigo — Frontend
 
-#### Imports: siempre con separador de seccion
+- **TypeScript estricto**, sin `any`. Los tipos van en `types/`: lo que responde el backend en `types/api/` (un archivo por controller, igual que `api/`) y lo propio de una pantalla en `types/pantallas/`. Excepciones: los **props** de un componente (su contrato) van en el mismo archivo, arriba, justo antes del componente; y los tipos que se calculan de un hook (`ReturnType<typeof useGenerarIaas>`) se quedan junto a él.
+- **Imports**: solo con alias `@/` (nunca `../`), en dos bloques `// react` y `// propios`. Desde fuera de una feature solo se importa su `index.ts` (`@/features/graficas`), nunca sus archivos internos.
+- **Llamadas al backend**: solo en `api/<modulo>/<controller>Api.ts`, un archivo por controller del backend (ej. `/Indicadores/ftp/*` → `api/indicadores/ftpApi.ts`), con un objeto `<controller>Api` con funciones que solo hacen la petición (sus tipos, en `types/api/` con el mismo nombre). Cualquier pantalla que necesite ese endpoint usa el mismo archivo. El estado va en los hooks de la feature con `useQuery` (leer) y `useMutation` (enviar).
+- **Páginas**: llaman hooks de la feature y pasan datos por props; la lógica no vive ahí.
+- **Navegación**: `navigate()` siempre con ruta absoluta (`/CIAE/IndicadoresMedicos/FTP`), nunca `navigate(-1)` ni relativa.
+- **El front no inventa datos de negocio**: textos, catálogos, íconos y colores de familia salen del backend/mapeo. El ícono se traduce con `urlIcono` (`@/features/indicadores`) y el color se aplica con la variable CSS `--ic`:
 
-```jsx
-// react
-import { useState, useEffect } from 'react'
-import { useNavigate }         from 'react-router-dom'
-// propios
-import TarjetaIndicador from '../componentes/TarjetaIndicador'
-import { CAT_COLOR }    from '../constantes/colores'
-import logo             from '../../../assets/logo_imms.png'
-import './mi-pagina.css'
-```
-
-> Sin aliases (`@/`, `@assets/`, etc.). Siempre rutas relativas desde el archivo actual.
-
-#### Navegacion: siempre rutas absolutas
-
-```jsx
-// CORRECTO — ruta absoluta
-navigate('/CIAE/IndicadoresMedicos/FTP')
-navigate('/CIAE/IndicadoresMedicos/FTP/Generar')
-navigate('/CIAE/Inicio')
-
-// INCORRECTO — nunca esto
-navigate(-1)
-navigate('Generar')
-navigate('./FTP')
-```
-
-#### Paginas vs Componentes
-
-| Tipo | Carpeta | Caracteristica |
-|---|---|---|
-| Pagina | `paginas/` | Es una ruta del router. Tiene su propio header, layout completo |
-| Componente | `componentes/` | Se importa dentro de una pagina. No aparece en ningun routes/ |
-
-Si algo solo lo usa una pagina y no aparece en routes, va en `componentes/`, no en `paginas/`.
-
-#### Sistema de colores por categoria
-
-Los colores de cada categoria de indicador se definen una sola vez en `ftp/constantes/colores.js` y se aplican via CSS custom property `--ic`:
-
-```js
-// ftp/constantes/colores.js
-export const COLORS = {
-  CAMA: '#b54870',  CACU: '#0d9488',  EH: '#691c32',
-  DM:   '#1a3a8f',  MT:   '#065f46',  CUPN: '#336699',
-}
-export const CAT_COLOR = {           // version mas oscura para contraste
-  CAMA: '#8d3456',  CACU: '#0f766e', EH: '#4e1224',
-  DM:   '#5c35a0',  MT:   '#7E0808', CUPN: '#336699',
-}
-```
-
-```jsx
-// En la pagina o componente — pasar el color como CSS variable
-<div className="mi-card" style={{ '--ic': CAT_COLOR[cat] }}>
-  <span>{indicador}</span>
-</div>
+```tsx
+<div className="mi-card" style={{ '--ic': familia.color }}>{indicador}</div>
 ```
 
 ```css
-/* En el CSS — consumir --ic con color-mix para tintes suaves */
-.mi-card {
-  border-left: 3px solid var(--ic);
-  background:  color-mix(in srgb, var(--ic) 10%, transparent);
-}
-
-.mi-card:hover {
-  background: color-mix(in srgb, var(--ic) 18%, transparent);
-}
+.mi-card { border-left: 3px solid var(--ic); background: color-mix(in srgb, var(--ic) 10%, transparent); }
 ```
 
-#### Comentarios: solo el "por que", nunca el "que"
-
-```jsx
-// MAL — el nombre ya dice lo que hace
-/** Componente que muestra las tarjetas de cada indicador */
-const TarjetasIndicador = () => { ... }
-
-// MAL — comentario de tarea/contexto que rota con el tiempo
-// Agregado para el flujo de generacion FINAL (issue #47)
-const [modoFinal, setModoFinal] = useState(false)
-
-// BIEN — explica una restriccion no obvia
-// El backend espera el mes como string "01".."12", no como numero
-const mesStr = String(mes).padStart(2, '0')
-```
+- **Epidemiología responde sin `ApiResponse`**: `reportesDengueApi` lee `response.data` directo en los reportes. Si el backend cambia eso, hay que cambiar los dos lados a la vez.
+- **Prefijo CSS por sección** (`ftp-`/`ind-`, `ia-`, `ex-`/`exv-`/`exa-`, `ig-`/`gi-` gráficas, `epi-`/`dengue-`): no mezclar clases entre secciones.
+- **Íconos**: nunca un `<svg>` suelto en un componente. Todos viven en `components/icons/` (`iconosAcciones`, `iconosDatos`, `iconosEstados`, `iconosFlechas`, `iconosTema`) y se usan con `import { IconoDescargar } from '@/components/icons'`. Cada ícono acepta `tamano` y cualquier prop de `<svg>` (`strokeWidth`, `className`, `style`...). Ícono nuevo = agregarlo al archivo de su tipo y exportarlo en `components/icons/index.ts`.
+- **Comentarios**: solo el "por qué", nunca el "qué".
+- **Verificar antes de subir**: `npm run typecheck`, `npm run lint` y `npm run build`.
 
 ---
 
 ## SECCION 9 — ARQUITECTURA DEL BACKEND
 
+> Esta sección es un resumen. El detalle del módulo de indicadores está en:
+> - [BackEnd/indicadores/README.md](BackEnd/indicadores/README.md): mapa de archivos, endpoints, procesos de FTP, IAAS y Extractor, cómo se guarda en BD_CIAE, gráficas, Excel y excepciones.
+> - [BackEnd/indicadores/mapeo/README.md](BackEnd/indicadores/mapeo/README.md): los JSON de configuración de cada indicador, campo por campo, y cómo agregar uno nuevo.
+> - [BackEnd/epidemiologia/README.md](BackEnd/epidemiologia/README.md): módulo de epidemiología.
+
 ### Mapa de carpetas
 
 ```
 BackEnd/
-│
-├── configs/              configuracion global del sistema
-│   ├── cors.py           origenes CORS permitidos (cambiar hostname aqui)
-│   └── settings.py       DATA_DIR, variables de entorno (.env)
-│
-├── auth/                 autenticacion JWT
-│   ├── controllers/      auth_controller.py
-│   ├── models/
-│   └── services/
-│
+├── main.py               punto de entrada: registra los routers y sirve el frontend
+├── configs/              configuracion global (cors.py, settings.py, response.py = ApiResponse)
+├── middleware/           errores_endpoints_Middleware.py: captura los errores de los endpoints
+├── compartido/           lo que usan 2 o mas modulos
+│   ├── ftp_imss/         FTP del IMSS (conectar, navegar con diagnostico, descargar, catalogo_ftp.json)
+│   ├── extraccion_excel/ motor + un archivo por modo (modos_por_posicion/, modos_por_filtro/)
+│   ├── auditoria_Services.py        eventos en BD_CIAE/auditoria.log
+│   └── validar_archivo_Services.py  peso/tipo del archivo subido y contrasena
+├── auth/                 MODULO: sesion (Controller/, services/ con solo_roles, schemas/)
 ├── indicadores/          MODULO: Indicadores Medicos
-│   ├── __init__.py       expone ROUTERS — main.py los registra desde aqui
-│   ├── ftp/              sub-modulo FTP (descarga archivos del servidor FTP)
-│   │   ├── controllers/  un archivo por dominio, no por metodo HTTP
-│   │   ├── models/       esquemas Pydantic para validar entrada/salida
-│   │   ├── services/     logica de negocio pura
-│   │   ├── mapeo/        JSON de configuracion por indicador
-│   │   └── config.py     rutas de BD_CIAE/, constantes del sub-modulo
-│   └── iaas/             sub-modulo IAAS (carga manual de Excel)
-│       ├── controllers/
-│       ├── services/
-│       └── config.py
-│
-├── epidemiologia/        MODULO: Epidemiologia
-│   ├── __init__.py       expone ROUTERS
-│   ├── controllers/
-│   ├── modulos/          algoritmos de negocio (clustering, canal, alertas)
-│   ├── services/         orquestacion de los modulos
-│   └── config.py
-│
-├── main.py               punto de entrada — registra todos los routers
+│   ├── Routes/           indicadores_Route.py: junta los controllers bajo /Indicadores
+│   ├── Controller/       ftp, poblacion, iaas, extractor, reportes, informacion, excel (*_Controller.py)
+│   ├── services/         un tema por carpeta (*_Services.py)
+│   │   ├── ftp/, iaas/, extractor/          logica exclusiva de cada modulo de generacion
+│   │   ├── calculo/, semaforo/              formulas, resultado por unidad y color
+│   │   ├── reporte_guardado/                lectura tipada de lo guardado (graficas y Excel)
+│   │   └── informacion/, poblacion/, grafica/, excel/
+│   ├── datos/            lo unico que lee/escribe: bd_ciae/, lectura_mapeo/, excel_subido/ (*_Datos.py)
+│   ├── shared/           meses, unidades, periodicidad (internos de indicadores)
+│   ├── schemas/          DTO/ (peticiones) y model/ (modelos internos)
+│   └── mapeo/            JSON de configuracion de cada indicador
+├── epidemiologia/        MODULO: Epidemiologia (mismo esqueleto, una carpeta por tema: dengue/, ftp/)
+│   ├── Routes/, Controller/, services/, datos/, schemas/, mapeo/
+│   └── modulos/          algoritmos puros (depuracion, duplicados, clustering, canal endemico)
 └── requirements.txt
 ```
 
----
+`main.py` agrega `indicadores/` al `sys.path`; por eso dentro de indicadores los imports son
+planos (`from services...`, `from shared...`, `from schemas...`).
 
-### Como fluye una peticion
+### Como fluye una peticion (ejemplo FTP)
 
 ```
-Navegador  →  POST /ftp/generar?indicador=CAMA C1&ano=2025&mes=06
+Navegador  →  GET /Indicadores/ftp/generar?indicador=CAMA 01&ano=2026&mes=06
                       │
                       ▼
-            ftp_controller.py       recibe, valida parametros con Pydantic
+   Controller/ftp_Controller.py                  recibe, valida rol y parametros
                       │
                       ▼
-            ftp_service.py          orquesta el proceso completo
-              │         │
-              ▼         ▼
-        ftp_extraer.py   reporte_final.py
-        (descarga Excel  (calcula numerador/
-         del servidor)    denominador/resultado)
+   services/ftp/generar_indicador_ftp_Services.py   orquesta los pasos
+     ├─ datos/lectura_mapeo/mapeo_por_modulo_Datos       lee el mapeo del indicador
+     ├─ services/ftp/extraer_indicador_ftp_Services      baja los reportes del FTP y extrae
+     ├─ services/ftp/calcular_indicador_ftp_Services     aplica las formulas del mapeo
+     ├─ services/semaforo/color_semaforo_Services        pone el color
+     └─ datos/bd_ciae/guardar_mes_Datos                  guarda en BD_CIAE
                       │
                       ▼
-            datos_json_service.py   guarda historico en JSON
-                      │
-                      ▼
-            generar_excel.py        construye el .xlsx
-                      │
-                      ▼
-            FileResponse con el archivo generado
+   ApiResponse(success, message, data)   (el Excel se pide aparte a /Indicadores/excel)
 ```
-
----
-
-### Como crear un nuevo endpoint
-
-Ejemplo: agregar `GET /ftp/resumen` que devuelve un resumen de meses generados.
-
-**1. Crear el service** (logica pura, sin saber que es HTTP)
-
-```python
-# indicadores/ftp/services/resumen_service.py
-from ftp.services.datos_json_service import leer_datos_indicador
-
-def obtener_resumen(indicador: str, ano: str) -> dict:
-    datos = leer_datos_indicador(indicador, ano)
-    meses = list(datos.get("MESES", {}).keys())
-    return {"indicador": indicador, "ano": ano, "meses_generados": meses}
-```
-
-**2. Crear o agregar al controller** (solo HTTP: recibir, llamar service, responder)
-
-```python
-# indicadores/ftp/controllers/ftp_controller.py
-from fastapi import APIRouter
-from ftp.services.resumen_service import obtener_resumen
-
-router = APIRouter()
-
-@router.get("/resumen")
-def resumen(indicador: str, ano: str):
-    return obtener_resumen(indicador, ano)
-```
-
-**3. Verificar que el router ya esta registrado en `__init__.py`**
-
-```python
-# indicadores/__init__.py
-from ftp.controllers.ftp_controller import router as ftp_router
-
-ROUTERS = [
-    (ftp_router, "/ftp"),   # ya registrado — nada mas que hacer
-    ...
-]
-```
-
-El endpoint queda disponible en `/ftp/resumen?indicador=CAMA C1&ano=2025`.
-
----
-
-### Como agregar un modulo nuevo
-
-Ejemplo: modulo `vacunacion/`.
-
-```
-BackEnd/vacunacion/
-├── __init__.py
-├── config.py
-├── controllers/
-│   └── vacunacion_controller.py
-└── services/
-    └── vacunacion_service.py
-```
-
-```python
-# vacunacion/__init__.py
-from vacunacion.controllers.vacunacion_controller import router as vac_router
-
-ROUTERS = [
-    (vac_router, "/vacunacion"),
-]
-```
-
-```python
-# main.py — agregar estas tres lineas
-import vacunacion as vac_module
-
-for _router, _prefix in vac_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
-```
-
----
 
 ### Responsabilidad por capa
 
 | Capa | Regla |
 |---|---|
-| `controller` | Solo HTTP: recibir parametros, llamar al service, devolver respuesta. Sin logica de negocio. |
-| `service` | Solo logica: calculos, lectura/escritura de archivos, llamadas FTP. No sabe que es HTTP. |
-| `config.py` | Solo constantes y rutas de archivos del modulo. No importa otros modulos. |
+| `Controller` | Solo HTTP: recibir parametros, validar rol con `solo_roles`, llamar al servicio y responder `ApiResponse`. Sin logica de negocio. |
+| `services` | Solo logica (un archivo por responsabilidad). Lo de un solo modulo va en `services/<modulo>/`; lo compartido en `services/calculo/`, `semaforo/`, `reporte_guardado/`, `informacion/`, `poblacion/`, `grafica/` y `excel/`. |
+| `datos` | Lo unico que lee y escribe: BD_CIAE, el mapeo JSON, el FTP y los Excel subidos. Sin reglas de negocio. |
+| `mapeo` | Las reglas de cada indicador (archivos, columnas, filtros, formulas, semaforo). No se escriben en el codigo. |
 
-Un controller por dominio, nunca por metodo HTTP:
-
-```
-# CORRECTO
-ftp_controller.py        — todo lo relacionado con extraccion FTP
-reportes_controller.py   — todo lo relacionado con reportes
-poblacion_controller.py  — todo lo relacionado con poblacion
-
-# INCORRECTO
-get_controller.py
-post_controller.py
-```
-
----
+Pasos para crear un endpoint nuevo: ver [BackEnd/indicadores/README.md, seccion 12](BackEnd/indicadores/README.md#12-cómo-escribir-un-endpoint-nuevo).
 
 ### Estructura del historico JSON
 
-Los datos de cada indicador se persisten en `BD_CIAE/INDICADORES/FTP/{ano}/{categoria}/{indicador}.json`:
+Cada indicador se guarda en `BD_CIAE/INDICADORES/{año}/{FAMILIA}/{FAMILIA}_{NN}.json`
+(ej. `BD_CIAE/INDICADORES/2026/CAMA/CAMA_01.json`):
 
 ```json
 {
-  "INDICADOR": "CAMA C1",
-  "ANO": "2025",
+  "INDICADOR": "CAMA 01",
+  "ANIO": "2026",
   "MESES": {
-    "ENERO": {
-      "HGZ01": { "numerador": 120, "denominador": 500, "%": 24.0 },
-      "HGZ02": { "numerador":  88, "denominador": 420, "%": 20.9 }
-    },
-    "FEBRERO": {
-      "HGZ01": { "numerador": 135, "denominador": 512, "%": 26.4 }
+    "Enero": {
+      "Poblacion": null,
+      "Reporte": {
+        "UMF 46 GUANAJUATO": { "numerador": 12, "denominador": 900, "%": 1.33, "desempeno": "Esperado" },
+        "TOTAL_OOAD":        { "numerador": 480, "denominador": 41000, "%": 1.17, "desempeno": "Medio" }
+      }
     }
   }
 }
 ```
 
-Para leer o escribir estos archivos usar siempre `ftp/services/datos_json_service.py` — nunca acceder al JSON directamente desde un controller o service ajeno.
+Para leer o escribir estos archivos usar siempre `datos/bd_ciae/` (y
+`services/reporte_guardado/reporte_guardado_Services.py` para las consultas tipadas). El semanal de FTP, los cortes del
+Extractor (`CORTES`) y la carpeta `EXTRACTOR_PARTES` estan explicados en
+[BackEnd/indicadores/README.md, seccion 5](BackEnd/indicadores/README.md#5-cómo-se-guarda-en-bd_ciae).
 
 ---
 

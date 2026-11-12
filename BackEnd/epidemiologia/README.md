@@ -1,127 +1,153 @@
 # Backend: Epidemiología
 
-Análisis de dengue. Procesa archivos CSV (base operativa + SisCep), ejecuta un pipeline de análisis y expone resultados por sección (canal endémico, mapa de brotes, alertas, duplicados).
+Análisis de dengue. El usuario sube dos Excel (`.xlsx`): la **base operativa** (SINAVE) y la
+**base SisCep** (resultados de laboratorio). Un pipeline los procesa en segundo plano y deja
+los resultados por sección (canal endémico, mapas de brotes, alertas SisCep, duplicados) en
+`BD_CIAE/EPIDEMIOLOGIA/Dengue/resultados/`, de donde los leen los endpoints de reportes.
+
+Mismo estilo que indicadores: **un archivo por responsabilidad**, el controller llama a un solo
+servicio y los servicios orquestan con pasos numerados.
 
 ## Estructura
 
 ```
 epidemiologia/
-├── controllers/
-│   ├── archivos_controller.py    — carga de archivos CSV al servidor
-│   ├── pipeline_controller.py    — estado y ejecución del pipeline
-│   └── reportes_controller.py    — consulta de resultados por sección
-├── mapeo/
-│   ├── gto_normalizado.json      — nombres normalizados de municipios de Guanajuato
-│   └── cp_coordenadas.csv        — coordenadas geográficas por código postal
-├── modulos/                      — algoritmos de análisis (funciones puras)
-│   ├── alertas.py                — detección de alertas epidemiológicas
-│   ├── clustering.py             — agrupación de casos
-│   ├── depuracion.py             — limpieza de datos
-│   ├── duplicados.py             — detección de registros duplicados
-│   ├── fechas.py                 — utilidades de semana epidemiológica
-│   ├── generador_mapas.py        — construcción de datos para el mapa de brotes
-│   └── series_tiempo.py          — canal endémico y series temporales
-├── services/
-│   ├── pipeline_service.py       — orquesta el pipeline completo
-│   ├── canal_service.py          — datos para la sección canal
-│   ├── mapa_service.py           — datos para la sección mapa
-│   ├── alertas_service.py        — datos para la sección alertas
-│   └── clustering_service.py     — datos de clustering
-├── config.py                     — RUTA_OPERATIVA, RUTA_SISCEP, RUTA_RESULTADOS
-└── __init__.py                   — exporta ROUTERS
+├── Routes/
+│   └── epidemiologia_Route.py      — junta los controllers (/archivos, /pipeline, /reportes, /ftp); main.py lo monta bajo /epidemiologia
+├── config.py                       — AÑO_ACTUAL y rutas (BD_CIAE/EPIDEMIOLOGIA/Dengue y mapeo/dengue/)
+├── Controller/
+│   ├── archivos_Controller.py      — subir base operativa / SisCep            (ApiResponse)
+│   ├── pipeline_Controller.py      — estado y ejecutar el pipeline            (ApiResponse)
+│   ├── reportes_Controller.py      — resultados por sección                   (dato DIRECTO)
+│   └── epiFTP.py                   — Acciones: extraer el OC30 del FTP y consultar lo guardado (ApiResponse)
+├── services/                       — orquestan: leen con datos/, calculan con modulos/
+│   └── dengue/
+│       ├── subir_bases_Services.py  — validar .xlsx y peso, guardar, auditar
+│       ├── pipeline/
+│       │   ├── estado_pipeline_Services.py   — ESTADO y RESULTADOS en memoria (estado_del_pipeline, resultado_guardado)
+│       │   ├── iniciar_pipeline_Services.py  — 409 si ya corre, 400 si falta una base; arranca el hilo
+│       │   └── pasos_pipeline_Services.py    — los pasos en orden (ver abajo)
+│       ├── depuracion_Services.py   — los 7 pasos de la depuración
+│       ├── duplicados_Services.py   — detectar + tabla de eliminados con datos del paciente
+│       ├── canal_Services.py        — canal endémico (histórico vs año actual)
+│       ├── alertas_Services.py      — alertas SisCep para el front
+│       ├── clustering_Services.py   — conteos, coordenadas, brotes y GeoJSON
+│       └── mapa_Services.py         — GeoJSON con casos por municipio para Leaflet
+│   ├── ftp/
+│   │   ├── ftpExtraer.py                     — baja el reporte de cada unidad, aplica el modo del mapeo y guarda
+│   │   ├── excel_extraccion_Services.py     — Excel de un rango de fechas (varios meses): lee los JSON mensuales, filtra por columnaFecha del mapeo y por unidad
+│   │   ├── consulta_extraccion_Services.py   — lee el definitivo del mes o, si no hay, su última semana; recorta a la unidad del usuario, errores solo admin, + estadísticas (404 si no hay nada)
+│   │   └── periodos_extraccion_Services.py   — meses del año con extracción (definitivo / última semana)
+│   │   └── estatus_acciones_Services.py      — cambiar el estatus de seguimiento de un registro (solo admin), validado contra el catálogo
+│   │   └── estudios_acciones_Services.py     — subir (solo admin, solo en "Con estudio") y descargar el estudio (Excel) de un registro
+│   │   └── sincronizar_estudios_Services.py  — al consultar (admin) pone estudios.json al día con la carpeta: quita los que ya no están, agrega los puestos a mano con nombre de registro y avisa los que no son de ninguno
+│   └── mapeo/mapeo_Services.py      — lee y valida mapeo/ftp/{archivo}.json (schemas/model/accionesAchivo_Dto.py)
+├── datos/                          — lo ÚNICO que lee y escribe archivos
+│   └── dengue/
+│       ├── bases_dengue_Datos.py   — leer/guardar base operativa y SisCep
+│       ├── historico_Datos.py      — histórico {año}.xlsx con su semana epidemiológica
+│       ├── catalogos_geo_Datos.py  — CPs con lat/lon y GeoJSON de Guanajuato (de mapeo/dengue/)
+│       ├── resultados_pipeline_Datos.py — resultados/{clave}.json y fecha del último reporte
+│       └── modelo_duplicados_Datos.py   — el modelo entrenado de duplicados (hoy no existe)
+│   └── ftp/extracciones_ftp_Datos.py — guardar/leer FTP/{extraccion}/{año}/{extraccion}_{año}{mes}.json (uno por mes; "semana" adentro: null = definitivo; un previo no reemplaza al definitivo)
+│   └── ftp/estatus_acciones_Datos.py — catálogo de estatus (mapeo/ftp/catalogos/estatus_acciones.json) y lo marcado en ACCIONES/{extraccion}/estatus.json ({id del registro: estatus}; fuera de FTP/: es captura, no se regenera)
+│   └── ftp/estudios_acciones_Datos.py — los estudios tal cual en ACCIONES/{extraccion}/ESTUDIOS/{año}/{unidad}/{mes}/ con el nombre con que llegó (si ya hay uno igual, " (2)") + índice ESTUDIOS/estudios.json; si se reemplaza, el anterior queda como _respaldo_{fecha}
+│       ftp/claves_up_Datos.py    — catálogo de claves UP (mapeo/ftp/catalogos/claves_up.json: descripción, grupo, RAIS/SIMF); en memoria, reiniciar tras editarlo
+├── modulos/                        — algoritmos puros: reciben y regresan DataFrames, sin archivos
+│   └── dengue/
+│       ├── fechas.py               — semana epidemiológica SUIVE (semana_epidemiologica)
+│       ├── depuracion/             — filtrar_imss, limpiar_texto, ubicacion_geografica,
+│       │                             cruce_siscep, asignar_semana, clasificacion_caso
+│       ├── duplicados/             — campos_registro, excepciones, reglas_resolucion, similitud,
+│       │                             candidatos, formato_posibles, deteccion
+│       ├── clustering/             — municipios_y_ventanas, conteo_casos, coordenadas_cp,
+│       │                             brotes_espaciales, brotes_temporales
+│       ├── canal_endemico.py       — canal por cuartiles, zonas y semanas anómalas
+│       └── alertas.py              — las 5 alertas SisCep y negativos por unidad
+│   └── ftp/filtro_seleccion.py     — modo FILTRO_SELECCION: filas que pasan filtroColumna, columnas de 'seleccionar'
+│       ftp/estadisticas_extraccion.py — conteos de las filas: total, por columna del filtroColumna (ej. Clave de la Acción) y por unidad
+│       ftp/errores_por_tipo.py     — errores guardados {tipo, unidad, reporte, detalle} agrupados por tipo con la misma forma que las restricciones de indicadores FTP (el front usa el mismo ModalRestricciones), nombre/descripción de compartido/ftp_imss/catalogo_errores_ftp.py (el mismo catálogo que indicadores FTP)
+│       ftp/id_registro.py          — id de cada fila (huella de sus valores): el mismo en el previo y en el definitivo
+│       ftp/ruta_estudio.py         — carpeta {año}/{unidad}/{mes} de un registro y el nombre {fecha}_{clave}_{NSS} (`nombreEstudio` del mapeo) con que se reconocen los Excel puestos a mano
+│       ftp/libro_excel_extraccion.py  — el .xlsx (xlsxwriter), una hoja por tabla: encabezado guinda inmóvil, filtro por columna, fecha como fecha de Excel
+├── entrenamiento/
+│   └── entrenar_duplicados.py      — se corre a mano: MLP vs Random Forest -> modelos/mlp_duplicados.pkl
+└── mapeo/
+    ├── dengue/
+    │   ├── gto_normalizado.json    — GeoJSON de los municipios de Guanajuato
+    │   └── cp_coordenadas.csv      — código postal -> LAT, LON (fuera de git: *.csv en .gitignore)
+    └── ftp/
+        └── AccionesOC30.json       — un archivo por extracción: del OC30, las claves de acción del filtro + columnas a guardar
+        └── catalogos/          — claves_up.json (qué es cada clave UP), colores_claves.json (color de cada clave en pantalla), estatus_acciones.json (No revisado / En proceso / Con estudio)
+
+Cada tema tiene su carpeta en services/, modulos/, datos/ y mapeo/ (hoy dengue/; lo nuevo, ej.
+ftp/, va en su propia carpeta). El FTP en sí (conectar, navegar, catálogo SIAIS) es compartido
+con indicadores y vive en BackEnd/compartido/ftp_imss/.
 ```
 
-## Diferencia crítica vs Indicadores: sin ApiResponse
+## Respuestas: dos formatos
 
-Los endpoints de epidemiología devuelven **datos directos**, no `ApiResponse`:
+- `archivos_Controller` y `pipeline_Controller` responden **`ApiResponse(success, message, data)`**.
+- `reportes_Controller` responde **el dato directo** (sin `ApiResponse`): el front de dengue lee
+  `data` como el objeto mismo. Si se cambia, hay que cambiar el front al mismo tiempo.
 
-```python
-# Indicadores — usa ApiResponse
-return ApiResponse(success=True, message="...", data=resultado)
+## Endpoints
 
-# Epidemiología — datos directos
-return {"canal": datos, "semanas": semanas, "unidades": lista}
-```
+| Método y ruta | Para qué | Servicio |
+|---|---|---|
+| `POST /epidemiologia/archivos/operativa` | Subir la base operativa (`.xlsx`) | `dengue/subir_bases_Services.subir_base_operativa` |
+| `POST /epidemiologia/archivos/siscep` | Subir la base SisCep (`.xlsx`) | `dengue/subir_bases_Services.subir_base_siscep` |
+| `GET /epidemiologia/pipeline/estado` | `{corriendo, paso, completado, error, ultimo_reporte, archivos: {operativa, siscep}}` (polling) | `dengue/pipeline/estado_pipeline_Services.estado_del_pipeline` |
+| `POST /epidemiologia/pipeline/ejecutar` | Arrancar el pipeline | `dengue/pipeline/iniciar_pipeline_Services.iniciar_pipeline` |
+| `GET /epidemiologia/reportes/canal` | Canal endémico | `resultado_guardado("canal")` |
+| `GET /epidemiologia/reportes/mapa/{situacion\|confirmados}` | Mapa de casos y brotes | `resultado_guardado("mapa")[tipo]` |
+| `GET /epidemiologia/reportes/alertas-siscep` | Alertas SisCep | `resultado_guardado("alertas")` |
+| `GET /epidemiologia/reportes/duplicados` | Registros eliminados por duplicado | `resultado_guardado("duplicados")` |
+| `GET /epidemiologia/reportes/posibles-duplicados` | Pares parecidos no confirmados (revisión a mano) | `resultado_guardado("posibles_duplicados")` |
+| `POST /epidemiologia/ftp/extraer/OC30?ano=&mes=[&semana=]` | Acciones: bajar el OC30 de las unidades, extraer y guardar en `BD_CIAE/EPIDEMIOLOGIA/FTP/AccionesOC30/` | `ftp/ftpExtraer.ftp_Extraer_Epidemeologia` |
+| `GET /epidemiologia/ftp/extraccion/OC30?ano=&mes=` | Acciones (admin, unidad): el definitivo del mes o, mientras no hay, su última semana `{extraccion, ano, mes, semana, filas, errores, estadisticas, filtrosMapeo, descripcionClaves}` (`descripcionClaves` = `{UP87: {descripcion, subgrupo}}` del catálogo de claves UP); el rol `unidad` solo recibe sus filas y solo el admin recibe `errores` (`{tipo: {nombreError, descripcionError, unidades}}`, como las restricciones de FTP; `{}` si no es admin) (404 si no hay nada) | `ftp/consulta_extraccion_Services.consultar_extraccion` |
+| `GET /epidemiologia/ftp/extraccion/OC30/periodos?ano=` | Acciones (admin, unidad): `[{mes, definitivo, ultimaSemana}]` de los meses con extracción | `ftp/periodos_extraccion_Services.periodos_de_extraccion` |
+| `POST /epidemiologia/ftp/estatus/OC30` `{id, estatus}` | Acciones (solo admin): estatus de seguimiento de un registro (No revisado / En proceso / Con estudio). La consulta manda `_id` por fila, `estatus` y `catalogoEstatus` | `ftp/estatus_acciones_Services.cambiar_estatus` |
+| `POST /epidemiologia/ftp/estudio/OC30` (form `ano, mes, id, archivo, pesoArchivo`) · `GET /epidemiologia/ftp/estudio/OC30?id=` | Acciones (solo admin): subir el estudio (Excel) de un registro en "Con estudio" (año/unidad/mes de su fecha de atención; con el nombre con que llegó) y bajarlo en base64. La consulta manda `estudios` (solo admin) | `ftp/estudios_acciones_Services.subir_estudio` / `descargar_estudio` |
+| `GET /epidemiologia/ftp/excel/OC30?desde=aaaa-mm-dd&hasta=aaaa-mm-dd` | Acciones (admin, unidad): Excel `{archivo_b64, nombre_archivo, totalRegistros}` de los registros cuya `columnaFecha` (mapeo) cae en el rango, aunque abarque varios meses (lee del mes de `desde` al siguiente de `hasta`); hoja 1 = registros (Unidad + `seleccionar` + Periodo), hoja 2 "Claves UP" = cada clave del filtro con descripción, tema, registros, RAIS/SIMF y clave anterior; el rol `unidad` solo recibe lo suyo (400 rango al revés, 404 sin registros) | `ftp/excel_extraccion_Services.excel_de_extraccion` |
 
-El frontend lee la respuesta con `({ data }) => setDatos(data)` — `data` es el objeto directamente. Si se agrega `ApiResponse`, el frontend se rompe. **Cambiar ambos lados a la vez o no cambiar ninguno.**
+Todos piden rol `admin`. Los reportes responden 404 si el pipeline nunca ha corrido. Los de `/ftp` responden `ApiResponse`.
+
+En el front, Acciones es la tarjeta junto a Dengue en la portada (`/CIAE/Epidemiologia/acciones`, `features/acciones`, `api/epidemiologia/ftpApi.ts`): el admin extrae el periodo y la tabla muestra las columnas tal cual llegan (Unidad + `seleccionar` del mapeo).
 
 ## El pipeline
 
-El pipeline es el núcleo del módulo. Transforma los archivos CSV en resultados de análisis listos para consumir:
+`POST /pipeline/ejecutar` revisa que no esté corriendo y que existan las dos bases, y corre
+`pasos_pipeline_Services.ejecutar_pasos` en un hilo. Cada paso actualiza `ESTADO["paso"]`:
 
-```
-Archivos cargados (POST /archivos/operativa, /archivos/siscep)
-    ↓
-pipeline_service.iniciar_pipeline()
-    ↓
-depuracion → duplicados → clustering → series_tiempo → alertas → generador_mapas
-    ↓
-Resultados guardados en disco (RUTA_RESULTADOS)
-    ↓
-Endpoints de reportes leen los resultados y los sirven al frontend
-```
+1. **Depurar** (`depuracion_Services.depurar_base`): leer la base operativa, filtrar IMSS
+   Guanajuato (institución 2, estado 11), limpiar texto, ubicación (colonia > CP > "Sin
+   ubicación"), cruzar con SisCep (`VEC_ID` = `FOLIO SINAVE` → `ESTATUS_SISCEP`), semana
+   epidemiológica y `CLASIFICACION_FINAL`.
+2. **Duplicados** (`duplicados_Services.procesar_duplicados`): por cada par candidato (mismo
+   Soundex del apellido paterno) → excepciones de negocio → modelo entrenado o umbral de
+   similitud → reglas de resolución (cuál se elimina).
+3. **Canal endémico** (`canal_Services`): histórico por cuartiles contra los casos del año.
+4. **Alertas SisCep** (`alertas_Services`).
+5. **Clustering y mapas** (`clustering_Services`, `mapa_Services`): situación y confirmados.
+6. **Guardar** en `resultados/{clave}.json` y la fecha en `fecha_ultimo_repo/utimoReporte.json`.
 
-El pipeline corre en un hilo separado. `get_estado()` devuelve `{ corriendo: bool, logs: [...] }` para que el frontend haga polling y muestre el progreso.
+Si un paso truena, `ESTADO.error` trae el mensaje y no se guarda nada de esa corrida.
 
-## Patrón de controller (epidemiología)
+## Modelo de duplicados (por confirmar)
 
-```python
-from fastapi import APIRouter, Depends
-from auth.services.jwt_utils import solo_roles
-from epidemiologia.services import canal_service
+La detección busca `epidemiologia/modelos/mlp_duplicados.pkl`. Ese archivo **no existe**, así
+que hoy siempre se usa el **umbral de similitud** (apellido paterno ≥ 0.92, materno ≥ 0.85,
+nombre ≥ 0.88). El entrenamiento quedó aparte en `entrenamiento/entrenar_duplicados.py` (se
+corre a mano con un Excel etiquetado). **Por confirmar** si se va a entrenar el modelo o si se
+quita el entrenamiento.
 
-router = APIRouter()
+## Agregar una sección de análisis de dengue
 
-@router.get("/canal")
-def get_canal(payload: dict = Depends(solo_roles("admin"))):
-    return canal_service.obtener_canal()   # devuelve dict directamente, sin ApiResponse
-```
-
-## modulos/ vs services/
-
-| `modulos/` | `services/` |
-|---|---|
-| Algoritmos de análisis puros | Orquestación y preparación de datos |
-| No conocen rutas de archivo | Sí conocen `config.py` y las rutas |
-| Reciben DataFrames y devuelven resultados | Leen archivos, llaman módulos, devuelven respuesta |
-| Se pueden probar unitariamente | Se prueban integrados |
-
-## Agregar una sección de análisis
-
-**1.** Crear el algoritmo en `modulos/nueva_seccion.py` (función pura, sin I/O de archivo)
-
-**2.** Crear `services/nueva_seccion_service.py`:
-```python
-from epidemiologia.config import RUTA_RESULTADOS
-from epidemiologia.modulos import nueva_seccion
-
-def obtener_nueva():
-    # leer resultados del disco o calcular
-    return nueva_seccion.calcular(datos)
-```
-
-**3.** Añadir endpoint en `controllers/reportes_controller.py`:
-```python
-from epidemiologia.services import nueva_seccion_service
-
-@router.get("/nueva-seccion")
-def get_nueva(payload: dict = Depends(solo_roles("admin"))):
-    return nueva_seccion_service.obtener_nueva()
-```
-
-**4.** Si debe ejecutarse en el pipeline, integrarlo en `pipeline_service.py`
-
-**5.** En frontend: añadir función en `dengue/api/reportes.js` y página en `dengue/paginas/`
-
-## Archivos de mapeo
-
-`gto_normalizado.json` — normaliza nombres de municipios en los CSV (variaciones de escritura → nombre canónico):
-```json
-{ "IRAPUATO": "Irapuato", "LEON": "León", ... }
-```
-
-`cp_coordenadas.csv` — coordenadas para trazar brotes en el mapa:
-```
-cp,lat,lng
-36000,20.677,-101.354
-```
+1. El algoritmo en `modulos/dengue/` (recibe y regresa DataFrames, sin leer archivos).
+2. Si necesita leer algo, su lectura en `datos/dengue/`.
+3. Un servicio en `services/dengue/` que lo orqueste y arme la respuesta para el front.
+4. Agregar el paso en `services/dengue/pipeline/pasos_pipeline_Services.py`, su clave en
+   `CLAVES_RESULTADOS` (`datos/dengue/resultados_pipeline_Datos.py`) y el endpoint en
+   `Controller/reportes_Controller.py` (dato directo).
+5. En el front: la función en la API de dengue y su página.

@@ -5,9 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="./public/iconoImss.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Web | CIAE</title>
+    <!-- Tema antes del primer pintado (evita el destello blanco en modo oscuro).
+         Misma clave que src/utils/tema.ts. -->
+    <script>
+      (function () {
+        var tema = null;
+        try { tema = localStorage.getItem('ciae-tema'); } catch (e) { /* sin almacenamiento */ }
+        if (tema !== 'dark' && tema !== 'light') {
+          tema = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', tema);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,0 +1,654 @@
+/* ══════════════════════════════════════════════
+   IAAS — CIAE  (rediseño visual)
+   ══════════════════════════════════════════════ */
+
+.ia-root {
+  width: 100%; min-height: 100%;
+  background: #f1f5f3;
+  font-family: 'Inter', system-ui, sans-serif;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+
+/* ── Fondo ── */
+.ia-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.ia-orb { position: absolute; border-radius: 50%; filter: blur(100px); }
+.ia-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, var(--color-oro-institucional), transparent 70%); top: -200px; right: -150px; opacity: 0.12; animation: ia-float 18s ease-in-out infinite alternate; }
+.ia-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, var(--color-imss-primario), transparent 70%); bottom: -100px; left: -100px; opacity: 0.13; animation: ia-float 22s ease-in-out infinite alternate-reverse; }
+.ia-orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, var(--color-tinto-gobierno), transparent 70%); top: 40%; left: 35%; opacity: 0.07; animation: ia-float 14s ease-in-out infinite alternate; }
+@keyframes ia-float {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(24px, 16px) scale(1.08); }
+}
+
+/* ── Nav ── */
+
+/* Leyenda de solo-lectura (ícono en el header, texto en tooltip nativo) */
+.ia-legal-note {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  color: var(--texto-suave);
+  cursor: help;
+}
+.ia-legal-note:hover { background: rgba(100,116,139,0.12); color: var(--texto-medio); }
+
+@keyframes ia-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+  50%      { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+}
+
+/* ── Main ── */
+.ia-main {
+  position: relative; z-index: 5; flex: 1;
+  max-width: 1480px; width: 100%;
+  margin: 0 auto; padding: 26px 28px 24px;
+  animation: ia-in 0.55s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes ia-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Hero ── */
+/* Todo en un solo renglón para ahorrar alto: insignia IAAS + título + píldora
+   de mes, en vez de una frase larga compitiendo con el título. */
+.ia-hero { margin-bottom: 14px; }
+.ia-hero-title-row {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin: 0 0 4px;
+}
+.ia-hero-label {
+  font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -1px;
+  color: var(--texto-tenue); flex-shrink: 0; line-height: 1.1;
+}
+.ia-hero-sep { font-size: clamp(1.5rem, 2.6vw, 2rem); color: var(--texto-deshabilitado); flex-shrink: 0; line-height: 1.1; }
+.ia-hero-title-main {
+  margin: 0; line-height: 1.1;
+  font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 900;
+  letter-spacing: -1px;
+  background: linear-gradient(100deg,
+    var(--color-tinto-gobierno) 0%, var(--color-tinto-gobierno) 45%,
+    var(--superficie) 50%,
+    var(--color-tinto-gobierno) 55%, var(--color-tinto-gobierno) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ia-title-shimmer 7s ease-in-out infinite;
+}
+@keyframes ia-title-shimmer {
+  0%   { background-position: 150% 0; }
+  50%  { background-position: -50% 0; }
+  100% { background-position: -50% 0; }
+}
+.ia-hero-sub { font-size: 0.8rem; color: var(--texto-suave); margin: 0; max-width: 520px; line-height: 1.5; }
+
+/* — Fila inferior del hero: descripción + selector de período — */
+
+.ia-periodo-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--tinto-texto); flex-shrink: 0;
+}
+
+/* ── Info indicador ── */
+
+/* ── Período (legacy) ── */
+
+.ia-select {
+  padding: 6px 30px 6px 10px;
+  border: 1.5px solid var(--borde); border-radius: 9px;
+  background: var(--superficie-suave) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 10px center;
+  -webkit-appearance: none; appearance: none;
+  font-size: 0.8rem; font-weight: 600; color: var(--texto);
+  cursor: pointer; font-family: inherit;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.ia-select:focus { border-color: var(--marca-texto); }
+
+/* ── Historial guardado ── */
+
+/* ── Steps container ── */
+.ia-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+
+/* ── Step Card base ── */
+.ia-step-card {
+  background: rgba(var(--superficie-rgb), 0.92);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(var(--borde-rgb), 0.8);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+.ia-step-card:hover { box-shadow: 0 8px 36px rgba(0,0,0,0.09); }
+
+/* ── Tabla única: unidades × (Excel numerador | Excel global IAAS 01 |
+   denominadores IAAS 02–06). Un solo acento (verde = completo, dorado =
+   acción de subir). ── */
+.ia-tabla-card {
+  background: var(--superficie);
+  border-radius: 18px;
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--tinto-texto);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+.ia-tabla-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  padding: 18px 22px; 
+}
+
+.ia-tabla-head-right {
+  display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+}
+
+/* Card resumen — advertencias + acción de generar */
+.ia-resumen-card { margin-top: 2px; border-left: 4px solid var(--tinto-texto); }
+.ia-resumen-card > .ia-warn-box:first-child { border-top: none; }
+
+/* ── Table ── */
+.ia-table-wrap {
+  overflow-x: auto; border-radius: 12px;
+  margin: 0 22px 20px;
+  border: 1px solid var(--borde-suave);
+}
+
+.ia-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  font-size: 0.8rem;
+}
+
+.ia-table thead tr {
+  background: var(--superficie-suave);
+  border-bottom: 1px solid var(--borde);
+}
+.ia-table th {
+  padding: 9px 14px; text-align: left;
+  font-size: 0.67rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--texto-suave); white-space: nowrap;
+}
+.ia-table th small {
+  display: block; font-size: 0.63rem; font-weight: 500;
+  text-transform: none; letter-spacing: 0; color: #7c8493; margin: 2px auto 0;
+  white-space: normal; max-width: 105px;
+}
+.ia-th-ind { color: var(--oro-texto); }
+
+.ia-col-unidad {
+  min-width: 40px; text-align: center !important; border-right: 1px solid var(--borde);
+  position: sticky; left: 0; z-index: 3; background: var(--superficie-suave);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+  color: var(--tinto-texto) !important;
+}
+.ia-col-num    { min-width: 150px; text-align: center !important; border-right: 1px solid var(--borde); color: var(--tinto-texto) !important; }
+.ia-col-grupo  {
+  text-align: center !important; color: var(--tinto-texto) !important;
+  background: var(--superficie-suave) !important;
+}
+.ia-col-denom  { min-width: 105px; text-align: center !important; border-right: 1px solid var(--borde-suave); }
+
+.ia-tr {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde-suave);
+  transition: background 0.15s;
+  animation: ia-rowIn 0.3s ease backwards;
+}
+@keyframes ia-rowIn { from { opacity:0; transform: translateX(-6px); } to { opacity:1; transform: none; } }
+.ia-tr:last-child { border-bottom: none; }
+.ia-tr:hover { background: var(--superficie-suave); }
+.ia-tr--ok   { background: color-mix(in srgb, var(--color-imss-primario) 4%, var(--superficie)) !important; }
+
+.ia-td-unidad {
+  padding: 9px 10px;
+  border-right: 1px solid var(--borde-suave);
+  position: sticky; left: 0; z-index: 1; background: var(--superficie);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+}
+.ia-td-unidad-inner { display: flex; align-items: center; gap: 8px; }
+.ia-tr:hover .ia-td-unidad { background: var(--superficie-suave); }
+.ia-tr--ok .ia-td-unidad { background: color-mix(in srgb, var(--color-imss-primario) 4%, var(--superficie)); }
+.ia-row-status {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-gris-neutral);
+  flex-shrink: 0; transition: all 0.2s;
+}
+.ia-row-status--ok { color: var(--primario-texto); }
+.ia-row-dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; }
+.ia-unit-name { font-size: 0.8rem; font-weight: 600; color: var(--texto); white-space: normal; line-height: 1.25; }
+
+.ia-td-denom {
+  padding: 7px; text-align: center; vertical-align: middle;
+  border-right: 1px solid var(--borde-suave);
+}
+.ia-td-denom:last-child { border-right: none; }
+
+/* Excel numerador por unidad — celda compacta */
+.ia-td-num {
+  padding: 7px 10px; text-align: center; vertical-align: middle;
+  border-right: 1px solid var(--borde-suave);
+  transition: background 0.15s;
+}
+.ia-td-num--over { background: color-mix(in srgb, var(--color-oro-institucional) 6%, var(--superficie)); }
+
+.ia-mini-subir {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 40px; border-radius: 8px;
+  border: 1px solid var(--borde); background: var(--superficie); color: var(--texto-suave);
+  font-size: 0.74rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.ia-mini-subir svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--tinto-texto); }
+.ia-mini-subir:hover { border-color: var(--oro-texto); color: var(--oro-texto); }
+
+.ia-mini-archivo {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 0.76rem; font-weight: 600; color: var(--primario-texto);
+  max-width: 100%; padding: 5px 8px 5px 12px; border-radius: 8px;
+  background: color-mix(in srgb, var(--color-imss-primario) 10%, var(--superficie));
+  border: 1px solid color-mix(in srgb, var(--primario-texto) 30%, transparent);
+}
+.ia-mini-archivo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ia-mini-archivo button {
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; padding: 2px; flex-shrink: 0;
+  color: var(--primario-texto); cursor: pointer; transition: color 0.15s;
+}
+.ia-mini-archivo button:hover { color: var(--peligro-texto); }
+
+/* Excel global de IAAS 01 (escritorio): tarjeta arriba de la tabla, en una fila; reusa las piezas
+   de ExcelGlobalIaas (ia-td-global-*), que en teléfono se ven en columna dentro de su tarjeta */
+.ia-global-card {
+  display: flex; align-items: center; gap: 18px; margin: 0 22px 14px; padding: 12px 16px;
+  background: var(--superficie); border: 1px solid var(--borde); border-left: 3px solid var(--tinto-texto); border-radius: 12px;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.ia-global-card--over { background: color-mix(in srgb, var(--color-oro-institucional) 8%, var(--superficie)); }
+.ia-global-card--done { border-left-color: var(--primario-texto); }
+.ia-global-card-titulo { display: flex; flex-direction: column; flex-shrink: 0; min-width: 120px; }
+.ia-global-card-titulo small { font-size: 0.68rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.4px; }
+.ia-global-card .ia-td-global-dropzone,
+.ia-global-card .ia-td-global-listo {
+  flex: 1; flex-direction: row; justify-content: flex-start; gap: 12px; height: auto; max-width: none; padding: 10px 14px;
+}
+.ia-global-card .ia-td-global-dropzone svg { margin-bottom: 0; }
+.ia-global-card .ia-td-global-nota { order: 9; margin: 0 0 0 auto; padding: 0; border: 0; max-width: none; }
+.ia-global-card .ia-td-global-archivo { max-width: none; }
+.ia-global-card .ia-td-global-acciones { flex-direction: row; gap: 10px; }
+
+.ia-td-global-nota {
+  font-size: 0.65rem; color: var(--color-gris-neutral); line-height: 1.35; max-width: 100px;
+  margin-bottom: 4px; padding-bottom: 8px; border-bottom: 1px solid var(--borde-suave);
+}
+
+/* Zona de arrastre real: ocupa casi todo el alto de la columna, no un botoncito perdido */
+.ia-td-global-dropzone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  width: 100%; height: 100%; flex: 1;
+  padding: 26px 10px;
+  border: 1.5px solid var(--borde);
+  border-radius: 14px;
+  background: var(--superficie);
+  cursor: pointer; transition: all 0.15s;
+}
+.ia-td-global-dropzone svg { width: 26px; height: 26px; color: var(--color-gris-neutral); margin-bottom: 4px; }
+.ia-td-global-dropzone strong { font-size: 0.78rem; font-weight: 700; color: var(--texto-medio); }
+.ia-td-global-dropzone span { font-size: 0.68rem; color: var(--color-gris-neutral); }
+.ia-td-global-dropzone:hover {
+  border-color: var(--oro-texto);
+  background: color-mix(in srgb, var(--color-oro-institucional) 5%, var(--superficie));
+}
+.ia-td-global-dropzone:hover svg { color: var(--oro-texto); }
+.ia-td-global--over .ia-td-global-dropzone {
+  border-color: var(--oro-texto);
+  background: color-mix(in srgb, var(--color-oro-institucional) 8%, var(--superficie));
+}
+
+/* Estado listo: check + nombre claro + cambiar/quitar, no un chip perdido */
+.ia-td-global-listo {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; max-width: 120px; height: 100%; flex: 1;
+  padding: 14px 10px;
+  border: 1.5px solid color-mix(in srgb, var(--primario-texto) 30%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-imss-primario) 6%, var(--superficie));
+}
+.ia-td-global-check {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: var(--color-imss-primario); color: white;
+  display: flex; align-items: center; justify-content: center;
+}
+.ia-td-global-archivo {
+  font-size: 0.78rem; font-weight: 700; color: var(--texto);
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ia-td-global-acciones { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ia-td-global-cambiar {
+  font-size: 0.68rem; font-weight: 700; color: var(--primario-texto);
+  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.ia-td-global-quitar {
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; padding: 2px;
+  color: var(--color-gris-neutral); cursor: pointer; transition: color 0.15s;
+}
+.ia-td-global-quitar:hover { color: var(--peligro-texto); }
+
+/* Input numérico */
+/* Vacío (nada capturado todavía) — borde punteado, gris.
+   Capturado (aunque sea cero real) — borde sólido verde.
+   Esa diferencia es lo que distingue null de un cero real ya escrito. */
+.ia-num {
+  width: 84px; padding: 7px 8px;
+  border: 1.5px dashed var(--borde-fuerte); border-radius: 9px;
+  font-size: 0.82rem; font-weight: 500; color: var(--texto);
+  text-align: center; background: var(--superficie);
+  transition: all 0.15s; font-family: inherit; outline: none;
+  -moz-appearance: textfield;
+}
+.ia-num::placeholder { color: var(--color-gris-neutral); }
+
+.ia-num--lleno {
+  border-style: solid; border-color: var(--primario-texto);
+  background: color-mix(in srgb, var(--color-imss-primario) 8%, var(--superficie));
+  color: var(--primario-texto);
+  font-weight: 800;
+}
+
+.ia-num:focus {
+  border-style: solid; border-color: var(--primario-texto); background: var(--superficie);
+}
+.ia-num::-webkit-inner-spin-button,
+.ia-num::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* ── Tarjetas por unidad (mobile) — reemplazan la tabla ancha; oculto
+   fuera de mobile (ver media query al final del archivo) ── */
+.ia-mobile-cards { display: none; }
+
+.ia-mcard-global {
+  border: 1.5px dashed var(--borde); border-radius: 12px;
+  padding: 14px; margin: 14px 14px 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ia-mcard-global--over { background: color-mix(in srgb, var(--color-oro-institucional) 6%, var(--superficie)); }
+.ia-mcard-global--done {
+  border-style: solid;
+  background: color-mix(in srgb, var(--color-imss-primario) 5%, var(--superficie));
+}
+
+.ia-mcard {
+  border: 1px solid var(--borde-suave); border-radius: 12px;
+  margin: 0 14px 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: background 0.15s;
+}
+.ia-mcard--ok { background: color-mix(in srgb, var(--color-imss-primario) 4%, var(--superficie)); }
+.ia-mcard-header { display: flex; align-items: center; gap: 8px; }
+
+.ia-mcard-num {
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+.ia-mcard-num--over { background: color-mix(in srgb, var(--color-oro-institucional) 6%, var(--superficie)); }
+.ia-mcard-num .ia-mini-subir {
+  width: 100%; justify-content: center; padding: 10px 16px;
+}
+.ia-mcard-num .ia-mini-archivo {
+  width: 100%; padding: 10px 12px;
+  border: 1.5px solid var(--primario-texto);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-imss-primario) 6%, var(--superficie));
+}
+
+.ia-mcard-denoms {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+.ia-mcard-denom-field { display: flex; flex-direction: column; gap: 4px; }
+.ia-mcard-denom-label {
+  font-size: 0.62rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.4px; color: var(--oro-texto); text-align: center;
+}
+.ia-mcard-denoms .ia-num { width: 100%; }
+
+/* ── Shimmer ── */
+.ia-shimmer-stack { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px 20px; }
+.ia-shimmer-row {
+  height: 48px; border-radius: 10px;
+  background: linear-gradient(90deg, var(--superficie-alterna) 25%, var(--superficie-marcada) 50%, var(--superficie-alterna) 75%);
+  background-size: 400% 100%;
+  animation: ia-shimmer 1.4s ease infinite;
+}
+@keyframes ia-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+/* ── Gráfica ── */
+
+/* ── Landing hub ── */
+.ia-hub-main {
+  position: relative; z-index: 5; flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 28px 20px 40px; gap: 36px;
+}
+
+.ia-hub-hero {
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  animation: ia-in 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+@keyframes ia-hub-titleIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes ia-hub-titleShine {
+  0%   { background-position: 100% 0; }
+  50%  { background-position:   0% 0; }
+  100% { background-position: 100% 0; }
+}
+
+@keyframes ia-hub-lineGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.ia-hub-acronym {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 800; margin: 0; letter-spacing: -2px; line-height: 1.1;
+  position: relative; display: inline-block;
+  background: linear-gradient(90deg,
+    var(--marca)  0%, #1a7a62 20%, #9a7026 42%,
+    #d4a840 50%, #9a7026 58%, #1a7a62 80%, var(--marca) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation:
+    ia-hub-titleIn    0.8s 0.5s cubic-bezier(0.16,1,0.3,1) both,
+    ia-hub-titleShine 5s   2s ease-in-out infinite;
+}
+.ia-hub-acronym::after {
+  content: ''; position: absolute; bottom: -6px; left: 0; right: 0;
+  height: 3px; background: linear-gradient(90deg, var(--marca), #9a7026, #d4a840, transparent);
+  border-radius: 2px; transform-origin: left;
+  animation: ia-hub-lineGrow 0.9s 0.9s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.ia-hub-sub {
+  font-size: 0.84rem; color: var(--texto-tenue);
+  margin: 18px 0 0; line-height: 1.5; font-weight: 400;
+}
+
+.ia-hub-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  width: 100%; max-width: 900px;
+  animation: ia-in 0.55s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+@media (max-width: 640px) {
+  .ia-hub-cards { grid-template-columns: 1fr; gap: 18px; }
+  .ia-hub-main  { padding: 20px 16px 32px; gap: 24px; }
+}
+
+/* ── Landing ── */
+
+/* ── Pills de indicador ── */
+
+/* ── Leyenda semáforo ── */
+
+/* ── Panel de advertencias — dentro del card, sin bordes propios ── */
+.ia-warn-box {
+  background: rgba(234,179,8,0.06);
+  border-top: 1px solid rgba(234,179,8,0.3);
+  border-bottom: 1px solid rgba(234,179,8,0.3);
+  padding: 10px 24px;
+  animation: ia-in 0.25s ease both;
+}
+.ia-warn-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.78rem; font-weight: 700; color: var(--aviso-texto-fuerte);
+  margin-bottom: 8px;
+}
+.ia-warn-list {
+  margin: 0; padding: 0 0 0 20px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.ia-warn-list li { font-size: 0.74rem; color: var(--aviso-texto-fuerte); }
+
+/* ── Action bar — footer del card ── */
+.ia-action-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border-top: 1px solid var(--borde-suave);
+  padding: 14px 24px;
+  background: var(--superficie-suave);
+}
+.ia-progress-pills { display: flex; align-items: center; gap: 8px; }
+.ia-pill {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 600; color: var(--texto-tenue);
+  background: var(--superficie-alterna); border-radius: 100px; padding: 5px 12px;
+  border: 1px solid var(--borde); transition: all 0.2s;
+}
+.ia-pill--ok { background: rgba(var(--marca-rgb), 0.08); color: var(--marca-texto); border-color: rgba(var(--marca-rgb), 0.15); }
+
+.ia-btn-gen {
+  display: flex; align-items: center; gap: 8px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--marca) 0%, #1a7a5e 50%, var(--marca) 100%);
+  background-size: 200% 200%;
+  color: white; border: none; border-radius: 100px;
+  padding: 12px 28px; font-size: 0.88rem; font-weight: 700;
+  cursor: pointer; transition: all 0.25s; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(11,84,69,0.3);
+}
+.ia-btn-gen::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg);
+  animation: ia-btn-shimmer 3.2s ease-in-out infinite;
+}
+@keyframes ia-btn-shimmer {
+  0%   { left: -60%; }
+  55%  { left: 130%; }
+  100% { left: 130%; }
+}
+.ia-btn-gen:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(11,84,69,0.4);
+  background-position: right center;
+}
+.ia-btn-gen:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.ia-btn-gen:disabled::after { display: none; }
+.ia-btn-gen--warn {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+  box-shadow: 0 4px 16px rgba(180,83,9,0.3);
+}
+.ia-btn-gen--warn:hover { box-shadow: 0 8px 28px rgba(180,83,9,0.4); }
+
+/* ── Toast fijo — unidades pendientes ── */
+.ia-toast-pendiente {
+  position: fixed;
+  top: 74px; right: 24px;
+  z-index: 300;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--superficie-elevada);
+  border: 1.5px solid #fbbf24;
+  border-left: 4px solid #d97706;
+  border-radius: 12px;
+  padding: .7rem 1rem;
+  box-shadow: 0 6px 28px rgba(0,0,0,.13);
+  cursor: pointer;
+  max-width: 300px;
+  text-align: left;
+  font-family: inherit;
+  transition: box-shadow .2s, transform .15s;
+  animation: ia-toast-in .45s ease-out;
+}
+.ia-toast-pendiente:hover {
+  box-shadow: 0 10px 36px rgba(0,0,0,.18);
+  transform: translateY(-2px);
+}
+@keyframes ia-toast-in {
+  from { transform: translateX(16px) scale(.97); opacity: 0; }
+  to   { transform: translateX(0)    scale(1);   opacity: 1; }
+}
+.ia-toast-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex-shrink: 0;
+  background: rgba(217,119,6,.1);
+  border-radius: 8px; color: var(--aviso-texto);
+}
+.ia-toast-body {
+  display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0;
+}
+.ia-toast-body strong { font-size: .78rem; font-weight: 700; color: var(--aviso-texto-fuerte); }
+.ia-toast-body span   { font-size: .7rem; color: var(--aviso-texto-fuerte); }
+.ia-toast-pendiente > svg { color: var(--aviso-texto); flex-shrink: 0; }
+
+/* ── Botón reloj — unidad tardía ── */
+.ia-btn-tardia {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: color-mix(in srgb, var(--color-tinto-gobierno) 8%, var(--superficie));
+  border: 1px solid color-mix(in srgb, var(--tinto-texto) 25%, transparent);
+  border-radius: 9px;
+  color: var(--tinto-texto); cursor: pointer;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.ia-btn-tardia:hover { background: color-mix(in srgb, var(--color-tinto-gobierno) 15%, var(--superficie)); border-color: var(--tinto-texto); }
+.ia-btn-tardia-badge {
+  position: absolute; top: -6px; right: -6px;
+  background: #d97706; color: #fff;
+  font-size: .6rem; font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 8px; padding: 0 3px;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; pointer-events: none;
+}
+
+/* ── Aviso sesión pendiente ── */
+
+/* ── Responsive ── */
+/* La tabla es ancha a propósito (8 columnas); en pantallas chicas se deja
+   scrollear horizontal en vez de comprimir las columnas hasta ilegibles. */
+@media (max-width: 820px) {
+  .ia-main { padding: 18px 14px 16px; }
+  .ia-hero { margin-bottom: 10px; }
+  .ia-hero-bottom { margin-top: 8px; }
+  .ia-tabla-head { padding: 14px 16px; }
+  .ia-table-wrap { margin: 0 16px 16px; }
+  .ia-global-card { margin: 0 16px 12px; }
+  .ia-action-bar { flex-wrap: wrap; padding: 14px 18px; }
+}
+
+/* Mobile: la tabla ancha se reemplaza por tarjetas por unidad (mismo corte
+   que el resto de la app — ver auth.css/inicio.css: 48rem) */
+@media (max-width: 48rem) {
+  .ia-table-wrap, .ia-global-card { display: none; }
+  .ia-mobile-cards { display: block; padding-bottom: 10px; }
+}
+
+/* Los estilos ig-* (gráficas compartidas) se encuentran en:
+   src/shared/estilos/graficas.css */

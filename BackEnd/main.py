@@ -1,4 +1,4 @@
-﻿import mimetypes
+import mimetypes
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
@@ -6,24 +6,32 @@ import os
 import sys
 from pathlib import Path
 
-# iass y ftp viven en indicadores/ — se exponen con su nombre original
+# Controller/ y services/ de indicadores importan con rutas planas (from services...,
+# from shared..., from schemas...) resueltas contra indicadores/, no contra el paquete
+# BackEnd -- de ahi este insert.
 sys.path.insert(0, str(Path(__file__).parent / "indicadores"))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from configs.cors import AMBIENTE, ORIGINS
 
-from auth.controllers.auth_controller import router as auth_router
+from auth.Controller.auth_Controller import router as auth_router
 
-import iaas as iass_module
-import ftp as ftp_module
-import epidemiologia as epi_module
+from epidemiologia.Routes import epidemiologia_Route
+from indicadores.Routes import indicadores_Route
+from middleware.errores_endpoints_Middleware import ErroresEndpointsMiddleware
 
 DIST = os.path.join(os.path.dirname(__file__), '..', 'FrontEnd', 'dist')
 
 app = FastAPI(title="CIAE Backend", version="2.0.0")
+
+app.add_middleware(ErroresEndpointsMiddleware) ##middleware para todos los endpoitns por si algo truena
+
+# Las respuestas de indicadores/epidemiologia son JSON grandes y se comprimen muy bien (~8x).
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,15 +50,12 @@ async def agregar_cabeceras_seguridad(request, call_next):
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
     return response
 
-app.include_router(auth_router, prefix="/auth")
-for _router, _prefix in ftp_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
+#cmabios de delcaraciones de Rutas
+app.include_router(indicadores_Route.routesIndicadores , prefix="/Indicadores")
 
-for _router, _prefix in iass_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
-    
-for _router, _prefix in epi_module.ROUTERS:
-    app.include_router(_router, prefix=_prefix)
+app.include_router(auth_router, prefix="/auth")
+
+app.include_router(epidemiologia_Route.routesEpidemiologia, prefix="/epidemiologia")
 
 app.mount("/assets", StaticFiles(directory=os.path.join(DIST, "assets")), name="assets")
 

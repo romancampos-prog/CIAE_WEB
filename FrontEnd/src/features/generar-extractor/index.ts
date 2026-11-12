@@ -1,0 +1,6 @@
+// API publica de la feature generar-extractor: lo unico que se puede usar fuera de features/generar-extractor/.
+export { default as PanelSubidaExtractor } from './components/PanelSubidaExtractor';
+export { default as SeccionArchivosExtractor } from './components/SeccionArchivosExtractor';
+export { default as SelectorCategoriasExtractor } from './components/SelectorCategoriasExtractor';
+export { default as TarjetaIndicadorExtractor } from './components/TarjetaIndicadorExtractor';
+export { useGenerarExtractor } from './hooks/useGenerarExtractor';

@@ -1,0 +1,1270 @@
+{
+  "_fuente": "CLAVES UP PARA REGISTRO EN SIMF Y RAIS OF 015.xlsx",
+  "_nota": "registroRAIS/registroSIMF: true = se registra ahi (RAIS: no hay opcion en SIMF para elegirlas); null = la fuente no lo dice",
+  "claves": {
+    "UP78": {
+      "descripcion": "Orientación sobre detección de atresia de vías biliares AVB (Tarjeta colorimétrica visual)",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP70": {
+      "descripcion": "Orientación sobre uso de Vida Suero Oral (VSO)",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP72": {
+      "descripcion": "Activación de cartilla a estudiante",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP316": {
+      "descripcion": "Orientación sobre uso correcto y consistente del condón femenino",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP317": {
+      "descripcion": "Consejería en anticoncepción",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP267": {
+      "descripcion": "Promoción para la prevención de cáncer de mama",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP268": {
+      "descripcion": "Promoción para la prevención de cáncer Cérvico Uterino",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP269": {
+      "descripcion": "Promoción para prevención de la Diabetes",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP270": {
+      "descripcion": "Promoción para la prevención de enfermedades hipertensivas",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP271": {
+      "descripcion": "Promoción para la prevención de enfermedades prevenibles por vacunación",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP272": {
+      "descripcion": "Promoción para la prevención de enfermedades metabólicas congénitas",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP273": {
+      "descripcion": "Promoción para la prevención de sobrepeso",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP274": {
+      "descripcion": "Promoción para la prevención de obesidad",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP275": {
+      "descripcion": "Promoción para la prevención de enfermedades por vectores",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP276": {
+      "descripcion": "Promoción para la prevención de la Salud Mental",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP277": {
+      "descripcion": "Derivación a Médico familiar",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP278": {
+      "descripcion": "Derivación a Trabajo Social",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP279": {
+      "descripcion": "Derivación a Nutrición y Dietética",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP280": {
+      "descripcion": "Derivación a Estomatología",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP281": {
+      "descripcion": "Derivación a los Centros de seguridad social",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP282": {
+      "descripcion": "Entrega de solicitud envió a mastografía",
+      "grupo": "Promoción de la salud",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP64.1": {
+      "descripcion": "Lactancia materna exclusiva de 0 - 6 meses",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP64.2": {
+      "descripcion": "Lactancia materna complementaria de 7 - 12 meses",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP64.3": {
+      "descripcion": "Lactancia materna mixta de 0 - 6 meses",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP64.4": {
+      "descripcion": "Lactancia materna mixta complementaria de 7 - 12 meses",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP65.1": {
+      "descripcion": "Abandono de lactancia materna",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP65.2": {
+      "descripcion": "Nunca le dio leche materna",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP159": {
+      "descripcion": "Resultado evaluación y vigilancia del estado nutricional - peso normal",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP160": {
+      "descripcion": "Resultado evaluación y vigilancia del estado nutricional - sobrepeso",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP161": {
+      "descripcion": "Resultado evaluación y vigilancia del estado nutricional - obesidad",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP164": {
+      "descripcion": "Detección de anemia",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP165": {
+      "descripcion": "Sospecha de anemia",
+      "grupo": "Nutrición",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP03": {
+      "descripcion": "Vacuna antirrábica de células Vero",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP04": {
+      "descripcion": "Inmunoglobulina antirrábica",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP05": {
+      "descripcion": "Inmunoglobulina antitetánica",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP06": {
+      "descripcion": "Inmunoglobulina simple",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP07": {
+      "descripcion": "Faboterápico anti alacrán",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP08": {
+      "descripcion": "Faboterápico anti viperino",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP09": {
+      "descripcion": "Faboterápico anti arácnido",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP12": {
+      "descripcion": "PPD",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP40": {
+      "descripcion": "Vacuna antirrábica inactivada",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP41": {
+      "descripcion": "Vacuna anti varicela",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP63": {
+      "descripcion": "Vacuna Virus de Papiloma Humano",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP81": {
+      "descripcion": "Vacuna Hepatitis A",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP88": {
+      "descripcion": "Vacuna aplicada contra el COVID-19",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP89": {
+      "descripcion": "Esquema completo de vacunación contra el COVID-19",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP260": {
+      "descripcion": "Fecha de vacunación COVID-19",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP262": {
+      "descripcion": "Lote vacuna",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP263": {
+      "descripcion": "Lugar de vacunación - México",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP264": {
+      "descripcion": "Lugar de vacunación - Extranjero",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP265": {
+      "descripcion": "Derechohabiente sin vacunarse contra el COVID-19",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP266": {
+      "descripcion": "Derechohabiente que no acepta ser vacunado contra el COVID-19",
+      "grupo": "Vacunación",
+      "subgrupo": null,
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP86": {
+      "descripcion": "Detección de PRV en grupos de riesgo (ambos sexos)",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP87": {
+      "descripcion": "PRV (prueba rápida de VIH reactiva en grupo de riesgos, ambos sexos)",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP35": {
+      "descripcion": "Sospechoso de sífilis",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP406": {
+      "descripcion": "No aceptante de PRV Dual VIH/Sífilis en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": "UP84",
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP407": {
+      "descripcion": "Detección de VIH por PRV Dual VIH/Sífilis 1era vez en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": "UP82",
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP408": {
+      "descripcion": "Detección de VIH por PRV Dual VIH/Sífilis Subsecuente en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": "UP85",
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP409": {
+      "descripcion": "PRV Dual REACTIVA a VIH en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": "UP83",
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP410": {
+      "descripcion": "PRV Dual NO reactiva a VIH en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP411": {
+      "descripcion": "PRV Dual REACTIVA a Sífilis en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": "UP35",
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP412": {
+      "descripcion": "No aceptante de PRV de VIH de 4ta generación en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP413": {
+      "descripcion": "Detección de VIH por PRV de 4ta. generación en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP414": {
+      "descripcion": "PRV de VIH de 4ta Generación REACTIVA en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP415": {
+      "descripcion": "PRV de VIH de 4ta Generación NO reactiva en el embarazo",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Prevención de VIH/SIDA e ITS",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP25": {
+      "descripcion": "Tratamiento antituberculoso primario",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Tuberculosis Pulmonar",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP26": {
+      "descripcion": "Retratamiento antituberculoso",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Tuberculosis Pulmonar",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP27": {
+      "descripcion": "Tratamientos Antituberculosos con fármacos de segunda línea",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Tuberculosis Pulmonar",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP36": {
+      "descripcion": "Sospechoso de Tuberculosis Pulmonar",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Tuberculosis Pulmonar",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP149": {
+      "descripcion": "Positivo de Tuberculosis Pulmonar",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Tuberculosis Pulmonar",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP22": {
+      "descripcion": "Uso de hilo dental",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Salud Bucal",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP45": {
+      "descripcion": "Aseo de prótesis dental",
+      "grupo": "Prevención y control de enfermedades",
+      "subgrupo": "Salud Bucal",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP16": {
+      "descripcion": "Sospechosa de cáncer de mama",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer de mama",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP47": {
+      "descripcion": "Sospechosa de cáncer de mama por mastografía",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer de mama",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP53": {
+      "descripcion": "Detección de cáncer de mama por exploración clínica no realizada a la madre del menor de un año por estar lactando",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer de mama",
+      "claveAnterior": null,
+      "registroRAIS": null,
+      "registroSIMF": true
+    },
+    "UP196": {
+      "descripcion": "CHKT Riesgo Bajo - Cáncer de Mama",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer de mama",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP197": {
+      "descripcion": "CHKT Riesgo Alto - Cáncer de Mama",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer de mama",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP351": {
+      "descripcion": "Entrega de resultado de mastografía",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer de mama",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP17": {
+      "descripcion": "Sospechosa de cáncer cérvico uterino",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer Cérvico Uterino",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP48": {
+      "descripcion": "Mujer histerectomizada",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer Cérvico Uterino",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP50": {
+      "descripcion": "Detección de cáncer cérvico uterino no realizada a mujer de más de 25 años en su ciclo menstrual",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer Cérvico Uterino",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP51": {
+      "descripcion": "Detección de cáncer cérvico uterino no realizada a mujer que nunca ha tenido relaciones sexuales y que no se le practica el Papanicolaou",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer Cérvico Uterino",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP52": {
+      "descripcion": "Detección de cáncer cérvico uterino no realizada a mujer en primer trimestre de embarazo",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cáncer Cérvico Uterino",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP14": {
+      "descripcion": "Sospechoso de diabetes mellitus por glucemia capilar",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP54": {
+      "descripcion": "Detección de diabetes mellitus no realizada al paciente que se refiere diabético",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP66": {
+      "descripcion": "Detección de glucemia capilar subsecuente",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP92": {
+      "descripcion": "CHKT - Riesgo Bajo - Diabetes Mellitus",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP93": {
+      "descripcion": "CHKT - Riesgo Alto - Diabetes Mellitus",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP96": {
+      "descripcion": "Detección Diabetes Mellitus mediante CHKT en Línea",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP166": {
+      "descripcion": "Sospecha de prediabetes por glucemia capilar",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP191": {
+      "descripcion": "Paciente con prediabetes",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP192": {
+      "descripcion": "Medición de glucosa capilar en ayuno",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP193": {
+      "descripcion": "Medición de glucosa capilar casual",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP200": {
+      "descripcion": "Seguimiento en tres meses a pacientes con prediabetes",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP201": {
+      "descripcion": "Seguimiento en seis meses a pacientes con prediabetes",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP208": {
+      "descripcion": "Glucosa plasmática de ayuno con resultado sospechoso de prediabetes",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP209": {
+      "descripcion": "Glucosa plasmática de ayuno con resultado sospechoso de diabetes",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP214": {
+      "descripcion": "Resultado Normal de Glucosa Capilar",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP215": {
+      "descripcion": "Resultado Normal de Glucosa Plasmática (Laboratorio)",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Diabetes Mellitus",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP34": {
+      "descripcion": "Sospechoso de hipertensión arterial",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP55": {
+      "descripcion": "Detección de hipertensión arterial no realizada al paciente que se refiere hipertenso",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP94": {
+      "descripcion": "CHKT - Riesgo Bajo - Hipertensión Arterial",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP95": {
+      "descripcion": "CHKT - Riesgo Alto - Hipertensión Arterial",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP97": {
+      "descripcion": "Detección Hipertensión Arterial mediante CHKT En Línea",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP195": {
+      "descripcion": "Sospecha de pre hipertensión",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP216": {
+      "descripcion": "Resultado normal en la Detección de Hipertensión Arterial",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hipertensión Arterial",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP57": {
+      "descripcion": "Sospechoso de hipercolesterolemia",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Dislipidemias",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP98": {
+      "descripcion": "Sospecha de triglicéridos",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Dislipidemias",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP46": {
+      "descripcion": "Sospechoso de defectos visuales",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Defectos visuales",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP56": {
+      "descripcion": "Detección de defectos visuales no realizada en derechohabientes que usan lentes",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Defectos visuales",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP59": {
+      "descripcion": "Sospechoso de hiperplasia adrenal congénita",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP60": {
+      "descripcion": "Sospechoso de fenilcetonuria",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP61": {
+      "descripcion": "Sospechoso de deficiencia de biotinidasa",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP62": {
+      "descripcion": "Sospechoso de hipotiroidismo congénito",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP79": {
+      "descripcion": "Sospechosos de galactosemia clásica",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP80": {
+      "descripcion": "Sospechoso de atresia de vías biliares AVB",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP131": {
+      "descripcion": "Atresia de vías biliares",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP211": {
+      "descripcion": "Sospechoso de fibrosis quística",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP212": {
+      "descripcion": "Sospechoso de hipotiroidismo congénito central",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP361": {
+      "descripcion": "Sospechoso de aminoacidopatía (trastorno del metabolismo de aminoácidos)",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP362": {
+      "descripcion": "Sospechoso de trastorno de beta oxidación de ácidos grasos",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP363": {
+      "descripcion": "Sospechoso de acidemia orgánica",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP364": {
+      "descripcion": "Sospechoso de deficiencia de glucosa 6-fosfato deshidrogenasa",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP365": {
+      "descripcion": "Sospechoso de hemoglobinopatía",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Enfermedades Metabólicas Congénitas",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP155": {
+      "descripcion": "Detección de Cáncer de Próstata",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP156": {
+      "descripcion": "Sospechoso de Cáncer de Próstata",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP157": {
+      "descripcion": "CHKT Riesgo bajo - Cáncer de colón y recto",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP158": {
+      "descripcion": "CHKT Riesgo Alto - Cáncer de colón y recto",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP198": {
+      "descripcion": "CHKT - Riesgo Bajo – Cáncer de Próstata",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP199": {
+      "descripcion": "CHKT - Riesgo Alto - Cáncer de Próstata",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP206": {
+      "descripcion": "Detección Cáncer Colon y Recto",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP207": {
+      "descripcion": "Sospecha Cáncer Colon y Recto",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP217": {
+      "descripcion": "Resultado normal en la Detección de Cáncer de Colon y Recto",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Cánceres (Próstata, Colón y Recto)",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP32": {
+      "descripcion": "Detección de hepatitis B",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": null,
+      "registroSIMF": null
+    },
+    "UP33": {
+      "descripcion": "Detección de hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": null,
+      "registroSIMF": null
+    },
+    "UP219": {
+      "descripcion": "Derechohabiente que no acepta responder cuestionario de riesgo para Virus de Hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP220": {
+      "descripcion": "Sin factores de riesgo para Virus de Hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP221": {
+      "descripcion": "Con factores de riesgo para Virus de Hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP222": {
+      "descripcion": "Derechohabiente que no acepta la toma de prueba rápida voluntaria para Virus de Hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP223": {
+      "descripcion": "Resultado de prueba rápida Reactiva al Virus de Hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP224": {
+      "descripcion": "Resultado de prueba rápida No reactiva al Virus de Hepatitis C",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Hepatitis B y hepatitis C",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP304": {
+      "descripcion": "Cuestionario de salud mental realizado",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Salud Mental",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP305": {
+      "descripcion": "Resultado normal de tamizaje de salud mental",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Salud Mental",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP306": {
+      "descripcion": "Resultado de sospecha de depresión",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Salud Mental",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP307": {
+      "descripcion": "Resultado de sospecha de ansiedad",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Salud Mental",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP308": {
+      "descripcion": "Resultado de sospecha de trastorno de pánico",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Salud Mental",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP309": {
+      "descripcion": "Cuestionario de salud mental no realizado porque la persona padece alguna enfermedad mental",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Salud Mental",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP73": {
+      "descripcion": "Tamizaje de Atención Integrada ICOPE",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Adulto Mayor",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP74": {
+      "descripcion": "Sospechoso de síndrome de caídas",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Adulto Mayor",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP75": {
+      "descripcion": "Sospechoso de síndrome de inmovilidad",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Adulto Mayor",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP76": {
+      "descripcion": "Sospechoso de síndrome de deterioro cognitivo",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Adulto Mayor",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP77": {
+      "descripcion": "Sospechoso de síndrome de incontinencia urinaria",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Adulto Mayor",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP91": {
+      "descripcion": "Cuestionario CHKT realizado en Línea por el derechohabiente",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "CHKT en Línea",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP194": {
+      "descripcion": "Cuestionario CHKT para evaluar el riesgo, realizado en los módulos de Enfermería",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "CHKT en Línea",
+      "claveAnterior": null,
+      "registroRAIS": true,
+      "registroSIMF": false
+    },
+    "UP67": {
+      "descripcion": "Detección de Alcoholismo",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Otras Detecciones",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP68": {
+      "descripcion": "Detección de Tabaquismo",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Otras Detecciones",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP69": {
+      "descripcion": "Detección de otras Drogas",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Otras Detecciones",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    },
+    "UP71": {
+      "descripcion": "Sospechoso de Alcoholismo",
+      "grupo": "Detección de enfermedades",
+      "subgrupo": "Otras Detecciones",
+      "claveAnterior": null,
+      "registroRAIS": false,
+      "registroSIMF": true
+    }
+  }
+}

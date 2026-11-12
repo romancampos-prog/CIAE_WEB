@@ -1,0 +1,11 @@
+{
+    "_nota": "Color con que se pinta cada clave UP en Acciones (etiqueta de la tabla, tarjeta y barra de conteo). Una clave sin color se ve en gris.",
+    "colores": {
+        "UP407": "#0e7490",
+        "UP87":  "#7c3aed",
+        "UP409": "#2563eb",
+        "UP411": "#db2777",
+        "UP414": "#65a30d",
+        "UP223": "#ea580c"
+    }
+}

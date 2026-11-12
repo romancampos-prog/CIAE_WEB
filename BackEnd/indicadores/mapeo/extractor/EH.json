@@ -1,0 +1,96 @@
+{
+    "EH 03": {
+        "nombreArchivoFinal": "EH_03",
+        "fechaModificacion": "02/11/2026",
+        "mostrarGenerar": true,
+        "mostrarGrafica": true,
+        "periodicidad": "Semestral Anualizado",
+        "informacion": {
+            "titulo": "EH 03 - Tasa de hospitalizaciones evitables por hipertensión arterial en población derechohabiente de 20 a 74 años",
+            "objetivo": "Medir el comportamiento de las hospitalizaciones potencialmente evitables por hipertensión arterial en derechohabientes de 20 a 74 años, con el propósito de conocer la magnitud de este problema de salud pública.",
+            "descNum": "Número de egresos hospitalarios por hipertensión arterial (códigos CIE-10: I10-I13) en derechohabientes de 20 a 74 años",
+            "descDen": "Población Adscrita a Médico Familiar (PAMF) de 20 a 74 años",
+            "etiquetaNumerador": "egresos",
+            "etiquetaDenominador": "población de 20 a 74"
+        },
+        "reporte": {
+            "numerador": {
+                "fuente": "extractor",
+                "archivo": "SUI_13",
+                "modoExtraccion": "FILTRO_CONTEO",
+                "encabezado": 1,
+                "agrupacion": "undadAdscripcion",
+                "columnaMesDeConteo": "fechaIngreso",
+                "filtroColumna": {
+                    "I": {
+                        "tipo": "RANGO",
+                        "filtro": [
+                            20,
+                            74
+                        ],
+                        "nombreColumna": "edadAnios"
+                    },
+                    "K": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            1,
+                            2
+                        ],
+                        "nombreColumna": "tipoIngreso"
+                    },
+                    "L": {
+                        "tipo": "LISTA",
+                        "filtro": [
+                            "I10X",
+                            "I110",
+                            "I119",
+                            "I120",
+                            "I129",
+                            "I130",
+                            "I131",
+                            "I132",
+                            "I139",
+                            "I160",
+                            "I161",
+                            "I169",
+                            "N180",
+                            "N188",
+                            "N189",
+                            "N18X",
+                            "N19X"
+                        ],
+                        "nombreColumna": "diagnosticoPrincipal"
+                    }
+                }
+            },
+            "denominador": {
+                "fuente": "poblacionInfoSalud",
+                "sexo": {
+                    "Todos": [
+                        "20 a 24",
+                        "25  a 29",
+                        "30 a 34",
+                        "35 a 39",
+                        "40 a 44",
+                        "45 a 49",
+                        "50 a 54",
+                        "55 a 59",
+                        "60 a 64",
+                        "65 a 69",
+                        "70 a 74"
+                    ]
+                }
+            },
+            "operacion": {
+                "numerador": "numerador",
+                "denominador": "sum(Todos)",
+                "resultado": "round((numerador / denominador) * 100000, 2)"
+            }
+        },
+        "semaforo": {
+            "Esperado": "<= 17.38",
+            "Medio": null,
+            "Bajo": "> 17.38"
+        }
+    }
+}

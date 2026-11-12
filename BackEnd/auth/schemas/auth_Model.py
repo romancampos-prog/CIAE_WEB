@@ -1,0 +1,22 @@
+"""
+Modulo: Autenticación
+Que hace? : Modelos Pydantic para login 
+Usado: auth_Controller.py
+
+request  = palabra asociada a que es para "enviar"
+response = palabra asociada a que es para "recibir"
+"""
+
+from pydantic import BaseModel
+
+
+#clase para los parametros del login
+class LoginRequest(BaseModel):
+    usuario: str
+    contrasena : str
+
+#clase para enviar datos al front
+#el token ya no viaja aqui, ahora vive en una cookie httpOnly
+class LoginResponse(BaseModel):
+    usuario: str
+    rol: str

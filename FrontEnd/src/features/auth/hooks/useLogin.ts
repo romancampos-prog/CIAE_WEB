@@ -1,0 +1,49 @@
+// react
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+// propios
+import type { CredencialesLogin, Rol } from '@/types/api/auth';
+import { authApi } from '@/api/auth/authApi';
+import { mensajeDeError } from '@/api/cliente/mensajeDeError';
+import { useAuth } from '@/features/auth/context/AuthContext';
+
+// A dónde entra cada rol; el que no está aquí entra a Inicio.
+const DESTINO_POR_ROL: Partial<Record<Rol, string>> = {
+  edita_iaas: '/CIAE/IndicadoresMedicos/IAAS',
+};
+
+/** Estado del formulario de login y el envío de credenciales. */
+export function useLogin() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [credenciales, setCredenciales] = useState<CredencialesLogin>({ usuario: '', contrasena: '' });
+  const [verContrasena, setVerContrasena] = useState(false);
+
+  const envio = useMutation({
+    mutationFn: authApi.iniciarSesion,
+    onSuccess: ({ usuario, rol }) => {
+      login({ user: usuario, rol });
+      // La pausa deja ver el botón terminar antes de cambiar de pantalla.
+      setTimeout(() => navigate(DESTINO_POR_ROL[rol] ?? '/CIAE/Inicio'), 600);
+    },
+  });
+
+  const cambiarCampo = (e: ChangeEvent<HTMLInputElement>) =>
+    setCredenciales(previas => ({ ...previas, [e.target.name]: e.target.value }));
+
+  const enviar = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    envio.mutate(credenciales);
+  };
+
+  return {
+    credenciales,
+    cambiarCampo,
+    enviar,
+    verContrasena,
+    alternarVerContrasena: () => setVerContrasena(v => !v),
+    entrando: envio.isPending,
+    error: envio.isError ? mensajeDeError(envio.error) : '',
+  };
+}

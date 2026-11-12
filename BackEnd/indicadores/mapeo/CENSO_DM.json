@@ -1,0 +1,14 @@
+{
+  "hojaEmpiezaCon": "DM Unidad",
+  "encabezados": {
+    "delegacion": "OOAD",
+    "clave": "Clave Presupuestal",
+    "unidad": "Nombre de la Unidad de Adscripción"
+  },
+  "bloquesEdad": {
+    "Mujeres": "Mujeres por grupo de edad",
+    "Hombres": "Hombres por grupo de edad"
+  },
+  "delegacion_filtro": "Guanajuato",
+  "digitosClaveUnidad": 6
+}
