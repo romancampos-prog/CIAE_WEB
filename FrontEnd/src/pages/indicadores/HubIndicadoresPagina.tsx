@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // propios
 import { IconoModuloGenerar, IconoModuloSeguimiento, IconoPeriodoDelDia } from '@/components/icons';
-import { useAuth, useRol } from '@/features/auth';
+import { useRol } from '@/features/auth';
 import NavCard from '@/components/ui/NavCard';
 import TopBar from '@/components/TopBar';
 import { getGreeting } from '@/utils/horario';
@@ -11,28 +11,19 @@ import './indicadores.css';
 
 /**
  * Página de inicio del módulo Indicadores Médicos.
- * La tarjeta "Generar indicadores" se oculta solo para quien no puede
- * generar NADA (hoy, únicamente el visitante) -- admin/trabajador_ftp/
- * trabajador_IAAS siempre tienen al menos un permiso de generación, así
- * que siempre la ven habilitada aquí. El detalle de "FTP sí, IAAS no" (o
- * viceversa) se ve un nivel más adentro, en GenerarHubPagina, con el patrón
- * de tarjeta deshabilitada.
+ * La tarjeta "Generar indicadores" se oculta para quien no puede generar nada
+ * (la unidad y edita_epidemiologia). El detalle de "IAAS sí, FTP no" se ve un
+ * nivel más adentro, en GenerarHubPagina, con el patrón de tarjeta deshabilitada.
  */
 const HubIndicadoresPagina = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
   const { icono } = getGreeting();
-  const { puedeGenFTP, puedeGenIAAS, esVisitante } = useRol();
+  const { puedeGenFTP, puedeGenIAAS } = useRol();
 
   const puedeGenerar = puedeGenFTP || puedeGenIAAS;
   // Siempre al hub de seleccion (GenerarHubPagina), igual para todos los roles --
   // ahi es donde se ve FTP/IAAS habilitado o deshabilitado segun el permiso.
   const navDestGenerar = '/CIAE/IndicadoresMedicos/Generar';
-
-  const handleLogout = () => {
-    logout();
-    navigate('/CIAE/LOGIN');
-  };
 
   useEffect(() => { document.title = 'Indicadores | CIAE'; }, []);
 
@@ -45,7 +36,7 @@ const HubIndicadoresPagina = () => {
         <div className="ciae-grid" />
       </div>
 
-      {esVisitante ? <TopBar onLogout={handleLogout} /> : <TopBar backTo="/CIAE/Inicio" />}
+      <TopBar backTo="/CIAE/Inicio" />
 
       <main className="ftp-main-content ftp-hub-main">
 

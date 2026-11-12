@@ -1,5 +1,5 @@
 """
-Cambiar el estatus de seguimiento de un registro de Acciones (lo elige el admin en la tabla):
+Cambiar el estatus de seguimiento de un registro de Acciones (lo elige quien edita Epidemiología):
 se valida contra el catalogo del mapeo y se guarda en BD_CIAE.
 Usado en: Controller/epiFTP.py
 """

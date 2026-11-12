@@ -12,8 +12,8 @@ import '@/styles/epidemiologia.css';
 
 export default function PortadaEpidemiologiaPagina() {
   const navigate = useNavigate()
-  // Dengue es solo de admin; el usuario de unidad solo ve Acciones.
-  const { esAdmin } = useRol()
+  // Dengue es de los internos; el usuario de unidad solo ve Acciones.
+  const { puedeVerDengue } = useRol()
 
   return (
     <div className="epi-root">
@@ -52,7 +52,7 @@ export default function PortadaEpidemiologiaPagina() {
 
         <div className="home-cards">
 
-          {esAdmin && (
+          {puedeVerDengue && (
             <NavCard
               titulo="Dengue"
               eyebrow="Módulo activo"

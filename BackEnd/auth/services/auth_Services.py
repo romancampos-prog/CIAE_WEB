@@ -1,14 +1,14 @@
 """
 Módulo  : auth_Services.py
 Carpeta : auth/services/
-Qué hace: Verifica credenciales (.env + usuarios de unidad de BD_CIAE) y genera tokens JWT.
+Qué hace: Verifica credenciales (usuarios internos y de unidad, ambos en BD_CIAE/USUARIOS) y genera tokens JWT.
 Usado en: auth_Controller.py
 """
 
-import os
 import bcrypt
 import jwt
 from datetime import datetime, timezone, timedelta
+from auth.datos.usuarios_internos_Datos import cargar_usuarios_internos
 from auth.datos.usuarios_unidades_Datos import cargar_usuarios_unidades
 from configs.settings import SECRET_KEY
 
@@ -16,23 +16,15 @@ from configs.settings import SECRET_KEY
 
 
 def verificar_credenciales(usuario: str , contrasena: str):
-    usuarios = { #USURIOS TOMADOS DE .ENV
-        os.getenv("USER_DrLeo")   : {"hash": os.getenv("HASH_DrLeo"),   "rol": "admin"},
-        os.getenv("USER_DrKarla") : {"hash": os.getenv("HASH_DrKarla"), "rol": "admin"},
-        os.getenv("USER_Irivin")  : {"hash": os.getenv("HASH_Irivin"),  "rol": "trabajador_IAAS"},
-        os.getenv("USER_FTP")     : {"hash": os.getenv("HASH_FTP"),     "rol": "trabajador_ftp"},
-        os.getenv("USER_Visit")   : {"hash": os.getenv("HASH_Visit"),   "rol": "visitante"}
-    }
-
-    # Los de .env van primero: un usuario de unidad nunca pisa a uno de ellos.
-    usuarios = {**cargar_usuarios_unidades(), **usuarios}
+    # Los internos van al final: un usuario de unidad nunca pisa a uno de ellos.
+    usuarios = {**cargar_usuarios_unidades(), **cargar_usuarios_internos()}
 
     if usuario not in usuarios:
         return None
     
 
     datos = usuarios[usuario]
-    if not datos ["hash"]:
+    if not datos.get("hash"):
         return None
     
     

@@ -1,5 +1,5 @@
 """
-El estudio (Excel) de un registro de Acciones con estatus "Con estudio": el admin lo sube y se
+El estudio (Excel) de un registro de Acciones con estatus "Con estudio": quien edita Epidemiología lo sube y se
 guarda tal cual, con el nombre con que llego, en BD_CIAE, ordenado por año / unidad / mes de la fecha de atencion del registro;
 despues se puede volver a bajar desde la tabla.
 Usado en: Controller/epiFTP.py

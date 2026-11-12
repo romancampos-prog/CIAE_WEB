@@ -10,7 +10,7 @@ import './generarIaas.css';
 
 const MenuIaasPagina = () => {
   const navigate   = useNavigate();
-  const { puedeGenIAAS, esVisitante } = useRol();
+  const { puedeGenIAAS } = useRol();
   const { anioActual, meses: mesesGuardados, ultimoMes } = useMesesGuardadosIaas();
 
   useEffect(() => { document.title = 'IAAS | CIAE'; }, []);
@@ -24,7 +24,7 @@ const MenuIaasPagina = () => {
         <div className="ciae-grid" />
       </div>
 
-      <TopBar backTo={esVisitante ? '/CIAE/Inicio' : '/CIAE/IndicadoresMedicos'} />
+      <TopBar backTo="/CIAE/IndicadoresMedicos" />
 
       <main className="ia-hub-main">
         <div className="ia-hub-hero">

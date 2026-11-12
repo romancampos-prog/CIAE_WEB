@@ -8,6 +8,7 @@ Usado en: Routes/epidemiologia_Route.py (prefix /epidemiologia/reportes)
 from fastapi import APIRouter, Depends, HTTPException
 
 from auth.services.jwt_Services import solo_roles
+from auth.services.roles_Services import VEN_DENGUE
 from epidemiologia.services.dengue.pipeline.estado_pipeline_Services import resultado_guardado
 
 reportesApi = APIRouter()
@@ -23,14 +24,14 @@ def _exigir(clave: str):
 ##--------------------------------------
 
 @reportesApi.get("/canal")
-def canal(payload: dict = Depends(solo_roles("admin"))):
+def canal(payload: dict = Depends(solo_roles(*VEN_DENGUE))):
     return _exigir("canal")
 
 
 ##--------------------------------------
 
 @reportesApi.get("/mapa/{tipo}")
-def mapa(tipo: str, payload: dict = Depends(solo_roles("admin"))):
+def mapa(tipo: str, payload: dict = Depends(solo_roles(*VEN_DENGUE))):
     if tipo not in ("situacion", "confirmados"):
         raise HTTPException(status_code=400, detail="tipo debe ser 'situacion' o 'confirmados'")
     return _exigir("mapa")[tipo]
@@ -39,19 +40,19 @@ def mapa(tipo: str, payload: dict = Depends(solo_roles("admin"))):
 ##--------------------------------------
 
 @reportesApi.get("/alertas-siscep")
-def alertas_siscep(payload: dict = Depends(solo_roles("admin"))):
+def alertas_siscep(payload: dict = Depends(solo_roles(*VEN_DENGUE))):
     return _exigir("alertas")
 
 
 ##--------------------------------------
 
 @reportesApi.get("/duplicados")
-def duplicados(payload: dict = Depends(solo_roles("admin"))):
+def duplicados(payload: dict = Depends(solo_roles(*VEN_DENGUE))):
     return _exigir("duplicados")
 
 
 ##--------------------------------------
 
 @reportesApi.get("/posibles-duplicados")
-def posibles_duplicados(payload: dict = Depends(solo_roles("admin"))):
+def posibles_duplicados(payload: dict = Depends(solo_roles(*VEN_DENGUE))):
     return _exigir("posibles_duplicados")

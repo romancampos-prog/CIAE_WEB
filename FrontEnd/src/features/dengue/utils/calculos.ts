@@ -6,11 +6,13 @@ import type { SeccionAlertaSiscep } from '@/types/pantallas/dengue';
  * Calcula los KPIs del canal endémico a partir de los datos de la API.
  */
 export function calcularKpisCanal(datos: DatosCanal) {
-  const totalCasos   = datos.casos_actual.reduce((a, b) => a + b, 0);
-  const picoCasos    = Math.max(...datos.casos_actual);
-  const picaSemana   = datos.semanas[datos.casos_actual.indexOf(picoCasos)];
+  // Las semanas que todavía no pasan llegan en null: no suman ni cuentan
+  const casos        = datos.casos_actual.map(c => c ?? 0);
+  const totalCasos   = casos.reduce((a, b) => a + b, 0);
+  const picoCasos    = Math.max(0, ...casos);
+  const picaSemana   = datos.semanas[casos.indexOf(picoCasos)];
   const semsAlerta   = datos.alertas.length;
-  const semsConDatos = datos.casos_actual.filter(c => c > 0).length;
+  const semsConDatos = casos.filter(c => c > 0).length;
   return { totalCasos, picoCasos, picaSemana, semsAlerta, semsConDatos };
 }
 

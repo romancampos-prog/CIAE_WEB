@@ -20,7 +20,7 @@ from ..mapeo.mapeo_Services import ExtraerMapeoFTP
 def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: list[str] | None, ver_errores: bool) -> tuple[str, dict]:
     """
     @param unidades_usuario - nombres de la unidad de un usuario de unidad (del token); None = todas
-    @param ver_errores      - solo el admin ve las unidades que fallaron en la extraccion
+    @param ver_errores      - los internos ven las unidades que fallaron en la extraccion (la unidad no)
     """
 
     #1- Lo guardado del mes (previo o definitivo)
@@ -36,7 +36,7 @@ def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: lis
         contenido["filas"] = [fila for fila in contenido["filas"] if fila.get("Unidad") in unidades_usuario]
         contenido["unidadesSinResultados"] = [u for u in contenido["unidadesSinResultados"] if u in unidades_usuario]
 
-    #3- Los errores de la extraccion solo los ve el admin, agrupados por tipo (como en indicadores FTP)
+    #3- Los errores de la extraccion los ven los internos (no la unidad), agrupados por tipo (como en indicadores FTP)
     contenido["errores"] = errores_por_tipo(contenido["errores"]) if ver_errores else {}
 
     #4- Estadisticas por las columnas del filtro del mapeo (ej. Clave de la Accion) y por unidad
@@ -74,7 +74,7 @@ def consultar_extraccion(ano: int, mes: int, archivo: str, unidades_usuario: lis
     contenido["estatus"] = {fila["_id"]: marcados.get(fila["_id"], catalogo["inicial"]) for fila in contenido["filas"]}
     contenido["catalogoEstatus"] = catalogo["estatus"]
 
-    #8- Los registros que ya tienen estudio (solo el admin los ve y los baja). Antes, el indice se
+    #8- Los registros que ya tienen estudio (los internos los ven y los bajan). Antes, el indice se
     #   pone al dia con la carpeta: alguien pudo poner o quitar Excel a mano.
     sincronizacion = sincronizar_estudios(archivo) if ver_errores else {"sinRegistro": []}
     contenido["estudiosSinRegistro"] = sincronizacion["sinRegistro"]

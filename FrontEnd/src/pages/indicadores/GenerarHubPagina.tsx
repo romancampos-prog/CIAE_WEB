@@ -13,8 +13,7 @@ import { IconoModuloExtractor, IconoModuloFtp, IconoModuloIaas } from '@/compone
  */
 const GenerarHubPagina = () => {
   const navigate = useNavigate();
-  const { puedeGenFTP, puedeGenIAAS } = useRol();
-  const puedeGenExtractor = puedeGenFTP; // mismo permiso que ftp -- back usa el mismo rol
+  const { puedeGenFTP, puedeGenIAAS, puedeGenExtractor } = useRol();
 
   useEffect(() => { document.title = 'Generar | CIAE'; }, []);
 

@@ -5,6 +5,8 @@ Sin lectura ni escritura de archivos: recibe y regresa DataFrames.
 """
 import pandas as pd
 
+from epidemiologia.modulos.dengue.fechas import rango_año_epidemiologico
+
 
 def calcular_canal_endemico(df_historico):
     """
@@ -61,17 +63,23 @@ def calcular_canal_endemico(df_historico):
 
 ##--------------------------------------
 
-def preparar_año_actual(df_actual):
+def preparar_año_actual(df_actual, año: int):
     """
     Recibe el DataFrame depurado (salida de depuracion.py).
-    Cuenta casos por semana epidemiológica.
+    Cuenta casos por semana epidemiológica, solo los del año epidemiológico: los del 1-3 de enero
+    que caen en la última semana del año anterior (ej. semana 53 de 2025) no se cuentan.
     """
 
     if 'SEM' not in df_actual.columns:
         raise ValueError("El DataFrame no contiene la columna 'SEM'.")
 
+    inicio, fin = rango_año_epidemiologico(año)
+    fechas = pd.to_datetime(df_actual['FEC_INI_SIGNOS_SINT'], errors='coerce')
+    del_año = df_actual[(fechas >= inicio) & (fechas < fin)]
+    print(f"Año actual: {len(df_actual) - len(del_año)} casos fuera del año epidemiológico {año}, no se cuentan")
+
     casos_actual = (
-        df_actual
+        del_año
         .groupby('SEM')
         .size()
         .reset_index(name='CASOS_ACTUAL')
@@ -88,7 +96,11 @@ def detectar_anomalias(df_canal, df_actual):
     Cruza el canal endémico con los casos del año actual.
     Clasifica cada semana en su zona epidemiológica:
         exito | seguridad | alerta | epidemica
+    Las semanas después de la última con casos todavía no pasan: quedan vacías (sin casos ni zona)
+    para que la línea termine ahí y no cuenten como "éxito".
     """
+
+    ultima_semana = int(df_actual['SEM'].max()) if not df_actual.empty else 0
 
     df = df_canal.merge(df_actual, on='SEM', how='left')
     df['CASOS_ACTUAL'] = df['CASOS_ACTUAL'].fillna(0)
@@ -106,6 +118,10 @@ def detectar_anomalias(df_canal, df_actual):
             return 'epidemica'
 
     df['ZONA'] = df.apply(clasificar_zona, axis=1)
+
+    futuras = df['SEM'] > ultima_semana
+    df['CASOS_ACTUAL'] = df['CASOS_ACTUAL'].astype(object).where(~futuras, None)
+    df['ZONA'] = df['ZONA'].astype(object).where(~futuras, None)
 
     print("Clasificación por zona:")
 

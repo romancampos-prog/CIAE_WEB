@@ -13,7 +13,7 @@ const InicioPagina = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const { saludo, icono } = getGreeting();
-  const { esVisitante, esUnidad, puedeGenFTP, puedeGenIAAS, puedeVerEpi } = useRol();
+  const { esUnidad } = useRol();
 
   const handleLogout = () => {
     logout();
@@ -23,15 +23,6 @@ const InicioPagina = () => {
   useEffect(() => {
     document.title = "Inicio | CIAE";
   }, []);
-
-  // El visitante no tiene nada que hacer en Inicio (solo ve Indicadores
-  // Medicos) -- si llega aqui por cualquier via (boton atras, URL directa),
-  // se manda derecho a su unico modulo.
-  useEffect(() => {
-    if (esVisitante) {
-      navigate('/CIAE/IndicadoresMedicos', { replace: true });
-    }
-  }, [esVisitante, navigate]);
 
   return (
     <div className="home-root">
@@ -75,19 +66,16 @@ const InicioPagina = () => {
             <IconoModuloIndicadores />
           </NavCard>
 
-          {(puedeGenFTP || puedeGenIAAS || esUnidad) && (
-            <NavCard
-              titulo="Epidemiología"
-              eyebrow="Módulo activo"
-              desc="Vigilancia de enfermedades prioritarias y seguimiento de acciones en el OOAD Guanajuato."
-              chips={esUnidad ? ['Acciones'] : ['Dengue', 'Acciones']}
-              color="tinto"
-              disabled={!puedeVerEpi}
-              onClick={() => navigate('/CIAE/Epidemiologia')}
-            >
-              <IconoModuloVigilancia />
-            </NavCard>
-          )}
+          <NavCard
+            titulo="Epidemiología"
+            eyebrow="Módulo activo"
+            desc="Vigilancia de enfermedades prioritarias y seguimiento de acciones en el OOAD Guanajuato."
+            chips={esUnidad ? ['Acciones'] : ['Dengue', 'Acciones']}
+            color="tinto"
+            onClick={() => navigate('/CIAE/Epidemiologia')}
+          >
+            <IconoModuloVigilancia />
+          </NavCard>
 
         </div>
       </main>

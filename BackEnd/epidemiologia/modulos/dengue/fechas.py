@@ -78,3 +78,11 @@ def semana_epidemiologica(fecha):
         inicio = _inicio_sem1(fecha.year - 1)
 
     return _numero_semana(fecha, inicio)
+
+
+##--------------------------------------
+
+def rango_año_epidemiologico(año: int) -> tuple[pd.Timestamp, pd.Timestamp]:
+    """(inicio de la semana 1 de ese año, inicio de la semana 1 del siguiente): el año va de [inicio, fin)."""
+
+    return _inicio_sem1(año), _inicio_sem1(año + 1)

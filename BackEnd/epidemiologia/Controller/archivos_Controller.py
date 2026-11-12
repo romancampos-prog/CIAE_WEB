@@ -7,6 +7,7 @@ Usado en: Routes/epidemiologia_Route.py (prefix /epidemiologia/archivos)
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from auth.services.jwt_Services import solo_roles
+from auth.services.roles_Services import EDITAN_EPIDEMIOLOGIA
 from configs.response import ApiResponse
 from epidemiologia.services.dengue.subir_bases_Services import subir_base_operativa, subir_base_siscep
 
@@ -18,7 +19,7 @@ archivosApi = APIRouter()
 async def subir_operativa(
     archivo:     UploadFile = File(...),
     pesoArchivo: int        = Form(...),
-    payload:     dict       = Depends(solo_roles("admin")),
+    payload:     dict       = Depends(solo_roles(*EDITAN_EPIDEMIOLOGIA)),
 ):
     mensaje, datos = subir_base_operativa(payload.get("sub"), archivo.filename, await archivo.read(), pesoArchivo)
     return ApiResponse(success=True, message=mensaje, data=datos)
@@ -31,7 +32,7 @@ async def subir_operativa(
 async def subir_siscep(
     archivo:     UploadFile = File(...),
     pesoArchivo: int        = Form(...),
-    payload:     dict       = Depends(solo_roles("admin")),
+    payload:     dict       = Depends(solo_roles(*EDITAN_EPIDEMIOLOGIA)),
 ):
     mensaje, datos = subir_base_siscep(payload.get("sub"), archivo.filename, await archivo.read(), pesoArchivo)
     return ApiResponse(success=True, message=mensaje, data=datos)

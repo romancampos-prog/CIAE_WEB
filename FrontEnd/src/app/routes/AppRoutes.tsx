@@ -24,9 +24,10 @@ import AlertasSiscepPagina          from '@/pages/epidemiologia/dengue/AlertasSi
 import DuplicadosPagina             from '@/pages/epidemiologia/dengue/DuplicadosPagina';
 import AccionesPagina               from '@/pages/epidemiologia/acciones/AccionesPagina';
 
-// Visitante solo puede ver gráficas: generar (FTP/IAAS/Extractor) queda bloqueado por ruta.
-const ROLES_GENERAR: Rol[] = ['admin', 'trabajador_ftp', 'trabajador_IAAS'];
-const ROLES_EPIDEMIOLOGIA: Rol[] = ['admin', 'unidad'];
+// Generar (FTP/IAAS/Extractor) solo para quien genera algo; quien solo ve se queda en gráficas.
+const ROLES_GENERAR: Rol[] = ['admin', 'edita_indicadores', 'edita_iaas'];
+// Dengue es de los internos; la unidad entra a Epidemiología solo para Acciones.
+const ROLES_DENGUE: Rol[] = ['admin', 'edita_indicadores', 'edita_epidemiologia', 'edita_iaas'];
 
 /** Todas las rutas de la aplicación en un solo lugar. */
 export default function AppRoutes() {
@@ -62,14 +63,12 @@ export default function AppRoutes() {
               </Route>
             </Route>
 
-            {/* Epidemiología: portada y Acciones también para el usuario de unidad (el back solo le manda
-                sus filas); Dengue solo admin, incluso por URL directa */}
+            {/* Epidemiología: portada y Acciones para todos (a la unidad el back solo le manda sus filas);
+                Dengue para los internos, incluso por URL directa. Quien solo ve no tiene Carga de datos. */}
             <Route path="CIAE/Epidemiologia">
-              <Route element={<ProtectedRoute roles={ROLES_EPIDEMIOLOGIA} />}>
-                <Route index           element={<PortadaEpidemiologiaPagina />} />
-                <Route path="acciones" element={<AccionesPagina />} />
-              </Route>
-              <Route element={<ProtectedRoute roles={['admin']} />}>
+              <Route index           element={<PortadaEpidemiologiaPagina />} />
+              <Route path="acciones" element={<AccionesPagina />} />
+              <Route element={<ProtectedRoute roles={ROLES_DENGUE} />}>
                 <Route path="dengue" element={<PipelineProvider><DengueLayout /></PipelineProvider>}>
                   <Route index             element={<CargaPagina />} />
                   <Route path="canal"      element={<CanalPagina />} />

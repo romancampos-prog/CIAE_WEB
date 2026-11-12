@@ -22,8 +22,9 @@ export interface DatosCanal {
   q1: number[];
   mediana: number[];
   q3: number[];
-  casos_actual: number[];
-  zonas: string[];
+  /** null = semana que todavía no pasa (después de la última con casos): la línea termina antes. */
+  casos_actual: (number | null)[];
+  zonas: (string | null)[];
   alertas: { sem: number; casos: number; umbral: number; zona: string }[];
 }
 

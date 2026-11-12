@@ -39,8 +39,9 @@ export default function CanalChart({ datos }: { datos: DatosCanal }) {
   const { tema } = useTema()
   const colores = COLORES_TEMA[tema]
 
-  const upper = Math.max(Math.max(...q3) * 2, Math.max(...casos_actual) * 1.15, 1)
-  const coloresMarcador = zonas.map(z => ZONA_COLORES[z] || '#000')
+  const casosConDato = casos_actual.filter((c): c is number => c != null)
+  const upper = Math.max(Math.max(...q3) * 2, Math.max(0, ...casosConDato) * 1.15, 1)
+  const coloresMarcador = zonas.map(z => (z && ZONA_COLORES[z]) || '#000')
 
   // Altura fija de 480px queda desproporcionada en mobile (chart muy alto y
   // angosto, obliga a scrollear para ver la mayor parte de los datos) — se

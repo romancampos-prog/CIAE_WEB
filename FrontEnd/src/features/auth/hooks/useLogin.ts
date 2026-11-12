@@ -8,11 +8,9 @@ import { authApi } from '@/api/auth/authApi';
 import { mensajeDeError } from '@/api/cliente/mensajeDeError';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
-// A dónde entra cada rol; el que no está aquí (admin) entra a Inicio.
+// A dónde entra cada rol; el que no está aquí entra a Inicio.
 const DESTINO_POR_ROL: Partial<Record<Rol, string>> = {
-  trabajador_IAAS: '/CIAE/IndicadoresMedicos/IAAS',
-  trabajador_ftp:  '/CIAE/IndicadoresMedicos/FTP',
-  visitante:       '/CIAE/IndicadoresMedicos',
+  edita_iaas: '/CIAE/IndicadoresMedicos/IAAS',
 };
 
 /** Estado del formulario de login y el envío de credenciales. */

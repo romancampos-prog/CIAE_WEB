@@ -2,9 +2,10 @@ import { NavLink } from 'react-router-dom'
 import { usePipeline } from '@/features/dengue/context/PipelineContext';
 // propios
 import { IconoChevronIzquierda } from '@/components/icons';
+import { useRol } from '@/features/auth';
 
 const NAV = [
-  { to: '/CIAE/Epidemiologia/dengue',                  icono: '📂', label: 'Carga de datos',   bloqueable: false },
+  { to: '/CIAE/Epidemiologia/dengue',                  icono: '📂', label: 'Carga de datos',   bloqueable: false, soloEdicion: true },
   { to: '/CIAE/Epidemiologia/dengue/canal',            icono: '📊', label: 'Canal endémico',   bloqueable: true  },
   { to: '/CIAE/Epidemiologia/dengue/mapa/situacion',   icono: '🗺️', label: 'Mapa situación',   bloqueable: true  },
   { to: '/CIAE/Epidemiologia/dengue/mapa/confirmados', icono: '🗺️', label: 'Mapa confirmados', bloqueable: true  },
@@ -20,6 +21,9 @@ const NAV = [
 export default function DengueSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const { estado } = usePipeline()
   const corriendo  = !!estado?.corriendo
+  const { puedeEditarEpi } = useRol()
+  // Quien solo ve Dengue no tiene Carga de datos (subir bases y correr el pipeline)
+  const opciones = NAV.filter(o => puedeEditarEpi || !o.soloEdicion)
 
   // En mobile el sidebar es un overlay: se cierra solo al elegir un módulo
   const cerrarSiMobile = () => {
@@ -38,7 +42,7 @@ export default function DengueSidebar({ collapsed, onToggle }: { collapsed: bool
       )}
 
       <div className="epi-nav-list">
-        {NAV.map(({ to, icono, label, bloqueable }) => {
+        {opciones.map(({ to, icono, label, bloqueable }) => {
           const deshabilitado = bloqueable && corriendo
 
           if (deshabilitado) {

@@ -5,6 +5,7 @@ procesa para los indicadores del motor Extractor que el mapeo le asigna (mapeo/e
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from auth.services.jwt_Services import solo_roles
+from auth.services.roles_Services import GENERAN_INDICADORES, VEN_PAGINAS_GENERAR
 from configs.response import ApiResponse
 from services.extractor.estado_archivos_Services import estado_archivos
 from services.extractor.estado_cortes_Services import estado_ventanas
@@ -13,15 +14,13 @@ from services.extractor.subir_archivo_extractor_Services import generar_archivo_
 
 extractorApi = APIRouter()
 
-ROLES_CONSULTA = ("admin", "trabajador_ftp", "visitante")
-ROLES_EXTRACTOR = ("admin", "trabajador_ftp")
 # Un archivo o un mapeo que no cuadra con lo que se esperaba (mes equivocado, columna faltante...).
 ERRORES_DE_DATOS = (FileNotFoundError, KeyError, ValueError)
 
 
 #Get Indicadores/extractor/indicadores
 @extractorApi.get("/indicadores")
-async def indicadores_extractor(payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def indicadores_extractor(payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     return ApiResponse(success=True, message="Indicadores del modulo Extractor", data=indicadores_para_generar())
 
 
@@ -29,7 +28,7 @@ async def indicadores_extractor(payload: dict = Depends(solo_roles(*ROLES_CONSUL
 
 #Get Indicadores/extractor/estado-cortes?anio=2026  (cuantos de los 12 meses de cada corte ya estan subidos)
 @extractorApi.get("/estado-cortes")
-async def estado_cortes(anio: int, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def estado_cortes(anio: int, payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     try:
         return ApiResponse(success=True, message="Estado de meses subidos", data=estado_ventanas(anio))
     except ERRORES_DE_DATOS as error:
@@ -40,7 +39,7 @@ async def estado_cortes(anio: int, payload: dict = Depends(solo_roles(*ROLES_CON
 
 #Get Indicadores/extractor/estado-archivos?anio=2026  (por archivo y mes: si ya esta subido)
 @extractorApi.get("/estado-archivos")
-async def estado_archivos_anio(anio: int, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def estado_archivos_anio(anio: int, payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     try:
         return ApiResponse(success=True, message="Estado de archivos subidos", data=estado_archivos(anio))
     except ERRORES_DE_DATOS as error:
@@ -57,7 +56,7 @@ async def generar_mes_extractor(
     archivo:          UploadFile        = File(...),
     pesoArchivo:      int               = Form(...),
     archivoBase:      str               = Form("SUI_13"),   # que archivo es (SUI_13, EGRESOS_TOCO...): decide que indicadores se procesan
-    payload:          dict              = Depends(solo_roles(*ROLES_EXTRACTOR)),
+    payload:          dict              = Depends(solo_roles(*GENERAN_INDICADORES)),
 ):
     contenido = await archivo.read()
 

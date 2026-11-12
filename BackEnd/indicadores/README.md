@@ -197,9 +197,11 @@ que lee `catalogo_ftp.json` y `reportes_siais_ftp_Datos`: rutas de cada unidad, 
 Todos bajo `/Indicadores`. Responden `ApiResponse(success, message, data)` (el front lee
 `response.data.data`), **salvo** `/informacion/*`, que responde el dato directo.
 
-Roles: consulta = `admin`, `trabajador_ftp`, `trabajador_IAAS`, `visitante` (el Extractor no
-incluye `trabajador_IAAS`); generar FTP/Extractor = `admin`, `trabajador_ftp`; generar IAAS =
-`admin`, `trabajador_IAAS`.
+Roles: los grupos viven en `auth/services/roles_Services.py` (los controllers solo los importan).
+Gráficas = todos (`VEN_GRAFICAS`, incluida la unidad); listas de las páginas de Generar y Excel =
+internos (`VEN_PAGINAS_GENERAR`, `DESCARGAN_EXCEL`); generar FTP/Extractor/población/censo =
+`admin`, `edita_indicadores` (`GENERAN_INDICADORES`); generar IAAS = esos dos + `edita_iaas`
+(`GENERAN_IAAS`).
 
 | Método y ruta | Para qué | Servicio |
 |---|---|---|
@@ -671,17 +673,16 @@ está claro en el código y conviene revisarlo.
 from fastapi import APIRouter, Depends
 
 from auth.services.jwt_Services import solo_roles
+from auth.services.roles_Services import VEN_PAGINAS_GENERAR
 from configs.response import ApiResponse
 from services.ftp.pagina_generar_ftp_Services import meses_generados_ftp
 
 ejemploApi = APIRouter()
 
-ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
-
 
 #Get Indicadores/ejemplo/meses?indicador=CAMA 01&ano=2026
 @ejemploApi.get("/meses")
-async def meses(indicador: str, ano: str, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def meses(indicador: str, ano: str, payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     return ApiResponse(success=True, message="Meses con datos", data=meses_generados_ftp(indicador, ano))
 ```
 

@@ -21,7 +21,7 @@ import '@/styles/acciones.css';
  * El reporte (tabla) es lo principal; los conteos van en una columna a su lado (abajo en pantallas chicas) con el aviso de errores (admin) hasta arriba.
  */
 export default function AccionesPagina() {
-  const { esAdmin, esUnidad } = useRol();
+  const { esUnidad, puedeEditarEpi } = useRol();
   const consulta = useConsultaAcciones();
   const generacion = useGenerarAcciones();
   const { datos, filtros } = consulta;
@@ -54,14 +54,14 @@ export default function AccionesPagina() {
           <MesesAcciones
             anios={consulta.anios} anio={consulta.anio} onAnio={consulta.cambiarAnio}
             periodos={consulta.periodos} mes={consulta.mes} onMes={consulta.cambiarMes}
-            onMesSinReporte={esAdmin ? avisarMesSinReporte : undefined}
-            onGenerar={esAdmin ? () => abrirGenerar(consulta.mes) : undefined}
+            onMesSinReporte={puedeEditarEpi ? avisarMesSinReporte : undefined}
+            onGenerar={puedeEditarEpi ? () => abrirGenerar(consulta.mes) : undefined}
           />
           {estadisticas && <ResumenPeriodo estadisticas={estadisticas} />}
           {consulta.periodos.length > 0 && <DescargarExcelAcciones fechas={consulta.fechas} anio={consulta.anio} soloMiUnidad={esUnidad} />}
         </header>
 
-        {esAdmin && (
+        {puedeEditarEpi && (
           <>
             <AvisoMesSinReporte ventana={ventanaAviso} anio={consulta.anio} mes={mesSinReporte} onGenerar={() => abrirGenerar(mesSinReporte)} />
             <GenerarAcciones generacion={generacion} ventana={ventanaGenerar} />
@@ -96,19 +96,19 @@ export default function AccionesPagina() {
                   onLimpiar={consulta.limpiarFiltros}
                   estatus={datos.estatus ?? {}}
                   catalogoEstatus={datos.catalogoEstatus ?? []}
-                  onCambiarEstatus={esAdmin ? consulta.cambiarEstatus : undefined}
+                  onCambiarEstatus={puedeEditarEpi ? consulta.cambiarEstatus : undefined}
                   estudios={datos.estudios ?? {}}
-                  onSubirEstudio={esAdmin ? consulta.subirEstudio : undefined}
+                  onSubirEstudio={puedeEditarEpi ? consulta.subirEstudio : undefined}
                   onLimpiarErrorEstudio={consulta.limpiarErrorEstudio}
-                  onDescargarEstudio={esAdmin ? consulta.descargarEstudio : undefined}
+                  onDescargarEstudio={!esUnidad ? consulta.descargarEstudio : undefined}
                   subiendoEstudio={consulta.subiendoEstudio}
                   errorEstudio={consulta.errorEstudio}
                   etiquetas={datos.etiquetasColumna ?? {}}
                   iconos={datos.iconosColumna ?? {}}
                 />
                 {consulta.errorEstatus && <p className="acc-vacio">{consulta.errorEstatus}</p>}
-                {/* El backend pone el índice al día con la carpeta; lo que no reconoce se avisa aquí (solo admin) */}
-                {esAdmin && !!datos.estudiosSinRegistro?.length && (
+                {/* El backend pone el índice al día con la carpeta; lo que no reconoce se avisa a quien edita */}
+                {puedeEditarEpi && !!datos.estudiosSinRegistro?.length && (
                   <div className="acc-estudios-sueltos">
                     <strong>{datos.estudiosSinRegistro.length} Excel en la carpeta de estudios no corresponden a ningún registro.</strong>
                     {' '}Deben ir en año/unidad/mes con el nombre fecha_clave_NSS:
@@ -122,7 +122,7 @@ export default function AccionesPagina() {
           {/* En pantalla grande la columna mide lo mismo que la tabla: la lista de unidades llena lo que sobra y no se pasa de largo */}
           <aside className="acc-resumenes" aria-label="Resumen del periodo">
             <div className="acc-resumenes-columna">
-              {esAdmin && datos && <ErroresExtraccion errores={datos.errores} />}
+              {!esUnidad && datos && <ErroresExtraccion errores={datos.errores} />}
               {estadisticas && (
                 <EstadisticasAcciones
                   estadisticas={estadisticas}

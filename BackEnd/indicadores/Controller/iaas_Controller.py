@@ -5,6 +5,7 @@ guardados en BD_CIAE; el Excel se pide aparte a /Indicadores/excel).
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from auth.services.jwt_Services import solo_roles
+from auth.services.roles_Services import GENERAN_IAAS, VEN_PAGINAS_GENERAR
 from configs.response import ApiResponse
 from schemas.DTO.iaas_ViewModel import EstadoMesIAASRequest
 from services.iaas.completar_unidad_iaas_Services import completar_unidad_tardia
@@ -14,13 +15,11 @@ from services.iaas.pagina_generar_iaas_Services import indicadores_para_generar,
 
 iaasApi = APIRouter()
 
-ROLES_CONSULTA = ("admin", "trabajador_ftp", "trabajador_IAAS", "visitante")
-ROLES_IAAS     = ("admin", "trabajador_IAAS")
 
 
 #Get Indicadores/iaas/unidades
 @iaasApi.get("/unidades")
-async def unidades(payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def unidades(payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     return ApiResponse(success=True, message="Unidades IAAS obtenidas", data=unidades_iaas())
 
 
@@ -28,7 +27,7 @@ async def unidades(payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
 
 #Get Indicadores/iaas/indicadores
 @iaasApi.get("/indicadores")
-async def indicadores_iaas(payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def indicadores_iaas(payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     return ApiResponse(success=True, message="Indicadores IAAS obtenidos", data=indicadores_para_generar())
 
 
@@ -36,7 +35,7 @@ async def indicadores_iaas(payload: dict = Depends(solo_roles(*ROLES_CONSULTA)))
 
 #Get Indicadores/iaas/meses-generados?anio=2026
 @iaasApi.get("/meses-generados")
-async def meses_generados(anio: str, payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def meses_generados(anio: str, payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     return ApiResponse(success=True, message="Meses guardados obtenidos", data={"meses": meses_generados_iaas(anio)})
 
 
@@ -44,7 +43,7 @@ async def meses_generados(anio: str, payload: dict = Depends(solo_roles(*ROLES_C
 
 #Get Indicadores/iaas/estado-mes?anio=2026&mes=03  (lo guardado y las unidades pendientes del mes)
 @iaasApi.get("/estado-mes")
-async def estado_mes(solicitud: EstadoMesIAASRequest = Depends(), payload: dict = Depends(solo_roles(*ROLES_CONSULTA))):
+async def estado_mes(solicitud: EstadoMesIAASRequest = Depends(), payload: dict = Depends(solo_roles(*VEN_PAGINAS_GENERAR))):
     estado = estado_del_mes(solicitud.anio, solicitud.mes)
     if estado is None:
         return ApiResponse(success=True, message="Sin sesión para este período", data=None)
@@ -64,7 +63,7 @@ async def generar_mes_iaas(
     denominador:                    str | None         = Form(None),
     excel_denominador_IAAS_01:      UploadFile | None  = File(None),
     peso_excel_denominador_IAAS_01: int | None         = Form(None),
-    payload:                        dict               = Depends(solo_roles(*ROLES_IAAS)),
+    payload:                        dict               = Depends(solo_roles(*GENERAN_IAAS)),
 ):
     archivos_numerador = [(archivo.filename, await archivo.read()) for archivo in numerador]
     excel_denominador = await excel_denominador_IAAS_01.read() if excel_denominador_IAAS_01 else None
@@ -89,7 +88,7 @@ async def completar_unidad(
     peso_excel_unidad:              int | None        = Form(None),
     excel_denominador_iaas01:       UploadFile | None = File(None),
     peso_excel_denominador_iaas01:  int | None        = Form(None),
-    payload:                        dict              = Depends(solo_roles(*ROLES_IAAS)),
+    payload:                        dict              = Depends(solo_roles(*GENERAN_IAAS)),
 ):
     mensaje, datos = completar_unidad_tardia(
         payload.get("sub"), password, anio, mes, unidad, indicadores, denominadores,

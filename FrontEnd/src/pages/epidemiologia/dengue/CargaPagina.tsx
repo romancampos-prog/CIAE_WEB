@@ -1,4 +1,7 @@
+// react
+import { Navigate } from 'react-router-dom';
 // propios
+import { useRol } from '@/features/auth';
 import { CorgiOverlay, ReporteToast, UploadCard, useCargaBases } from '@/features/dengue';
 import { textoAcento } from '@/utils/colorAcento';
 
@@ -9,6 +12,10 @@ import { textoAcento } from '@/utils/colorAcento';
  */
 export default function CargaPagina() {
   const { estado, ejecutar, listos, subir, ambosListos, corriendo, completado, hayError, cuenta } = useCargaBases()
+  const { puedeEditarEpi } = useRol()
+
+  // Quien solo ve Dengue no sube bases ni corre el pipeline: entra directo al canal endémico.
+  if (!puedeEditarEpi) return <Navigate to="/CIAE/Epidemiologia/dengue/canal" replace />
 
   return (
     <div style={{

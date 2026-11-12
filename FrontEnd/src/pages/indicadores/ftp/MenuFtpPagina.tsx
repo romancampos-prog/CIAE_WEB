@@ -12,7 +12,7 @@ import '@/pages/indicadores/indicadores.css';
  */
 const MenuFtpPagina = () => {
   const navigate = useNavigate();
-  const { puedeGenFTP, esVisitante } = useRol();
+  const { puedeGenFTP } = useRol();
 
   return (
     <div className="ftp-screen-container">
@@ -21,7 +21,7 @@ const MenuFtpPagina = () => {
         <div className="ftp-circle ftp-c2" />
       </div>
 
-      <TopBar backTo={esVisitante ? '/CIAE/Inicio' : '/CIAE/IndicadoresMedicos'} />
+      <TopBar backTo="/CIAE/IndicadoresMedicos" />
 
       <div className="ftp-hub-main">
         <div className="ftp-hero-hub">

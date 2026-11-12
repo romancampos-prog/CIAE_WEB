@@ -538,19 +538,19 @@ Todas viven en `app/routes/AppRoutes.tsx`:
 /CIAE/IndicadoresMedicos/Generar             GenerarHubPagina      ┐
 /CIAE/IndicadoresMedicos/FTP                 MenuFtpPagina         │
 /CIAE/IndicadoresMedicos/FTP/Generar         GenerarFtpPagina      │ roles: admin,
-/CIAE/IndicadoresMedicos/IAAS                MenuIaasPagina        │ trabajador_ftp,
-/CIAE/IndicadoresMedicos/IAAS/Reporte        GenerarIaasPagina     │ trabajador_IAAS
+/CIAE/IndicadoresMedicos/IAAS                MenuIaasPagina        │ edita_indicadores,
+/CIAE/IndicadoresMedicos/IAAS/Reporte        GenerarIaasPagina     │ edita_iaas
 /CIAE/IndicadoresMedicos/Extractor           GenerarExtractorPagina┘ (también /Extractor/Generar)
-/CIAE/Epidemiologia                          PortadaEpidemiologiaPagina  ┐ admin, unidad
-/CIAE/Epidemiologia/acciones                 AccionesPagina              ┘
-/CIAE/Epidemiologia/dengue                   CargaPagina                 ┐
-/CIAE/Epidemiologia/dengue/canal             CanalPagina                 │ solo admin
+/CIAE/Epidemiologia                          PortadaEpidemiologiaPagina  ┐ todos
+/CIAE/Epidemiologia/acciones                 AccionesPagina              ┘ (editan: admin, edita_epidemiologia)
+/CIAE/Epidemiologia/dengue                   CargaPagina                 ┐ internos (no unidad);
+/CIAE/Epidemiologia/dengue/canal             CanalPagina                 │ Carga solo quien edita
 /CIAE/Epidemiologia/dengue/mapa/:tipo        MapaPagina                  │
 /CIAE/Epidemiologia/dengue/alertas           AlertasSiscepPagina         │
 /CIAE/Epidemiologia/dengue/duplicados        DuplicadosPagina            ┘
 ```
 
-Los roles se revisan en la ruta (`<ProtectedRoute roles={...} />`), no solo ocultando la tarjeta: tampoco se entra escribiendo la URL.
+Los roles se revisan en la ruta (`<ProtectedRoute roles={...} />`), no solo ocultando la tarjeta: tampoco se entra escribiendo la URL. Qué puede hacer cada rol en pantalla sale de `useRol()` (`@/features/auth`); el backend lo vuelve a revisar con los grupos de `auth/services/roles_Services.py`.
 
 ### Como crear una nueva pagina
 
