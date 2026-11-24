@@ -12,7 +12,7 @@ def limpiar_campos(df):
     df = df.copy()
 
     campos_texto = ['IDE_NOM', 'IDE_APE_PAT', 'IDE_APE_MAT', 'CURP',
-                    'IDE_COL','DES_MPO_RES']
+                    'IDE_COL','DES_MPO_RES', 'DES_MPO_UNIDAD']
 
     for campo in campos_texto:
         if campo in df.columns:

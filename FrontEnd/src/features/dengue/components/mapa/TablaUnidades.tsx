@@ -1,27 +1,35 @@
+// propios
+import type { FilaTablaMapa } from '@/types/api/dengue/reportes';
 import { textoAcento } from '@/utils/colorAcento';
 
+interface Props {
+  filas: FilaTablaMapa[] | undefined;
+  /** Título de la columna de nombres: 'Municipio de residencia' o 'Unidad Médica'. */
+  encabezado: string;
+}
+
 /**
- * Tabla de ranking de unidades médicas ordenada de mayor a menor número de casos.
+ * Tabla de ranking (municipios o unidades médicas) ordenada de mayor a menor número de casos.
  * Las primeras 3 posiciones se destacan con color. Cada fila incluye una barra de proporción.
  */
-export default function TablaUnidades({ unidades }: { unidades: { unidad: string; n: number }[] | undefined }) {
-  if (!unidades?.length) return null
-  const max = unidades[0]?.n || 1
+export default function TablaUnidades({ filas, encabezado }: Props) {
+  if (!filas?.length) return null
+  const max = filas[0]?.n || 1
 
   return (
     <table className="dengue-tabla">
       <thead>
         <tr>
           <th style={{ width: 36, textAlign: 'center' }}>#</th>
-          <th>Unidad Médica</th>
+          <th>{encabezado}</th>
           <th style={{ textAlign: 'center', width: 80 }}>Casos</th>
           <th style={{ width: 180 }}>Proporción</th>
         </tr>
       </thead>
       <tbody>
-        {unidades.map((u, i) => {
-          const pct = (u.n / max * 100).toFixed(1)
-          const color = u.n === max ? 'var(--epi-guinda)' : i < 3 ? 'var(--epi-dorado)' : 'var(--epi-verde)'
+        {filas.map((fila, i) => {
+          const pct = (fila.n / max * 100).toFixed(1)
+          const color = fila.n === max ? 'var(--epi-guinda)' : i < 3 ? 'var(--epi-dorado)' : 'var(--epi-verde)'
           return (
             <tr key={i}>
               <td style={{ textAlign: 'center' }}>
@@ -33,9 +41,9 @@ export default function TablaUnidades({ unidades }: { unidades: { unidad: string
                   fontSize: 10, fontWeight: 800,
                 }}>{i + 1}</div>
               </td>
-              <td style={{ fontWeight: i < 3 ? 600 : 400, color: 'var(--texto-medio)' }}>{u.unidad}</td>
+              <td style={{ fontWeight: i < 3 ? 600 : 400, color: 'var(--texto-medio)' }}>{fila.nombre}</td>
               <td style={{ textAlign: 'center', fontWeight: 700, color: textoAcento(color) }}>
-                {u.n}
+                {fila.n}
               </td>
               <td>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

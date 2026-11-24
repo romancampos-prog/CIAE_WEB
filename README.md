@@ -447,7 +447,7 @@ Procesa dos bases de datos Excel (SINAVE operativa + SisCep laboratorio) y gener
 | Reporte | Ruta frontend |
 |---|---|
 | Canal endemico semanal | `/CIAE/Epidemiologia/dengue/canal` |
-| Mapa de situacion / confirmados | `/CIAE/Epidemiologia/dengue/mapa/situacion` (o `/confirmados`) |
+| Mapa por residencia / unidad / confirmados | `/CIAE/Epidemiologia/dengue/mapa/residencia` (o `/unidad`, `/confirmados`) |
 | Alertas SisCep | `/CIAE/Epidemiologia/dengue/alertas` |
 | Duplicados detectados | `/CIAE/Epidemiologia/dengue/duplicados` |
 

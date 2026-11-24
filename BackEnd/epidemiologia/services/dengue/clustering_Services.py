@@ -18,13 +18,14 @@ def procesar_clustering(df) -> dict:
     El catálogo de CPs y el GeoJSON salen de mapeo/dengue/ (rutas en config.py).
 
     Devuelve un dict con claves:
-        geojson         — GeoJSON de Guanajuato (para mapa_Services)
-        df_municipio    — conteo por municipio
-        df_confirmados  — conteo confirmados por municipio
-        df_unidades     — conteo por unidad médica
-        df_uni_confirm  — conteo confirmados por unidad médica
-        brotes_espacial — lista de alertas DBSCAN + LOF adaptativo
-        brotes_temporal — lista de alertas temporales por colonia
+        geojson          — GeoJSON de Guanajuato (para mapa_Services)
+        df_municipio     — conteo por municipio de residencia (de mas a menos casos)
+        df_mpo_unidad    — conteo por municipio de la unidad que notifico
+        df_confirmados   — conteo confirmados por municipio de residencia
+        df_unidades      — conteo por unidad médica
+        df_uni_confirm   — conteo confirmados por unidad médica
+        brotes_espacial  — lista de alertas DBSCAN + LOF adaptativo
+        brotes_temporal  — lista de alertas temporales por colonia
     """
 
     print("=" * 55)
@@ -38,7 +39,8 @@ def procesar_clustering(df) -> dict:
     ventanas = construir_ventanas(df)
 
     print("\n[3] Agregando por municipio y unidad médica...")
-    df_municipio   = contar_casos(df, 'MPO_NORM')
+    df_municipio   = contar_casos(df, 'MPO_NORM', ordenar=True)
+    df_mpo_unidad  = contar_casos(df, 'MPO_UNIDAD_NORM')
     df_confirmados = contar_casos(df, 'MPO_NORM', solo_confirmados=True)
     df_unidades    = contar_casos(df, 'DES_UNI_MED_NOTIF', ordenar=True)
     df_uni_confirm = contar_casos(df, 'DES_UNI_MED_NOTIF', solo_confirmados=True, ordenar=True)
@@ -63,6 +65,7 @@ def procesar_clustering(df) -> dict:
     return {
         'geojson'         : geojson,
         'df_municipio'    : df_municipio,
+        'df_mpo_unidad'   : df_mpo_unidad,
         'df_confirmados'  : df_confirmados,
         'df_unidades'     : df_unidades,
         'df_uni_confirm'  : df_uni_confirm,

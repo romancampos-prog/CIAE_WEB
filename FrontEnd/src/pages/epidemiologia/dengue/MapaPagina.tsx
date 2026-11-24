@@ -11,15 +11,17 @@ import { conAlfa, textoAcento } from '@/utils/colorAcento';
  * Página del mapa de dengue por municipio.
  * Muestra la distribución geoespacial (mapa Leaflet) o la tabla de unidades médicas
  * según la pestaña activa, más el panel de brotes si existen.
- * El parámetro `tipo` puede ser 'situacion' (notificados) o 'confirmados'.
+ * El parámetro `tipo` puede ser 'residencia' (donde vive el paciente), 'unidad' (municipio de la
+ * unidad que notificó) o 'confirmados'. La tabla de residencia lista municipios; las otras, unidades.
  */
 export default function MapaPagina() {
-  const { tipo = 'situacion' } = useParams<{ tipo: TipoMapa }>()
+  const { tipo = 'residencia' } = useParams<{ tipo: TipoMapa }>()
   const { datos, cargando, error } = useMapaDengue(tipo)
   const [tabActiva, setTabActiva]       = useState<'mapa' | 'tabla'>('mapa')
   const [panelBrotes, setPanelBrotes]   = useState(false)
 
-  const { etiqueta, colorTema, bgTema, bordeTema } = getTemaMapa(tipo)
+  const { insignia, etiqueta, subtitulo, colorTema, bgTema, bordeTema } = getTemaMapa(tipo)
+  const tablaPorMunicipio = datos?.tabla_por === 'municipio'
 
   if (cargando) return <DengueSpinner texto={`Cargando mapa de ${etiqueta.toLowerCase()}…`} />
 
@@ -43,7 +45,7 @@ export default function MapaPagina() {
             fontSize: '0.6rem', fontWeight: 700, color: textoAcento(colorTema),
             textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8,
           }}>
-            🗺️ {tipo === 'situacion' ? 'Mapa de situación' : 'Mapa de confirmados'}
+            🗺️ {insignia}
           </div>
           <h1 className="epi-canal-titulo" style={{
             fontSize: 'clamp(1.4rem,3vw,1.9rem)', fontWeight: 800,
@@ -57,7 +59,7 @@ export default function MapaPagina() {
             }}>{datos.año}</span>
           </h1>
           <p className="epi-canal-sub" style={{ fontSize: 12, color: 'var(--texto-tenue)', margin: 0 }}>
-            IMSS OOAD Guanajuato · distribución por municipio
+            IMSS OOAD Guanajuato · {subtitulo}
           </p>
         </div>
 
@@ -206,7 +208,7 @@ export default function MapaPagina() {
           }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--texto)' }}>
-                {etiqueta} por Unidad Médica
+                {etiqueta} {tablaPorMunicipio ? 'por Municipio de residencia' : 'por Unidad Médica'}
               </div>
               <div style={{ fontSize: 11, color: 'var(--texto-tenue)', marginTop: 1 }}>
                 Ordenadas por número de casos descendente
@@ -218,11 +220,14 @@ export default function MapaPagina() {
               borderRadius: 100, padding: '4px 12px',
               fontSize: 11, fontWeight: 700, color: textoAcento(colorTema),
             }}>
-              {datos.unidades.length} unidades
+              {datos.tabla.length} {tablaPorMunicipio ? 'municipios' : 'unidades'}
             </div>
           </div>
           <div style={{ padding: '8px 0' }}>
-            <TablaUnidades unidades={datos.unidades} />
+            <TablaUnidades
+              filas={datos.tabla}
+              encabezado={tablaPorMunicipio ? 'Municipio de residencia' : 'Unidad Médica'}
+            />
           </div>
         </div>
       )}
