@@ -38,7 +38,14 @@ export interface DatosAlertasSiscep {
   tabla_negativos: { DES_UNI_MED_NOTIF: string; N_NEGATIVOS: number }[];
 }
 
-export type TipoMapa = 'situacion' | 'confirmados';
+/** residencia: donde vive el paciente · unidad: donde está la unidad que notificó · confirmados: solo POSITIVO por residencia */
+export type TipoMapa = 'residencia' | 'unidad' | 'confirmados';
+
+/** Una fila de la tabla del mapa: un municipio o una unidad médica, según `tabla_por`. */
+export interface FilaTablaMapa {
+  nombre: string;
+  n: number;
+}
 
 export interface PropiedadesMunicipio {
   state_code: number;
@@ -84,7 +91,8 @@ export interface DatosMapa {
   max_casos: number;
   total: number;
   mun_con_casos: number;
-  unidades: { unidad: string; n: number }[];
+  tabla_por: 'municipio' | 'unidad';
+  tabla: FilaTablaMapa[];
   brotes_espacial: BroteEspacial[];
   brotes_temporal: BroteTemporal[];
 }

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from auth.services.jwt_Services import solo_roles
 from auth.services.roles_Services import VEN_DENGUE
+from epidemiologia.services.dengue.mapa_Services import TIPOS_MAPA
 from epidemiologia.services.dengue.pipeline.estado_pipeline_Services import resultado_guardado
 
 reportesApi = APIRouter()
@@ -32,9 +33,13 @@ def canal(payload: dict = Depends(solo_roles(*VEN_DENGUE))):
 
 @reportesApi.get("/mapa/{tipo}")
 def mapa(tipo: str, payload: dict = Depends(solo_roles(*VEN_DENGUE))):
-    if tipo not in ("situacion", "confirmados"):
-        raise HTTPException(status_code=400, detail="tipo debe ser 'situacion' o 'confirmados'")
-    return _exigir("mapa")[tipo]
+    if tipo not in TIPOS_MAPA:
+        raise HTTPException(status_code=400, detail=f"tipo debe ser uno de {', '.join(TIPOS_MAPA)}")
+    mapa_guardado = _exigir("mapa").get(tipo, {})
+    # Resultados guardados antes de los mapas de residencia y unidad (sin 'tabla')
+    if "tabla" not in mapa_guardado:
+        raise HTTPException(status_code=404, detail="Mapa con formato anterior — vuelve a ejecutar el pipeline")
+    return mapa_guardado
 
 
 ##--------------------------------------

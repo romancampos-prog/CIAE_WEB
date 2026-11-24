@@ -19,7 +19,7 @@ def ejecutar_pasos():
         from epidemiologia.services.dengue.clustering_Services import procesar_clustering
         from epidemiologia.services.dengue.depuracion_Services import depurar_base
         from epidemiologia.services.dengue.duplicados_Services import procesar_duplicados
-        from epidemiologia.services.dengue.mapa_Services       import procesar_mapa
+        from epidemiologia.services.dengue.mapa_Services       import TIPOS_MAPA, procesar_mapa
         from epidemiologia.modulos.dengue.fechas               import año_epidemiologico_actual
 
         # El año sale de la fecha de cada corrida (antes era un 2026 fijo en config.py)
@@ -44,10 +44,7 @@ def ejecutar_pasos():
         # 5. Clustering y mapas
         avisar_paso("Ejecutando clustering geoespacial...")
         clust = procesar_clustering(df)
-        RESULTADOS["mapa"] = {
-            "situacion"  : procesar_mapa(clust, "situacion",    año),
-            "confirmados": procesar_mapa(clust, "confirmados",  año),
-        }
+        RESULTADOS["mapa"] = {tipo: procesar_mapa(clust, tipo, año) for tipo in TIPOS_MAPA}
 
         # 6. Guardar en disco y marcar terminado
         avisar_paso("Guardando resultados...")

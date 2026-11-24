@@ -100,7 +100,7 @@ con indicadores y vive en BackEnd/compartido/ftp_imss/.
 | `GET /epidemiologia/pipeline/estado` | `{corriendo, paso, completado, error, ultimo_reporte, archivos: {operativa, siscep}}` (polling) | `dengue/pipeline/estado_pipeline_Services.estado_del_pipeline` |
 | `POST /epidemiologia/pipeline/ejecutar` | Arrancar el pipeline | `dengue/pipeline/iniciar_pipeline_Services.iniciar_pipeline` |
 | `GET /epidemiologia/reportes/canal` | Canal endémico | `resultado_guardado("canal")` |
-| `GET /epidemiologia/reportes/mapa/{situacion\|confirmados}` | Mapa de casos y brotes | `resultado_guardado("mapa")[tipo]` |
+| `GET /epidemiologia/reportes/mapa/{residencia\|unidad\|confirmados}` | Mapa de casos y brotes | `resultado_guardado("mapa")[tipo]` |
 | `GET /epidemiologia/reportes/alertas-siscep` | Alertas SisCep | `resultado_guardado("alertas")` |
 | `GET /epidemiologia/reportes/duplicados` | Registros eliminados por duplicado | `resultado_guardado("duplicados")` |
 | `GET /epidemiologia/reportes/posibles-duplicados` | Pares parecidos no confirmados (revisión a mano) | `resultado_guardado("posibles_duplicados")` |
@@ -129,7 +129,7 @@ En el front, Acciones es la tarjeta junto a Dengue en la portada (`/CIAE/Epidemi
    similitud → reglas de resolución (cuál se elimina).
 3. **Canal endémico** (`canal_Services`): histórico por cuartiles contra los casos del año.
 4. **Alertas SisCep** (`alertas_Services`).
-5. **Clustering y mapas** (`clustering_Services`, `mapa_Services`): situación y confirmados.
+5. **Clustering y mapas** (`clustering_Services`, `mapa_Services`): residencia (`DES_MPO_RES`, tabla por municipio), unidad (`DES_MPO_UNIDAD`, tabla por `DES_UNI_MED_NOTIF`) y confirmados.
 6. **Guardar** en `resultados/{clave}.json` y la fecha en `fecha_ultimo_repo/utimoReporte.json`.
 
 Si un paso truena, `ESTADO.error` trae el mensaje y no se guarda nada de esa corrida.

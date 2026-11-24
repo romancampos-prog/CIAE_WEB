@@ -7,7 +7,8 @@ import { useRol } from '@/features/auth';
 const NAV = [
   { to: '/CIAE/Epidemiologia/dengue',                  icono: '📂', label: 'Carga de datos',   bloqueable: false, soloEdicion: true },
   { to: '/CIAE/Epidemiologia/dengue/canal',            icono: '📊', label: 'Canal endémico',   bloqueable: true  },
-  { to: '/CIAE/Epidemiologia/dengue/mapa/situacion',   icono: '🗺️', label: 'Mapa situación',   bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue/mapa/residencia',  icono: '🗺️', label: 'Mapa residencia',  bloqueable: true  },
+  { to: '/CIAE/Epidemiologia/dengue/mapa/unidad',      icono: '🗺️', label: 'Mapa unidad',      bloqueable: true  },
   { to: '/CIAE/Epidemiologia/dengue/mapa/confirmados', icono: '🗺️', label: 'Mapa confirmados', bloqueable: true  },
   { to: '/CIAE/Epidemiologia/dengue/alertas',          icono: '⚠️', label: 'Alertas SisCep',   bloqueable: true  },
   { to: '/CIAE/Epidemiologia/dengue/duplicados',       icono: '⧉',  label: 'Duplicados',       bloqueable: true  },

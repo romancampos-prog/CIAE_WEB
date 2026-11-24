@@ -38,22 +38,37 @@ export function agruparPorMetodo(registros: RegistroCaso[]): Record<string, numb
   }, {});
 }
 
-/**
- * Devuelve los valores de tema (color, fondo, borde, etiqueta) según el tipo de mapa.
- */
-export function getTemaMapa(tipo: TipoMapa) {
-  if (tipo === 'situacion') {
-    return {
-      etiqueta:  'Casos Notificados',
-      colorTema: 'var(--epi-verde)',
-      bgTema:    'rgba(36,92,79,0.07)',
-      bordeTema: 'rgba(36,92,79,0.18)',
-    };
-  }
-  return {
+const TEMAS_MAPA = {
+  residencia: {
+    insignia:  'Mapa por residencia',
+    etiqueta:  'Casos por Residencia',
+    subtitulo: 'municipio donde vive el paciente',
+    colorTema: 'var(--epi-verde)',
+    bgTema:    'rgba(36,92,79,0.07)',
+    bordeTema: 'rgba(36,92,79,0.18)',
+  },
+  unidad: {
+    insignia:  'Mapa por unidad',
+    etiqueta:  'Casos por Unidad',
+    subtitulo: 'municipio de la unidad que notificó',
+    colorTema: 'var(--epi-dorado)',
+    bgTema:    'rgba(167,128,45,0.07)',
+    bordeTema: 'rgba(167,128,45,0.18)',
+  },
+  confirmados: {
+    insignia:  'Mapa de confirmados',
     etiqueta:  'Casos Confirmados',
+    subtitulo: 'distribución por municipio',
     colorTema: 'var(--epi-guinda)',
     bgTema:    'rgba(105,28,50,0.07)',
     bordeTema: 'rgba(105,28,50,0.18)',
-  };
+  },
+};
+
+/**
+ * Devuelve los valores de tema (textos, color, fondo, borde) según el tipo de mapa.
+ * Un tipo desconocido en la URL cae en el de residencia.
+ */
+export function getTemaMapa(tipo: TipoMapa) {
+  return TEMAS_MAPA[tipo] ?? TEMAS_MAPA.residencia;
 }
